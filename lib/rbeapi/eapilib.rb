@@ -45,7 +45,7 @@ module Rbeapi
     DEFAULT_HTTP_PATH = '/command-api'
     DEFAULT_UNIX_SOCKET = '/var/run/command-api.sock'
 
-    class EapiError < Exception
+    class EapiError < StandardError
 
       attr_accessor :commands
 
