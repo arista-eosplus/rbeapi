@@ -29,11 +29,17 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+require 'rbeapi/eapilib'
 
 module Rbeapi
+
   module Api
 
     class Entity
+
+      attr_reader :error
+      attr_reader :config
+      attr_reader :node
 
       def self.instance(node)
         new(node)
@@ -68,9 +74,9 @@ module Rbeapi
       def configure(commands)
         begin
           @node.config(commands)
-          return True
-        rescue CommandError, ConnectionError
-          return False
+          return true
+        rescue Rbeapi::Eapilib::CommandError, Rbeapi::Eapilib::ConnectionError
+          return false
         end
       end
     end
