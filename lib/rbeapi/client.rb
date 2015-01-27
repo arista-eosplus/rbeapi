@@ -235,6 +235,8 @@ module Rbeapi
 
     class Node
 
+      attr_reader :connection
+
       ##
       # The Node object provies an instnace for sending and receiveing messages
       # with a specific EOS device.  The methods provided in this calss allow
