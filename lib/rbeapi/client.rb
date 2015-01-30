@@ -246,6 +246,7 @@ module Rbeapi
       #   EapiConnection used to send and receive eAPI formatted messages
       def initialize(connection)
         @connection = connection
+        @autorefresh = true
       end
 
       ##
@@ -352,7 +353,7 @@ module Rbeapi
       #
       # @return [Hash] A Ruby hash object
       def make_response(command, result, encoding)
-        { command: command, result: response, encoding: encoding }
+        { command: command, result: result, encoding: encoding }
       end
       private :make_response
 

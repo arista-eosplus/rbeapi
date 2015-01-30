@@ -59,7 +59,7 @@ describe Rbeapi::Client::Node do
     let(:enc) { 'json' }
     let(:args) { [cmds, resp, enc] }
 
-    it {is_expected.to eq(command: 'show version', response: 'version',
+    it {is_expected.to eq(command: 'show version', result: 'version',
                           encoding: 'json') }
   end
 
@@ -138,7 +138,7 @@ describe Rbeapi::Client::Node do
       let(:commands) { ['enable', 'show version'] }
       let(:args) { 'show version' }
 
-      it { is_expected.to eq([{command: 'show version', response: {},
+      it { is_expected.to eq([{command: 'show version', result: {},
                                encoding: 'json'}]) }
     end
 
@@ -147,20 +147,10 @@ describe Rbeapi::Client::Node do
       let(:args) { ['show version', 'show hostname'] }
       let(:opts) { {strict: true} }
 
-      it { is_expected.to eq([{command: 'show version', response: {},
+      it { is_expected.to eq([{command: 'show version', result: {},
                                encoding: 'json'},
                               {command: 'show hostname',
-                               response: {}, encoding: 'json'}]) }
-    end
-
-    describe 'when sending multiple commands (strict=false)' do
-      let(:commands) { ['show version', 'show hostname'] }
-      let(:args) { ['show version', 'show hostname'] }
-
-      it { is_expected.to eq([{command: 'show version', response: {},
-                               encoding: 'json'},
-                              {command: 'show hostname',
-                               response: {}, encoding: 'json'}]) }
+                               result: {}, encoding: 'json'}]) }
     end
   end
 end
