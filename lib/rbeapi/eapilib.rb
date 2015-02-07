@@ -305,7 +305,7 @@ module Rbeapi
 
     class HttpLocalEapiConnection < EapiConnection
       def initialize(opts = {})
-        port = opts.fetch('port', DEFAULT_HTTP_PORT)
+        port = opts.fetch('port', DEFAULT_HTTP_LOCAL_PORT)
         transport = Net::HTTP.new('localhost', port)
         super(transport)
 
@@ -317,7 +317,7 @@ module Rbeapi
 
     class HttpsEapiConnection < EapiConnection
       def initialize(host, opts = {})
-        port = opts.fetch('port', DEFAULT_HTTP_PORT)
+        port = opts.fetch('port', DEFAULT_HTTPS_PORT)
 
         transport = Net::HTTP.new(host, port)
         transport.use_ssl = true
