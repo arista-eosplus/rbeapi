@@ -283,7 +283,7 @@ module Rbeapi
 
     class SocketEapiConnection < EapiConnection
       def initialize(opts = {})
-        path = opts.fetch('path', DEFAULT_UNIX_SOCKET)
+        path = opts.fetch(:path, DEFAULT_UNIX_SOCKET)
         transport = NetX::HTTPUnix.new("unix://#{path}")
         super(transport)
       end
@@ -305,27 +305,28 @@ module Rbeapi
 
     class HttpLocalEapiConnection < EapiConnection
       def initialize(opts = {})
-        port = opts.fetch('port', DEFAULT_HTTP_LOCAL_PORT)
+        port = opts.fetch(:port, DEFAULT_HTTP_LOCAL_PORT)
         transport = Net::HTTP.new('localhost', port)
         super(transport)
 
-        user = opts.fetch('username', 'admin')
-        pass = opts.fetch('password', '')
+        user = opts.fetch(:username, 'admin')
+        pass = opts.fetch(:password, '')
         authentication(user, pass)
       end
     end
 
     class HttpsEapiConnection < EapiConnection
-      def initialize(host, opts = {})
-        port = opts.fetch('port', DEFAULT_HTTPS_PORT)
+      def initialize(opts = {})
+        host = opts.fetch(:host, 'localhost')
+        port = opts.fetch(:port, DEFAULT_HTTPS_PORT)
 
         transport = Net::HTTP.new(host, port)
         transport.use_ssl = true
         transport.verify_mode = OpenSSL::SSL::VERIFY_NONE
         super(transport)
 
-        user = opts.fetch('username', 'admin')
-        pass = opts.fetch('password', '')
+        user = opts.fetch(:username, 'admin')
+        pass = opts.fetch(:password, '')
         authentication(user, pass)
       end
     end
