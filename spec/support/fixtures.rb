@@ -42,6 +42,10 @@ class Fixtures
   end
 end
 
+def get_fixture(name)
+  File.join(File.dirname(__FILE__), "../fixtures/#{name}")
+end
+
 ##
 # FixtureHelpers provides instance methods for RSpec test cases that aid in the
 # loading and caching of fixture data.

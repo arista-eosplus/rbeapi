@@ -35,15 +35,13 @@ require 'rbeapi/api'
 # Eos is the toplevel namespace for working with Arista EOS nodes
 module Rbeapi
   ##
-  # Eapi is module namesapce for working with the EOS command API
+  # Api is module namesapce for working with the EOS command API
   module Api
 
     ##
     # The Vlan class provides an interface for working wit VLAN resources
     # in EOS.  All configuration is sent and received using eAPI.  In order
-    # to use this class, eAPI must be enablined in EOS.  This class
-    # can be instatiated either using the Eos::Eapi::Switch.load_class
-    # method or used directly.
+    # to use this class, eAPI must be enablined in EOS.
     #
     class Vlans < Entity
 
@@ -55,6 +53,7 @@ module Rbeapi
       #     "vlanid" <integer>
       #     "name": <string>
       #     "state": [active, suspend]
+      #     "trunk_groups": [array<string>]
       #   }
       #
       # @param [String] id The VLAN identifier to return
@@ -64,10 +63,10 @@ module Rbeapi
       def get(id)
         config = get_block("vlan #{id}")
         return nil unless config
-        response = { 'vlan_id' => id }
+        response = { 'vlan_id' => id.to_s }
         response['name'] = config.match(/name\s(.+)$/)[1]
         response['state'] = config.match(/state\s(.+)$/)[1]
-        response['trunk_groups'] = config.scan(/(?<=groups\s)(.+)$/)
+        response['trunk_groups'] = config.scan(/(?<=group\s).+$/)
         return response
       end
 
@@ -167,28 +166,27 @@ module Rbeapi
       end
 
       ##
-      # Configures the trunk group value for the VLAN specified by ID.  The
-      # trunk group setting is typically used to associate VLANs with MLAG
-      # configurations
+      # Adds a new trunk group value to the list of values supported for
+      # the vlan specified
       #
-      # @param [Hash] opts The configuration parameters for the VLAN
-      # @option opts [String] :id The VLAN ID to change
-      # @option opts [string] :value The value to set the trunk group to
-      # @option opts [Boolean] :default The value should be set to default
+      # @param [String] :id The VLAN ID to change
+      # @param [String] :tg The trunk group name to add
       #
       # @return [Boolean] returns true if the command completed successfully
-      def set_trunk_group(id, opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
+      def add_trunk_group(id, tg)
+        configure(["vlan #{id}", "trunk group #{tg}"])
+      end
 
-        cmds = ["vlan #{id}"]
-        case default
-        when true
-          cmds << 'default trunk group'
-        when false
-          cmds << (value.nil? ? 'no trunk group' : "trunk group #{value}")
-        end
-        configure(cmds)
+      ##
+      # Removes an existing trunk group value from  the list of values
+      # supported for the vlan specified
+      #
+      # @param [String] :id The VLAN ID to change
+      # @param [String] :tg The trunk group name to add
+      #
+      # @return [Boolean] returns true if the command completed successfully
+      def remove_trunk_group(id, tg)
+        configure(["vlan #{id}", "no trunk group #{tg}"])
       end
     end
   end
