@@ -59,14 +59,25 @@ module Rbeapi
       #
       # @return [Hash] a hash that includes the switchport properties
       def get(name)
-        cfg = get_block("interface #{name}")
-        return nil unless cfg
-        hsh = { 'name' => name }
-        hsh['mode'] = cfg.match(/switchport\smode\s(.+)$/)[1]
-        hsh['access_vlan'] = cfg.match(/access\svlan\s(\d+)$/)[1]
-        hsh['trunk_native_vlan'] = cfg.match(/native\svlan\s(\d+)$/)[1]
-        hsh['trunk_allowed_vlans'] = cfg.match(/allowed\svlan\s(.+)$/)[1]
-        hsh
+        config = get_block("interface #{name}")
+        return nil unless config
+        return nil if /no\sswitchport$/ =~ config
+
+        response = { 'name' => name }
+
+        mdata = /(?<=\s{3}switchport\smode\s)(.+)$/.match(config)
+        response['mode'] = mdata[1]
+
+        mdata = /(?<=access\svlan\s)(.+)$/.match(config)
+        response['access_vlan'] = mdata[1]
+
+        mdata = /(?<=trunk\snative\svlan\s)(.+)$/.match(config)
+        response['trunk_native_vlan'] = mdata[1]
+
+        mdata = /(?<=trunk\sallowed\svlan\s)(.+)$/.match(config)
+        response['trunk_allowed_vlans'] = mdata[1]
+
+        response
       end
 
       ##
@@ -88,8 +99,7 @@ module Rbeapi
       #
       # @return [Boolean] True if it succeeds otherwise False
       def create(name)
-        @api.config(["interface #{name}", 'no ip address',
-                     'switchport']) == [{}, {}, {}]
+        configure ["interface #{name}", 'no ip address', 'switchport']
       end
 
       ##
@@ -99,7 +109,7 @@ module Rbeapi
       #
       # @return [Boolean] True if it succeeds otherwise False
       def delete(name)
-        @api.config(["interface #{name}", 'no switchport']) == [{}, {}]
+        configure ["interface #{name}", 'no switchport']
       end
 
       ##
@@ -109,8 +119,7 @@ module Rbeapi
       #
       # @return [Boolean] True if it succeeds otherwise False
       def default(name)
-        @api.config(["interface #{name}",
-                     'default switchport']) == [{}, {}]
+        configure ["interface #{name}", 'default switchport']
       end
 
       ##
@@ -135,7 +144,7 @@ module Rbeapi
           cmds << (value.nil? ? 'no switchport mode' : \
                                 "switchport mode #{value}")
         end
-        @api.config(cmds) == [{}, {}]
+        configure(cmds)
       end
 
       ##
@@ -161,7 +170,7 @@ module Rbeapi
           cmds << (value.nil? ? 'no switchport trunk allowed vlan' : \
                                 "switchport trunk allowed vlan #{value}")
         end
-        @api.config(cmds) == [{}, {}]
+        configure(cmds)
       end
 
       ##
@@ -187,7 +196,7 @@ module Rbeapi
           cmds << (value.nil? ? 'no switchport trunk native vlan' : \
                                 "switchport trunk native vlan #{value}")
         end
-        @api.config(cmds) == [{}, {}]
+        configure(cmds)
       end
 
       ##
@@ -213,30 +222,7 @@ module Rbeapi
           cmds << (value.nil? ? 'no switchport access vlan' : \
                                 "switchport access vlan #{value}")
         end
-        @api.config(cmds) == [{}, {}]
-      end
-
-      private
-
-      def mode_to_value(config)
-        m = /(?<=Operational Mode:\s)(?<mode>[[:alnum:]|\s]+)\n/.match(config)
-        m['mode'] == 'static access' ? 'access' : 'trunk'
-      end
-
-      def trunk_vlans_to_value(config)
-        m = /(?<=Trunking VLANs Enabled:\s)(?<vlans>[[[:alnum:]]+|ALL])/
-            .match(config)
-        return m['vlans'] unless m.nil?
-      end
-
-      def trunk_native_to_value(config)
-        m = /(?<=Trunking Native Mode VLAN:\s)(?<trunk_vlan>\d+)/.match(config)
-        return m['trunk_vlan'] unless m.nil?
-      end
-
-      def access_vlan_to_value(config)
-        m = /(?<=Access Mode VLAN:\s)(?<access_vlan>\d+)/.match(config)
-        return m['access_vlan'] unless m.nil?
+        configure(cmds)
       end
     end
   end
