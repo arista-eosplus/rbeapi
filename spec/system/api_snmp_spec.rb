@@ -1,228 +1,70 @@
 require 'spec_helper'
+
 require 'rbeapi/client'
+require 'rbeapi/api/snmp'
 
+describe Rbeapi::Api::Snmp do
+  subject { described_class.new(node) }
 
-describe Rbeapi::Client do
-  let(:node) { described_class.connect_to('veos01') }
-  let(:api) { node.api('snmp') }
+  let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
+  let(:node) { Rbeapi::Client.connect_to('veos02') }
 
-  let(:entity) do
-    { 'location' => '', 'contact' => '', 'chassis_id' => '',
-      'source_interface' => '' }
-  end
+  describe '#get' do
 
-  context '#get' do
-    subject { api.get }
+    let(:entity) do
+      { 'location' => '', 'contact' => '', 'chassis_id' => '',
+        'source_interface' => '' }
+    end
 
-    describe 'returns the snmp config' do
-      before { node.config(['no snmp-server contact',
-                            'no snmp-server location',
-                            'no snmp-server chassis-id',
-                            'no snmp-server source-interface']) }
+    before { node.config(['no snmp-server contact',
+                          'no snmp-server location',
+                          'no snmp-server chassis-id',
+                          'no snmp-server source-interface']) }
 
-      it { is_expected.to eq(entity) }
+    it 'returns the snmp resource' do
+      expect(subject.get).to eq(entity)
     end
   end
 
-  context '#set_contact' do
-    subject { api.set_contact(opts) }
+  describe '#set_location' do
+    before { node.config(['no snmp-server location']) }
 
-    before { node.config([*setup]) }
-
-    describe "configures the snmp contact" do
-      let(:opts) { {value: 'foo'} }
-      let(:setup) { 'default snmp-server contact' }
-
-      it 'sets the value to foo' do
-        expect(api.get['contact']).to eq ''
-        subject
-        expect(api.get['contact']).to eq 'foo'
-      end
-    end
-
-    describe "negates the snmp contact" do
-      let(:opts) { {} }
-      let(:setup) { 'snmp-server contact foo' }
-
-      it 'removes the value' do
-        expect(api.get['contact']).to eq 'foo'
-        subject
-        expect(api.get['contact']).to eq ''
-      end
-    end
-
-    describe "defaults the snmp contact" do
-      let(:opts) { {default: true} }
-      let(:setup) { 'snmp-server contact foo' }
-
-      it 'removes the value' do
-        expect(api.get['contact']).to eq 'foo'
-        subject
-        expect(api.get['contact']).to eq ''
-      end
-    end
-
-    describe "default overrides value in opts" do
-      let(:opts) { {value: 'bar', default: true} }
-      let(:setup) { 'snmp-server contact foo' }
-
-      it 'removes the value' do
-        expect(api.get['contact']).to eq 'foo'
-        subject
-        expect(api.get['contact']).to eq ''
-      end
+    it 'configures the snmp location value' do
+      expect(subject.get['location']).to be_empty
+      expect(subject.set_location(value: 'foo')).to be_truthy
+      expect(subject.get['location']).to eq('foo')
     end
   end
 
-  context '#set_location' do
-    subject { api.set_location(opts) }
+  describe '#set_contact' do
+    before { node.config('no snmp-server contact') }
 
-    before { node.config([*setup]) }
-
-    describe "configures the snmp location" do
-      let(:opts) { {value: 'foo'} }
-      let(:setup) { 'default snmp-server location' }
-
-      it 'sets the value to foo' do
-        expect(api.get['location']).to eq ''
-        subject
-        expect(api.get['location']).to eq 'foo'
-      end
-    end
-
-    describe "negates the snmp location" do
-      let(:opts) { {} }
-      let(:setup) { 'snmp-server location foo' }
-
-      it 'removes the value' do
-        expect(api.get['location']).to eq 'foo'
-        subject
-        expect(api.get['location']).to eq ''
-      end
-    end
-
-    describe "defaults the snmp location" do
-      let(:opts) { {default: true} }
-      let(:setup) { 'snmp-server location foo' }
-
-      it 'removes the value' do
-        expect(api.get['location']).to eq 'foo'
-        subject
-        expect(api.get['location']).to eq ''
-      end
-    end
-
-    describe "default overrides value in opts" do
-      let(:opts) { {value: 'bar', default: true} }
-      let(:setup) { 'snmp-server location foo' }
-
-      it 'removes the value' do
-        expect(api.get['location']).to eq 'foo'
-        subject
-        expect(api.get['location']).to eq ''
-      end
+    it 'configures the snmp contact value' do
+      expect(subject.get['contact']).to be_empty
+      expect(subject.set_contact(value: 'foo')).to be_truthy
+      expect(subject.get['contact']).to eq('foo')
     end
   end
 
-  context '#set_chassis_id' do
-    subject { api.set_chassis_id(opts) }
+  describe '#set_chassis_id' do
+    before { node.config('no snmp-server chassis-id') }
 
-    before { node.config([*setup]) }
-
-    describe "configures the snmp chassis-id" do
-      let(:opts) { {value: 'foo'} }
-      let(:setup) { 'default snmp-server chassis-id' }
-
-      it 'sets the value to foo' do
-        expect(api.get['chassis_id']).to eq ''
-        subject
-        expect(api.get['chassis_id']).to eq 'foo'
-      end
-    end
-
-    describe "negates the snmp chassis-id" do
-      let(:opts) { {} }
-      let(:setup) { 'snmp-server chassis-id foo' }
-
-      it 'removes the value' do
-        expect(api.get['chassis_id']).to eq 'foo'
-        subject
-        expect(api.get['chassis_id']).to eq ''
-      end
-    end
-
-    describe "defaults the snmp chassis-id" do
-      let(:opts) { {default: true} }
-      let(:setup) { 'snmp-server chassis-id foo' }
-
-      it 'removes the value' do
-        expect(api.get['chassis_id']).to eq 'foo'
-        subject
-        expect(api.get['chassis_id']).to eq ''
-      end
-    end
-
-    describe "default overrides value in opts" do
-      let(:opts) { {value: 'bar', default: true} }
-      let(:setup) { 'snmp-server chassis-id foo' }
-
-      it 'removes the value' do
-        expect(api.get['chassis_id']).to eq 'foo'
-        subject
-        expect(api.get['chassis_id']).to eq ''
-      end
+    it 'configures the snmp chassis-id value' do
+      expect(subject.get['chassis_id']).to be_empty
+      expect(subject.set_chassis_id(value: 'foo')).to be_truthy
+      expect(subject.get['chassis_id']).to eq('foo')
     end
   end
 
-  context '#set_source_interface' do
-    subject { api.set_source_interface(opts) }
+  describe '#set_source_interface' do
+    before { node.config('no snmp-server source-interface') }
 
-    before { node.config([*setup]) }
-
-    describe "configures the snmp source-interface" do
-      let(:opts) { {value: 'Loopback0'} }
-      let(:setup) { 'default snmp-server source-interface' }
-
-      it 'sets the value to Loopback0' do
-        expect(api.get['source_interface']).to eq ''
-        subject
-        expect(api.get['source_interface']).to eq 'Loopback0'
-      end
-    end
-
-    describe "negates the snmp source-interface" do
-      let(:opts) { {} }
-      let(:setup) { 'snmp-server source-interface Loopback0' }
-
-      it 'removes the value' do
-        expect(api.get['source_interface']).to eq 'Loopback0'
-        subject
-        expect(api.get['source_interface']).to eq ''
-      end
-    end
-
-    describe "defaults the snmp source-interface" do
-      let(:opts) { {default: true} }
-      let(:setup) { 'snmp-server source-interface Loopback0' }
-
-      it 'removes the value' do
-        expect(api.get['source_interface']).to eq 'Loopback0'
-        subject
-        expect(api.get['source_interface']).to eq ''
-      end
-    end
-
-    describe "default overrides value in opts" do
-      let(:opts) { {value: 'bar', default: true} }
-      let(:setup) { 'snmp-server source-interface Loopback0' }
-
-      it 'removes the value' do
-        expect(api.get['source_interface']).to eq 'Loopback0'
-        subject
-        expect(api.get['source_interface']).to eq ''
-      end
+    it 'configures the snmp chassis-id value' do
+      expect(subject.get['source_interface']).to be_empty
+      expect(subject.set_source_interface(value: 'Loopback0')).to be_truthy
+      expect(subject.get['source_interface']).to eq('Loopback0')
     end
   end
-
 end
+
 
