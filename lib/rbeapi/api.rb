@@ -41,22 +41,61 @@ module Rbeapi
       attr_reader :config
       attr_reader :node
 
+      ##
+      # The instance class method is used to create a new instance of the
+      # object.  It works in conjunction with the Node.api loader method
+      # to make it easy to load classes derived from Entity
+      #
+      # @param [Node] :node An instance of Rbeapi::Client::Node used to
+      #   send and receive eAPI messages
       def self.instance(node)
         new(node)
       end
 
+      ##
+      # The Entity class provides a base class implementation for building
+      # API modules.  The Entity class is typcially not instantiated directly
+      # but serves as a super class with convenience methods used to
+      # work with the node.
+      #
+      # @param [Node] :node This should be an instance of Rbeapi::Client::Node
+      #   that is used to send and receive eAPI messages
+      #
       def initialize(node, opts = {})
         @node = node
       end
 
+      ##
+      # Returns the running configuration from the node instance.  This is
+      # a convenience method to easily access the current running config
+      # from an API module
+      #
+      # @return [String] The current running-config from the node
       def config
         return @node.running_config
       end
 
+      ##
+      # Provides a convenience method for access the connection error (if
+      # one exists) of the node's connection instance
+      #
+      # @return [Rbeapi::Eapilib::CommandError] An instance of CommandError
+      #   that can be used to futher evaluate the root cause of an error
       def error
         return @node.connection.error
       end
 
+      ##
+      # Returns a block of configuration from the current running config
+      # as a string.  The argument is used to search the config and return
+      # the text along with any child configuration statements.
+      #
+      # @param [String] :text The text to be used to find the parent line
+      #   in the nodes configuration.
+      #
+      # @returns [nil, String] Returns the block of configuration based on
+      #   the supplied argument.  If the argument is not found in the
+      #   configuration, nil is returned
       def get_block(text)
         mdata = /^#{text}$/.match(config)
         return nil unless mdata
@@ -71,6 +110,17 @@ module Rbeapi
         config[block_start, block_end]
       end
 
+      ##
+      # Method called to send configuration commands to the node.  This method
+      # will send the commands to the node and rescue from CommandError or
+      # ConnectionError.
+      #
+      # @param [String, Array] :commands The commands to send to the node over
+      #   the API connection to configure the system
+      #
+      # @return [Boolean] Returns True if the commands were successful or
+      #   returns False if there was an error issuing the commands on the
+      #   node.  Use error to further investigate the cause of any errors
       def configure(commands)
         begin
           @node.config(commands)
