@@ -404,6 +404,18 @@ module Rbeapi
 
     class PortchannelInterface < BaseInterface
 
+      ##
+      #
+      # @example
+      #   {
+      #     "type": "portchannel",
+      #     "members": array<string>,
+      #     "lacp_mode": [active, passive, on],
+      #     "minimum_links": <string>,
+      #     "lacp_timeout": <string>,
+      #     "lacp_fallback": [static, individual, disabled]
+      #   }
+      #
       def get(name)
         config = get_block("^interface #{name}")
         return nil unless config
@@ -417,8 +429,11 @@ module Rbeapi
         mdata = /(?<=\s{3}port-channel\smin-links\s)(.+)$/.match(config)
         response['minimum_links'] = mdata.nil? ? '0' : mdata[1]
 
-        mdata = /(?<=\s{3}lacp\sfallback\stimeout\s)(.+)$/.match(config)
-        response['lacp_timeout'] = mdata.nil? ? '' : mdata[1]
+        mdata = /(?<=lacp\sfallback\stimeout\s)(.+)$/.match(config)
+        response['lacp_timeout'] = mdata[1]
+
+        mdata = /(?<=lacp\sfallback\s)(\w+)$/.match(config)
+        response['lacp_fallback'] = mdata.nil? ? 'disabled' : mdata[1]
 
         response
       end
@@ -500,11 +515,37 @@ module Rbeapi
       end
 
       def set_lacp_fallback(name, opts = {})
+        value = opts[:value]
+        default = opts.fetch(:default, false)
+
+        cmds = ["interface #{name}"]
+        case default
+        when true
+          cmds << 'default port-channel lacp fallback'
+        when false
+          if [nil, 'disabled'].include?(value)
+            cmds << 'no port-channel lacp fallback'
+          else
+            cmds << "port-channel lacp fallback #{value}"
+          end
+        end
+        configure(cmds)
       end
 
       def set_lacp_timeout(name, opts = {})
-      end
+        value = opts[:value]
+        default = opts.fetch(:default, false)
 
+        cmds = ["interface #{name}"]
+        case default
+        when true
+          cmds << 'default port-channel lacp fallback timeout'
+        when false
+          cmds << (value ? "port-channel lacp fallback timeout #{value}" : \
+                           'no port-channel lacp fallback timeout')
+        end
+        configure(cmds)
+      end
     end
 
     class VxlanInterface < BaseInterface
