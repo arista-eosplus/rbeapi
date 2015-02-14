@@ -31,61 +31,130 @@
 #
 require 'rbeapi/api'
 
-##
-# Eos is the toplevel namespace for working with Arista EOS nodes
 module Rbeapi
+
   ##
   # Api is module namesapce for working with the EOS command API
   module Api
 
     ##
-    # The Vlan class provides an interface for working wit VLAN resources
-    # in EOS.  All configuration is sent and received using eAPI.  In order
-    # to use this class, eAPI must be enablined in EOS.
+    # The Vlan class provides a class implementation for working with the
+    # collection of Vlans on the node.  This class presents an abstraction
+    # of the nodes configured vlan id's from the running configuration.
     #
+    # @eos_version 4.13.7M
     class Vlans < Entity
 
       ##
-      # Returns a single VlAN resource
+      # get returns the specified vlan resource Hash that represents the
+      # nodes current vlan configuration.
       #
-      # Example
+      # @example
       #   {
-      #     "vlanid" <integer>
-      #     "name": <string>
-      #     "state": [active, suspend]
-      #     "trunk_groups": [array<string>]
+      #     name: <string>
+      #     state: <string>
+      #     trunk_groups: array[<string]
       #   }
       #
-      # @param [String] id The VLAN identifier to return
+      # @param [String] id The vlan id to return a resource for from the
+      #   nodes configuration
       #
-      # @return [Hash] a hash that describes the VLAN.  If the VLAN is not
-      #   found, then nil is returned
+      # @return [nil, Hash<Symbol, Object>] Returns the vlan resource as a
+      #   Hash.  If the specified vlan id is not found in the nodes current
+      #   configuration a nil object is returned
       def get(id)
         config = get_block("vlan #{id}")
         return nil unless config
-        response = { 'vlan_id' => id.to_s }
-        response['name'] = config.match(/name\s(.+)$/)[1]
-        response['state'] = config.match(/state\s(.+)$/)[1]
-        response['trunk_groups'] = config.scan(/(?<=group\s).+$/)
-        return response
+        response = {}
+        response.merge!(parse_name(config))
+        response.merge!(parse_state(config))
+        response.merge!(parse_trunk_groups(config))
+        response
       end
 
       ##
-      # Returns the vlan data for the provided id with the
-      # show vlan <id> command.  If the id doesn't exist then
-      # nil is returned
+      # getall returns the collection of vlan resources from the nodes
+      # running configuration as a hash.  The vlan resource collection
+      # hash is keyed by the unique vlan id
+      #
+      # @example
+      #   {
+      #     <vlanid>: {...}
+      #   }
+      #
+      # @see get Vlan resource example
+      #
+      # @return [Hash<Symbol, Object>] returns a hash that represents the
+      #   entire vlan collection from the nodes running configuration.  If
+      #   there are no vlans configured, this method will return an empty
+      #   hash
       def getall
-        vlans = config.scan(/(?<=^vlan\s)(\d+)$/)
+        vlans = config.scan(/(?<=^vlan\s)\d+$/)
         vlans.each_with_object({}) do |vid, hsh|
-          hsh[vid.first] = get vid.first
+          resource = get vid
+          hsh[vid] = resource if resource
         end
       end
 
       ##
-      # Adds a new VLAN resource in EOS setting the VLAN ID to id.  The
-      # VLAN ID must be in the valid range of 1 through 4094
+      # parse_name scans the provided configuration block and parses the
+      # vlan name value.  The vlan name should always return a value
+      # from the running conifguration.  The return value is intended to
+      # be merged into the resource hash
       #
-      # @param [String] id The VLAN identifier (e.g. 1)
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_name(config)
+        mdata = /name (\w+)$/.match(config)
+        { name: mdata[1] }
+      end
+      private :parse_name
+
+      ##
+      # parse_state scans the provided configuration block and parses the
+      # vlan state value. The vlan state should always return a value from
+      # the nodes running configuration.  The return hash is intended to be
+      # merged into the resource hash
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_state(config)
+        mdata = /state (\w+)$/.match(config)
+        { state: mdata[1] }
+      end
+      private :parse_state
+
+      ##
+      # parse_trunk_groups scans the provided configuration block and parses
+      # the trunk groups.  If no trunk groups are found in the nodes
+      # running configuration then an empty array is returned as the value.
+      # The return hash is intedned to be merged into the resource hash.
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_trunk_groups(config)
+        values = config.scan(/trunk group (.+)$/).first
+        values = [] unless values
+        { trunk_groups: values }
+      end
+      private :parse_trunk_groups
+
+      ##
+      # create will create a new vlan resource in the nodes current
+      # configuration with the specified vlan id.  If the create method
+      # is called and the vlan id already exists, this method will still
+      # return true.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   vlan <value>
+      #
+      # @param [String, Integer] :id The vlan id to create on the node.  The
+      #   vlan id must be in the valid range of 1 to 4094
       #
       # @return [Boolean] returns true if the command completed successfully
       def create(id)
@@ -93,37 +162,69 @@ module Rbeapi
       end
 
       ##
-      # Deletes an existing VLAN resource in EOS as specified by ID.  If
-      # the supplied VLAN ID does not exist no error is raised
+      # delete will delete an existing vlan resource from the nodes current
+      # running configuration.  If the delete method is called and the vlan
+      # id does not exist, this method will succeed.
       #
-      # @param [String] id The VLAN identifier (e.g. 1)
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] always returns true
+      # @commands
+      #   no vlan <value>
+      #
+      # @param [String, Integer] :id The vlan id to delete from the node.  The
+      #   id value should be in the valid range of 1 to 4094
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def delete(id)
         configure("no vlan #{id}")
       end
 
       ##
-      # Defaults an existing VLAN resource in EOS as specified by ID.  If
-      # the supplied VLAN ID does not exist no error is raised.  Note: setting
-      # a vlan to default is equivalent to negating it
+      # default will configure the vlan using the default keyword.  This
+      # command has the same effect as deleting the vlan from the nodes
+      # running configuration.
       #
-      # @param [String] id The VLAN identifier (e.g. 1)
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @commands
+      #   default vlan <value>
+      #
+      # @param [String, Integer] :id The vlan id to default in the nodes
+      #   configuration.  Ths vid value should be in the valid range of 1
+      #   to 4094
+      #
+      # @return [Boolean] returns true if the command complete successfully
       def default(id)
         configure("default vlan #{id}")
       end
 
       ##
-      # Configures the VLAN name of the VLAN specified by ID.  set_name maps
-      # to the EOS name WORD command.  Spaces in the name will be converted
-      # to _
+      # set_name configures the name value for the specified vlan id in the
+      # nodes running configuration.  If the value is not provided in the
+      # opts keyword Hash then the name value is negated using the no
+      # keyword.  If the default keyword is set to true, then the name value
+      # is defaulted using the default keyword.  The default keyword takes
+      # precedence over the value keyword
       #
-      # @param [Hash] opts The configuration parameters for the VLAN
-      # @option opts [String] :id The VLAN ID to change
-      # @option opts [string] :value The value to set the name to
-      # @option opts [Boolean] :default The value should be set to default
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   vlan <id>
+      #     name <value>
+      #     no name
+      #     defaul name
+      #
+      # @param [String, Integer] :id The vlan id to apply the configuration
+      #   to.  The id value should be in the valid range of 1 to 4094
+      #
+      # @param [Hash] :opts Optional keyword arguments
+      #
+      # @option :opts [String] :value The value to configure the vlan name
+      #   to in the node configuration.  The name parameter accepts a-z, 0-9
+      #   and _.
+      #
+      # @option :opts [Boolean] :default Configure the vlan name value using
+      #   the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_name(id, opts = {})
@@ -141,19 +242,44 @@ module Rbeapi
       end
 
       ##
-      # Configures the administrative state of the VLAN specified by ID.  The
-      # set_state function accepts 'active' or 'suspend' to configure the
-      # VLAN state.
+      # set_state configures the state value for the specified vlan id in
+      # the nodes running configuration.  If the value is not provided in
+      # the opts keyword Hash then the state value is negated using the no
+      # keyword.  If the default keyword is set to true, then the state
+      # value is defaulted using the default keyword.  The default keyword
+      # takes precedence over the value keyword
       #
-      # @param [Hash] opts The configuration parameters for the VLAN
-      # @option opts [String] :id The VLAN ID to change
-      # @option opts [string] :value The value to set the state to
-      # @option opts [Boolean] :default The value should be set to default
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   vlan <id>
+      #     state [active, suspend]
+      #     no state
+      #     default state
+      #
+      # @param [String, Integer] :id The vlan id to apply the configuration
+      #   to.  The id value should be in the valid range of 1 to 4094
+      #
+      # @param [Hash] :opts Optional keyword arguments
+      #
+      # @option :opts [String] :value The value to configure the vlan state
+      #   to in the node's configuration.  Accepted values are 'active' or
+      #   'suspend'
+      #
+      # @option :opts [Boolean] :deafult Configure the vlan state value using
+      #   the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
+      #
+      # @raise [ArgumentError] if the value is not in the accept list of
+      #   values
       def set_state(id, opts = {})
         value = opts[:value]
         default = opts[:default] || false
+
+        unless ['active', 'suspend', nil].include?(value)
+          raise ArgumentError, 'state must be active, suspend or nil'
+        end
 
         cmds = ["vlan #{id}"]
         case default
@@ -166,27 +292,46 @@ module Rbeapi
       end
 
       ##
-      # Adds a new trunk group value to the list of values supported for
-      # the vlan specified
+      # add_trunk_group adds a new trunk group value to the specified vlan
+      # id in the nodes running configuration.  The trunk group name value
+      # accepts a-z 0-9 and _
       #
-      # @param [String] :id The VLAN ID to change
-      # @param [String] :tg The trunk group name to add
+      # @version 4.13.7M
+      #
+      # @commands
+      #   vlan <id>
+      #     trunk group <value>
+      #
+      # @param [String, Integer] :id The vlan id to apply the configuration
+      #   to.  the id value should be in the range of 1 to 4094
+      #
+      # @param [String] :value The value to add to the vlan id configuration
+      #   on the node.
       #
       # @return [Boolean] returns true if the command completed successfully
-      def add_trunk_group(id, tg)
-        configure(["vlan #{id}", "trunk group #{tg}"])
+      def add_trunk_group(id, value)
+        configure(["vlan #{id}", "trunk group #{value}"])
       end
 
       ##
-      # Removes an existing trunk group value from  the list of values
-      # supported for the vlan specified
+      # remove_trunk_group removes the specified trunk group value from the
+      # specified vlan id in the node's configuration.  If the trunk group
+      # name does not exist, this method will return success
       #
-      # @param [String] :id The VLAN ID to change
-      # @param [String] :tg The trunk group name to add
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] returns true if the command completed successfully
-      def remove_trunk_group(id, tg)
-        configure(["vlan #{id}", "no trunk group #{tg}"])
+      # @commands
+      #   vlan <id>
+      #     no trunk group <value>
+      #
+      # @param [String, Integer] :id The vlan id to apply the configuration
+      #   to.  the id value should be in the range of 1 to 4094
+      #
+      # @param [String] :value The value to remove from the list of trunk
+      #   group names configured for the specified vlan
+      #
+      def remove_trunk_group(id, value)
+        configure(["vlan #{id}", "no trunk group #{value}"])
       end
     end
   end

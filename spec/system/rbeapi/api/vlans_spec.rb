@@ -12,8 +12,7 @@ describe Rbeapi::Api::Vlans do
   describe '#get' do
 
     let(:entity) do
-      { 'vlan_id' => '1', 'name' => 'default', 'state' => 'active',
-        'trunk_groups' => [] }
+      { name: 'default', state: 'active', trunk_groups: [] }
     end
 
     before { node.config(['no vlan 1-4094', 'vlan 1']) }
@@ -73,9 +72,9 @@ describe Rbeapi::Api::Vlans do
     before { node.config(['default vlan 1', 'vlan 1']) }
 
     it 'sets vlan 1 name to foo' do
-      expect(subject.get('1')['name']).to eq('default')
+      expect(subject.get('1')[:name]).to eq('default')
       expect(subject.set_name('1', value: 'foo')).to be_truthy
-      expect(subject.get('1')['name']).to eq('foo')
+      expect(subject.get('1')[:name]).to eq('foo')
     end
   end
 
@@ -83,16 +82,16 @@ describe Rbeapi::Api::Vlans do
 
     it 'sets vlan 1 state to suspend' do
       node.config(['default vlan 1', 'vlan 1'])
-      expect(subject.get('1')['state']).to eq('active')
+      expect(subject.get('1')[:state]).to eq('active')
       expect(subject.set_state('1', value: 'suspend')).to be_truthy
-      expect(subject.get('1')['state']).to eq('suspend')
+      expect(subject.get('1')[:state]).to eq('suspend')
     end
 
     it 'sets vlan 1 state to active' do
       node.config(['vlan 1', 'state suspend'])
-      expect(subject.get('1')['state']).to eq('suspend')
+      expect(subject.get('1')[:state]).to eq('suspend')
       expect(subject.set_state('1', value: 'active')).to be_truthy
-      expect(subject.get('1')['state']).to eq('active')
+      expect(subject.get('1')[:state]).to eq('active')
     end
   end
 
@@ -100,9 +99,9 @@ describe Rbeapi::Api::Vlans do
     before { node.config(['default vlan 1', 'vlan 1']) }
 
     it 'adds trunk group foo to vlan 1' do
-      expect(subject.get('1')['trunk_groups']).not_to include('foo')
+      expect(subject.get('1')[:trunk_groups]).not_to include('foo')
       expect(subject.add_trunk_group('1', 'foo')).to be_truthy
-      expect(subject.get('1')['trunk_groups']).to include('foo')
+      expect(subject.get('1')[:trunk_groups]).to include('foo')
     end
   end
 
@@ -110,9 +109,9 @@ describe Rbeapi::Api::Vlans do
     before { node.config(['vlan 1', 'trunk group foo']) }
 
     it 'removes trunk group foo from vlan 1' do
-      expect(subject.get('1')['trunk_groups']).to include('foo')
+      expect(subject.get('1')[:trunk_groups]).to include('foo')
       expect(subject.remove_trunk_group('1', 'foo')).to be_truthy
-      expect(subject.get('1')['trunk_groups']).not_to include('foo')
+      expect(subject.get('1')[:trunk_groups]).not_to include('foo')
     end
   end
 end
