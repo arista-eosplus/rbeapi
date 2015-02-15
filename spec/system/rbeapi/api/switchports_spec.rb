@@ -12,8 +12,8 @@ describe Rbeapi::Api::Switchports do
   describe '#get' do
 
     let(:entity) do
-      { 'name' => 'Ethernet1', 'mode' => 'access', 'access_vlan' => '1',
-        'trunk_native_vlan' => '1', 'trunk_allowed_vlans' => '1-4094' }
+      { mode: 'access', access_vlan: '1', trunk_native_vlan: '1',
+        trunk_allowed_vlans: '1-4094' }
     end
 
     before { node.config('default interface Ethernet1') }
@@ -68,16 +68,16 @@ describe Rbeapi::Api::Switchports do
   describe '#set_mode' do
     it 'sets mode value to access' do
       node.config(['interface Ethernet1', 'switchport mode trunk'])
-      expect(subject.get('Ethernet1')['mode']).to eq('trunk')
+      expect(subject.get('Ethernet1')[:mode]).to eq('trunk')
       expect(subject.set_mode('Ethernet1', value: 'access')).to be_truthy
-      expect(subject.get('Ethernet1')['mode']).to eq('access')
+      expect(subject.get('Ethernet1')[:mode]).to eq('access')
     end
 
     it 'sets the mode value to trunk' do
       node.config(['default interface Ethernet1'])
-      expect(subject.get('Ethernet1')['mode']).to eq('access')
+      expect(subject.get('Ethernet1')[:mode]).to eq('access')
       expect(subject.set_mode('Ethernet1', value: 'trunk')).to be_truthy
-      expect(subject.get('Ethernet1')['mode']).to eq('trunk')
+      expect(subject.get('Ethernet1')[:mode]).to eq('trunk')
     end
   end
 
@@ -85,9 +85,9 @@ describe Rbeapi::Api::Switchports do
     before { node.config(['default interface Ethernet1', 'vlan 100'])  }
 
     it 'sets the access vlan value to 100' do
-      expect(subject.get('Ethernet1')['access_vlan']).to eq('1')
+      expect(subject.get('Ethernet1')[:access_vlan]).to eq('1')
       expect(subject.set_access_vlan('Ethernet1', value: '100')).to be_truthy
-      expect(subject.get('Ethernet1')['access_vlan']).to eq('100')
+      expect(subject.get('Ethernet1')[:access_vlan]).to eq('100')
     end
   end
 
@@ -95,9 +95,9 @@ describe Rbeapi::Api::Switchports do
     before { node.config(['default interface Ethernet1', 'vlan 100']) }
 
     it 'sets the trunk native vlan to 100' do
-      expect(subject.get('Ethernet1')['trunk_native_vlan']).to eq('1')
+      expect(subject.get('Ethernet1')[:trunk_native_vlan]).to eq('1')
       expect(subject.set_trunk_native_vlan('Ethernet1', value: '100')).to be_truthy
-      expect(subject.get('Ethernet1')['trunk_native_vlan']).to eq('100')
+      expect(subject.get('Ethernet1')[:trunk_native_vlan]).to eq('100')
     end
   end
 
@@ -105,9 +105,9 @@ describe Rbeapi::Api::Switchports do
     before { node.config(['default interface Ethernet1', 'vlan 100']) }
 
     it 'sets the trunk allowed vlans' do
-      expect(subject.get('Ethernet1')['trunk_allowed_vlans']).to eq('1-4094')
+      expect(subject.get('Ethernet1')[:trunk_allowed_vlans]).to eq('1-4094')
       expect(subject.set_trunk_allowed_vlans('Ethernet1', value: '1-100')).to be_truthy
-      expect(subject.get('Ethernet1')['trunk_allowed_vlans']).to eq('1-100')
+      expect(subject.get('Ethernet1')[:trunk_allowed_vlans]).to eq('1-100')
     end
   end
 end

@@ -63,21 +63,32 @@ module Rbeapi
         return nil unless config
         return nil if /no\sswitchport$/ =~ config
 
-        response = { 'name' => name }
-
-        mdata = /(?<=\s{3}switchport\smode\s)(.+)$/.match(config)
-        response['mode'] = mdata[1]
-
-        mdata = /(?<=access\svlan\s)(.+)$/.match(config)
-        response['access_vlan'] = mdata[1]
-
-        mdata = /(?<=trunk\snative\svlan\s)(.+)$/.match(config)
-        response['trunk_native_vlan'] = mdata[1]
-
-        mdata = /(?<=trunk\sallowed\svlan\s)(.+)$/.match(config)
-        response['trunk_allowed_vlans'] = mdata[1]
-
+        response = {}
+        response.merge!(parse_mode(config))
+        response.merge!(parse_access_vlan(config))
+        response.merge!(parse_trunk_native_vlan(config))
+        response.merge!(parse_trunk_allowed_vlans(config))
         response
+      end
+
+      def parse_mode(config)
+        mdata = /(?<=\s{3}switchport\smode\s)(.+)$/.match(config)
+        { mode: mdata[1] }
+      end
+
+      def parse_access_vlan(config)
+        mdata = /(?<=access\svlan\s)(.+)$/.match(config)
+        { access_vlan: mdata[1] }
+      end
+
+      def parse_trunk_native_vlan(config)
+        mdata = /(?<=trunk\snative\svlan\s)(.+)$/.match(config)
+        { trunk_native_vlan: mdata[1] }
+      end
+
+      def parse_trunk_allowed_vlans(config)
+        mdata = /(?<=trunk\sallowed\svlan\s)(.+)$/.match(config)
+        { trunk_allowed_vlans: mdata[1] }
       end
 
       ##
