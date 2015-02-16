@@ -39,6 +39,7 @@ module Rbeapi
     # IP interfaces configured using eAPI.
     class Ipinterfaces < Entity
 
+      DEFAULT_ADDRESS = ''
 
       def get(name)
         config = get_block("interface #{name}")
@@ -46,17 +47,25 @@ module Rbeapi
         return nil if /\s{3}switchport$/ =~ config
 
         response = {}
-
-        mdata = /(?<=^\s{3}ip\saddress\s)(.+)$/.match(config)
-        response['address'] = mdata.nil? ? '' : mdata[1]
-
-        mdata = /(?<=mtu\s)(\d+)$/.match(config)
-        response['mtu'] = mdata.nil? ? '': mdata[1]
-
-        helpers = config.scan(/(?<=\s{3}ip\shelper-address\s).+$/)
-        response['helper_addresses'] = helpers
-
+        response.merge!(parse_address(config))
+        response.merge!(parse_mtu(config))
+        response.merge!(parse_helper_addresses(config))
         response
+      end
+
+      def parse_address(config)
+        mdata = /(?<=^\s{3}ip\saddress\s)(.+)$/.match(config)
+        { address: mdata.nil? ? DEFAULT_ADDRESS : mdata[1] }
+      end
+
+      def parse_mtu(config)
+        mdata = /(?<=mtu\s)(\d+)$/.match(config)
+        { mtu: mdata.nil? ? '': mdata[1] }
+      end
+
+      def parse_helper_addresses(config)
+        helpers = config.scan(/(?<=\s{3}ip\shelper-address\s).+$/)
+        { helper_addresses: helpers }
       end
 
       ##

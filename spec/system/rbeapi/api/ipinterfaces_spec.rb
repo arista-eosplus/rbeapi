@@ -6,14 +6,15 @@ require 'rbeapi/api/ipinterfaces'
 describe Rbeapi::Api::Ipinterfaces do
   subject { described_class.new(node) }
 
-  let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-  let(:node) { Rbeapi::Client.connect_to('veos02') }
+  let(:node) do
+    Rbeapi::Client.config.read(fixture_file('dut.conf'))
+    Rbeapi::Client.connect_to('dut')
+  end
 
   describe '#get' do
 
     let(:entity) do
-      { 'address' => '99.99.99.99/24', 'mtu' => '1500',
-        'helper_addresses' => [] }
+      { address: '99.99.99.99/24', mtu: '1500', helper_addresses: [] }
     end
 
     before { node.config(['default interface Ethernet1', 'interface Ethernet1',
@@ -63,9 +64,9 @@ describe Rbeapi::Api::Ipinterfaces do
                           'no switchport'])  }
 
     it 'sets the address value' do
-      expect(subject.get('Ethernet1')['address']).to be_empty
+      expect(subject.get('Ethernet1')[:address]).to be_empty
       expect(subject.set_address('Ethernet1', value: '99.99.99.99/24')).to be_truthy
-      expect(subject.get('Ethernet1')['address']).to eq('99.99.99.99/24')
+      expect(subject.get('Ethernet1')[:address]).to eq('99.99.99.99/24')
     end
   end
 
@@ -74,9 +75,9 @@ describe Rbeapi::Api::Ipinterfaces do
                           'no switchport'])  }
 
     it 'sets the mtu value on the interface' do
-      expect(subject.get('Ethernet1')['mtu']).to eq('1500')
+      expect(subject.get('Ethernet1')[:mtu]).to eq('1500')
       expect(subject.set_mtu('Ethernet1', value: '2000')).to be_truthy
-      expect(subject.get('Ethernet1')['mtu']).to eq('2000')
+      expect(subject.get('Ethernet1')[:mtu]).to eq('2000')
     end
   end
 
@@ -87,9 +88,9 @@ describe Rbeapi::Api::Ipinterfaces do
     let(:helpers) { %w(99.99.99.98 99.99.99.97) }
 
     it 'sets the helper addresses on the interface' do
-      expect(subject.get('Ethernet1')['helper_addresses']).to be_empty
+      expect(subject.get('Ethernet1')[:helper_addresses]).to be_empty
       expect(subject.set_helper_addresses('Ethernet1', value: helpers)).to be_truthy
-      expect(subject.get('Ethernet1')['helper_addresses'].sort).to eq(helpers.sort)
+      expect(subject.get('Ethernet1')[:helper_addresses].sort).to eq(helpers.sort)
     end
   end
 end
