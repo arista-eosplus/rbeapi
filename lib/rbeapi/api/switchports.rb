@@ -88,7 +88,17 @@ module Rbeapi
 
       def parse_trunk_allowed_vlans(config)
         mdata = /(?<=trunk\sallowed\svlan\s)(.+)$/.match(config)
-        { trunk_allowed_vlans: mdata[1] }
+        return { trunk_allowed_vlans: [] } unless mdata[1] != 'none'
+        vlans = mdata[1].split(',')
+        values = vlans.each_with_object([]) do |vlan, arry|
+          if /-/ !~ vlan
+            arry << vlan.to_i
+          else
+            range_start, range_end = vlan.split('-')
+            arry.push(*Array(range_start.to_i..range_end.to_i))
+          end
+        end
+        { trunk_allowed_vlans: values }
       end
 
       ##
@@ -172,6 +182,12 @@ module Rbeapi
       def set_trunk_allowed_vlans(name, opts = {})
         value = opts[:value]
         default = opts[:default] || false
+
+        unless value.is_a?(Array)
+          raise ArgumentError, 'value must be an Array'
+        end
+
+        value = value.map(&:inspect).join(',') if value
 
         cmds = ["interface #{name}"]
         case default

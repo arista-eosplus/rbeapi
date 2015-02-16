@@ -6,20 +6,34 @@ require 'rbeapi/api/switchports'
 describe Rbeapi::Api::Switchports do
   subject { described_class.new(node) }
 
-  let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-  let(:node) { Rbeapi::Client.connect_to('veos02') }
+  let(:node) do
+    Rbeapi::Client.config.read(fixture_file('dut.conf'))
+    Rbeapi::Client.connect_to('dut')
+  end
 
   describe '#get' do
 
-    let(:entity) do
-      { mode: 'access', access_vlan: '1', trunk_native_vlan: '1',
-        trunk_allowed_vlans: '1-4094' }
+    let(:keys) do
+      [ :mode, :access_vlan, :trunk_native_vlan, :trunk_allowed_vlans ]
     end
 
-    before { node.config('default interface Ethernet1') }
+    before { node.config(['default interface Ethernet1', 'interface Ethernet2',
+                          'no switchport']) }
 
     it 'returns the switchport resource' do
-      expect(subject.get('Ethernet1')).to eq(entity)
+      expect(subject.get('Ethernet1')).not_to be_nil
+    end
+
+    it 'does not return a nonswitchport resource' do
+      expect(subject.get('Ethernet2')).to be_nil
+    end
+
+    it 'has all required keys' do
+      expect(subject.get('Ethernet1').keys).to eq(keys)
+    end
+
+    it 'returns allowed_vlans as an array' do
+      expect(subject.get('Ethernet1')[:trunk_allowed_vlans]).to be_a_kind_of(Array)
     end
   end
 
@@ -104,10 +118,17 @@ describe Rbeapi::Api::Switchports do
   describe '#set_trunk_allowed_vlans' do
     before { node.config(['default interface Ethernet1', 'vlan 100']) }
 
-    it 'sets the trunk allowed vlans' do
-      expect(subject.get('Ethernet1')[:trunk_allowed_vlans]).to eq('1-4094')
-      expect(subject.set_trunk_allowed_vlans('Ethernet1', value: '1-100')).to be_truthy
-      expect(subject.get('Ethernet1')[:trunk_allowed_vlans]).to eq('1-100')
+    it 'raises an ArgumentError if value is not an array' do
+      expect {
+        subject.set_trunk_allowed_vlans('Ethernet1', value: '1-100')
+      }.to raise_error(ArgumentError)
+    end
+
+    it 'sets vlan 100 to the trunk allowed vlans' do
+      node.config(['interface Ethernet1', 'switchport trunk allowed vlan none'])
+      expect(subject.get('Ethernet1')[:trunk_allowed_vlans]).to be_empty
+      expect(subject.set_trunk_allowed_vlans('Ethernet1', value: [100])).to be_truthy
+      expect(subject.get('Ethernet1')[:trunk_allowed_vlans]).to include(100)
     end
   end
 end
