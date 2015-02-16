@@ -6,13 +6,15 @@ require 'rbeapi/api/system'
 describe Rbeapi::Api::System do
   subject { described_class.new(node) }
 
-  let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-  let(:node) { Rbeapi::Client.connect_to('veos02') }
+  let(:node) do
+    Rbeapi::Client.config.read(fixture_file('dut.conf'))
+    Rbeapi::Client.connect_to('dut')
+  end
 
   describe '#get' do
 
     let(:entity) do
-      { 'hostname' => 'localhost' }
+      { hostname: 'localhost' }
     end
 
     before { node.config('hostname localhost') }
@@ -26,9 +28,9 @@ describe Rbeapi::Api::System do
     before { node.config('hostname localhost') }
 
     it 'configures the system hostname value' do
-      expect(subject.get['hostname']).to eq('localhost')
+      expect(subject.get[:hostname]).to eq('localhost')
       expect(subject.set_hostname(value: 'foo')).to be_truthy
-      expect(subject.get['hostname']).to eq('foo')
+      expect(subject.get[:hostname]).to eq('foo')
     end
   end
 end

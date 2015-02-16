@@ -43,20 +43,22 @@ module Rbeapi
       ##
       # Returns the system settings
       #
-      # Example
+      # @example
       #   {
-      #     "hostname": <string>
+      #     hostname: <string>
       #   }
       #
       # @return [Hash]  A Ruby hash objec that provides the system settings as
       #   key/value pairs.
       def get()
         response = {}
-
-        mdata = /(?<=^hostname\s)(.+)$/.match(config)
-        response['hostname'] = mdata.nil? ? '' : mdata[0]
-
+        response.merge!(parse_hostname(config))
         response
+      end
+
+      def parse_hostname(config)
+        mdata = /(?<=^hostname\s)(.+)$/.match(config)
+        { hostname: mdata.nil? ? '' : mdata[1] }
       end
 
       ##
