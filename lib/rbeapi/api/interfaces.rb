@@ -361,7 +361,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_sflow(config)
-        value = /no sflow enable/ =~ config
+        value = /no  enable/ =~ config
         { sflow: value.nil? }
       end
       private :parse_sflow
@@ -601,7 +601,7 @@ module Rbeapi
         response = super(name)
         response[:type] = 'portchannel'
         response.merge!(parse_members(name))
-        response.merge!(parse_lacp_mode(name, config))
+        response.merge!(parse_lacp_mode(name))
         response.merge!(parse_minimum_links(config))
         response.merge!(parse_lacp_fallback(config))
         response.merge!(parse_lacp_timeout(config))
@@ -616,11 +616,11 @@ module Rbeapi
         { members: values }
       end
 
-      def parse_lacp_mode(name, config)
+      def parse_lacp_mode(name)
         members = parse_members(name)[:members]
-        return 'on' unless members
+        return { lacp_mode: 'on' } unless members
         config = get_block("interface #{members.first}")
-        mdata = /channel-group \d+ mode ([\w+])/.match(config)
+        mdata = /channel-group \d+ mode (\w+)/.match(config)
         { lacp_mode: mdata.nil? ? 'on' : mdata[1] }
       end
 
@@ -630,7 +630,7 @@ module Rbeapi
       end
 
       def parse_lacp_fallback(config)
-        mdata = /lacp fallback timeout (\d+)$/.match(config)
+        mdata = /lacp fallback (static|individual)/.match(config)
         { lacp_fallback: mdata.nil? ? DEFAULT_LACP_FALLBACK : mdata[1] }
       end
 
@@ -655,7 +655,7 @@ module Rbeapi
       end
 
       def set_members(name, members)
-        current_members = Set.new get_members(name)
+        current_members = Set.new parse_members(name)[:members]
         members = Set.new members
 
         # remove members from the current port-channel interface
@@ -674,7 +674,7 @@ module Rbeapi
       end
 
       def add_member(name, member)
-        lacp = get_lacp_mode(name)
+        lacp = parse_lacp_mode(name)[:lacp_mode]
         grpid = /(\d+)/.match(name)[0]
         configure ["interface #{member}", "channel-group #{grpid} mode #{lacp}"]
       end
@@ -691,7 +691,7 @@ module Rbeapi
         remove_commands = []
         add_commands = []
 
-        get_members(name).each do |member|
+        parse_members(name)[:members].each do |member|
           remove_commands << "interface #{member}"
           remove_commands << "no channel-group #{grpid}"
           add_commands << "interface #{member}"

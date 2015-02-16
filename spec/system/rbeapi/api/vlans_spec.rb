@@ -3,11 +3,16 @@ require 'spec_helper'
 require 'rbeapi/client'
 require 'rbeapi/api/vlans'
 
+include FixtureHelpers
+
 describe Rbeapi::Api::Vlans do
   subject { described_class.new(node) }
 
-  let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-  let(:node) { Rbeapi::Client.connect_to('veos02') }
+  let(:node) do
+    Rbeapi::Client.config.read(fixture_file('dut.conf'))
+    Rbeapi::Client.connect_to('dut')
+  end
+
 
   describe '#get' do
 
