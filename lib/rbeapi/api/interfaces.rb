@@ -361,7 +361,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_sflow(config)
-        value = /no slfow enable/ =~ config
+        value = /no sflow enable/ =~ config
         { sflow: value.nil? }
       end
       private :parse_sflow
@@ -377,7 +377,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_flowcontrol_send(config)
-        mdata = /flowcontrol send ([^\s])$/.match(config)
+        mdata = /flowcontrol send (\w+)$/.match(config)
         { flowcontrol_send: mdata.nil? ? DEFAULT_ETH_FLOWC_TX : mdata[1] }
       end
       private :parse_flowcontrol_send
@@ -393,7 +393,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_flowcontrol_receive(config)
-        mdata = /flowcontrol receive ([^\s])$/.match(config)
+        mdata = /flowcontrol receive (\w+)$/.match(config)
         { flowcontrol_receive: mdata.nil? ? DEFAULT_ETH_FLOWC_RX : mdata[1] }
       end
       private :parse_flowcontrol_receive

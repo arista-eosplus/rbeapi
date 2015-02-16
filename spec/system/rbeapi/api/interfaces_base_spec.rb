@@ -6,8 +6,6 @@ require 'rbeapi/api/interfaces'
 describe Rbeapi::Api::Interfaces do
   subject { described_class.new(node) }
 
-  let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-
   let(:node) do
     Rbeapi::Client.config.read(fixture_file('dut.conf'))
     Rbeapi::Client.connect_to('dut')
