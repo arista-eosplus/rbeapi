@@ -7,13 +7,16 @@ describe Rbeapi::Api::Interfaces do
   subject { described_class.new(node) }
 
   let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-  let(:node) { Rbeapi::Client.connect_to('veos02') }
+
+  let(:node) do
+    Rbeapi::Client.config.read(fixture_file('dut.conf'))
+    Rbeapi::Client.connect_to('dut')
+  end
 
   describe '#get' do
 
     let(:entity) do
-      { 'name' => 'Loopback0', 'type' => 'generic', 'description' => '',
-        'shutdown' => false }
+      { name: 'Loopback0', type: 'generic', description: '', shutdown: false }
     end
 
     before { node.config(['no interface Loopback0', 'interface Loopback0']) }
@@ -59,34 +62,34 @@ describe Rbeapi::Api::Interfaces do
     before { node.config(['interface Loopback0', 'shutdown']) }
 
     it 'sets Loopback0 to default' do
-      expect(subject.get('Loopback0')['shutdown']).to be_truthy
+      expect(subject.get('Loopback0')[:shutdown]).to be_truthy
       expect(subject.default('Loopback0')).to be_truthy
-      expect(subject.get('Loopback0')['shutdown']).to be_falsy
+      expect(subject.get('Loopback0')[:shutdown]).to be_falsy
     end
   end
 
   describe '#set_description' do
     it 'sets the description value on the interface' do
       node.config(['interface Loopback0', 'no description'])
-      expect(subject.get('Loopback0')['description']).to be_empty
+      expect(subject.get('Loopback0')[:description]).to be_empty
       expect(subject.set_description('Loopback0', value: 'foo bar')).to be_truthy
-      expect(subject.get('Loopback0')['description']).to eq('foo bar')
+      expect(subject.get('Loopback0')[:description]).to eq('foo bar')
     end
   end
 
   describe '#set_shutdown' do
     it 'sets the shutdown value to true' do
       node.config(['interface Loopback0', 'no shutdown'])
-      expect(subject.get('Loopback0')['shutdown']).to be_falsy
+      expect(subject.get('Loopback0')[:shutdown]).to be_falsy
       expect(subject.set_shutdown('Loopback0', value: true)).to be_truthy
-      expect(subject.get('Loopback0')['shutdown']).to be_truthy
+      expect(subject.get('Loopback0')[:shutdown]).to be_truthy
     end
 
     it 'sets the shutdown value to false' do
       node.config(['interface Loopback0', 'shutdown'])
-      expect(subject.get('Loopback0')['shutdown']).to be_truthy
+      expect(subject.get('Loopback0')[:shutdown]).to be_truthy
       expect(subject.set_shutdown('Loopback0', value: false)).to be_truthy
-      expect(subject.get('Loopback0')['shutdown']).to be_falsy
+      expect(subject.get('Loopback0')[:shutdown]).to be_falsy
     end
   end
 end

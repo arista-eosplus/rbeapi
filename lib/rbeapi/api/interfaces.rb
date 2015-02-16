@@ -97,90 +97,159 @@ module Rbeapi
     # that is common to all interfaces configured in EOS.
     class BaseInterface < Entity
 
+      DEFAULT_INTF_DESCRIPTION = ''
+
       ##
-      # Returns the base interface properties common to all interfaces and
-      # sets the type to 'generic'.
+      # get returns the specified interface resource hash that represents the
+      # node's current interface configuration.   The BaseInterface class
+      # provides all the set of attributres that are common to all interfaces
+      # in EOS.  This method will return an interface type of generic
       #
       # @example
       #   {
-      #     "name": <string>,
-      #     "type": 'generic',
-      #     "description": <string>,
-      #     "shutdown":  [true, false]
+      #     name: <string>
+      #     type: 'generic'
+      #     description: <string>
+      #     shutdown: [true, false]
       #   }
       #
       # @param [String] :name The name of the interface to return from the
       #   running-configuration
       #
-      # @return [nil, Hash<String, String> Returns a hash of the interface
+      # @return [nil, Hash<String, Object>] Returns a hash of the interface
       #   properties if the interface name was found in the running
       #   configuration.  If the interface was not found, nil is returned
       def get(name)
         config = get_block("^interface #{name}")
         return nil unless config
 
-        response = { 'name' => name, 'type' => 'generic' }
-        response['shutdown'] = /\s{3}(no\sshutdown)$/ !~ config
-
-        mdata = /(?<=\s{3}description\s)(.+)$/.match(config)
-        response['description'] = mdata.nil? ? '' : mdata[1]
-
+        response = { name: name, type: 'generic' }
+        response.merge!(parse_description(config))
+        response.merge!(parse_shutdown(config))
         response
       end
 
       ##
-      # Creates an interface on the node in the running config
+      # parse_description scans the provided configuration block and parses
+      # the description value if it exists in the cofiguration.  If the
+      # description value is not configured, then the DEFALT_INTF_DESCRIPTION
+      # value is returned.  The hash returned by this method is inteded to be
+      # merged into the interface resource hash returned by the get method.
       #
-      # @param [String] :name The name of the interface to create
+      # @api private
       #
-      # @return [Boolean] This method returns true if the commands were
-      #   successful otherwise it returns false
-      def create(name)
-        configure("interface #{name}")
+      # @eturn [Hash<Symbol, Object>] resource hash attribute
+      def parse_description(config)
+        mdata = /^\s{3}description\s(.+)$/.match(config)
+        { description: mdata.nil? ? DEFAULT_INTF_DESCRIPTION : mdata[1] }
+      end
+      private :parse_description
+
+      ##
+      # parse_shutdown scans the provided configuration block and parses
+      # the shutdown value.  If the shutdown value is configured then true
+      # is returned as its value otherwise false is returned.  The hash
+      # returned by this method is intended to be merged into the interface
+      # ressource hash returned by the get method.
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_shutdown(config)
+        value = /no shutdown/ =~ config
+        { shutdown: value.nil?  }
+      end
+      private :parse_shutdown
+
+      ##
+      # create will create a new interface resource in the node's current
+      # configuration with the specified interface name.  If the create
+      # method is called and the interface already exists, this method will
+      # return successful
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   interface <value>
+      #
+      # @param [String] :value The interface name to create on the node.  The
+      #   interface name must be the full interface identifier (ie Loopback,
+      #   not Lo)
+      #
+      # @return [Boolean] returns true if the command completed succesfully
+      def create(value)
+        configure("interface #{value}")
       end
 
       ##
-      # Deletes the interface configuration from the nodes operational
-      # (running) config
+      # delete will delete an existing interface resource in the node's
+      # current configuration with the specified interface name.  If the
+      # delete method is called and interface does not exist, this method
+      # will return successful
       #
-      # @param [String] :name The name of the interface to remove from the
-      #  running config
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] This method returns true if the commands were
-      #   successful otherwise it returns false
-      def delete(name)
-        configure("no interface #{name}")
+      # @commands
+      #   no interface <value>
+      #
+      # @param [String] :value The interface name to delete from the node.
+      #   The interface name must be the full interface identifier
+      #   (ie Loopback, no Lo)
+      #
+      # @return [Boolean] returns true if the command completed successfully
+      def delete(value)
+        configure("no interface #{value}")
       end
 
       ##
-      # Configures the interface using the default configuration command
-      # which will cause all interface configuratin settings to be reset
-      # to default values
+      # default will configure the interface using the default keyword.  For
+      # virtual interfaces this is equivalent to deleting the interface. For
+      # physical interfaces, the entire interface configuration will be set
+      # to defaults.
       #
-      # @param [String] :name The name of the interface to apply the default
-      #   configuration to
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] This method returns true if the commands were
-      #   successful otherwise it returns false
-      def default(name)
-        configure("default interface #{name}")
+      # @commands
+      #   default interface <value>
+      #
+      # @param [String] :value The interface name to default in the node.  The
+      #   interface name must be the full interface identifier (ie Loopback,
+      #   not Lo)
+      #
+      # @return [Boolean] returns true if the command completed successfully
+      def default(value)
+        configure("default interface #{value}")
       end
 
       ##
-      # Configures the interface description for the specified interface
+      # set_description configures the description value for the specified
+      # interface name in the nodes running configuration.  If the value is
+      # not provided in the opts keyword hash then the description value is
+      # negated using the no keyword.  If the default keyword is set to
+      # true, then the description value is defaulted using the default
+      # keyword.  The default keyword takes precedence over the value
+      # keyword if both are provided.
       #
-      # @param [String] :name The name of the interface to apply the
-      #   configuration values to
-      # @param [Hash] :opts Optional keyword arguments
-      # @option :opts [String] :value The value to assign to the interface
-      #   description in the configuration.  If this value is nil and default
-      #   is false, then the description command is negated
-      # @option :opts [Boolean] :default Specifies whether or not the
-      #   description configuration command should be defaulted.  The value
-      #   of this option has higher precedence than :value
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] This method returns true if the commands were
-      #   successful otherwise it returns false
+      # @commands
+      #   interface <name>
+      #     description <value>
+      #     no description
+      #     default description
+      #
+      # @param [String] :name The interface name to apply the configuration
+      #   to.  The name value must be the full interface identifier
+      #
+      # @param [hash] :opts Optional keyword arguments
+      #
+      # @option :opts [String] :value The value to configure the description
+      #   to in the node's configuration.
+      #
+      # @option :opts [Boolean] :default Configure the interface description
+      #   using the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_description(name, opts = {})
         value = opts[:value]
         value = nil if value.empty?
@@ -197,21 +266,36 @@ module Rbeapi
       end
 
       ##
-      # Conifgures the adminstrative state of the specified interfaces
+      # set_shutdown configures the adminstrative state of the specified
+      # interface in the node.  If the value is true, then the interface
+      # is adminstratively disabled.  If the value is false, then the
+      # interface is adminstratively enabled.  If no value is provided, then
+      # the interface is configured with the no keyword which is equivalent
+      # to false.  If the default keyword is set to true, then the interface
+      # shutdown value is configured using the default keyword.  The default
+      # keyword takes precedence over the value keyword if both are provided.
       #
-      # @param [String] :name The name of the interface to apply the
-      #   configuration values to
-      # @param [Hash] :opt Optional keyword arguments
-      # @option :opts [Boolean] :value Configures the interface to be
-      #   administratively disabled (shutdown) if the value is true otherwise
-      #   configures the adminstrative state to enabled (no shutdown).  If
-      #   the value is nil then the shutdown command is negated.
-      # @option :opts [Boolean] :default Specifies whether or not the
-      #   shutdown command is configured as default.  The value of this
-      #   option has a higher precedence than :value
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] This method returns true if the commands were
-      #   successful otherwise it returns false
+      # @commands
+      #   interface <name<
+      #     shutdown
+      #     no shutdown
+      #     default shutdown
+      #
+      # @param [String] :name The interface name to apply the configuration
+      #   to.  The name value must be the full interface identifier
+      #
+      # @param [hash] :opts Optional keyword arguments
+      #
+      # @option :opts [Boolean] :value True if the interface should be
+      #   administratively disabled or false if the interface should be
+      #   administratively enabled
+      #
+      # @option :opts [Boolean] :default Configure the interface shutdown
+      #   using the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_shutdown(name, opts = {})
         value = opts[:value]
         default = opts.fetch(:default, false)
@@ -229,53 +313,94 @@ module Rbeapi
 
     class EthernetInterface < BaseInterface
 
+      DEFAULT_ETH_FLOWC_TX = 'off'
+      DEFAULT_ETH_FLOWC_RX = 'off'
+
       ##
-      # Returns the Ethernet interface as a Ruby hash of key/value pairs that
-      # represent the interface configuration from the node.  This method
-      # extends the get method from the BaseInterface and adds the Ethernet
-      # specific attributes
+      # get returns the specified Etherent interface resource hash that
+      # respresents the interface's current configuration in th e node.
       #
       # @example
       #   {
-      #     "name": <string>,
-      #     "type": 'ethernet',
-      #     "description": <string>
-      #     "shutdown": [true, false],
-      #     "sflow": [true, false],
-      #     "flowcontrol_send": [on, off],
-      #     "flowcontrol_receive": [on, off]
+      #     name: <string>
+      #     type: 'ethernet'
+      #     description: <string>
+      #     shutdown: [true, false]
+      #     sflow: [true, false]
+      #     flowcontrol_send: [on, off]
+      #     flowcontrol_receive: [on, off]
       #   }
       #
-      # @param [String] :name The name of the interface to return the
-      #   configuration values for.  This argument must be the full interface
-      #   identifier
+      # @param [String] :name The interface name to return a resource hash
+      #   for from the node's running configuration
       #
-      # @return [nil, Hash<String, String>] Returns a Ruby Hash object that
-      #   represents the interface configuration.  If the name argument
-      #   is not found in the node's configuration then nil is returned
+      # @return [nil, Hash<Symbol, Object>] Returns the interface resource as
+      #   a hash.  If the specified interface name is not found in the node's
+      #   configuration a nil object is returned
       def get(name)
         config = get_block("^interface #{name}")
         return nil unless config
 
         response = super(name)
-        response.update({ 'name' => name, 'type' => 'ethernet' })
+        response[:type] = 'ethernet'
 
-        sflow = /no sflow enable/ =~ config
-        response['sflow'] = sflow.nil?
-
-        mdata = /(?<=\s{3}flowcontrol\ssend\s)(?<value>.+)$/.match(config)
-        response['flowcontrol_send'] = mdata.nil? ? 'off' : mdata[1]
-
-        mdata = /(?<=\s{3}flowcontrol\sreceive\s)(?<value>.+)$/.match(config)
-        response['flowcontrol_receive'] = mdata.nil? ? 'off' : mdata[1]
+        response.merge!(parse_sflow(config))
+        response.merge!(parse_flowcontrol_send(config))
+        response.merge!(parse_flowcontrol_receive(config))
 
         response
       end
 
       ##
-      # Overrides the default behavior of the create method from the
-      # BaseInterface class to raise an error because Ethernet interface
-      # creation is not supported.
+      # parse_sflow scans the provided configuration block and parse the
+      # sflow value.  The sflow values true if sflow is enabled on the
+      # interface or returns false if it is not enabled.  The hash returned
+      # is intended to be merged into the interface hash.
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_sflow(config)
+        value = /no slfow enable/ =~ config
+        { sflow: value.nil? }
+      end
+      private :parse_sflow
+
+      ##
+      # parse_flowcontrol_send scans the provided configuration block and
+      # parses the flowcontrol send value.  If the interface flowcontrol value
+      # is not configured, then this method will return the value of
+      # DEFAULT_ETH_FLOWC_TX.  The hash returned is intended to be merged into
+      # the interface resource hash.
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_flowcontrol_send(config)
+        mdata = /flowcontrol send ([^\s])$/.match(config)
+        { flowcontrol_send: mdata.nil? ? DEFAULT_ETH_FLOWC_TX : mdata[1] }
+      end
+      private :parse_flowcontrol_send
+
+      ##
+      # parse_flowcontrol_receive scans the provided configuration block and
+      # parse the flowcontrol receive value.  If the interface flowcontrol
+      # value is not configured, then this method will return the value of
+      # DEFAULT_ETH_FLOWC_RX.  The hash returned is intended to be merged into
+      # the interface resource hash.
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_flowcontrol_receive(config)
+        mdata = /flowcontrol receive ([^\s])$/.match(config)
+        { flowcontrol_receive: mdata.nil? ? DEFAULT_ETH_FLOWC_RX : mdata[1] }
+      end
+      private :parse_flowcontrol_receive
+
+      ##
+      # create overrides the create method from the BaseInterface and raises
+      # an exception because Ethernet interface creation is not supported.
       #
       # @param [String] :name The name of the interface
       #
@@ -287,9 +412,9 @@ module Rbeapi
       end
 
       ##
-      # Overrides the default behavior of the delete method from the
-      # BaseInterface class to raise an error because Ethernet interface
-      # deletion is not supported.
+      # delete overrides the delete method fro the BaseInterface instance and
+      # raises an exception because Ethernet interface deletion is not
+      # supported.
       #
       # @param [String] :name The name of the interface
       #
@@ -301,20 +426,34 @@ module Rbeapi
       end
 
       ##
-      # Configures sflow support for the specified interface
+      # set_sflow configures the administrative state of sflow on the
+      # interface.  Setting the value to true enables sflow on the interface
+      # and setting the value to false disables sflow on the interface.  If the
+      # value is not provided, the sflow state is negated using the no keyword.
+      # If the default keyword is set to true, then the sflow value is
+      # defaulted using the default keyword.  The default keyword takes
+      # precedence over the value keyword
       #
-      # @param [String] :name The name of the Ethernet interface to enable or
-      #   disable sflow support on
-      # @param [Hash] :opt Optional keyword arguments
-      # @option :opts [Boolean] :value True to enable sflow support on the
-      #   interface or False to disable sflow support.  If no value is provided
-      #   then the value is negated (set to False)
-      # @option :opts [Boolean] :default Specifies whether or not the
-      #   sflow command is configured as default.  The value of this
-      #   option has a higher precedence than :value
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] This method returns true if the commands were
-      #   successful otherwise it returns false
+      # @commands
+      #   interface <name>
+      #     sflow enable
+      #     no sflow enable
+      #     default sflow
+      #
+      # @param [String] :name The interface name to apply the configuration
+      #   values to.  The name must be the full interface identifier.
+      #
+      # @param [Hash] :opts optional keyword arguments
+      #
+      # @option :opts [Boolean] :value Enables  sflow if the value is true or
+      #   disables sflow on the interface if false
+      #
+      # @option :opts [Boolean] :default Configures the sflow value on the
+      #   interface using the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_sflow(name, opts = {})
         value = opts[:value]
         default = opts.fetch(:default, false)
@@ -330,22 +469,36 @@ module Rbeapi
       end
 
       ##
-      # Configures flowcontrol support for the specified interface
+      # set_flowcontrol configures the flowcontrol value either on or off for
+      # the for the specified interface in the specified direction (either send
+      # or receive).  If the value is not provided then the configuration is
+      # negated using the no keyword.  If the default keyword is set to true,
+      # then the state value is defaulted using the default keyword.  The
+      # default keyword takes precedence over the value keyword
       #
-      # @param [String] :name The name of the Ethernet interface to configure
-      # @param [String] :direction The flowcontrol direction (send or receive)
-      #   to configure for the interface
-      # @param [Hash] :opt Optional keyword arguments
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   interface <name>
+      #   flowcontrol [send | receive] [on, off]
+      #   no flowcontrol [send | receive]
+      #   default flowcontrol [send | receive]
+      #
+      # @param [String] :name The interface name to apply the configuration
+      #   values to.  The name must be the full interface identifier.
+      #
+      # @param [String] :direction Specifies the flowcontrol direction to
+      #   configure.  Valid values include send and receive.
+      #
+      # @param [Hash] :opts optional keyword arguments
+      #
       # @option :opts [String] :value Specifies the value to configure the
-      #   flowcontrol setting to in the configuration.  Valid values are
-      #   on and off.  If the value is not provided and default is false
-      #   then the flowcontrol setting is negated
-      # @option :opts [Boolean] :default Specifies whether or not the
-      #   flowcontrol command is configured as default.  The value of this
-      #   option has a higher precedence than :value
+      #   flowcontrol setting for.  Valid values include on or off
       #
-      # @return [Boolean] This method returns true if the commands were
-      #   successful otherwise it returns false
+      # @option :opts [Boolean] :default Configures the flowcontrol value on
+      #   the interface using the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_flowcontrol(name, direction, opts = {})
         value = opts[:value]
         default = opts.fetch(:default, false)
@@ -362,41 +515,61 @@ module Rbeapi
       end
 
       ##
-      # Configures the flowcontrol send value for the specified Ethernet
-      # interface
+      # set_flowcontrol_send is a convenience function for configuring the
+      # value of interface flowcontrol.
       #
-      # @param [String] :name The name of the Ethernet interface to configure
-      # @param [Hash] :opt Optional keyword arguments
+      # @see set_flowcontrol
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   interface <name>
+      #   flowcontrol [send | receive] [on, off]
+      #   no flowcontrol [send | receive]
+      #   default flowcontrol [send | receive]
+      #
+      # @param [String] :name The interface name to apply the configuration
+      #   values to.  The name must be the full interface identifier.
+      #
+      # @param [Hash] :opts optional keyword arguments
+      #
       # @option :opts [String] :value Specifies the value to configure the
-      #   flowcontrol setting to in the configuration.  Valid values are
-      #   on and off.  If the value is not provided and default is false
-      #   then the flowcontrol setting is negated
-      # @option :opts [Boolean] :default Specifies whether or not the
-      #   flowcontrol command is configured as default.  The value of this
-      #   option has a higher precedence than :value
+      #   flowcontrol setting for.  Valid values include on or off
       #
-      # @return [Boolean] This method returns true if the commands were
-      #   successful otherwise it returns false
+      # @option :opts [Boolean] :default Configures the flowcontrol value on
+      #   the interface using the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_flowcontrol_send(name, opts = {})
         set_flowcontrol(name, 'send', opts)
       end
 
       ##
-      # Configures the flowcontrol receive value for the specified Ethernet
-      # interface
+      # set_flowcontrol_receive is a convenience function for configuring th e
+      # value of interface flowcontrol
       #
-      # @param [String] :name The name of the Ethernet interface to configure
-      # @param [Hash] :opt Optional keyword arguments
+      # @see set_flowcontrol
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   interface <name>
+      #   flowcontrol [send | receive] [on, off]
+      #   no flowcontrol [send | receive]
+      #   default flowcontrol [send | receive]
+      #
+      # @param [String] :name The interface name to apply the configuration
+      #   values to.  The name must be the full interface identifier.
+      #
+      # @param [Hash] :opts optional keyword arguments
+      #
       # @option :opts [String] :value Specifies the value to configure the
-      #   flowcontrol setting to in the configuration.  Valid values are
-      #   on and off.  If the value is not provided and default is false
-      #   then the flowcontrol setting is negated
-      # @option :opts [Boolean] :default Specifies whether or not the
-      #   flowcontrol command is configured as default.  The value of this
-      #   option has a higher precedence than :value
+      #   flowcontrol setting for.  Valid values include on or off
       #
-      # @return [Boolean] This method returns true if the commands were
-      #   successful otherwise it returns false
+      # @option :opts [Boolean] :default Configures the flowcontrol value on
+      #   the interface using the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_flowcontrol_receive(name, opts = {})
         set_flowcontrol(name, 'receive', opts)
       end
@@ -404,16 +577,21 @@ module Rbeapi
 
     class PortchannelInterface < BaseInterface
 
+      DEFAULT_LACP_FALLBACK = 'disabled'
+      DEFAULT_MIN_LINKS = '0'
+
       ##
       #
       # @example
       #   {
-      #     "type": "portchannel",
-      #     "members": array<string>,
-      #     "lacp_mode": [active, passive, on],
-      #     "minimum_links": <string>,
-      #     "lacp_timeout": <string>,
-      #     "lacp_fallback": [static, individual, disabled]
+      #     type: 'portchannel'
+      #     description: <string>
+      #     shutdown: [true, false]
+      #     members: array[<strings>]
+      #     lacp_mode: [active, passive, on]
+      #     minimum_links: <string>
+      #     lacp_timeout: <string>
+      #     lacp_fallback: [static, individual, disabled]
       #   }
       #
       def get(name)
@@ -421,36 +599,44 @@ module Rbeapi
         return nil unless config
 
         response = super(name)
-        response.update({'name' => name, 'type' => 'portchannel'})
-
-        response['members'] = get_members(name)
-        response['lacp_mode'] = get_lacp_mode(name)
-
-        mdata = /(?<=\s{3}port-channel\smin-links\s)(.+)$/.match(config)
-        response['minimum_links'] = mdata.nil? ? '0' : mdata[1]
-
-        mdata = /(?<=lacp\sfallback\stimeout\s)(.+)$/.match(config)
-        response['lacp_timeout'] = mdata[1]
-
-        mdata = /(?<=lacp\sfallback\s)(\w+)$/.match(config)
-        response['lacp_fallback'] = mdata.nil? ? 'disabled' : mdata[1]
-
+        response[:type] = 'portchannel'
+        response.merge!(parse_members(name))
+        response.merge!(parse_lacp_mode(name, config))
+        response.merge!(parse_minimum_links(config))
+        response.merge!(parse_lacp_fallback(config))
+        response.merge!(parse_lacp_timeout(config))
         response
       end
 
-      def get_members(name)
+      def parse_members(name)
         grpid = name.scan(/(?<=Port-Channel)\d+/)[0]
         command = "show port-channel #{grpid} all-ports"
         config = node.enable(command, format: 'text')
-        config.first[:result]['output'].scan(/Ethernet[\d\/]*/)
+        values = config.first[:result]['output'].scan(/Ethernet[\d\/]*/)
+        { members: values }
       end
 
-      def get_lacp_mode(name)
-        members = get_members(name)
+      def parse_lacp_mode(name, config)
+        members = parse_members(name)[:members]
         return 'on' unless members
-        config = get_block("^interface #{members.first}")
-        mdata = /channel-group\s\d+\smode\s(.+)/.match(config)
-        mdata.nil? ? 'on' : mdata[1]
+        config = get_block("interface #{members.first}")
+        mdata = /channel-group \d+ mode ([\w+])/.match(config)
+        { lacp_mode: mdata.nil? ? 'on' : mdata[1] }
+      end
+
+      def parse_minimum_links(config)
+        mdata = /port-channel min-links (\d+)$/.match(config)
+        { minimum_links: mdata.nil? ? DEFAULT_MIN_LINKS : mdata[1] }
+      end
+
+      def parse_lacp_fallback(config)
+        mdata = /lacp fallback timeout (\d+)$/.match(config)
+        { lacp_fallback: mdata.nil? ? DEFAULT_LACP_FALLBACK : mdata[1] }
+      end
+
+      def parse_lacp_timeout(config)
+        mdata = /lacp fallback timeout (\d+)$/.match(config)
+        { lacp_timeout: mdata[1] }
       end
 
       def set_minimum_links(name, opts = {})
@@ -550,6 +736,9 @@ module Rbeapi
 
     class VxlanInterface < BaseInterface
 
+      DEFAULT_SRC_INTF = ''
+      DEFAULT_MCAST_GRP = ''
+
       ##
       # Returns the Vxlan interface configuration as a Ruby hash of key/value
       # pairs from the nodes running configuration. This method extends the
@@ -573,19 +762,24 @@ module Rbeapi
       #   as a Ruby hash object.   If the provided interface name is not found
       #   then this method will return nil
       def get(name = 'Vxlan1')
-        config = get_block("^interface #{name}")
+        config = get_block("interface #{name}")
         return nil unless config
 
         response = super(name)
-        response.update({ 'name' => name, 'type' => 'vxlan' })
-
-        mdata = /(?<=\s{3}vxlan\ssource-interface\s)(.+)$/.match(config)
-        response['source_interface'] = mdata.nil? ? '' : mdata[0]
-
-        mdata = /(?<=\s{3}vxlan\smulticast-group\s)(.+)$/.match(config)
-        response['multicast_group'] = mdata.nil? ? '' : mdata[0]
-
+        response[:type] = 'vxlan'
+        response.merge!(parse_source_interface(config))
+        response.merge!(parse_multicast_group(config))
         response
+      end
+
+      def parse_source_interface(config)
+        mdata = /source-interface ([^\s]+)$/.match(config)
+        { source_interface: mdata.nil? ? DEFAULT_SRC_INTF : mdata[1] }
+      end
+
+      def parse_multicast_group(config)
+        mdata = /multicast-group ([^\s]+)$/.match(config)
+        { multicast_group: mdata.nil? ? DEFAULT_MCAST_GRP : mdata[1] }
       end
 
       ##
