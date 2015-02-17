@@ -81,7 +81,7 @@ describe Rbeapi::Api::Ipinterfaces do
     end
   end
 
-  describe '#set_trunk_allowed_vlans' do
+  describe '#set_helper_addresses' do
     before { node.config(['default interface Ethernet1', 'interface Ethernet1',
                           'no switchport', 'ip address 99.99.99.99/24'])  }
 

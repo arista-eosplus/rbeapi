@@ -41,6 +41,24 @@ module Rbeapi
 
       DEFAULT_ADDRESS = ''
 
+      ##
+      # get returns a resource hash that represents the configuration of the IP
+      # interface from the nodes running configuration.
+      #
+      # @example
+      #   {
+      #     address: <string>
+      #     mtu: <string>
+      #     helper_addresses: array<strings>
+      #   }
+      #
+      # @param [String] :name The full interface identifier of the interface to
+      #   return the resource configuration hash for.  The name must be the
+      #   full name (Ethernet, not Et)
+      #
+      # @return [nil, Hash<Symbol, Object>] returns the ip interface
+      #   configuration as a hash.  If the provided interface name is not a
+      #   configured ip address, nil is returned.
       def get(name)
         config = get_block("interface #{name}")
         return nil unless config
@@ -53,36 +71,68 @@ module Rbeapi
         response
       end
 
+      ##
+      # parse_address scans the provided configuration block and extracts
+      # the interface address, if configured, and returns it.  If there is
+      # no IP address configured, then this method will return the
+      # DEFAULT_ADDRESS.  The return value is intended to be merged into the
+      # ipaddress resource hash.
+      #
+      # @param [String] :config The IP interface configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_address(config)
         mdata = /(?<=^\s{3}ip\saddress\s)(.+)$/.match(config)
         { address: mdata.nil? ? DEFAULT_ADDRESS : mdata[1] }
       end
 
+      ##
+      # parse_mtu scans the provided configuration block and extracts the IP
+      # interface MTU value.  The MTU value is expected to always be present in
+      # the configuration blcok.  The return value is intended to be merged
+      # into the ipaddress resource hash
+      #
+      # @param [String] :config The IP interface configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_mtu(config)
         mdata = /(?<=mtu\s)(\d+)$/.match(config)
         { mtu: mdata.nil? ? '': mdata[1] }
       end
 
+      ##
+      # parse_helper_addresses scans the provided configuraiton block and
+      # extracts any configured IP helper address values.  The interface could
+      # be configured with one or more helper addresses.  If no helper
+      # addresses are configured, then an empty array is set in the return
+      # hash.  The return value is intended to be merged into the ipaddress
+      # resource hash
+      #
+      # @param [String] :config The IP interface configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_helper_addresses(config)
         helpers = config.scan(/(?<=\s{3}ip\shelper-address\s).+$/)
         { helper_addresses: helpers }
       end
 
       ##
-      # Retrieves all logical IP interfaces from the running-configuration
-      # and returns all instances
+      # getall returns a hash object that represents all ip interfaces
+      # configured on the node from the current running configuration.
       #
-      # Example:
+      # @example
       #   {
-      #     "Ethernet1": {
-      #       "address" => "1.2.3.4/5",
-      #       "mtu" => "1500",
-      #       "helper_addresses" => ["5.6.7.8", "9.10.11.12"]
-      #     },
-      #     "Ethernet2": {...}
+      #     <name>: {...}
       #   }
       #
-      # @return [Hash] all IP interfaces found in the running-config
+      # @see get Ipaddress resource example
+      #
+      # @return [Hash<Symbol, Object>] returns a hash object that
+      #   represents all of the configured IP addresses found.  If no IP
+      #   addresses are configured, then an empty hash is returned
       def getall
         interfaces = config.scan(/(?<=^interface\s).+/)
         interfaces.each_with_object({}) do |name, hsh|
@@ -92,34 +142,76 @@ module Rbeapi
       end
 
       ##
-      # Create a new logical IP interface in the running-config
+      # create will create a new IP interface on the node.  If the ip interface
+      # already exists in the configuration, this method will still return
+      # successful.  This method will cause an existing layer 2 interface
+      # (switchport) to be deleted if it exists in the node's configuration.
       #
-      # @param [String] name The name of the interface
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] True if the create succeeds otherwise False
+      # @commands
+      #   interface <name>
+      #     no switchport
+      #
+      # @param [String] :name The full interface name of the port to create the
+      #   logical interface on.  The name must be the full interface
+      #   identifier
+      #
+      # @return [Boolean] returns true if the commands complete successfully
       def create(name)
         configure(["interface #{name}", 'no switchport'])
       end
 
       ##
-      # Deletes a logical IP interface from the running-config
+      # delete will delete an existing IP interface in the node's current
+      # configuration.  If the IP interface does not exist on the specified
+      # interface, this method will still return success.  This command will
+      # default the interface back to being a switchport.
       #
-      # @param [String] name The name of the interface
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] True if the create succeeds otherwise False
+      # @commands
+      #   interface <name>
+      #     no ip address
+      #     switchport
+      #
+      # @param [String] :name The full interface name of the port to delete the
+      #   logical interface from.  The name must be the full interface name
+      #
+      # @return [Boolean] returns true if the commands complete successfully
       def delete(name)
         configure(["interface #{name}", 'no ip address', 'switchport'])
       end
 
       ##
-      ## Configures the IP address and mask length for the interface
+      # set_address configures a logical IP interface with an address.  The
+      # address value must be in the form of A.B.C.D/E.  If no value is
+      # provided, then the interface address is negated using the config no
+      # keyword.  If the default option is set to true, then the ip address
+      # value is defaulted using the default keyword.  The default keyword has
+      # precedence over the value keyword if both options are specified
       #
-      # @param [String] name The name of the interface to configure
-      # @param [Hash] opts The configuration parameters for the interface
-      # @option opts [string] :value The value to set the address to
-      # @option opts [Boolean] :default The value should be set to default
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @commands
+      #   interface <name>
+      #     ip address <value>
+      #     no ip address
+      #     default ip address
+      #
+      # @param [String] :name The name of the interface to configure the
+      #   address in the node.  The name must be the full interface name.
+      #
+      # @param [Hash] :opts Optional keyword arguments
+      #
+      # @option :opts [String] :value The value to configure the address to
+      #   for the specified interface name.  The value must be in the form
+      #   of A.B.C.D/E
+      #
+      # @option :opts [Boolean] :default Configure the ip address value using
+      #   the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_address(name, opts = {})
         value = opts[:value]
         default = opts[:default] || false
@@ -135,14 +227,34 @@ module Rbeapi
       end
 
       ##
-      ## Configures the MTU value for the interface
+      # set_mtu configures the IP mtu value of the ip interface in the nodes
+      # configuration.  If the value is not provided, then the ip mtu value is
+      # configured using the no keyword.  If the default keywork option is
+      # provided and set to true then the ip mtu value is configured using the
+      # default keyword.  The default keyword has precedence over the value
+      # keyword if both options are specified.
       #
-      # @param [String] name The name of the interface to configure
-      # @param [Hash] opts The configuration parameters for the interface
-      # @option opts [string] :value The value to set the MTU to
-      # @option opts [Boolean] :default The value should be set to default
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @commands
+      #   interface <name>
+      #     mtu <value>
+      #     no mtu
+      #     default mtu
+      #
+      # @param [String] :name The name of the interface to configure the
+      #   address in the node.  The name must be the full interface name.
+      #
+      # @param [Hash] :opts Optional keyword arguments
+      #
+      # @option :opts [String] :value The value to configure the IP MTU to in
+      #   the nodes configuration.  Valid values are in the range of 68 to 9214
+      #   bytes.  The default is 1500 bytes
+      #
+      # @option :opts [Boolean] :default Configure the ip mtu value using
+      #   the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_mtu(name, opts = {})
         value = opts[:value]
         default = opts[:default] || false
@@ -158,13 +270,33 @@ module Rbeapi
       end
 
       ##
-      ## Configures ip helper addresses for the interface
+      # set_helper_addresses configures the list of helper addresses on the ip
+      # interface.  An IP interface can have one or more helper addresses
+      # configured.  If no value is provided, the helper address configuration
+      # is set using the no keyword.  If the default option is specified and
+      # set to true, then the helper address values are defaulted using the
+      # default keyword.
       #
-      # @param [String] name The name of the interface to configure
-      # @param [Hash] opts The configuration parameters for the interface
-      # @param [opts] [Array] :value list of addresses to configure as
-      #   helper address on the specified interface
-      # @option opts [Boolean] :default The value should be set to default
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   interface <name>
+      #     ip helper-address <value>
+      #     no ip helper-address
+      #     default ip helper-address
+      #
+      # @param [String] :name The name of the interface to configure the
+      #   address in the node.  The name must be the full interface name.
+      #
+      # @param [Hash] :opts Optional keyword arguments
+      #
+      # @option :opts [Array] :value The list of IP addresses to configure as
+      #   helper address on the interface.  The helper addresses must be valid
+      #   addresses in the main interface's subnet.
+      #
+      # @option :opts [Boolean] :default Configure the ip helper address values
+      #    using the default keyword
+      #
       def set_helper_addresses(name, opts = {})
         value = opts[:value]
         default = opts[:default] || false
@@ -177,7 +309,7 @@ module Rbeapi
           if value.nil?
             cmds << 'no ip helper-address'
           else
-            cmds << 'default ip helper-address'
+            cmds << 'no ip helper-address'
             value.each { |addr| cmds << "ip helper-address #{addr}" }
           end
         end
