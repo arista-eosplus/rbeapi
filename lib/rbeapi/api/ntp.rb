@@ -56,13 +56,22 @@ module Rbeapi
       #   from the node as key/value pairs
       def get
         response = {}
-
-        mdata = /(?<=ntp\ssource\s)(.+)$/.match(config)
-        response['source_interface'] = mdata.nil? ? '' : mdata[1]
-
-        response['servers'] = config.scan(/(?<=ntp\sserver\s)[^\s]+/)
-
+        response.merge!(parse_source_interface)
+        response.merge!(parse_servers)
         response
+      end
+
+      def parse_source_interface
+        mdata = /(?<=^ntp\ssource\s)(.+)$/.match(config)
+        { source_interface: mdata.nil? ? '' : mdata[1] }
+      end
+
+      def parse_servers
+        servers = config.scan(/(?:ntp server\s)([^\s]+)\s(prefer)?/)
+        values = servers.each_with_object({}) do |(srv, prefer), hsh|
+          hsh[srv] = { prefer: !prefer.nil? }
+        end
+        { servers: values }
       end
 
       ##
@@ -114,6 +123,34 @@ module Rbeapi
       #   False
       def remove_server(server)
         configure("no ntp server #{server}")
+      end
+
+      ##
+      # set_prefer will set the prefer keyword for the specified ntp server.
+      # If the server does not already exist in the configuration, it will be
+      # added and the prefer keyword will be set.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   ntp server <srv> prefer
+      #   no ntp server <srv> prefer
+      #
+      # @param [String] :srv The IP address or hostname of the ntp server to
+      #   configure with the prefer value
+      # @param [Boolean] :value The value to configure for prefer.  If true
+      #   the prefer value is configured for the server.  If false, then the
+      #   prefer value is removed.
+      #
+      # @return [Boolean] returns true if the commands completed successfully
+      def set_prefer(srv, value)
+        case value
+        when true
+          cmds = "ntp server #{srv} prefer"
+        when false
+          cmds = ["no ntp server #{srv} prefer", "ntp server #{srv}"]
+        end
+        configure cmds
       end
     end
   end
