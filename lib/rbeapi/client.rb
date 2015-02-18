@@ -65,6 +65,18 @@ module Rbeapi
       end
 
       ##
+      # load_config overrides the default conf file loaded in the config
+      # instances using the supplied conf argument as the conf file.  This
+      # method will clear out an previously loaded configuration and replace
+      # all entries with the contects of the supplied file.
+      #
+      # @param [String] :conf The full path to the conf file to load into
+      #   the config instance.
+      def load_config(conf)
+        config.read(conf)
+      end
+
+      ##
       # Returns the configuration options for the named connection from the
       # the loaded configuuration.  The configuration name is specified as
       # the string right of the colon in the section name.
