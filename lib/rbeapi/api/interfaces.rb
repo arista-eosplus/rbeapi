@@ -361,7 +361,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_sflow(config)
-        value = /no  enable/ =~ config
+        value = /no sflow enable/ =~ config
         { sflow: value.nil? }
       end
       private :parse_sflow
@@ -578,9 +578,14 @@ module Rbeapi
     class PortchannelInterface < BaseInterface
 
       DEFAULT_LACP_FALLBACK = 'disabled'
+      DEFAULT_LACP_MODE = 'on'
       DEFAULT_MIN_LINKS = '0'
 
       ##
+      # get returns the specified port-channel interface configuration from
+      # the nodes running configuration as a resource hash.  The resource
+      # hash returned extends the BaseInterface resource hash, sets the type
+      # value to portchannel and adds the portchannel specific attributes
       #
       # @example
       #   {
@@ -594,10 +599,18 @@ module Rbeapi
       #     lacp_fallback: [static, individual, disabled]
       #   }
       #
+      # @see BaseInterface Interface get example
+      #
+      # @param [String] :name The name of the portchannel interface to return
+      #   a resource hash for.  The name must be the full interface name of
+      #   the desired interface.
+      #
+      # @return [nil, Hash<Symbol, Object>] returns the interface resource as
+      #   a hash object.  If the specified interface does not exist in the
+      #   running configuration, a nil object is returned
       def get(name)
         config = get_block("^interface #{name}")
         return nil unless config
-
         response = super(name)
         response[:type] = 'portchannel'
         response.merge!(parse_members(name))
@@ -608,6 +621,19 @@ module Rbeapi
         response
       end
 
+      ##
+      # parse_members scans the nodes running config and returns all of the
+      # ethernet members for the port-channel interface specified.  If the
+      # port-channel interface has no members configured, then this method will
+      # assign an empty array as the value for members.  The hash returned is
+      # intended to be merged into the interface resource hash
+      #
+      # @api private
+      #
+      # @param [String] :name The name of the portchannel interface to extract
+      #   the members for
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_members(name)
         grpid = name.scan(/(?<=Port-Channel)\d+/)[0]
         command = "show port-channel #{grpid} all-ports"
@@ -615,29 +641,85 @@ module Rbeapi
         values = config.first[:result]['output'].scan(/Ethernet[\d\/]*/)
         { members: values }
       end
+      private :parse_members
 
+      ##
+      # parse_lacp_mode scans the member interfaces and returns the configured
+      # lacp mode.  The lacp mode value must be common across every member
+      # in the port channel interface.  If no members are configured, the value
+      # for lacp_mode will be set using DEFAULT_LACP_MODE.  The hash returned is
+      # intended to be merged into the interface resource hash
+      #
+      # @api private
+      #
+      # @param [String] :name The name of the portchannel interface to extract
+      #   the members from in order to get the configured lacp_mode
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_lacp_mode(name)
         members = parse_members(name)[:members]
-        return { lacp_mode: 'on' } unless members
+        return { lacp_mode: DEFAULT_LACP_MODE } unless members
         config = get_block("interface #{members.first}")
         mdata = /channel-group \d+ mode (\w+)/.match(config)
-        { lacp_mode: mdata.nil? ? 'on' : mdata[1] }
+        { lacp_mode: mdata.nil? ? DEFAULT_LACP_MODE : mdata[1] }
       end
+      private :parse_lacp_mode
 
+      ##
+      # parse_minimum_links scans the port-channel configuration and returns
+      # the value for port-channel minimum-links.  If the value is not found
+      # in the interface configuration, then DEFAULT_MIN_LINKS value is used.
+      # The hash returned is intended to be merged into the interface
+      # resource hash
+      #
+      # @api private
+      #
+      # @param [String] :config The interface configuration blcok to extract
+      #   the minimum links value from
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_minimum_links(config)
         mdata = /port-channel min-links (\d+)$/.match(config)
         { minimum_links: mdata.nil? ? DEFAULT_MIN_LINKS : mdata[1] }
       end
+      private :parse_minimum_links
 
+      ##
+      # parse_lacp_fallback scans the interface config block and returns the
+      # confiured value of the lacp fallback attribute.  If the value is not
+      # configured, then the method will return the value of
+      # DEFAULT_LACP_FALLBACK.  The hash returned is intended to be merged into
+      # the interface resource hash
+      #
+      # @api private
+      #
+      # @param [String] :config The interface configuration block to extract
+      #   the lacp fallback value from
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_lacp_fallback(config)
         mdata = /lacp fallback (static|individual)/.match(config)
         { lacp_fallback: mdata.nil? ? DEFAULT_LACP_FALLBACK : mdata[1] }
       end
+      private :parse_lacp_fallback
 
+      ##
+      # parse_lacp_timeout scans the interface config block and returns the
+      # value of the lacp fallback timeout value.  The value is expected to be
+      # found in the interface configuration block.  The hash returned is
+      # intended to be merged into the interface resource hash
+      #
+      # @api private
+      #
+      # @param [String] :config The interface configuration block to extract
+      #   the lacp timeout value from
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_lacp_timeout(config)
         mdata = /lacp fallback timeout (\d+)$/.match(config)
         { lacp_timeout: mdata[1] }
       end
+      private :parse_lacp_timeout
 
       def set_minimum_links(name, opts = {})
         value = opts[:value]
