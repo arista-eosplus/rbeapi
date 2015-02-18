@@ -6,22 +6,21 @@ require 'rbeapi/api/snmp'
 describe Rbeapi::Api::Snmp do
   subject { described_class.new(node) }
 
-  let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-  let(:node) { Rbeapi::Client.connect_to('veos02') }
+  let(:node) do
+    Rbeapi::Client.config.read(fixture_file('dut.conf'))
+    Rbeapi::Client.connect_to('dut')
+  end
 
   describe '#get' do
 
-    let(:entity) do
-      { location: '', contact: '', chassis_id: '', source_interface: '' }
+    let(:keys) do
+      [:location, :contact, :chassis_id, :source_interface]
     end
 
-    before { node.config(['no snmp-server contact',
-                          'no snmp-server location',
-                          'no snmp-server chassis-id',
-                          'no snmp-server source-interface']) }
-
-    it 'returns the snmp resource' do
-      expect(subject.get).to eq(entity)
+    it 'has the required key in the resource hash' do
+      keys.each do |key|
+        expect(subject.get).to include(key)
+      end
     end
   end
 
