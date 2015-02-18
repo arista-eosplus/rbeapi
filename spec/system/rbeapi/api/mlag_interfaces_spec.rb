@@ -6,13 +6,15 @@ require 'rbeapi/api/mlag'
 describe Rbeapi::Api::MlagInterfaces do
   subject { described_class.new(node) }
 
-  let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-  let(:node) { Rbeapi::Client.connect_to('veos02') }
+  let(:node) do
+    Rbeapi::Client.config.read(fixture_file('dut.conf'))
+    Rbeapi::Client.connect_to('dut')
+  end
 
   describe '#get' do
 
     let(:entity) do
-      { 'mlag_id' => '1' }
+      { mlag_id: '1' }
     end
 
     before { node.config(['interface Port-Channel1', 'mlag 1']) }
@@ -70,7 +72,7 @@ describe Rbeapi::Api::MlagInterfaces do
     it 'sets Port-Channel1 to default' do
       expect(subject.get('Port-Channel1')).to be_nil
       expect(subject.set_mlag_id('Port-Channel1', value: '1')).to be_truthy
-      expect(subject.get('Port-Channel1')['mlag_id']).to eq('1')
+      expect(subject.get('Port-Channel1')[:mlag_id]).to eq('1')
     end
   end
 
