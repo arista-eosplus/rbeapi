@@ -3,8 +3,6 @@ require 'spec_helper'
 require 'rbeapi/client'
 require 'rbeapi/api/vlans'
 
-include FixtureHelpers
-
 describe Rbeapi::Api::Vlans do
   subject { described_class.new(node) }
 
@@ -12,7 +10,6 @@ describe Rbeapi::Api::Vlans do
     Rbeapi::Client.config.read(fixture_file('dut.conf'))
     Rbeapi::Client.connect_to('dut')
   end
-
 
   describe '#get' do
 

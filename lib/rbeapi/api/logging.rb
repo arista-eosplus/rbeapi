@@ -38,35 +38,72 @@ module Rbeapi
     class Logging < Entity
 
       ##
-      # Returns the current logging configuration from the node's config
+      # get returns the current logging configuration hash extracted from the
+      # nodes running configuration.
       #
-      # Example
+      # @example
       #   {
-      #     "enable": [true, false],
-      #     "hosts": array<string>
+      #     enable: [true, false]
+      #     hosts: array<strings>
       #   }
       #
-      # @return [Hash]  A Ruby hash objec that provides the SNMP settings as
-      #   key / value pairs.
+      # @return [Hash<Symbol, Object>] returns the logging resource as a hash
+      #   object from the nodes current configuration
       def get
         response = {}
-        val = /^logging\son$/ =~ config
-        response['enable'] = !val.nil?
-        response['hosts'] = config.scan(/(?<=^logging\shost\s)[^\s]+/)
+        response.merge!(parse_enable)
+        response.merge!(parse_hosts)
         response
       end
 
       ##
-      # Configures the global logging instance as enabled or disabled
+      # parse_enable scans the nodes current running configuration and extracts
+      # the current enabled state of the logging facility.  The logging enable
+      # command is expected to always be in the node's configuration.  This
+      # methods return value is intended to be merged into the logging resource
+      # hash.
+      def parse_enable
+        value = /^logging\son$/ =~ config
+        { enable: value.nil? }
+      end
+
+      ##
+      # parse_hosts scans the nodes current running configuration and extracts
+      # the configured logging host destinations if any are configured.  If no
+      # logging hosts are configured, then the value for hosts will be an empty
+      # array.  The return value is intended to be merged into the logging
+      # resource hash
+      def parse_hosts
+        hosts = config.scan(/(?<=^logging\shost\s)[^\s]+/)
+        { hosts: hosts }
+      end
+
+      ##
+      # set_enable configures the global logging instance on the node as either
+      # enabled or disabled.  If the value is set to true then logging is
+      # globally enabled and if set to false, it is globally disabled.  If no
+      # value is specified, then the no keyword is used to configure the
+      # logging enable value.  If the default keyword is specified and set to
+      # true, then the configuration is defaulted using the default keyword.
+      # The default keyword option takes precedence over the value keyword if
+      # both options are specified.
       #
-      # @param [Hash] :opts Arbitrary keyword arguments
-      # @option :opts [Boolean] :value Enables logging globally if value is
-      #   configured as true or Disables logging globally if the value is
-      #   configured as false
-      # @option :opts [Boolean] :default Configures the global logging value
-      #   as default.  This keyword argument overrides value
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] True if the commands succeeds otherwise False
+      # @commands
+      #   logging on
+      #   no logging on
+      #   default logging on
+      #
+      # @param [Hash] :opts Optional keyword arguments
+      #
+      # @option :opts [Boolean] :value Enables logging globally if value is true or
+      #   disabled logging glboally if value is false
+      #
+      # @option :opts [Boolean] :default Configure the ip address value using
+      #   the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_enable(opts = {})
         value = opts[:value]
         default = opts[:default] || false
@@ -81,23 +118,37 @@ module Rbeapi
       end
 
       ##
-      # Adds a new logging host to the node's configuration
+      # add_host configures a new logging destination host address or hostname
+      # to the list of logging destinations.  If the host is already configured
+      # in the list of destinations, this method will return successfully.
       #
-      # @param [String] :node The IP address or host name of the logging
-      #   destination to be added to the configuration
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @commands
+      #   logging host <name>
+      #
+      # @param [String] :name The host name or ip address of the destination
+      #   node to send logging information to.
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def add_host(name)
         configure "logging host #{name}"
       end
 
       ##
-      # Removes a logging host from the node's configuration
+      # remove_host deletes a logging destination host name or address form the
+      # list of logging destinations.   If the host is not in the list of
+      # configured hosts, this method will still return successfully.
       #
-      # @param [String] :node The IP address or host name of the logging
-      #   destination to be removed from  the configuration
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @commands
+      #   no logging host <name>
+      #
+      # @param [String] :name The host name or ip address of the destination
+      #   host to remove from the nodes current configuration
+      #
+      # @return [Boolean] returns true if the commands completed successfully
       def remove_host(name)
         configure "no logging host #{name}"
       end

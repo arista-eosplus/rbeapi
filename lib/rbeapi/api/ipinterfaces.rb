@@ -72,54 +72,6 @@ module Rbeapi
       end
 
       ##
-      # parse_address scans the provided configuration block and extracts
-      # the interface address, if configured, and returns it.  If there is
-      # no IP address configured, then this method will return the
-      # DEFAULT_ADDRESS.  The return value is intended to be merged into the
-      # ipaddress resource hash.
-      #
-      # @param [String] :config The IP interface configuration block returned
-      #   from the node's running configuration
-      #
-      # @return [Hash<Symbol, Object>] resource hash attribute
-      def parse_address(config)
-        mdata = /(?<=^\s{3}ip\saddress\s)(.+)$/.match(config)
-        { address: mdata.nil? ? DEFAULT_ADDRESS : mdata[1] }
-      end
-
-      ##
-      # parse_mtu scans the provided configuration block and extracts the IP
-      # interface MTU value.  The MTU value is expected to always be present in
-      # the configuration blcok.  The return value is intended to be merged
-      # into the ipaddress resource hash
-      #
-      # @param [String] :config The IP interface configuration block returned
-      #   from the node's running configuration
-      #
-      # @return [Hash<Symbol, Object>] resource hash attribute
-      def parse_mtu(config)
-        mdata = /(?<=mtu\s)(\d+)$/.match(config)
-        { mtu: mdata.nil? ? '': mdata[1] }
-      end
-
-      ##
-      # parse_helper_addresses scans the provided configuraiton block and
-      # extracts any configured IP helper address values.  The interface could
-      # be configured with one or more helper addresses.  If no helper
-      # addresses are configured, then an empty array is set in the return
-      # hash.  The return value is intended to be merged into the ipaddress
-      # resource hash
-      #
-      # @param [String] :config The IP interface configuration block returned
-      #   from the node's running configuration
-      #
-      # @return [Hash<Symbol, Object>] resource hash attribute
-      def parse_helper_addresses(config)
-        helpers = config.scan(/(?<=\s{3}ip\shelper-address\s).+$/)
-        { helper_addresses: helpers }
-      end
-
-      ##
       # getall returns a hash object that represents all ip interfaces
       # configured on the node from the current running configuration.
       #
@@ -140,6 +92,62 @@ module Rbeapi
           hsh[name] = values if values
         end
       end
+
+      ##
+      # parse_address scans the provided configuration block and extracts
+      # the interface address, if configured, and returns it.  If there is
+      # no IP address configured, then this method will return the
+      # DEFAULT_ADDRESS.  The return value is intended to be merged into the
+      # ipaddress resource hash.
+      #
+      # @api private
+      # @param [String] :config The IP interface configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_address(config)
+        mdata = /(?<=^\s{3}ip\saddress\s)(.+)$/.match(config)
+        { address: mdata.nil? ? DEFAULT_ADDRESS : mdata[1] }
+      end
+      private :parse_address
+
+      ##
+      # parse_mtu scans the provided configuration block and extracts the IP
+      # interface MTU value.  The MTU value is expected to always be present in
+      # the configuration blcok.  The return value is intended to be merged
+      # into the ipaddress resource hash
+      #
+      # @api private
+      #
+      # @param [String] :config The IP interface configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_mtu(config)
+        mdata = /(?<=mtu\s)(\d+)$/.match(config)
+        { mtu: mdata.nil? ? '': mdata[1] }
+      end
+      private :parse_mtu
+
+      ##
+      # parse_helper_addresses scans the provided configuraiton block and
+      # extracts any configured IP helper address values.  The interface could
+      # be configured with one or more helper addresses.  If no helper
+      # addresses are configured, then an empty array is set in the return
+      # hash.  The return value is intended to be merged into the ipaddress
+      # resource hash
+      #
+      # @api private
+      #
+      # @param [String] :config The IP interface configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_helper_addresses(config)
+        helpers = config.scan(/(?<=\s{3}ip\shelper-address\s).+$/)
+        { helper_addresses: helpers }
+      end
+      private :parse_helper_addresses
 
       ##
       # create will create a new IP interface on the node.  If the ip interface
