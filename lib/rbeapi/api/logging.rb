@@ -63,8 +63,8 @@ module Rbeapi
       # methods return value is intended to be merged into the logging resource
       # hash.
       def parse_enable
-        value = /^logging\son$/ =~ config
-        { enable: value.nil? }
+        value = /no logging on/ !~ config
+        { enable: value }
       end
 
       ##
