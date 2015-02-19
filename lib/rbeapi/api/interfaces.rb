@@ -721,6 +721,36 @@ module Rbeapi
       end
       private :parse_lacp_timeout
 
+      ##
+      # set_minimum_links configures the minimum physical links up required to
+      # consider the logical portchannel interface operationally up.  If no
+      # value is provided then the minimum-links is configured using the no
+      # keyword argument.  If the default keyword argument is provided and set
+      # to true, the minimum-links value is defaulted using the default
+      # keyword.  The default keyword takes precedence over the value keyword
+      # argument if both are provided.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   interface <name>
+      #     port-channel min-links <value>
+      #     no port-channel min-links
+      #     default port-channel min-links
+      #
+      # @param [String] :name The interface name to apply the configuration
+      #   values to.  The name must be the full interface identifier.
+      #
+      # @param [Hash] :opts optional keyword arguments
+      #
+      # @option :opts [String, Integer] :value Specifies the value to
+      #   configure the minimum-links to in the configuration.  Valid values
+      #   are in the range of 1 to 16.
+      #
+      # @option :opts [Boolean] :default Configures the minimum links value on
+      #   the interface using the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_minimum_links(name, opts = {})
         value = opts[:value]
         default = opts.fetch(:default, false)
@@ -736,6 +766,24 @@ module Rbeapi
         configure(cmds)
       end
 
+      ##
+      # set_members configures the set of physical interfaces that comprise the
+      # logical port-channel interface.  The members value passed should be an
+      # array of physical interface names that comprise the port-channel
+      # interface.  This method will add and remove individual members as
+      # required to sync the provided members array
+      #
+      # @see add_member Adds member links to the port-channel interface
+      # @see remove_member Removes member links from the port-channel interface
+      #
+      # @param [String] :name The name of the port-channel interface to apply
+      #   the members to.  If the port-channel interface does not already exist
+      #   it will be created
+      #
+      # @param [Array] :members The array of physical interface members to add
+      #   to the port-channel logical interface.
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_members(name, members)
         current_members = Set.new parse_members(name)[:members]
         members = Set.new members
@@ -755,17 +803,74 @@ module Rbeapi
         return true
       end
 
+      ##
+      # add_member adds the interface specified in member to the port-channel
+      # interface specified by name in the nodes running-configuration.  If
+      # the port-channel interface does not already exist, it will be created.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   interface <name>
+      #     channel-group <grpid> mode <lacp_mode>
+      #
+      # @param [String] :name The name of the port-channel interface to apply
+      #   the configuration to.
+      #
+      # @param [String] :member The name of the physical ethernet interface to
+      #   add to the logical port-channel interface.
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def add_member(name, member)
         lacp = parse_lacp_mode(name)[:lacp_mode]
         grpid = /(\d+)/.match(name)[0]
         configure ["interface #{member}", "channel-group #{grpid} mode #{lacp}"]
       end
 
+      ##
+      # remove_member removes the interface specified in member from the
+      # port-channel interface specified by name in the nodes
+      # running-configuration.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   interface <name>
+      #     no channel-group <grpid>
+      #
+      # @param [String] :name The name of the port-channel interface to apply
+      #   the configuration to.
+      #
+      # @param [String] :member The name of the physical ethernet interface to
+      #   remove from the logical port-channel interface.
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def remove_member(name, member)
         grpid = /(\d+)/.match(name)[0]
         configure ["interface #{member}", "no channel-group #{grpid}"]
       end
 
+      ##
+      # set_lacp_mode configures the lacp mode on the port-channel interface
+      # by configuring the lacp mode value for each member interface.  This
+      # method will find all member interfaces for a port-channel and
+      # reconfigure them using the mode argument.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   interface <name>
+      #     no channel-group <grpid>
+      #     channge-group <grpid> mode <lacp_mode>
+      #
+      # @param [String] :name The interface name to apply the configuration
+      #   values to.  The name must be the full interface identifier.
+      #
+      # @param [String] :mode The lacp mode to configure on the member
+      #   interfaces for the port-channel.  Valid values include active,
+      #   passive or on
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_lacp_mode(name, mode)
         return false unless %w(on passive active).include?(mode)
         grpid = /(\d+)/.match(name)[0]
@@ -782,6 +887,35 @@ module Rbeapi
         configure remove_commands + add_commands
       end
 
+      ##
+      # set_lacp_fallback configures the lacp fallback mode for the
+      # port-channel interface.  If no value is provided, lacp fallback is
+      # configured using the no keyword argument.  If the default option is
+      # specified and set to true, the lacp fallback value is configured using
+      # the default keyword.  The default keyword takes precedence over the
+      # value keyword if both options are provided.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   interface <name>
+      #     port-channel lacp fallback <value>
+      #     no port-channel lacp fallback
+      #     default port-channel lacp fallback
+      #
+      # @param [String] :name The interface name to apply the configuration
+      #   values to.  The name must be the full interface identifier.
+      #
+      # @param [Hash] :opts optional keyword arguments
+      #
+      # @option :opts [String] :value Specifies the value to configure for
+      #   the port-channel lacp fallback.  Valid values are individual and
+      #   static
+      #
+      # @option :opts [Boolean] :default Configures the lacp fallback value on
+      #   the interface using the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_lacp_fallback(name, opts = {})
         value = opts[:value]
         default = opts.fetch(:default, false)
@@ -800,6 +934,35 @@ module Rbeapi
         configure(cmds)
       end
 
+      ##
+      # set_lacp_timeout configures the lacp fallback timeou for the
+      # port-channel interface.  If no value is provided, lacp fallback timeout
+      # is configured using the no keyword argument.  If the default option is
+      # specified and set to true, the lacp fallback timeout value is
+      # configured using the default keyword.  The default keyword takes
+      # precedence over the value keyword if both options are provided.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   interface <name>
+      #     port-channel lacp fallback timeout <value>
+      #     no port-channel lacp fallback timeout
+      #     default port-channel lacp fallback timeout
+      #
+      # @param [String] :name The interface name to apply the configuration
+      #   values to.  The name must be the full interface identifier.
+      #
+      # @param [Hash] :opts optional keyword arguments
+      #
+      # @option :opts [String] :value Specifies the value to configure for
+      #   the port-channel lacp fallback timeout.  Valid values range from
+      #   1 to 100 seconds
+      #
+      # @option :opts [Boolean] :default Configures the lacp fallback timeout
+      #   value on the interface using the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_lacp_timeout(name, opts = {})
         value = opts[:value]
         default = opts.fetch(:default, false)
@@ -854,15 +1017,41 @@ module Rbeapi
         response
       end
 
+      ##
+      # parse_source_interface scans the interface config block and returns the
+      # value of the vxlan source-interace.  If the source-interface is not
+      # configured then the value of DEFAULT_SRC_INTF is used.  The hash
+      # returned is intended to be merged into the interface resource hash
+      #
+      # @api private
+      #
+      # @param [String] :config The interface configuration block to extract
+      #   the vxlan source-interface value from
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_source_interface(config)
         mdata = /source-interface ([^\s]+)$/.match(config)
         { source_interface: mdata.nil? ? DEFAULT_SRC_INTF : mdata[1] }
       end
+      private :parse_source_interface
 
+      ##
+      # parse_multicast_group scans the interface config block and returns the
+      # value of the vxlan multicast-group.  If the multicast-group is not
+      # configured then the value of DEFAULT_MCAST_GRP is used.  The hash
+      # returned is intended to be merged into the interface resource hash
+      #
+      # @api private
+      #
+      # @param [String] :config The interface configuration block to extract
+      #   the vxlan multicast-group value from
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_multicast_group(config)
         mdata = /multicast-group ([^\s]+)$/.match(config)
         { multicast_group: mdata.nil? ? DEFAULT_MCAST_GRP : mdata[1] }
       end
+      private :parse_multicast_group
 
       ##
       # Configures the vxlan source-interface to the specified value.  This
