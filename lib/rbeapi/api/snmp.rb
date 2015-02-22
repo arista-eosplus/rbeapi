@@ -49,6 +49,8 @@ module Rbeapi
       DEFAULT_SNMP_CONTACT = ''
       DEFAULT_SNMP_CHASSIS_ID = ''
       DEFAULT_SNMP_SOURCE_INTERFACE = ''
+      CFG_TO_STATE = { 'default' => 'default', 'no' => 'off', nil => 'on' }
+      STATE_TO_CFG = { 'default' => 'default', 'on' => nil, 'off' => 'no' }
 
       ##
       # get returns the snmp resource Hash that represents the nodes snmp
@@ -69,6 +71,8 @@ module Rbeapi
         response.merge!(parse_contact)
         response.merge!(parse_chassis_id)
         response.merge!(parse_source_interface)
+        response.merge!(parse_communities)
+        response.merge!(parse_notifications)
         response
       end
 
@@ -136,6 +140,72 @@ module Rbeapi
         { source_interface: mdata.nil? ? '' : mdata[1] }
       end
       private :parse_source_interface
+
+      ##
+      # parse_communities scans the running config from the node and parses all
+      # of the configure snmp community strings.  If there are no configured
+      # snmp community strings, the communitys value is set to an empty array.
+      # The returned hash is intended to be merged into the global snmp
+      # resource hash
+      #
+      # @api private
+      #
+      # @return [Hash<Hash>] resource hash attribute
+      def parse_communities
+        values = config.scan(/snmp-server community (\w+) (ro|rw)[ ]?(.+)?$/)
+        communities = values.each_with_object({}) do |value, hsh|
+          name, access, acl = value
+          hsh[name] = { access: access, acl: acl }
+        end
+        { communities: communities }
+      end
+      private :parse_communities
+
+      ##
+      # parse_notifications scans the running configuration and parses all of
+      # the snmp trap notificaitons configuration.  It is expected the trap
+      # configuration is in the running config.  The returned hash is intendd
+      # to be merged into the resource hash
+      def parse_notifications
+        traps = config.scan(/(default|no)?[ ]?snmp-server enable traps (.+)$/)
+        all = config.scan(/(default|no)?[ ]?snmp-server enable traps$/).first
+
+        notifications = traps.map do |trap|
+          state, name = trap
+          { name: name, state: CFG_TO_STATE[state]}
+        end
+        notifications << { name: 'all', state: CFG_TO_STATE[all.first] }
+        { notifications: notifications }
+      end
+      private :parse_notifications
+
+      ##
+      # set_notification configures the snmp trap notificaiton for the
+      # specified trap.  The name option accepts the snmp trap name to
+      # configure or the keyword all to globally enable or disable
+      # notifications.  If the optional state argument is not provided then the
+      # default state is default.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   snmp-server enable traps <name>
+      #   no snmp-server enable traps <name>
+      #   default snmp-server enable traps <name>
+      #
+      # @param [String] :name The name of the trap to configure or the keyword
+      #   all.  If this option is not specified, then the value of 'all' is
+      #   used as the default.
+      #
+      # @param [String] :state The state to configure the trap notification.
+      #   Valid values include 'on', 'off' or 'default'
+      def set_notification(opts = {})
+        name = opts[:name]
+        name = nil if name == 'all'
+        state = opts[:state] || 'default'
+        state = STATE_TO_CFG[state]
+        configure "#{state} snmp-server enable traps #{name}"
+      end
 
       ##
       # set_location updates the snmp location value in the nodes running
@@ -284,6 +354,73 @@ module Rbeapi
                                "snmp-server source-interface #{value}")
         end
        configure(cmds)
+      end
+
+      ##
+      # add_community adds a new snmp community to the nodes running
+      # configuration.  This function is a convenience function that passes the
+      # message to set_community_access.
+      #
+      # @see set_community_access
+      #
+      # @param [String] :name The name of the snmp community to add to the
+      #   nodes running configuration.
+      #
+      # @param [String] :access Specifies the access level to assign to the
+      #   new snmp community.  Valid values are 'rw' or 'ro'
+      #
+      # @return [Boolean] returns true if the command completed successfully
+      def add_community(name, access = 'ro')
+        set_community_access(name, access)
+      end
+
+      ##
+      # remove_community removes the specified community from the nodes running
+      # configuration.  If the specified name is not configured, this method
+      # will still return successfully.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   no snmp-server community <name>
+      #
+      # @param [String] :name The name of the snmp community to add to the
+      #   nodes running configuration.
+      #
+      # @return [Boolean] returns true if the command completed successfully
+      def remove_community(name)
+        configure "no snmp-server community #{name}"
+      end
+
+      ##
+      # set_community_acl configures the acl to apply to the specified
+      # community name.  If the value option is not specified, the acl is
+      # removed from the community name
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   no snmp-server <name> [ro|rw] <value>
+      #   snmp-server <name> [ro|rw] <value>
+      #
+      # @param [String] :name The name of the snmp community to add to the
+      #   nodes running configuration.
+      #
+      # @option [String] :value The name of the acl to apply to the snmp
+      #   community in the nodes config
+      #
+      # @return [Boolean] returns true if the command completed successfully
+      def set_community_acl(name, opts = {})
+        value = opts[:value]
+        communities = parse_communities[:communities]
+        access = communities[name][:access] if communities.include?(name)
+        cmds = ["no snmp-server community #{name}",
+                "snmp-server community #{name} #{access} #{value}"]
+        configure cmds
+      end
+
+      def set_community_access(name, access)
+        configure "snmp-server community #{name} #{access}"
       end
     end
   end
