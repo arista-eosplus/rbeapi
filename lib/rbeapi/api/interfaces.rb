@@ -315,21 +315,27 @@ module Rbeapi
 
       DEFAULT_ETH_FLOWC_TX = 'off'
       DEFAULT_ETH_FLOWC_RX = 'off'
+      DEFAULT_SPEED = 'auto'
+      DEFAULT_FORCED = false
 
       ##
       # get returns the specified Etherent interface resource hash that
       # respresents the interface's current configuration in th e node.
       #
-      # @example
-      #   {
-      #     name: <string>
-      #     type: 'ethernet'
-      #     description: <string>
-      #     shutdown: [true, false]
-      #     sflow: [true, false]
-      #     flowcontrol_send: [on, off]
-      #     flowcontrol_receive: [on, off]
-      #   }
+      # The resource hash returned contains the following information:
+      #
+      # * name (string): the interface name (eg Ethernet1)
+      # * type (string): will always be 'ethernet'
+      # * description (string): the interface description value
+      # * speed (string): the current speed setting for the interface speed
+      # * forced (boolean): true if autonegotiation is disabled otherwise
+      #   false
+      # * sflow (boolean): true if sflow is enabled on the interface
+      #   otherwise false
+      # * flowcontrol_send (string): the inteface flowcontrol send value.
+      #   Valid values are 'on' or 'off'
+      # * flowconrol_receive (string): the interface flowcontrol receive
+      #   value.  Valid values are 'on' or 'off'
       #
       # @param [String] :name The interface name to return a resource hash
       #   for from the node's running configuration
@@ -344,12 +350,30 @@ module Rbeapi
         response = super(name)
         response[:type] = 'ethernet'
 
+        response.merge!(parse_speed(config))
         response.merge!(parse_sflow(config))
         response.merge!(parse_flowcontrol_send(config))
         response.merge!(parse_flowcontrol_receive(config))
 
         response
       end
+
+      ##
+      # parse_speed scans the provided configuration block and parses the speed
+      # value. If the speed value is not found in the interface configuration
+      # block provided, DEFAULT_SPEED and DEFAULT_FORCED are used.  The
+      # returned hash is intended to be merged into the interface resource hash
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_speed(config)
+        value = config.scan(/speed (forced)?[ ]?(\w+)/).first
+        return { speed: DEFAULT_SPEED, forced: DEFAULT_FORCED } unless value
+        (forced, value) = value.first
+        { speed: value, forced: forced != nil }
+      end
+      private :parse_speed
 
       ##
       # parse_sflow scans the provided configuration block and parse the
@@ -423,6 +447,55 @@ module Rbeapi
       def delete(name)
         raise NotImplementedError, 'deleting Ethernet interfaces is '\
               'not supported'
+      end
+
+      ##
+      # set_speed configures the interface speed and negotiation values on the
+      # specified interface.  If the value option is not provide, the speed
+      # setting is configured using the no keyword.  If the default options is
+      # set to true, then the speed setting is configured using the default
+      # keyword.  If both options are specified, the default keyword takes
+      # precedence.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   interface <name>
+      #   speed [forced] <value>
+      #   no speed
+      #   default speed
+      #
+      # @param [String] :name The interface name to apply the configuration
+      #   values to.  The name must be the full interface identifier.
+      #
+      # @param [Hash] :opts optional keyword arguments
+      #
+      # @option [String] :value The value to configure the speed setting to in
+      #   the nodes running configuration
+      #
+      # @option [Boolean] :forced Specifies if autonegotiation should be
+      #   enabled (true) or disabled (false)
+      #
+      # @option :opts [Boolean] :default Configures the sflow value on the
+      #   interface using the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
+      def set_speed(name, opts = {})
+        value = opts[:value]
+        forced = opts.fetch(:forced, false)
+        default = opts.fetch(:default, false)
+
+        forced = 'forced' if forced
+        forced = '' if value == 'auto'
+
+        cmds = ["interface #{name}"]
+        case default
+        when true
+          cmds << 'default speed'
+        when false
+          cmds << value ? "speed #{forced} #{value}" : 'no speed'
+        end
+        configure cmds
       end
 
       ##
