@@ -323,5 +323,4 @@ module Rbeapi
       end
     end
   end
- end
 end
