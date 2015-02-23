@@ -94,12 +94,96 @@ module Rbeapi
         configure(cmds)
       end
 
+      ##
+      # set_name_servers configures the set of name servers that eos will use
+      # to resolve dns queries. If the value option is not provided, the
+      # name-server list will be configured using the no keyword.  If the
+      # default option is specified, then the name server list will be
+      # configured using the default keyword.  If both options are provided the
+      # keyword option will take precedence
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   ip name-server <value>
+      #   no ip name-server
+      #   default ip name-server
+      #
+      # @option [Array] :value The set of name servers to configure on the
+      #   node.  The list of name servers will be replace in the nodes running
+      #   configuration by the list provided in value
+      #
+      # @option [Boolean] :default Configures the ip name-servers using the
+      #   default keyword argument
+      #
+      # @return [Boolean] returns true if the commands completed successfuly
+      def set_name_servers(opts = {})
+        value = opts[:value] || []
+        default = opts[:default] || false
+
+        case default
+        when true
+          cmds = 'default ip name-server'
+        when false
+          cmds = []
+          parse_name_servers[:name_servers].each do |srv|
+            cmds << "no ip name-server #{srv}"
+          end
+          value.each do |srv|
+            cmds << "ip name-server #{srv}"
+          end
+        end
+        configure cmds
+      end
+
       def add_name_server(server)
         configure "ip name-server #{server}"
       end
 
       def remove_name_server(server)
         configure "no ip name-server #{server}"
+      end
+
+      ##
+      # set_domain_list configures the set of domain names to search when
+      # making dns queries for the FQDN.  If the value option is not provided,
+      # the domain-list will be configured using the no keyword.  If the
+      # default option is specified, then the domain list will be configured
+      # using the default keyword.  If both options are provided the default
+      # keyword option will take precedence.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commands
+      #   ip domain-list <value>
+      #   no ip domain-list
+      #   default ip domain-list
+      #
+      # @option [Array] :value The set of domain names to configure on the
+      #   node.  The list of domain names will be replace in the nodes running
+      #   configuration by the list provided in value
+      #
+      # @option [Boolean] :default Configures the ip domain-list using the
+      #   default keyword argument
+      #
+      # @return [Boolean] returns true if the commands completed successfuly
+      def set_domain_list(opts = {})
+        value = opts[:value] || []
+        default = opts[:default] || false
+
+        case default
+        when true
+            cmds = 'default ip domain-list'
+        when false
+          cmds = []
+          parse_domain_list[:domain_list].each do |name|
+            cmds << "no ip domain-list #{name}"
+          end
+          value.each do |name|
+            cmds << "ip domain-list #{name}"
+          end
+        end
+        configure cmds
       end
 
       def add_domain_list(name)

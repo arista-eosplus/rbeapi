@@ -49,7 +49,7 @@ module Rbeapi
       #   {
       #     "name": <String>,
       #     "mode": [access, trunk],
-      #     "trunk_allowed_vlans": <String>,
+      #     "trunk_allowed_vlans": array<strings>
       #     "trunk_native_vlan": <Integer>,
       #     "access_vlan": <Integer>
       #   }
@@ -169,16 +169,28 @@ module Rbeapi
       end
 
       ##
-      # Configures the trunk port allowed vlans for the specified interface.
-      # This value is only valid if the switchport mode is configure as
-      # trunk.
+      # set_trunk_allowed_vlans configures the list of vlan ids that are
+      # allowed on the specified trunk port.  If the value option is not
+      # provided, then the allowed trunks is configured using the no keyword.
+      # If the default keyword is provied then the allowed trunks is configured
+      # using the default keywork  The default optio takes precedence over the
+      # value option if both are specified
       #
-      # @param [String] name The name of the interface to configure
-      # @param [Hash] opts The configuration parameters for the interface
-      # @option opts [string] :value The list of vlans to allow
-      # @option opts [Boolean] :default The value should be set to default
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @commands
+      #   switchport trunk allowed vlan add <value>
+      #   no switchport trunk allowed vlan
+      #   default switchport trunk allowed vlan
+      #
+      # @option [Array] :value The list of vlan ids to configure on the
+      #   switchport to be allowed.  This value must be an array of valid vlan
+      #   ids
+      #
+      # @option [Boolean] :default Configures the switchport trunk allowed
+      #     vlans command using the default keyword
+      #
+      # @return [Boolean] returns true if the commands complete successfully
       def set_trunk_allowed_vlans(name, opts = {})
         value = opts[:value]
         default = opts[:default] || false
@@ -194,8 +206,12 @@ module Rbeapi
         when true
           cmds << 'default switchport trunk allowed vlan'
         when false
-          cmds << (value.nil? ? 'no switchport trunk allowed vlan' : \
-                                "switchport trunk allowed vlan #{value}")
+          if value.nil?
+            cmds << 'no switchport trunk allowed vlan'
+          else
+            cmds << 'switchport trunk allowed vlan none'
+            cmds << "switchport trunk allowed vlan add #{value}"
+          end
         end
         configure(cmds)
       end

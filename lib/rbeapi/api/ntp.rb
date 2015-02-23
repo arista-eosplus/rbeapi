@@ -43,17 +43,21 @@ module Rbeapi
     # NTP configuraiton.
     class Ntp < Entity
 
+      DEFAULT_SRC_INTF = ''
+
       ##
-      # Returns the NTP configuration from the nodes running configuration
+      # get returns the nodes current ntp configure as a resource hash
       #
-      # Example
+      # @example
       #   {
-      #     "source_interface": <string>,
-      #     "servers": array<string>
+      #     source_interface: <string>
+      #     servers: {
+      #       prefer: [true, false]
+      #     }
       #   }
       #
-      # @return [Hash] Returns a Ruby hash object with the NTP configuration
-      #   from the node as key/value pairs
+      # @return [nil, Hash<Symbol, Object>] Returns the ntp resource as a
+      #   Hash.
       def get
         response = {}
         response.merge!(parse_source_interface)
@@ -61,11 +65,31 @@ module Rbeapi
         response
       end
 
+      ##
+      # parse_source_interface scans the nodes configurations and parses
+      # the ntp source interface if configured.  If the source interface
+      # is not configured, this method will return DEFAULT_SRC_INTF as the
+      # value. The return hash is intended to be merged into the resource hash
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_source_interface
         mdata = /(?<=^ntp\ssource\s)(.+)$/.match(config)
-        { source_interface: mdata.nil? ? '' : mdata[1] }
+        { source_interface: mdata.nil? ? DEFAULT_SRC_INTF : mdata[1] }
       end
+      private :parse_source_interface
 
+      ##
+      # parse_servers scans the nodes configuration and parses the configured
+      # ntp server host names and/or addresses.  This method will also return
+      # the value of prefer.  If no servers are configured, the value will be
+      # set to an empty array.  The return hash is inteded to be merged into
+      # the resource hash
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_servers
         servers = config.scan(/(?:ntp server\s)([^\s]+)\s(prefer)?/)
         values = servers.each_with_object({}) do |(srv, prefer), hsh|
@@ -75,14 +99,29 @@ module Rbeapi
       end
 
       ##
-      # Configures the source interface for sending NTP packets from the node
+      # set_source_interface configures the ntp source value in the nodes
+      # running configuration.  If no value is provided in the options, then
+      # the ntp source is configured with the no keyword argument.  If the
+      # default keyword argument is provided and set to true, the value is
+      # configured used the default keyword.  The default keyword takes
+      # precedence over the value keyword if both optiosn are specified.
       #
-      # @param [String] :value The value to configure the source interface
-      #  value to
-      # @param [Boolean] :default Specifies the value should be defaulted
+      # @eos_version 4.13.7M
       #
-      # @return [Boolean] True if the commands complete successfully otherwise
-      #   False
+      # @commands
+      #   ntp source <value>
+      #   no ntp source
+      #   deafult ntp source
+      #
+      # @param [Hash] :opts Optional keyword arguments
+      #
+      # @option :opts [String] :value The value to configure the ntp source
+      #   in the nodes configuration
+      #
+      # @option :opts [Boolean] :default Configure the ntp source value using
+      #   the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_source_interface(opts = {})
         value = opts[:value]
         default = opts[:default] || false
@@ -98,15 +137,18 @@ module Rbeapi
       end
 
       ##
-      # Adds the specified NTP server to the nodes configuration.
+      # add_server configures a new ntp server destination hostname or ip
+      # address to the list of ntp destinations.  The optional prefer argument
+      # configures the server as a preferred (true) or not (false) ntp
+      # destination.
       #
       # @param [String] :server The IP address or FQDN of the NTP server to
       #   be removed from the configuration
+      #
       # @param [Boolean] :prefer Appends the prefer keyword argument to the
       #   command if this value is true
       #
-      # @return [Boolean] True if the commands complete successfully otherwise
-      #   False
+      # @return [Boolean] returns true if the command completed successfully
       def add_server(server, prefer = false)
         cmd = "ntp server #{server}"
         cmd << ' prefer' if prefer
@@ -114,13 +156,14 @@ module Rbeapi
       end
 
       ##
-      # Removes the specified NTP server from the nodes configuration.
+      # remove_server deletes the provided server destination from the list of
+      # ntp server destinations.  If the ntp server does not exist in the list
+      # of servers, this method will return successful
       #
       # @param [String] :server The IP address or FQDN of the NTP server to
       #   be removed from the configuration
       #
-      # @return [Boolean] True if the commands complete successfully otherwise
-      #   False
+      # @return [Boolean] returns true if the command completed successfully
       def remove_server(server)
         configure("no ntp server #{server}")
       end
@@ -138,6 +181,7 @@ module Rbeapi
       #
       # @param [String] :srv The IP address or hostname of the ntp server to
       #   configure with the prefer value
+      #
       # @param [Boolean] :value The value to configure for prefer.  If true
       #   the prefer value is configured for the server.  If false, then the
       #   prefer value is removed.
