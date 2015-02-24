@@ -67,6 +67,14 @@ module Rbeapi
                              [ ]auth-port[ ](\d+)
                              [ ]acct-port[ ](\d+)/x
 
+      # Regular expression that parse the tacacs servers from the aaa group
+      # server tacacs+ configuration block
+      TACACS_GROUP_SERVER = /\s{3}server
+                             [ ]([^\s]+)
+                             (?:[ ]vrf[ ](\w+))?
+                             (?:[ ]port[ ](\d+))?/x
+
+
       ##
       # get returns the aaa server group resource hash that describes the
       # current configuration for the specified server group name
@@ -77,23 +85,23 @@ module Rbeapi
       #   * servers: (Array) The set of servers associated with the group.
       #   Servers are returned as either IP address or host name
       #
-      # @param [String] :name The server group name to return from the nodes
+      # @param [String] :name The server group name to return f:rom the nodes
       #   current running configuration.  If the name is not configured a nil
       #   object is returned.
       #
       # @return [nil, Hash<Symbol, Object>] returns the resource hash for the
       #   specified name.  If the name does not exist, a nil object is returned
       def get(name)
-        config = get_block("aaa group server (radius|tacacs) #{name}")
-        return nil unless config
+        block = get_block("aaa group server ([^\s]+) #{name}")
+        return nil unless block
         response = {}
-        response.merge!(parse_type(config))
-        response.merge!(parse_servers(config))
+        response.merge!(parse_type(block))
+        response.merge!(parse_servers(block, response[:type]))
         response
       end
 
       def getall
-        cfg = config.scan(/aaa group server \w+ (.+)$/)
+        cfg = config.scan(/aaa group server (?:radius|tacacs\+) (.+)$/)
         cfg.each_with_object({}) do |name, hsh|
           values = get(name.first)
           hsh[name.first] = values if values
@@ -112,7 +120,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_type(config)
-        value = config.scan(/aaa group server (\w+)/).first
+        value = config.scan(/aaa group server ([^\s]+)/).first
         { type: value.first }
       end
       private :parse_type
@@ -124,21 +132,39 @@ module Rbeapi
       #
       # @api private
       #
+      # @see parse_radius_server
+      # @see parse_tacacs_server
+      #
       # @param [String] :config The aaa server group block configuration for the
       #   group name to parse
       #
       # @param [String] :type The aaa server block type.  Valid values are
-      #   either radius or tacacs.
-      #
-      # @note Current only type: radius is supported
+      #   either radius or tacacs+.
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
-      def parse_servers(config, type = 'radius')
-        if type == 'radius'
-          regex = RADIUS_GROUP_SERVER
+      def parse_servers(config, type)
+        case type
+        when 'radius' then parse_radius_server(config)
+        when 'tacacs+' then parse_tacacs_server(config)
         end
+      end
+      private :parse_servers
 
-        values = config.scan(regex).map do |(name, auth, acct)|
+      ##
+      # parse_radius_server scans the provide configuration block and returns
+      # the list of servers configured.  The configuration block is expected to
+      # be a radius configuration block.  If there are no servers configured
+      # for the group the servers value will return an empty array.
+      #
+      # @api private
+      #
+      # @param [String] :config The aaa server group block configuration for the
+      #   group name to parse
+      #
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_radius_server(config)
+        values = config.scan(RADIUS_GROUP_SERVER).map do |(name, auth, acct)|
           {
             name: name,
             auth_port: auth || DEFAULT_RADIUS_AUTH_PORT,
@@ -147,7 +173,33 @@ module Rbeapi
         end
         { servers: values }
       end
-      private :parse_servers
+      private :parse_radius_server
+
+      ##
+      # parse_tacacs_server scans the provide configuration block and returns
+      # the list of servers configured.  The configuration block is expected to
+      # be a tacacs configuration block.  If there are no servers configured
+      # for the group the servers value will return an empty array.
+      #
+      # @api private
+      #
+      # @param [String] :config The aaa server group block configuration for the
+      #   group name to parse
+      #
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_tacacs_server(config)
+        values = config.scan(TACACS_GROUP_SERVER).map do |(name, vrf, port)|
+          {
+            name: name,
+            vrf: vrf,
+            port: port
+          }
+        end
+        { servers: values }
+      end
+      private :parse_radius_server
+
 
       ##
       # find_type is a utility method to find the type of aaa server group for
@@ -164,7 +216,7 @@ module Rbeapi
       # @return [nil, String] returns either the type name as 'radius' or
       #   'tacacs+' or nil if the server group is not configured.
       def find_type(name)
-        mdata = /aaa group server (\w+) #{name}/.match(config)
+        mdata = /aaa group server ([^\s]+) #{name}/.match(config)
         return mdata[1] if mdata
       end
       private :find_type
@@ -189,7 +241,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the commands complete successfully
       def create(name, type)
-        configure "aaa group server #{type} #{name}"
+        configure ["aaa group server #{type} #{name}", "exit"]
       end
 
       ##
@@ -265,7 +317,8 @@ module Rbeapi
         return false unless type
         case type
         when 'radius' then add_radius_server(name, server, opts)
-        #when 'tacacs+' then add_tacacs_server(name, server, opts)
+        when 'tacacs+' then add_tacacs_server(name, server, opts)
+        else return false
         end
       end
 
@@ -299,6 +352,36 @@ module Rbeapi
         configure ["aaa group server radius #{name}", server, "exit"]
       end
 
+
+      ##
+      # add_tacacs_server adds a new tacacs server to the nodes current
+      # configuration.  If the server already exists in the specified group
+      # name this method will still return successfully
+      #
+      # @eos_version 4.13.7M
+      #
+      # @commmands
+      #   aaa group server tacacs+ <name>
+      #   server <server> [acct-port <acct_port>] [auth-port <auth_port>]
+      #                   [vrf <vrf>]
+      #
+      # @param [String] :name The name of the aaa group server to add the new
+      #   server configuration to.
+      #
+      # @param [String] :server The IP address or host name of the server to
+      #   add to the configuration
+      #
+      # @param [Hash] :opts Optional configuration parameters
+      #
+      # @return [Boolean] returns true if the commands complete successfully
+      def add_tacacs_server(name, server, opts = {})
+        # order of command options matter here!
+        server = "server #{server} "
+        server << "vrf #{opts[:vrf]} "    if opts[:vrf]
+        server << "port #{opts[:port]} "  if opts[:port]
+        configure ["aaa group server tacacs+ #{name}", server, "exit"]
+      end
+
       ##
       # remove_server deletes an existing server from the specified aaa server
       # group.  If the specified server is not configured in the specified
@@ -315,11 +398,12 @@ module Rbeapi
       # @param [String] :server The IP address or host name of the server
       #
       # @return [Boolean] returns true if the commands complete successfully
-      def remove_server(name, server)
+      def remove_server(name, server, opts={})
         type = find_type(name)
         return false unless type
-        configure ["aaa group server #{type} #{name}", "no server #{server}",
-                   "exit"]
+        server = "no server #{server} "
+        server << "vrf #{opts[:vrf]}" if opts[:vrf]
+        configure ["aaa group server #{type} #{name}", server, "exit"]
       end
     end
   end
