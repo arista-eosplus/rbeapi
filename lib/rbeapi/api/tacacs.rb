@@ -40,27 +40,22 @@ module Rbeapi
     # Tacacs provides instance methods to retrieve and set tacacs configuration
     # values.
     class Tacacs < Entity
+
+      DEFAULT_KEY_FORMAT = 0
+      DEFAULT_KEY = nil
+
       # Regular expression to extract a tacacs server's attributes from the
       # running-configuration text.  The explicit [ ] spaces enable line
       # wrappping and indentation with the /x flag.
-      SERVER_REGEXP = /tacacs-server[ ]host[ ](.*?)
+      SERVER_REGEXP = /tacacs-server[ ]host[ ]([^\s]+)
                        (?:[ ](single-connection))?
+                       (?:[ ]vrf[ ]([^\s]+))?
                        (?:[ ]port[ ](\d+))?
                        (?:[ ]timeout[ ](\d+))?
                        (?:[ ]key[ ](\d+)[ ](\w+))?\s/x
 
       # Default Tacacs TCP port
       DEFAULT_PORT = 49
-
-      # Regular expression to extract a tacacs server's attributes from the
-      # running-configuration text.  The explicit [ ] spaces enable line
-      # wrappping and indentation with the /x flag.
-      SERVER_GROUP_REGEXP = /aaa group server tacacs[+]? (.*)/
-
-      # FIXME Needs to be updated
-      GROUP_MEMBER_REGEXP = /server[ ](.*?)
-                             (?:[ ]vrf[ ]([^ ]+))?
-                             (?:[ ]port[ ](\d+))?\s/x
 
       ##
       # getall Returns an Array with a single resource Hash describing the
@@ -79,30 +74,13 @@ module Rbeapi
       # @api public
       #
       # @return [Array<Hash>] Single element Array of resource hashes
-      def getall
-        rsrc_hsh = tacacs_global_defaults
-        rsrc_hsh.merge!(parse_global_key(config))
-        rsrc_hsh.merge!(parse_global_timeout(config))
-        [rsrc_hsh]
+      def get
+        global = {}
+        global.merge!(parse_global_timeout)
+        global.merge!(parse_global_key)
+        resource = { global: global, servers: servers }
+        resource
       end
-
-      ##
-      # tacacs_global_defaults returns the default values for the tacacs_global
-      # resource.  This is in a single method to keep the information in one
-      # place.  If a value is explicitly configured to be the same as a default
-      # value it will not show up in the running configuration and as a result
-      # will not be parsed out by the parse instance methods.  This method
-      # exposes the default values.
-      #
-      # @return [Array<Hash>] Single element Array of resource hashes
-      def tacacs_global_defaults
-        {
-          name: 'settings',
-          enable: true,
-          timeout: 5,
-        }
-      end
-      private :tacacs_global_defaults
 
       ##
       # parse_global_key takes a running configuration as a string and
@@ -116,12 +94,12 @@ module Rbeapi
       # @api private
       #
       # @return [Hash<Symbol,Object>] resource hash attributes
-      def parse_global_key(config)
+      def parse_global_key
         rsrc_hsh = {}
         (key_format, key) = config.scan(/tacacs-server key (\d+) (\w+)/).first
-        rsrc_hsh[:key_format] = key_format.to_i if key_format
-        rsrc_hsh[:key] = key if key
-        rsrc_hsh
+        rsrc_hsh[:key_format] = key_format.to_i || DEFAULT_KEY_FORMAT
+        rsrc_hsh[:key] = key || DEFAULT_KEY
+        { key: key, key_format: key_format }
       end
       private :parse_global_key
 
@@ -137,53 +115,11 @@ module Rbeapi
       # @api private
       #
       # @return [Hash<Symbol,Object>] resource hash attributes
-      def parse_global_timeout(config)
-        rsrc_hsh = {}
+      def parse_global_timeout
         timeout = config.scan(/tacacs-server timeout (\d+)/).first
-        # EOS default is 5 (does not show up in the running config)
-        rsrc_hsh[:timeout] = timeout.first.to_i if timeout
-        rsrc_hsh
+        { timeout: timeout.first.to_i }
       end
       private :parse_global_timeout
-
-      ##
-      # set_global_key configures the tacacs default key.  This method maps to
-      # the `tacacs-server key` EOS configuration command, e.g. `tacacs-server
-      # key 7 070E234F1F5B4A`.
-      #
-      # @option opts [String] :key ('070E234F1F5B4A') The key value
-      #
-      # @option opts [Fixnum] :key_format (7) The key format, 0 for plaintext
-      #   and 7 for a hashed value.  7 will be assumed if this option is not
-      #   provided.
-      #
-      # @api public
-      #
-      # @return [Boolean] true if no errors
-      def set_global_key(opts = {})
-        format = opts[:key_format] || 7
-        key = opts[:key]
-        fail ArgumentError, 'key option is required' unless key
-        result = api.config("tacacs-server key #{format} #{key}")
-        result == [{}]
-      end
-
-      ##
-      # set_timeout configures the tacacs default timeout.  This method maps to
-      # the `tacacs-server timeout` setting.
-      #
-      # @option opts [Fixnum] :timeout (50) The timeout in seconds to
-      #   configure.
-      #
-      # @api public
-      #
-      # @return [Boolean] true if no errors
-      def set_timeout(opts = {})
-        timeout = opts[:timeout]
-        fail ArgumentError, 'timeout option is required' unless timeout
-        result = api.config("tacacs-server timeout #{timeout}")
-        result == [{}]
-      end
 
       ##
       # servers returns an Array of tacacs server resource hashes.  Each hash
@@ -204,95 +140,64 @@ module Rbeapi
       #
       # @return [Array<Hash<Symbol,Object>>] Array of resource hashes
       def servers
-        config = running_configuration
         tuples = config.scan(SERVER_REGEXP)
-        tuples.map do |(host, mplex, port, tout, keyfm, key)|
-          hsh = { port: DEFAULT_PORT }
-          hsh[:hostname]         = host       if host
-          hsh[:port]             = port.to_i  if port
-          hsh[:timeout]          = tout.to_i  if tout
-          hsh[:key_format]       = keyfm.to_i if keyfm
-          hsh[:key]              = key        if key
+        tuples.map do |(host, mplex, vrf, port, tout, keyfm, key)|
+          hsh = {}
+          hsh[:hostname]         = host
+          hsh[:vrf]              = vrf
+          hsh[:port]             = port.to_i
+          hsh[:timeout]          = tout.to_i
+          hsh[:key_format]       = keyfm.to_i
+          hsh[:key]              = key
           hsh[:multiplex]        = mplex ? true : false
           hsh
         end
       end
 
       ##
-      # server_groups retrieves a list of tacacs server groups from the target
-      # device.
+      # set_global_key configures the tacacs default key.  This method maps to
+      # the `tacacs-server key` EOS configuration command, e.g. `tacacs-server
+      # key 7 070E234F1F5B4A`.
       #
-      # @api public
+      # @option opts [String] :key ('070E234F1F5B4A') The key value
       #
-      # @return [Array<Hash<Symbol,Object>>] Array of resource hashes
-      def server_groups
-        config = running_configuration
-        regexp = SERVER_GROUP_REGEXP
-        tuples = config.scan(regexp)
-        tuples.map do |(name)|
-          { name: name, servers: parse_group_servers(config, name) }
-        end
-      end
-
-      ##
-      # parse_group_servers parses the list of servers associated with a tacacs
-      # server group given a group name and a running configuration text.
-      #
-      # @param [String] config The running configuration text.
-      #
-      # @param [String] name The name of the server group to parse.
-      #
-      # @api private
-      #
-      # @return [Array<Hash<Symbol,Object>] Array of server attributes
-      def parse_group_servers(config, name)
-        regexp = /aaa group server tacacs[+] #{name}(.*?)!/m
-        mdata = regexp.match(config)
-        tuples = mdata[1].scan(GROUP_MEMBER_REGEXP)
-        tuples.collect do |(hostname, vrf, port)|
-          { hostname: hostname, port: port ? port.to_i : DEFAULT_PORT }
-        end
-      end
-
-      ##
-      # update_server_group updates a tacacs server group given an Array of
-      # server attributes and the name of the server group.  The update happens
-      # by first deleting the existing group if it exists then creating it
-      # again with all of the specified servers.
-      #
-      # @param [String] name The name of the server group to update
-      #
-      # @param [Array<Hash<Symbol,Object>>] servers The array of servers to
-      #   associate with the server group.  This hash should have at least the
-      #   :hostname key.
+      # @option opts [Fixnum] :key_format (7) The key format, 0 for plaintext
+      #   and 7 for a hashed value.  7 will be assumed if this option is not
+      #   provided.
       #
       # @api public
       #
       # @return [Boolean] true if no errors
-      def update_server_group(opts = {})
-        cmd = "aaa group server tacacs+ #{opts[:name]}"
-        api.config("no #{cmd}")
-        cmds = [cmd]
-        opts[:servers].each do |hsh|
-          cmds << "server #{hsh[:hostname]} port #{hsh[:port] || DEFAULT_PORT}"
-        end
-        result = api.config(cmds)
-        !result.find { |r| r != {} }
-      end
-
-      ##
-      # remove_server_group removes a tacacs server group by name.  This API
-      # call maps to the `no aaa group server tacacs <name>` command.
-      #
-      # @option opts [String] :name ('TAC-GR') The name of the tacacs server
-      #   group to remove.
-      #
-      # @api public
-      #
-      # @return [Boolean] true if no errors
-      def remove_server_group(opts = {})
-        result = api.config("no aaa group server tacacs+ #{opts[:name]}")
+      def set_global_key(opts = {})
+        format = opts[:key_format]
+        key = opts[:key]
+        fail ArgumentError, 'key option is required' unless key
+        result = api.config("tacacs-server key #{format} #{key}")
         result == [{}]
+      end
+
+      ##
+      # set_timeout configures the tacacs default timeout.  This method maps to
+      # the `tacacs-server timeout` setting.
+      #
+      # @option opts [Fixnum] :timeout (50) The timeout in seconds to
+      #   configure.
+      #
+      # @api public
+      #
+      # @return [Boolean] true if no errors
+      def set_global_timeout(opts = {})
+        value = opts[:value]
+        default = opts[:default] || false
+
+        case default
+        when true
+            cmds = 'default tacacs-server timeout'
+        when false
+            cmds = value ? "tacacs-server timeout #{value}" :
+                           'no tacacs-server timeout'
+        end
+        configure cmds
       end
 
       ##
@@ -311,8 +216,7 @@ module Rbeapi
         cmd << " port #{opts[:port]}"             if opts[:port]
         cmd << " timeout #{opts[:timeout]}"       if opts[:timeout]
         cmd << " key #{key_format} #{opts[:key]}" if opts[:key]
-        result = api.config(cmd)
-        result == [{}]
+        configure cmd
       end
 
       ##
@@ -325,8 +229,7 @@ module Rbeapi
       def remove_server(opts = {})
         cmd = "no tacacs-server host #{opts[:hostname]}"
         cmd << " port #{opts[:port]}" if opts[:port]
-        result = api.config(cmd)
-        result == [{}]
+        configure cmd
       end
     end
   end
