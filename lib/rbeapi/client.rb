@@ -432,7 +432,9 @@ module Rbeapi
       ##
       # Returns an API module for working with the active conifguraiton
       # of the node
-      def api(name, path = 'rbeapi/api', namespace = 'Rbeapi::Api')
+      def api(name, opts = {})
+        path = opts.fetch(:path, 'rbeapi/api')
+        namespace = opts.fetch(:namespace, 'Rbeapi::Api')
         require "#{path}/#{name}"
         clsname = "#{namespace}::#{name.capitalize}"
         cls = Rbeapi::Utils.class_from_string(clsname)
