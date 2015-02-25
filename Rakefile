@@ -8,5 +8,5 @@ task :build do
 end
 
 task :release => :build do
-    system "gem push rbeapi-#{Rbeapi::VERSION}"
+    system "gem push rbeapi-#{Rbeapi::VERSION}.gem"
 end
