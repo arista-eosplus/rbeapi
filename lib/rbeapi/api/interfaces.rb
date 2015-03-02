@@ -252,7 +252,6 @@ module Rbeapi
       # @return [Boolean] returns true if the command completed successfully
       def set_description(name, opts = {})
         value = opts[:value]
-        value = nil if value.empty?
         default = opts.fetch(:default, false)
 
         cmds = ["interface #{name}"]
@@ -260,7 +259,7 @@ module Rbeapi
         when true
           cmds << 'default description'
         when false
-          cmds << (value.nil? ? 'no description' : "description #{value}")
+          cmds << (value ? "description #{value}" : 'no description')
         end
         configure(cmds)
       end

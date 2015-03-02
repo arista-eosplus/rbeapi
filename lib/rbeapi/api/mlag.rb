@@ -46,33 +46,36 @@ module Rbeapi
       DEFAULT_PEER_LINK = ''
 
       ##
-      # get returns the mlag configuration from the node as a resource hash
+      # get scans the current nodes configuration and returns the values as
+      # a Hash descriping the current state.
       #
-      # @example
-      #   {
-      #     domain_id: <string>
-      #     local_interface: <string>
-      #     peer_address: <string>
-      #     peer_link: <string>
-      #     shutdown: [true, false]
-      #     interfaces: {...}
-      #   }
+      # The resource hash returned contains the following:
+      #   * domain_id: (String) The MLAG domain-id value
+      #   * local_interface: (String) The MLAG local-interface value
+      #   * peer_address: (String) The IP address of the MLAG peer
+      #   * peer_link: (String) The MLAG transit peer-link value
+      #   * shutdown: (Boolean) The administrative staet of the mlag
+      #     configuration
+      #   * interfaces: (Hash) The list of configured MLAG interfaces.  (See
+      #     parse_interfaces for the Hash details)
       #
-      # @see MlagInterfaces interface resource message
+      # @see parse_interfaces
       #
       # @return [nil, Hash<Symbol, Object] returns the nodes current running
       #   configuration as a Hash.  If mlag is not configured on the node this
       #   method will return nil
       def get()
         config = get_block('mlag configuration')
-        response = {}
-        response.merge!(parse_domain_id(config))
-        response.merge!(parse_local_interface(config))
-        response.merge!(parse_peer_address(config))
-        response.merge!(parse_peer_link(config))
-        response.merge!(parse_shutdown(config))
-        response[:interfaces] = interfaces.getall
-        response
+
+        global = {}
+        global.merge!(parse_domain_id(config))
+        global.merge!(parse_local_interface(config))
+        global.merge!(parse_peer_address(config))
+        global.merge!(parse_peer_link(config))
+        global.merge!(parse_shutdown(config))
+
+        { global: global, interfaces: parse_interfaces }
+
       end
 
       ##
@@ -166,18 +169,27 @@ module Rbeapi
       private :parse_shutdown
 
       ##
-      # interfaces returns a memoized instance of MlagInterfaces that provide
-      # an api for working with mlag interfaces in the nodes current
-      # configuration.
+      # parse_interfaces scans the global configuraiton and returns all of the
+      # configured MLAG interfaces.  Each interface returns the configured MLAG
+      # identifier for establishing a MLAG peer.  The return value is intended
+      # to be merged into the resource Hash
       #
-      # @see MlagInterfaces
+      # The resource Hash attribute returned contains:
+      #   * mlag_id: (Fixnum) The configured MLAG identifier
       #
-      # @return [Object] returns an instance of MlagInterfaces
-      def interfaces
-        return @interfaces if @interfaces
-        @interfaces = MlagInterfaces.new(node)
-        @interfaces
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource Hash attribute
+      def parse_interfaces
+        names = config.scan(/(?<=^interface\s)Po.+/)
+        names.each_with_object({}) do |name, hsh|
+          config = get_block("^interface #{name}")
+          next unless config
+          id = config.scan(/(?<=mlag )\d+/)
+          hsh[name] = { mlag_id: id.first.to_i } unless id.empty?
+        end
       end
+      private :parse_interfaces
 
       ##
       # set_domain_id configures the mlag domain-id value in the current nodes
@@ -376,100 +388,6 @@ module Rbeapi
           cmds << (value ? 'shutdown' : 'no shutdown')
         end
         configure(cmds)
-      end
-    end
-
-    class MlagInterfaces < Entity
-
-      ##
-      # get returns the mlag interface configuration as a hash object.  If the
-      # specified interface name is not configured as an mlag interface this
-      # method will return nil
-      #
-      # @example
-      #   {
-      #     mlag_id: <string>
-      #   }
-      #
-      # @param [String] :name The full interface name of the interface to
-      #   return the mlag interface hash for.
-      #
-      # @return [nil, Hash<Symbol, Object>] returns the interface configuration
-      #   as a resource hash.  If the interface is not configured as an mlag
-      #   interface nil is returned.
-      def get(name)
-        config = get_block("^interface #{name}")
-        return nil unless config
-        mdata = /(?<=\s{3}mlag\s)(.+)$/.match(config)
-        return nil unless mdata
-        { mlag_id: mdata[1] }
-      end
-
-      ##
-      # getall scans the nodes current running configuration and returns a
-      # hash of all mlag interfaces keyed by the interface name.  If no
-      # interfaces are configured, an empty hash object is returned
-      #
-      # @see get Interface resource example
-      #
-      # @return [Hash<String, Hash>] returns the nodes mlag interface
-      #   configurations as a hash
-      def getall
-        names = config.scan(/(?<=^interface\s)Po.+/)
-        names.each_with_object({}) do |name, response|
-          data = get name
-          response[name] = data if data
-        end
-      end
-
-      ##
-      # create adds a new mlag interface to the nodes current running
-      # configuration.  If the specified interface already exists, then this
-      # method will return successfully with the updated mlag id.
-      #
-      # @see set_mlag_id
-      #
-      # @param [String] :name The name of of the interface to create.  The name
-      #   must be the full interface name.  The value of name is expected to
-      #   be a Port-Channel interface.
-      #
-      # @param [String, Integer] :id The value of the mlag id to configure for
-      #   the specified interface.  Valid mlag ids are in the range of 1 to
-      #   2000.
-      #
-      # @return [Boolean] returns true if the command completed successfully
-      def create(name, id)
-        set_mlag_id(name, value: id)
-      end
-
-      ##
-      # delete removes a mlag interface from the nodes current running
-      # configuration.  If the specified interface does not exist as a mlag
-      # interface this method will return successfully
-      #
-      # @see set_mlag_id
-      #
-      # @param [String] :name The name of of the interface to remove.  The name
-      #   must be the full interface name.
-      #
-      # @return [Boolean] returns true if the command completed successfully
-      def delete(name)
-        set_mlag_id(name)
-      end
-
-      ##
-      # default configures a mlag interface using the default keyword.  If the
-      # specified interface does not exist as a mlag interface this method
-      # will return successfully
-      #
-      # @see set_mlag_id
-      #
-      # @param [String] :name The name of of the interface to create.  The name
-      #   must be the full interface name.
-      #
-      # @return [Boolean] returns true if the command completed successfully
-      def default(name)
-        set_mlag_id(name, default: true)
       end
 
       ##

@@ -1,0 +1,5 @@
+vlan 1
+   name default
+   state active
+   no private-vlan
+!

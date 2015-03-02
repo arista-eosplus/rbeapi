@@ -210,7 +210,7 @@ module Rbeapi
             cmds << 'no switchport trunk allowed vlan'
           else
             cmds << 'switchport trunk allowed vlan none'
-            cmds << "switchport trunk allowed vlan add #{value}"
+            cmds << "switchport trunk allowed vlan #{value}"
           end
         end
         configure(cmds)

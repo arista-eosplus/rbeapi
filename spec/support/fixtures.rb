@@ -73,11 +73,13 @@ module FixtureHelpers
 
     yaml = Pathname.new(File.join(dir, "fixture_#{key}.yaml"))
     json = Pathname.new(File.join(dir, "fixture_#{key}.json"))
+    text = Pathname.new(File.join(dir, "fixture_#{key}.text"))
 
     data = if yaml.exist?; then YAML.load(File.read(yaml))
            elsif json.exist?; then JSON.load(File.read(json))
-           else fail "could not load YAML or JSON fixture #{key} "\
-             "tried:\n  #{yaml}\n  #{json}"
+           elsif text.exist?; then File.read(text)
+           else fail "could not load YAML, JSON or TEXT fixture #{key} "\
+             "tried:\n  #{yaml}\n  #{json} #{text}"
            end
 
     Fixtures[key] = data
@@ -86,6 +88,7 @@ module FixtureHelpers
     when :ruby then data
     when :json then JSON.pretty_generate(data)
     when :yaml then YAML.dump(data)
+    when :text then data
     else fail ArgumentError, "unknown format #{opts[:format].inspect}"
     end
   end
