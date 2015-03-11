@@ -129,6 +129,45 @@ module Rbeapi
           return false
         end
       end
+
+      ##
+      # command_builder builds the correct version of a command based on the
+      # configuration options.  If the value option is not provided then the
+      # no keyword is used to build the command.  If the default value is
+      # provided and set to true, then the default keyword is used.  If both
+      # options are provided, then the default option will take precedence.
+      #
+      # @return [String]
+      def command_builder(cmd, opts = {})
+        value = opts[:value]
+        default = opts.fetch(:default, false)
+        case default
+        when true then "default #{cmd}"
+        when false
+          case value
+          when nil, false then "no #{cmd}"
+          when true then cmd
+          else "#{cmd} #{value}"
+          end
+        end
+      end
+
+      ##
+      # configure_interface sends the commands over eAPI to the desitnation
+      # node to configure a specific interface.
+      #
+      # @param [String] :name The interface name to apply the configuration
+      #   to.  The name value must be the full interface identifier
+      #
+      # @param [Array] :commands The list of commands to configure the
+      #   interface
+      #
+      # @return [Boolean] Returns true if the commands complete successfully
+      def configure_interface(name, commands)
+        commands = [*commands]
+        commands.insert(0, "interface #{name}")
+        configure commands
+      end
     end
   end
 end
