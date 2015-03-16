@@ -43,8 +43,6 @@ module Rbeapi
     # EOS node.
     class Interfaces < Entity
 
-      METHODS = [:create, :delete, :default]
-
       def initialize(node)
         super(node)
         @instances = {}
@@ -83,10 +81,8 @@ module Rbeapi
       end
 
       def method_missing(method_name, *args, &block)
-        if method_name.to_s =~ /set_(.*)/ || METHODS.include?(method_name)
-          instance = get_instance(args[0])
-          instance.send(method_name.to_sym, *args, &block)
-        end
+        instance = get_instance(args[0])
+        instance.send(method_name.to_sym, *args, &block)
       end
 
       def respond_to?(method_name, name = nil)
