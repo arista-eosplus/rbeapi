@@ -31,6 +31,7 @@
 #
 require 'net/http'
 require 'json'
+require 'openssl'
 
 require 'net_http_unix'
 
