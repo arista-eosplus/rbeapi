@@ -119,10 +119,10 @@ using rbeapi.  For more examples, please see the examples folder.
 require 'rbeapi/client'
 
 # create a node object by specifying the node to work with
-node = Rbeap::Client.connect_to('veos01')
+node = Rbeapi::Client.connect_to('veos01')
 
 # send one or more commands to the node
-node.eanble('show hostname')
+node.enable('show hostname')
 node.enable('show hostname')
 => [{:command=>"show hostname", :result=>{"fqdn"=>"veos01.arista.com", "hostname"=>"veos01"}, :encoding=>"json"}]
 
@@ -130,13 +130,13 @@ node.enable('show hostname')
 node.config('hostname veos01')
 => [{}]
 
-# multiple commands can be sent by using a list (works for both enable or
-config)
+# multiple commands can be sent by using a list (works for both enable or config)
+
 node.config(['interface Ethernet1', 'description foo'])
 => [{}, {}]
 
-# return the running or startup configuration from the node (output omitted for
-brevity)
+# return the running or startup configuration from the node (output omitted for brevity)
+
 node.running_config
 
 node.startup_config
@@ -187,8 +187,7 @@ http://github.com/arista-eosplus/rbeapi.  All current development is done in
 the develop branch.  Stable released versions are tagged in the master branch
 and uploaded to RubyGems.
 
-* To install the latest stable version of rbeapi, simply run ``gem install
-  rbeapi``
+* To install the latest stable version of rbeapi, simply run ``gem install rbeapi``
 * To install the latest development version from Github, simply clone the
   develop branch and run ``rake build``
 
@@ -212,7 +211,3 @@ Redistributions in binary form must reproduce the above copyright notice, this l
 Neither the name of Arista Networks nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ARISTA NETWORKS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
-
-
