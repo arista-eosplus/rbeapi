@@ -191,6 +191,10 @@ module Rbeapi
           fn = File.expand_path(fn)
           return read(fn) if File.exists?(fn)
         end
+
+        unless get_connection 'localhost'
+          add_connection('localhost', transport: 'socket')
+        end
       end
       private :autoload
 
@@ -202,6 +206,7 @@ module Rbeapi
       # @param [String] :filename The full path to the filename to load
       def read(filename)
         super(filename: filename)
+
         unless get_connection 'localhost'
           add_connection('localhost', transport: 'socket')
         end
