@@ -191,6 +191,9 @@ and uploaded to RubyGems.
   rbeapi``
 * To install the latest development version from Github, simply clone the
   develop branch and run ``rake build``
+* To create an RPM, run ``rake rpm``
+* To generate a SWIX file for EOS with necessary dependencies, run
+  ``rake all_rpms`` then follow the ``swix create`` instructions at the end.
 
 
 # Contributing
