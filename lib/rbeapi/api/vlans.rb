@@ -106,7 +106,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_name(config)
-        mdata = /name (\w+)$/.match(config)
+        mdata = /name ([^\s]+)$/.match(config)
         { name: mdata[1] }
       end
       private :parse_name

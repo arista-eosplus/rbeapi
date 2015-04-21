@@ -11,16 +11,29 @@ describe Rbeapi::Api::Vlans do
     Rbeapi::Client.connect_to('dut')
   end
 
-  describe '#get' do
+  context '#get' do
+    describe 'with defaults' do
+      let(:entity) do
+        { name: 'default', state: 'active', trunk_groups: [] }
+      end
 
-    let(:entity) do
-      { name: 'default', state: 'active', trunk_groups: [] }
+      before { node.config(['no vlan 1-4094', 'vlan 1']) }
+
+      it 'returns the vlan resource' do
+        expect(subject.get('1')).to eq(entity)
+      end
     end
 
-    before { node.config(['no vlan 1-4094', 'vlan 1']) }
+    describe 'validate name parser' do
+      let(:entity) do
+        { name: 'test-vlan', state: 'active', trunk_groups: [] }
+      end
 
-    it 'returns the vlan resource' do
-      expect(subject.get('1')).to eq(entity)
+      before { node.config(['no vlan 1-4094', 'vlan 1', 'name test-vlan']) }
+
+      it 'returns the vlan resource' do
+        expect(subject.get('1')).to eq(entity)
+      end
     end
   end
 
@@ -117,5 +130,3 @@ describe Rbeapi::Api::Vlans do
     end
   end
 end
-
-
