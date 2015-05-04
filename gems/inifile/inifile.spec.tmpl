@@ -1,0 +1,80 @@
+# -*- rpm-spec -*-
+%global gem_name inifile
+
+Name:		%{?enterprise:pe-}rubygem-%{gem_name}
+Version:	3.0.0
+Release:	1.eos4
+Summary:	INI file reader and writer
+
+Group:		Development/Languages
+License:    Unknown
+URL:		http://rubygems.org/gems/inifile
+Source0:	https://rubygems.org/gems/%{gem_name}-%{version}.gem
+
+%if 0%{?enterprise:1} == 1
+# Use these settings for Puppet Enterprise
+%global gem /opt/puppet/bin/gem
+Requires: pe-ruby
+Requires: pe-rubygems
+Provides: pe-rubygem(%{gem_name}) = %{version}
+Provides: pe-rubygem-%{gem_name} = %{version}
+%else
+# Use these settings for all other installs
+%global gem gem
+Requires: ruby(abi) = %{rubyabi}
+Provides: ruby(%{gem_name}) = %{version}-%{release}
+%endif
+
+BuildArch: noarch
+
+%description
+Although made popular by Windows, INI files can be used on any system thanks
+to their flexibility. They allow a program to store configuration data, which
+can then be easily parsed and changed. Two notable systems that use the INI 
+format are Samba and Trac.
+More information about INI files can be found on the [Wikipedia
+Page](http://en.wikipedia.org/wiki/INI_file).
+### Properties
+The basic element contained in an INI file is the property. Every property has 
+a name and a value, delimited by an equals sign *=*. The name appears to the 
+left of the equals sign and the value to the right.
+name=value
+### Sections
+Section declarations start with *[* and end with *]* as in `[section1]` and 
+`[section2]` shown in the example below. The section declaration marks the 
+beginning of a section. All properties after the section declaration will be
+associated with that section.
+### Comments
+All lines beginning with a semicolon *;* or a number sign *#* are considered
+to be comments. Comment lines are ignored when parsing INI files.
+### Example File Format
+A typical INI file might look like this:
+[section1]
+; some comment on section1
+var1 = foo
+var2 = doodle
+var3 = multiline values \
+are also possible
+[section2]
+# another comment
+var1 = baz
+var2 = shoodle.
+
+%prep
+%setup -q -D -T -n  .
+
+%install
+install %{SOURCE0} %{buildroot}/
+
+%files
+/%{gem_name}-%{version}.gem
+
+%post
+%{gem} install --local /%{gem_name}-%{version}.gem > /dev/null 2>&1
+
+%preun
+%{gem} uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
+
+%changelog
+* Tue Mar 17 2015 Jere Julian - 3.0.0-1
+- Initial package loosely based off of gem2rpm output
