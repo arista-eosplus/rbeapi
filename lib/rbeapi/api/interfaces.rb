@@ -506,7 +506,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_flowcontrol(name, direction, opts = {})
-        commands = command_builder("flowcontrol #{directionxi}", opts)
+        commands = command_builder("flowcontrol #{direction}", opts)
         configure_interface(name, commands)
       end
 
