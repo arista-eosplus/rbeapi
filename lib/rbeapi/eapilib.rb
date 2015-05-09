@@ -42,7 +42,8 @@ module Rbeapi
     DEFAULT_HTTP_PORT = 80
     DEFAULT_HTTPS_PORT = 443
     DEFAULT_HTTP_LOCAL_PORT = 8080
-    DEFAULT_HTTP_TIMEOUT = 10
+    DEFAULT_HTTP_OPEN_TIMEOUT = 10
+    DEFAULT_HTTP_READ_TIMEOUT = 10
     DEFAULT_HTTP_PATH = '/command-api'
     DEFAULT_UNIX_SOCKET = '/var/run/command-api.sock'
 
@@ -233,8 +234,12 @@ module Rbeapi
         request.body = JSON.dump(data)
         request.basic_auth @username, @password
 
+        open_timeout = opts.fetch(:open_timeout, DEFAULT_HTTP_OPEN_TIMEOUT)
+        read_timeout = opts.fetch(:read_timeout, DEFAULT_HTTP_READ_TIMEOUT)
+
         begin
-          @transport.open_timeout = DEFAULT_HTTP_TIMEOUT
+          @transport.open_timeout = open_timeout
+          @transport.read_timeout = read_timeout
           response = @transport.request(request)
           decoded = JSON(response.body)
 
@@ -272,7 +277,7 @@ module Rbeapi
         begin
           @error = nil
           request = request(commands,  opts)
-          response = send request
+          response = send(request, opts)
           return response['result']
         rescue ConnectionError, CommandError => exc
           exc.commands = commands
