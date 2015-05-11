@@ -284,6 +284,7 @@ module Rbeapi
         return nil if /no switchport$/ =~ config
         response = {}
         response.merge!(parse_portfast(config))
+        response.merge!(parse_portfast_type(config))
         response.merge!(parse_bpduguard(config))
         response
       end
@@ -326,6 +327,26 @@ module Rbeapi
       private :parse_portfast
 
       ##
+      # parse_portfast_type scans the supplied interface configuration block and
+      # parses the value stp portfast type.  The value of portfast type is either
+      # not set which implies normal (default), edge, or network.
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_portfast_type(config)
+        if /spanning-tree portfast network/ =~ config
+            value = 'network'
+        elsif /no spanning-tree portfast/ =~ config
+            value = 'normal'
+        else
+            value = 'edge'
+        end
+        { portfast_type: value }
+      end
+      private :parse_portfast_type
+
+      ##
       # parse_bpduguard scans the supplied interface configuration block and
       # parses the value of stp bpduguard.  The value of bpduguard is either
       # disabled (false) or enabled (true)
@@ -337,6 +358,7 @@ module Rbeapi
         val = /spanning-tree bpduguard enable/ =~ config
         { bpduguard: !val.nil? }
       end
+      private :parse_bpduguard
 
       ##
       # Configures the interface portfast value
@@ -362,6 +384,38 @@ module Rbeapi
         configure(cmds)
       end
 
+      ##
+      # Configures the interface portfast type value
+      #
+      # @param [String] name The name of the interface to configure
+      # @param [Hash] opts The configuration parameters for portfast type
+      # @option opts [String] :value The value to set portfast type to.
+      # @option opts [Boolean] :default The value should be set to default
+      #
+      # @return [Boolean] True if the commands succeed otherwise False
+      def set_portfast_type(name, opts = {})
+        value = opts[:value]
+        default = opts[:default] || false
+
+        cmds = ["interface #{name}"]
+        case default
+        when true
+          cmds << 'default spanning-tree portfast normal'
+        when false
+          cmds << "spanning-tree portfast #{value}"
+        end
+        configure(cmds)
+      end
+
+      ##
+      # Configures the interface bpdu guard value
+      #
+      # @param [String] name The name of the interface to configure
+      # @param [Hash] opts The configuration parameters for bpduguard
+      # @option opts [Boolean] :value The value to set bpduguard
+      # @option opts [Boolean] :default The value should be set to default
+      #
+      # @return [Boolean] True if the commands succeed otherwise False
       def set_bpduguard(name, opts = {})
         value = opts[:value]
         default = opts[:default] || false
