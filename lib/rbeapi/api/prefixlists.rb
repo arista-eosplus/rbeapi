@@ -31,16 +31,17 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Api
   module Api
-
     ##
     # The Prefixlists class provides a configuration instance for working
     # with static routes in EOS.
     #
     class Prefixlists < Entity
-
       ##
       # Returns the static routes configured on the node
       #
@@ -92,7 +93,6 @@ module Rbeapi
         cmd << " seq #{seq}" if seq
         configure cmd
       end
-
     end
   end
 end

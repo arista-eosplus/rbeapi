@@ -36,7 +36,6 @@ module Rbeapi
   ##
   # Utils module
   module Utils
-
     ##
     # Iterates through a hash structure and converts all of the keys
     # to symbols.
@@ -46,9 +45,9 @@ module Rbeapi
     # @return [Hash] An updated hash structure with all keys converted to
     #   symboles
     def self.transform_keys_to_symbols(value)
-      return value if not value.kind_of?(Hash)
-      hash = value.inject({}) do |hsh, (k,v)|
-        hsh[k.to_sym] = self.transform_keys_to_symbols(v)
+      return value unless value.is_a?(Hash)
+      hash = value.each_with_object({}) do |hsh, (k, v)|
+        hsh[k.to_sym] = transform_keys_to_symbols(v)
         hsh
       end
       hash
@@ -67,4 +66,3 @@ module Rbeapi
     end
   end
 end
-

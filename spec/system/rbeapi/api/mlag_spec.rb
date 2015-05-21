@@ -12,10 +12,9 @@ describe Rbeapi::Api::Mlag do
   end
 
   describe '#get' do
-
     let(:keys) do
-      [ :domain_id, :local_interface, :peer_address, :peer_link, :shutdown,
-        :interfaces ]
+      [:domain_id, :local_interface, :peer_address, :peer_link, :shutdown,
+       :interfaces]
     end
 
     before { node.config('default mlag configuration') }
@@ -48,8 +47,10 @@ describe Rbeapi::Api::Mlag do
   end
 
   describe '#set_peer_link' do
-    before { node.config(['default mlag configuration',
-                          'default interface Ethernet1']) }
+    before do
+      node.config(['default mlag configuration',
+                   'default interface Ethernet1'])
+    end
 
     it 'configures the mlag peer link value' do
       expect(subject.get[:peer_link]).to be_empty
@@ -59,8 +60,10 @@ describe Rbeapi::Api::Mlag do
   end
 
   describe '#set_peer_address' do
-    before { node.config(['default mlag configuration',
-                          'default interface Ethernet1']) }
+    before do
+      node.config(['default mlag configuration',
+                   'default interface Ethernet1'])
+    end
 
     it 'configures the mlag peer address value' do
       expect(subject.get[:peer_address]).to be_empty
@@ -90,5 +93,4 @@ describe Rbeapi::Api::Mlag do
       expect(subject.interfaces).to be_a_kind_of(Rbeapi::Api::MlagInterfaces)
     end
   end
-
 end

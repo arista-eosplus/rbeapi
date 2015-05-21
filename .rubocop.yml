@@ -1,0 +1,21 @@
+AllCops:
+    Exclude:
+        - '**/*.gemspec'
+
+Metrics/CyclomaticComplexity:
+  Max: 20
+
+Metrics/MethodLength:
+  Max: 20
+
+Style/AccessorMethodName:
+  Enabled: False
+
+Metrics/PerceivedComplexity:
+  Max: 20
+
+Metrics/AbcSize:
+  Max: 50
+
+Metrics/ClassLength:
+  Max: 130

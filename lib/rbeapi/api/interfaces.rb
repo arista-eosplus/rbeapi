@@ -42,7 +42,6 @@ module Rbeapi
     # The Interfaces class manages all physical and logical interfaces on an
     # EOS node.
     class Interfaces < Entity
-
       def initialize(node)
         super(node)
         @instances = {}
@@ -62,7 +61,7 @@ module Rbeapi
       end
 
       def get_instance(name)
-        name = name[0,2].upcase
+        name = name[0, 2].upcase
         case name
         when 'ET'
           cls = 'Rbeapi::Api::EthernetInterface'
@@ -96,7 +95,6 @@ module Rbeapi
     # The BaseInterface class extends Entity and provides an implementation
     # that is common to all interfaces configured in EOS.
     class BaseInterface < Entity
-
       DEFAULT_INTF_DESCRIPTION = ''
 
       ##
@@ -271,8 +269,10 @@ module Rbeapi
       end
     end
 
+    ##
+    # The EthernetInterface class manages all Ethernet interfaces on an
+    # EOS node.
     class EthernetInterface < BaseInterface
-
       DEFAULT_ETH_FLOWC_TX = 'off'
       DEFAULT_ETH_FLOWC_RX = 'off'
       DEFAULT_SPEED = 'auto'
@@ -331,7 +331,7 @@ module Rbeapi
         value = config.scan(/speed (forced)?[ ]?(\w+)/).first
         return { speed: DEFAULT_SPEED, forced: DEFAULT_FORCED } unless value
         (forced, value) = value.first
-        { speed: value, forced: forced != nil }
+        { speed: value, forced: !forced.nil? }
       end
       private :parse_speed
 
@@ -390,8 +390,8 @@ module Rbeapi
       #
       # @raise [NotImplementedError] Creation of physical Ethernet interfaces
       #   is not supported
-      def create(name)
-        raise NotImplementedError, 'creating Ethernet interfaces is '\
+      def create(_name)
+        fail NotImplementedError, 'creating Ethernet interfaces is '\
               'not supported'
       end
 
@@ -404,8 +404,8 @@ module Rbeapi
       #
       # @raise [NotImplementedError] Deletion of physical Ethernet interfaces
       #   is not supported
-      def delete(name)
-        raise NotImplementedError, 'deleting Ethernet interfaces is '\
+      def delete(_name)
+        fail NotImplementedError, 'deleting Ethernet interfaces is '\
               'not supported'
       end
 
@@ -559,8 +559,10 @@ module Rbeapi
       end
     end
 
+    ##
+    # The PortchannelInterface class manages all port channel interfaces on an
+    # EOS node.
     class PortchannelInterface < BaseInterface
-
       DEFAULT_LACP_FALLBACK = 'disabled'
       DEFAULT_LACP_MODE = 'on'
       DEFAULT_MIN_LINKS = '0'
@@ -622,7 +624,7 @@ module Rbeapi
         grpid = name.scan(/(?<=Port-Channel)\d+/)[0]
         command = "show port-channel #{grpid} all-ports"
         config = node.enable(command, format: 'text')
-        values = config.first[:result]['output'].scan(/Ethernet[\d\/]*/)
+        values = config.first[:result]['output'].scan(%r{Ethernet[\d\/]*})
         { members: values }
       end
       private :parse_members
@@ -768,7 +770,7 @@ module Rbeapi
           return false unless result
         end
 
-        return true
+        true
       end
 
       ##
@@ -900,8 +902,9 @@ module Rbeapi
       end
     end
 
+    ##
+    # The VxlanInterface class manages all Vxlan interfaces on an EOS node.
     class VxlanInterface < BaseInterface
-
       DEFAULT_SRC_INTF = ''
       DEFAULT_MCAST_GRP = ''
 

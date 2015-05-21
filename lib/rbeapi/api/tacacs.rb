@@ -31,16 +31,16 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Eos is module namesapce for working with the EOS command API
+  # Api is module namesapce for working with the EOS command API
   module Api
-
     ##
     # Tacacs provides instance methods to retrieve and set tacacs configuration
     # values.
     class Tacacs < Entity
-
       DEFAULT_KEY_FORMAT = 0
       DEFAULT_KEY = nil
 
@@ -192,10 +192,13 @@ module Rbeapi
 
         case default
         when true
-            cmds = 'default tacacs-server timeout'
+          cmds = 'default tacacs-server timeout'
         when false
-            cmds = value ? "tacacs-server timeout #{value}" :
-                           'no tacacs-server timeout'
+          if value
+            cmds = "tacacs-server timeout #{value}"
+          else
+            cmds = 'no tacacs-server timeout'
+          end
         end
         configure cmds
       end

@@ -31,20 +31,24 @@
 #
 require 'rbeapi/eapilib'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Api
   module Api
-
+    ##
+    # The Entity class provides a base class implementation for building
+    # API modules.  The Entity class is typcially not instantiated directly
+    # but serves as a super class with convenience methods used to
+    # work with the node.
     class Entity
-
       attr_reader :error
       attr_reader :config
       attr_reader :node
 
       ##
-      # The instance class method is used to create a new instance of the
-      # object.  It works in conjunction with the Node.api loader method
-      # to make it easy to load classes derived from Entity
+      # Construct the node.
       #
       # @param [Node] :node An instance of Rbeapi::Client::Node used to
       #   send and receive eAPI messages
@@ -61,7 +65,7 @@ module Rbeapi
       # @param [Node] :node This should be an instance of Rbeapi::Client::Node
       #   that is used to send and receive eAPI messages
       #
-      def initialize(node, opts = {})
+      def initialize(node)
         @node = node
       end
 
@@ -72,7 +76,7 @@ module Rbeapi
       #
       # @return [String] The current running-config from the node
       def config
-        return @node.running_config
+        @node.running_config
       end
 
       ##
@@ -82,7 +86,7 @@ module Rbeapi
       # @return [Rbeapi::Eapilib::CommandError] An instance of CommandError
       #   that can be used to futher evaluate the root cause of an error
       def error
-        return @node.connection.error
+        @node.connection.error
       end
 
       ##
@@ -105,7 +109,7 @@ module Rbeapi
         return nil unless mdata
 
         _, block_end = mdata.offset(0)
-        block_end = block_end - block_start
+        block_end -= block_start
 
         config[block_start, block_end]
       end
@@ -171,4 +175,3 @@ module Rbeapi
     end
   end
 end
-

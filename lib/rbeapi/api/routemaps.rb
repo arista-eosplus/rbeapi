@@ -31,12 +31,18 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Api
   module Api
-
+    ##
+    # The Routemaps class manages routemaps. A route map is a list of rules
+    # that control the redistribution of IP routes into a protocol domain on
+    # the basis of such criteria as route metrics, access control lists, next
+    # hop addresses, and route tags.
     class Routemaps < Entity
-
       def get(name)
         entries = config.scan(/^route-map\s#{name}\s.+$/)
 
@@ -52,13 +58,13 @@ module Rbeapi
             case mdata.nil? ? nil : mdata[1]
             when 'match'
               hsh['match_rules'] = [] unless hsh.include?('match')
-              hsh['match_rules'] << rule.strip()
+              hsh['match_rules'] << rule.strip
             when 'set'
               hsh['set_rules'] = [] unless hsh.include?('set')
-              hsh['set_rules'] << rule.strip()
+              hsh['set_rules'] << rule.strip
             when 'continue'
               hsh['continue_rules'] = [] unless hsh.include?('continue')
-              hsh['continue_rules'] << rule.strip()
+              hsh['continue_rules'] << rule.strip
             end
           end
           rule_hsh.update(parsed)
@@ -69,9 +75,7 @@ module Rbeapi
       def getall
         maps = config.scan(/(?<=^route-map\s)[^\s]+/)
         maps.each_with_object({}) do |name, hsh|
-          if !hsh.include?(name)
-            hsh[name] = get name
-          end
+          hsh[name] = get name unless hsh.include?(name)
         end
       end
 
@@ -94,7 +98,6 @@ module Rbeapi
       def remove_rule(name, action, seqno)
         configure "no route-map #{name} #{action} #{seqno}"
       end
-
     end
   end
 end

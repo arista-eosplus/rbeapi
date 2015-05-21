@@ -35,10 +35,12 @@ require 'openssl'
 
 require 'net_http_unix'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Eapilib
   module Eapilib
-
     DEFAULT_HTTP_PORT = 80
     DEFAULT_HTTPS_PORT = 443
     DEFAULT_HTTP_LOCAL_PORT = 8080
@@ -47,14 +49,14 @@ module Rbeapi
     DEFAULT_HTTP_PATH = '/command-api'
     DEFAULT_UNIX_SOCKET = '/var/run/command-api.sock'
 
+    ##
+    # Base error class for generating exceptions.  The EapiError class
     class EapiError < StandardError
-
       attr_accessor :commands
 
       ##
-      # Base error class for generating exceptions.  The EapiError class
-      # provides one property for holding the set of commands issued
-      # when the error was generated
+      # The EapiError class provides one property for holding the set of
+      # commands issued when the error was generated.
       #
       # @param [String] :message The error message to return from raising
       #   the exception
@@ -65,15 +67,15 @@ module Rbeapi
       end
     end
 
+    ##
+    # A CommandError exception is raised in response to an eAPI call that
+    # returns a failure message.
     class CommandError < EapiError
-
       attr_reader :error_code
       attr_reader :error_text
 
       ##
-      # A CommandError exception is raised in response to an eAPI call that
-      # returns a failure message.  The exception contains the eAPI error
-      # code and error text.
+      # The exception contains the eAPI error code and error text.
       #
       # @param [String] :message The error message to return from raising
       #   this exception
@@ -90,13 +92,14 @@ module Rbeapi
       end
     end
 
+    ##
+    # A ConnectionError exception is raised when the connection object
+    # is unable to establish a connection with eAPI.
     class ConnectionError < EapiError
-
       attr_accessor :connection_type
 
       ##
-      # A ConnectionError exception is raised when the connection object
-      # is unable to establish a connection with eAPI.
+      # The exception contains the eAPI error code and error text.
       #
       # @param [String] :message The error message to return from raising
       #   this exception
@@ -111,16 +114,16 @@ module Rbeapi
       end
     end
 
+    ##
+    # The EapiConnection provides a base class for building eAPI connection
+    # instances with a specific transport for connecting to Arista EOS
+    # devices.  This class handles sending and receiving eAPI calls using
+    # JSON-RPC.  This class should not need to be directly instantiated.
     class EapiConnection
-
       attr_reader :error
 
       ##
-      # The EapiConnection provides a base class for building eAPI connection
-      # instances with a specific transport for connecting to Arista EOS
-      # devices.  This class handles sending and receiving eAPI calls using
-      # JSON-RPC over HTTP.  This class should not need to be directly
-      # instantiated.
+      # The connection contains the transport.
       #
       # @param [Net::HTTP] :transport The HTTP transport to use for sending
       #   and receive eAPI request and response messages
@@ -174,7 +177,7 @@ module Rbeapi
       # @return [Hash] Returns a Ruby hash of the request message that is
       #   suitable to be JSON encoded and sent to the desitination node
       def request(commands, opts = {})
-        id = opts.fetch(:reqid, self.object_id)
+        id = opts.fetch(:reqid, object_id)
         format = opts.fetch(:format, 'json')
         cmds = [*commands]
         params = { 'version' => 1, 'cmds' => cmds, 'format' => format }
@@ -252,7 +255,7 @@ module Rbeapi
           raise ConnectionError, 'unable to connect to eAPI'
         end
 
-        return decoded
+        decoded
       end
 
       ##
@@ -287,6 +290,9 @@ module Rbeapi
       end
     end
 
+    ##
+    # The SocketEapiConnection provides a class for building a domain
+    # socket eAPI connection to Arista EOS devices.
     class SocketEapiConnection < EapiConnection
       def initialize(opts = {})
         path = opts.fetch(:path, DEFAULT_UNIX_SOCKET)
@@ -295,6 +301,9 @@ module Rbeapi
       end
     end
 
+    ##
+    # The HttpEapiConnection provides a class for building an HTTP
+    # eAPI connection to a Arista EOS devices.
     class HttpEapiConnection < EapiConnection
       def initialize(opts = {})
         port = opts.fetch(:port, DEFAULT_HTTP_PORT)
@@ -309,6 +318,9 @@ module Rbeapi
       end
     end
 
+    ##
+    # The HttpLocalEapiConnection provides a class for building an HTTP
+    # eAPI connection to a local Arista EOS devices.
     class HttpLocalEapiConnection < EapiConnection
       def initialize(opts = {})
         port = opts.fetch(:port, DEFAULT_HTTP_LOCAL_PORT)
@@ -321,6 +333,9 @@ module Rbeapi
       end
     end
 
+    ##
+    # The HttpEapiConnection provides a class for building an HTTPS
+    # eAPI connection to a Arista EOS devices.
     class HttpsEapiConnection < EapiConnection
       def initialize(opts = {})
         host = opts.fetch(:host, 'localhost')

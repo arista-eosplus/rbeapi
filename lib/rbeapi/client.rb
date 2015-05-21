@@ -41,9 +41,7 @@ module Rbeapi
   ##
   # Rbeapi::Client
   module Client
-
     class << self
-
       DEFAULT_TRANSPORT = 'http'
 
       TRANSPORTS = { 'http' => 'Rbeapi::Eapilib::HttpEapiConnection',
@@ -60,8 +58,8 @@ module Rbeapi
       #   with the eapi.conf file
       def config
         return @config if @config
-        @config = Config.new()
-        return @config
+        @config = Config.new
+        @config
       end
 
       ##
@@ -88,7 +86,7 @@ module Rbeapi
       #   the named configuration if found.  If the name is not found, then
       #   nil is returned
       def config_for(name)
-        return config.get_connection(name)
+        config.get_connection(name)
       end
 
       ##
@@ -153,15 +151,15 @@ module Rbeapi
       end
     end
 
+    ##
+    # The Config class holds the loaded configuration file data.  It is a
+    # subclass of IniFile.
     class Config < IniFile
-
       CONFIG_SEARCH_PATH = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
 
       ##
-      # The Config class holds the loaded configuration file data.  It is a
-      # subclass of IniFile.  The Config class will automatically search for
-      # a filename to load (if none provided) and load the data when the
-      # object is instantiated.
+      # The Config class will automatically search for a filename to load
+      # (if none provided) and load the data when the object is instantiated.
       #
       # @param [String] :filename The full path to the filename to load.  If
       #   the filename is not provided, then this class will attempt to find
@@ -189,12 +187,11 @@ module Rbeapi
 
         path.each do |fn|
           fn = File.expand_path(fn)
-          return read(fn) if File.exists?(fn)
+          return read(fn) if File.exist?(fn)
         end
 
-        unless get_connection 'localhost'
-          add_connection('localhost', transport: 'socket')
-        end
+        return if get_connection 'localhost'
+        add_connection('localhost', transport: 'socket')
       end
       private :autoload
 
@@ -207,9 +204,8 @@ module Rbeapi
       def read(filename)
         super(filename: filename)
 
-        unless get_connection 'localhost'
-          add_connection('localhost', transport: 'socket')
-        end
+        return if get_connection 'localhost'
+        add_connection('localhost', transport: 'socket')
       end
 
       ##
@@ -250,14 +246,15 @@ module Rbeapi
       end
     end
 
+    ##
+    # The Node object provies an instance for sending and receiveing messages
+    # with a specific EOS device. The methods provided in this calss allow
+    # for handling both enable mode and config mode commands
     class Node
-
       attr_reader :connection
 
       ##
-      # The Node object provies an instnace for sending and receiveing messages
-      # with a specific EOS device.  The methods provided in this calss allow
-      # for handling both enable mode and config mode commands
+      # Save the connection and set autorefresh to true.
       #
       # @param [Rbeapi::Eapilib::EapiConnection] :connection An instance of
       #   EapiConnection used to send and receive eAPI formatted messages
@@ -274,7 +271,6 @@ module Rbeapi
       def running_config
         return @running_config if @running_config
         @running_config = get_config(params: 'all', as_string: true)
-        return @running_config
       end
 
       ##
@@ -285,7 +281,6 @@ module Rbeapi
       def startup_config
         return @startup_config if @startup_config
         @startup_config = get_config(config: 'startup-config', as_string: true)
-        return @startup_config
       end
 
       ##
@@ -341,7 +336,8 @@ module Rbeapi
 
         results = []
         if strict
-          responses = run_commands(commands, encoding, open_timeout, read_timeout)
+          responses = run_commands(commands, encoding, open_timeout,
+                                   read_timeout)
           responses.each_with_index do |resp, idx|
             results << make_response(commands[idx], resp, encoding)
           end
@@ -386,17 +382,20 @@ module Rbeapi
       # @param [String] :encoding The encoding scheme to use for sending and
       #   receive eAPI requests.  This argument is optional.  Valid values
       #   include json or text.  The default is json
-      def run_commands(commands, encoding = 'json', open_timeout = 10, read_timeout = 10)
+      def run_commands(commands, encoding = 'json', open_timeout = 10,
+                       read_timeout = 10)
         commands = [*commands] unless commands.respond_to?('each')
         commands = commands.dup
 
         if @enablepwd
-          commands.insert(0, { 'cmd' => 'enable', 'input' => @enablepwd })
+          commands.insert(0, 'cmd' => 'enable', 'input' => @enablepwd)
         else
           commands.insert(0, 'enable')
         end
 
-        response = @connection.execute(commands, format: encoding, open_timeout: open_timeout, read_timeout: read_timeout)
+        response = @connection.execute(commands, format: encoding,
+                                                 open_timeout: open_timeout,
+                                                 read_timeout: read_timeout)
         response.shift
         response
       end

@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'rbeapi/client'
 require 'rbeapi/api/mlag'
 
-describe Rbeapi::Api::MlagInterfaces do
+describe Rbeapi::Api::Mlag do
   subject { described_class.new(node) }
 
   let(:node) do
@@ -12,7 +12,6 @@ describe Rbeapi::Api::MlagInterfaces do
   end
 
   describe '#get' do
-
     let(:entity) do
       { mlag_id: '1' }
     end
@@ -34,7 +33,7 @@ describe Rbeapi::Api::MlagInterfaces do
     it 'returns a hash collection' do
       expect(subject.getall).to be_a_kind_of(Hash)
     end
- end
+  end
 
   describe '#create' do
     before { node.config(['interface Port-Channel1', 'no mlag']) }
@@ -75,6 +74,4 @@ describe Rbeapi::Api::MlagInterfaces do
       expect(subject.get('Port-Channel1')[:mlag_id]).to eq('1')
     end
   end
-
 end
-

@@ -31,12 +31,15 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Api
   module Api
-
+    ##
+    # The Logging class manages logging settings on an EOS node.
     class Logging < Entity
-
       ##
       # get returns the current logging configuration hash extracted from the
       # nodes running configuration.
@@ -97,8 +100,8 @@ module Rbeapi
       #
       # @param [Hash] :opts Optional keyword arguments
       #
-      # @option :opts [Boolean] :value Enables logging globally if value is true or
-      #   disabled logging glboally if value is false
+      # @option :opts [Boolean] :value Enables logging globally if value is true
+      #   or disabled logging glboally if value is false
       #
       # @option :opts [Boolean] :default Configure the ip address value using
       #   the default keyword

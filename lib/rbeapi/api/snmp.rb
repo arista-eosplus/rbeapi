@@ -31,12 +31,12 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
   ##
   # Api is module namespace for working with eAPI abstractions
   module Api
-
     ##
     # The Snmp class provides a class implementation for working with the
     # nodes SNMP conifguration entity.  This class presents an abstraction
@@ -44,7 +44,6 @@ module Rbeapi
     #
     # @eos_version 4.13.7M
     class Snmp < Entity
-
       DEFAULT_SNMP_LOCATION = ''
       DEFAULT_SNMP_CONTACT = ''
       DEFAULT_SNMP_CHASSIS_ID = ''
@@ -172,7 +171,7 @@ module Rbeapi
 
         notifications = traps.map do |trap|
           state, name = trap
-          { name: name, state: CFG_TO_STATE[state]}
+          { name: name, state: CFG_TO_STATE[state] }
         end
         notifications << { name: 'all', state: CFG_TO_STATE[all.first] }
         { notifications: notifications }
@@ -238,8 +237,11 @@ module Rbeapi
         when true
           cmds = ['default snmp-server location']
         when false
-          cmds = (value.nil? ? "no snmp-server location" : \
-                               "snmp-server location #{value}")
+          if value.nil?
+            cmds = 'no snmp-server location'
+          else
+            cmds = "snmp-server location #{value}"
+          end
         end
         configure(cmds)
       end
@@ -275,8 +277,11 @@ module Rbeapi
         when true
           cmds = ['default snmp-server contact']
         when false
-          cmds = (value.nil? ? "no snmp-server contact" : \
-                               "snmp-server contact #{value}")
+          if value.nil?
+            cmds = 'no snmp-server contact'
+          else
+            cmds = "snmp-server contact #{value}"
+          end
         end
         configure(cmds)
       end
@@ -312,8 +317,11 @@ module Rbeapi
         when true
           cmds = 'default snmp-server chassis-id'
         when false
-          cmds = (value.nil? ? "no snmp-server chassis-id" : \
-                               "snmp-server chassis-id #{value}")
+          if value.nil?
+            cmds = 'no snmp-server chassis-id'
+          else
+            cmds = "snmp-server chassis-id #{value}"
+          end
         end
         configure(cmds)
       end
@@ -350,10 +358,13 @@ module Rbeapi
         when true
           cmds = ['default snmp-server source-interface']
         when false
-          cmds = (value.nil? ? "no snmp-server source-interface" : \
-                               "snmp-server source-interface #{value}")
+          if value.nil?
+            cmds = 'no snmp-server source-interface'
+          else
+            cmds = "snmp-server source-interface #{value}"
+          end
         end
-       configure(cmds)
+        configure(cmds)
       end
 
       ##
