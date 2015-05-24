@@ -235,8 +235,12 @@ module Rbeapi
       #   properities from the loaded config.  This method will return nil
       #   if the connection name is not found.
       def get_connection(name)
-        return nil unless sections.include? "connection:#{name}"
-        self["connection:#{name}"]
+        return self["connection:#{name}"] if sections.include? "connection:#{name}"
+
+        if (sections.include? "connection_unknown_host") && (name != "localhost") then
+          return merge(IniFile.new(:content => "[connection_unknown_host]\nhost: #{name}", :parameter => ":"))["connection_unknown_host"]
+        end
+        return nil
       end
 
       ##
