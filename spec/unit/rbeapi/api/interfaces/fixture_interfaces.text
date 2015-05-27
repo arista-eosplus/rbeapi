@@ -208,3 +208,12 @@ interface Vxlan1
    no vxlan learn-restrict vtep
    no vxlan vlan learn-restrict vtep
 !
+interface Port-Channel1
+   description mlag port-channel
+   switchport trunk allowed vlan 500-502
+   switchport mode trunk
+   port-channel lacp fallback static
+   port-channel lacp fallback timeout 30
+   mlag 1
+   spanning-tree portfast
+!

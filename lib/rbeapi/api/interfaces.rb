@@ -622,7 +622,7 @@ module Rbeapi
         grpid = name.scan(/(?<=Port-Channel)\d+/)[0]
         command = "show port-channel #{grpid} all-ports"
         config = node.enable(command, format: 'text')
-        values = config.first[:result]['output'].scan(/Ethernet[\d\/]*/)
+        values = config.first[:result]['output'].scan(/\bEthernet[\d\/]*/)
         { members: values }
       end
       private :parse_members
