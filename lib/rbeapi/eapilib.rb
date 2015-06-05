@@ -277,16 +277,14 @@ module Rbeapi
       # @raises [ConnectionError] Raises a ConnectionError if resuced and
       #   adds the list of commands to the exception message
       def execute(commands, opts = {})
-        begin
-          @error = nil
-          request = request(commands,  opts)
-          response = send(request, opts)
-          return response['result']
-        rescue ConnectionError, CommandError => exc
-          exc.commands = commands
-          @error = exc
-          raise
-        end
+        @error = nil
+        request = request(commands,  opts)
+        response = send(request, opts)
+        return response['result']
+      rescue ConnectionError, CommandError => exc
+        exc.commands = commands
+        @error = exc
+        raise
       end
     end
 

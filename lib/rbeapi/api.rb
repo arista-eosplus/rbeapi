@@ -126,12 +126,10 @@ module Rbeapi
       #   returns False if there was an error issuing the commands on the
       #   node.  Use error to further investigate the cause of any errors
       def configure(commands)
-        begin
-          @node.config(commands)
-          return true
-        rescue Rbeapi::Eapilib::CommandError, Rbeapi::Eapilib::ConnectionError
-          return false
-        end
+        @node.config(commands)
+        return true
+      rescue Rbeapi::Eapilib::CommandError, Rbeapi::Eapilib::ConnectionError
+        return false
       end
 
       ##
