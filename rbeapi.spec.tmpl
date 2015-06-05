@@ -3,7 +3,7 @@
 
 Name:		%{?enterprise:pe-}rubygem-%{gem_name}
 Version:	REPLACEME
-Release:	1.eos4
+Release:	2.eos4
 Summary:	Arista eAPI Ruby Library for the EOS command API
 
 Group:		Development/Languages
@@ -52,6 +52,7 @@ Github iusses.
 %setup -q -D -T -n  .
 
 %install
+mkdir -p %{buildroot}
 install %{SOURCE0} %{buildroot}/
 
 %files
@@ -64,5 +65,8 @@ install %{SOURCE0} %{buildroot}/
 %{gem} uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
 
 %changelog
+* Tue May 21 2015 Jere Julian - 0.1.0-2
+- Ubuntu requires we manually create the buildroot
+
 * Tue Mar 17 2015 Jere Julian - 0.1.0-1
 - Initial package
