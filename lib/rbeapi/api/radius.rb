@@ -31,16 +31,16 @@
 #
 require 'rbeapi/api'
 
-
+##
+# Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Eos is module namesapce for working with the EOS command API
+  # Rbeapi::Api
   module Api
     ##
     # Radius provides instance methods to retrieve and set radius configuration
     # values.
     class Radius < Entity
-
       DEFAULT_KEY_FORMAT = 0
       DEFAULT_KEY = nil
 
@@ -164,11 +164,11 @@ module Rbeapi
       private :parse_servers
 
       ##
-      # set_global_key configures the global radius-server key.  If the value option
-      # is not specified, radius-server key is configured using the no keyword.
-      # If the default option is specified, radius-server key is configured
-      # using the default keyword.  If both options are specified, the default
-      # keyword option takes precedence.
+      # set_global_key configures the global radius-server key.  If the value
+      # option is not specified, radius-server key is configured using the no
+      # keyword. If the default option is specified, radius-server key is
+      # configured using the default keyword. If both options are specified,
+      # the default keyword option takes precedence.
       #
       # @eos_version 4.13.7M
       #
@@ -197,18 +197,21 @@ module Rbeapi
         when true
           cmds = 'default radius-server key'
         when false
-          cmds = value ? "radius-server key #{key_format} #{value}" :
-                         'no radius-server key'
+          if value
+            cmds = "radius-server key #{key_format} #{value}"
+          else
+            cmds = 'no radius-server key'
+          end
         end
         configure cmds
       end
 
       ##
-      # set_global_timeout configures the radius-server timeout value.  If the value
-      # options is not specified, radius-server timeout is configured using the
-      # no keyword.  If the default option is specified, radius-server timeout
-      # is configured using the default keyword.  If both options are specified
-      # then the default keyword takes precedence.
+      # set_global_timeout configures the radius-server timeout value.  If the
+      # value # options is not specified, radius-server timeout is configured
+      # using the no keyword.  If the default option is specified, radius-server
+      # timeout is configured using the default keyword.  If both options are
+      # specified then the default keyword takes precedence.
       #
       # @eos_version 4.13.7M
       #
@@ -233,19 +236,22 @@ module Rbeapi
         when true
           cmds = 'default radius-server timeout'
         when false
-          cmds = value ? "radius-server timeout #{value}" :
-                         'no radius-server timeout'
+          if value
+            cmds = "radius-server timeout #{value}"
+          else
+            cmds = 'no radius-server timeout'
+          end
         end
         configure cmds
       end
 
       ##
-      # set_global_retransmit configures the global radius-server restransmit value.
-      # If the value is not specified, the radius-server retransmist value is
-      # configured using the no keyword.  If the default option is specified,
-      # the radius-server retransmit value is configured using the default
-      # keyword.  If both options are specified then the default keyword taks
-      # precedence
+      # set_global_retransmit configures the global radius-server restransmit
+      # value. If the value is not specified, the radius-server retransmist
+      # value is configured using the no keyword.  If the default option is
+      # specified, the radius-server retransmit value is configured using the
+      # default keyword. If both options are specified then the default keyword
+      # takes precedence
       #
       # @eos_version 4.13.7M
       #
@@ -270,8 +276,11 @@ module Rbeapi
         when true
           cmds = 'default radius-server retransmit'
         when false
-          cmds = value ?  "radius-server retransmit #{value}" :
-                          'no radius-server retransmit'
+          if value
+            cmds = "radius-server retransmit #{value}"
+          else
+            cmds = 'no radius-server retransmit'
+          end
         end
         configure cmds
       end

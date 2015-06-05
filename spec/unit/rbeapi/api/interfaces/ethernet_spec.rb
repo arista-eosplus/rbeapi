@@ -23,8 +23,8 @@ describe Rbeapi::Api::EthernetInterface do
     let(:resource) { subject.get('Ethernet1') }
 
     let(:keys) do
-      [ :type, :speed, :sflow, :flowcontrol_send, :flowcontrol_receive,
-        :forced, :shutdown, :description, :name ]
+      [:type, :speed, :sflow, :flowcontrol_send, :flowcontrol_receive,
+       :forced, :shutdown, :description, :name]
     end
 
     it 'returns an ethernet resource as a hash' do
@@ -61,25 +61,29 @@ describe Rbeapi::Api::EthernetInterface do
 
   describe '#set_description' do
     it 'sets the interface description' do
-      expect(node).to receive(:config).with(['interface Ethernet1', 'description test string'])
-      expect(subject.set_description('Ethernet1', value: 'test string')).to be_truthy
+      expect(node).to receive(:config).with(['interface Ethernet1',
+                                             'description test string'])
+      expect(subject.set_description('Ethernet1', value: 'test string'))
+        .to be_truthy
     end
 
     it 'negates the interface description' do
-      expect(node).to receive(:config).with(['interface Ethernet1', 'no description'])
+      expect(node).to receive(:config).with(['interface Ethernet1',
+                                             'no description'])
       expect(subject.set_description('Ethernet1')).to be_truthy
     end
 
     it 'defaults the interface description' do
-      expect(node).to receive(:config).with(['interface Ethernet1', 'default description'])
+      expect(node).to receive(:config).with(['interface Ethernet1',
+                                             'default description'])
       expect(subject.set_description('Ethernet1', default: true)).to be_truthy
     end
 
     it 'default is preferred over value' do
-      expect(node).to receive(:config).with(['interface Ethernet1', 'default description'])
-      expect(subject.set_description('Ethernet1', value: 'test', default: true)).to be_truthy
+      expect(node).to receive(:config).with(['interface Ethernet1',
+                                             'default description'])
+      expect(subject.set_description('Ethernet1', value: 'test',
+                                                  default: true)).to be_truthy
     end
   end
-
 end
-

@@ -12,7 +12,6 @@ describe Rbeapi::Api::Interfaces do
   end
 
   describe '#get' do
-
     let(:entity) do
       { name: 'Loopback0', type: 'generic', description: '', shutdown: false }
     end
@@ -34,7 +33,7 @@ describe Rbeapi::Api::Interfaces do
     it 'returns a hash collection' do
       expect(subject.getall).to be_a_kind_of(Hash)
     end
- end
+  end
 
   describe '#create' do
     before { node.config('no interface Loopback0') }
@@ -70,7 +69,8 @@ describe Rbeapi::Api::Interfaces do
     it 'sets the description value on the interface' do
       node.config(['interface Loopback0', 'no description'])
       expect(subject.get('Loopback0')[:description]).to be_empty
-      expect(subject.set_description('Loopback0', value: 'foo bar')).to be_truthy
+      expect(subject.set_description('Loopback0', value: 'foo bar'))
+        .to be_truthy
       expect(subject.get('Loopback0')[:description]).to eq('foo bar')
     end
   end
@@ -91,4 +91,3 @@ describe Rbeapi::Api::Interfaces do
     end
   end
 end
-

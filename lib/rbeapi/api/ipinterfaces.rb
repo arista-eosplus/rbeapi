@@ -31,14 +31,16 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Api
   module Api
     #
     # The Ipinterface class provides an instance for managing logical
     # IP interfaces configured using eAPI.
     class Ipinterfaces < Entity
-
       DEFAULT_ADDRESS = ''
 
       ##
@@ -125,7 +127,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_mtu(config)
         mdata = /(?<=mtu\s)(\d+)$/.match(config)
-        { mtu: mdata.nil? ? '': mdata[1] }
+        { mtu: mdata.nil? ? '' : mdata[1] }
       end
       private :parse_mtu
 

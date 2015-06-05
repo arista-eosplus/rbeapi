@@ -12,7 +12,6 @@ describe Rbeapi::Api::System do
   end
 
   describe '#get' do
-
     let(:entity) do
       { hostname: 'localhost' }
     end
@@ -34,5 +33,3 @@ describe Rbeapi::Api::System do
     end
   end
 end
-
-

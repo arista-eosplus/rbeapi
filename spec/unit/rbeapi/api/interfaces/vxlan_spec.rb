@@ -23,8 +23,8 @@ describe Rbeapi::Api::VxlanInterface do
     let(:resource) { subject.get('Vxlan1') }
 
     let(:keys) do
-      [ :type, :shutdown, :description, :name, :source_interface,
-        :multicast_group, :udp_port, :flood_list, :vlans ]
+      [:type, :shutdown, :description, :name, :source_interface,
+       :multicast_group, :udp_port, :flood_list, :vlans]
     end
 
     it 'returns the resource as a hash' do
@@ -64,7 +64,7 @@ describe Rbeapi::Api::VxlanInterface do
   describe '#set_source_interface' do
     it 'sets the vxlan source interface' do
       commands = ['interface Vxlan1', 'vxlan source-interface Loopback0']
-      opts = {value: 'Loopback0'}
+      opts = { value: 'Loopback0' }
       expect(node).to receive(:config).with(commands)
       expect(subject.set_source_interface('Vxlan1', opts)).to be_truthy
     end
@@ -77,7 +77,7 @@ describe Rbeapi::Api::VxlanInterface do
 
     it 'defaults the source interface setting' do
       commands = ['interface Vxlan1', 'default vxlan source-interface']
-      opts = {default: true}
+      opts = { default: true }
       expect(node).to receive(:config).with(commands)
       expect(subject.set_source_interface('Vxlan1', opts)).to be_truthy
     end
@@ -93,7 +93,7 @@ describe Rbeapi::Api::VxlanInterface do
   describe '#set_multicast_group' do
     it 'sets the vxlan multicast group' do
       commands = ['interface Vxlan1', 'vxlan multicast-group 239.10.10.10']
-      opts = {value: '239.10.10.10'}
+      opts = { value: '239.10.10.10' }
       expect(node).to receive(:config).with(commands)
       expect(subject.set_multicast_group('Vxlan1', opts)).to be_truthy
     end
@@ -106,7 +106,7 @@ describe Rbeapi::Api::VxlanInterface do
 
     it 'defaults the multicast group setting' do
       commands = ['interface Vxlan1', 'default vxlan multicast-group']
-      opts = {default: true}
+      opts = { default: true }
       expect(node).to receive(:config).with(commands)
       expect(subject.set_multicast_group('Vxlan1', opts)).to be_truthy
     end
@@ -122,7 +122,7 @@ describe Rbeapi::Api::VxlanInterface do
   describe '#set_udp_port' do
     it 'sets the vxlan udp-port' do
       commands = ['interface Vxlan1', 'vxlan udp-port 1024']
-      opts = {value: '1024'}
+      opts = { value: '1024' }
       expect(node).to receive(:config).with(commands)
       expect(subject.set_udp_port('Vxlan1', opts)).to be_truthy
     end
@@ -135,7 +135,7 @@ describe Rbeapi::Api::VxlanInterface do
 
     it 'defaults the vxlan udp-port setting' do
       commands = ['interface Vxlan1', 'default vxlan udp-port']
-      opts = {default: true}
+      opts = { default: true }
       expect(node).to receive(:config).with(commands)
       expect(subject.set_udp_port('Vxlan1', opts)).to be_truthy
     end
@@ -189,45 +189,55 @@ describe Rbeapi::Api::VxlanInterface do
     end
 
     it 'negates the interface description' do
-      expect(node).to receive(:config).with(['interface Vxlan1', 'no description'])
+      expect(node).to receive(:config).with(['interface Vxlan1',
+                                             'no description'])
       expect(subject.set_description('Vxlan1')).to be_truthy
     end
 
     it 'defaults the interface description' do
-      expect(node).to receive(:config).with(['interface Vxlan1', 'default description'])
+      expect(node).to receive(:config).with(['interface Vxlan1',
+                                             'default description'])
       expect(subject.set_description('Vxlan1', default: true)).to be_truthy
     end
 
     it 'default is preferred over value' do
-      expect(node).to receive(:config).with(['interface Vxlan1', 'default description'])
-      expect(subject.set_description('Vxlan1', value: 'test', default: true)).to be_truthy
+      expect(node).to receive(:config).with(['interface Vxlan1',
+                                             'default description'])
+      expect(subject.set_description('Vxlan1', value: 'test',
+                                               default: true)).to be_truthy
     end
   end
 
   describe '#set_shutdown' do
     it 'enables the interface' do
-      expect(node).to receive(:config).with(['interface Vxlan1', 'no shutdown'])
+      expect(node).to receive(:config).with(['interface Vxlan1',
+                                             'no shutdown'])
       expect(subject.set_shutdown('Vxlan1', value: false)).to be_truthy
     end
 
     it 'disables the interface' do
-      expect(node).to receive(:config).with(['interface Vxlan1', 'shutdown'])
+      expect(node).to receive(:config).with(['interface Vxlan1',
+                                             'shutdown'])
       expect(subject.set_shutdown('Vxlan1', value: true)).to be_truthy
     end
 
     it 'negates the interface description' do
-      expect(node).to receive(:config).with(['interface Vxlan1', 'no shutdown'])
+      expect(node).to receive(:config).with(['interface Vxlan1',
+                                             'no shutdown'])
       expect(subject.set_shutdown('Vxlan1')).to be_truthy
     end
 
     it 'defaults the interface state' do
-      expect(node).to receive(:config).with(['interface Vxlan1', 'default shutdown'])
+      expect(node).to receive(:config).with(['interface Vxlan1',
+                                             'default shutdown'])
       expect(subject.set_shutdown('Vxlan1', default: true)).to be_truthy
     end
 
     it 'default is preferred over value' do
-      expect(node).to receive(:config).with(['interface Vxlan1', 'default shutdown'])
-      expect(subject.set_shutdown('Vxlan1', value: 'test', default: true)).to be_truthy
+      expect(node).to receive(:config).with(['interface Vxlan1',
+                                             'default shutdown'])
+      expect(subject.set_shutdown('Vxlan1', value: 'test', default: true))
+        .to be_truthy
     end
   end
 end

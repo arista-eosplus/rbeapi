@@ -12,7 +12,6 @@ describe Rbeapi::Api::StpInterfaces do
   end
 
   describe '#get' do
-
     let(:entity) do
       { portfast: false, bpduguard: false }
     end
@@ -25,7 +24,6 @@ describe Rbeapi::Api::StpInterfaces do
   end
 
   describe '#getall' do
-
     before { node.config('default interface Ethernet1') }
 
     it 'includes interface ethernet1' do

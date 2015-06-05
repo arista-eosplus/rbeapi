@@ -31,15 +31,16 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Api
   module Api
-
     ##
     # The Mlag class provides a configuration instance for working with
     # the global MLAG configuration of the node
     class Mlag < Entity
-
       DEFAULT_DOMAIN_ID = ''
       DEFAULT_LOCAL_INTF = ''
       DEFAULT_PEER_ADDR = ''
@@ -64,7 +65,7 @@ module Rbeapi
       # @return [nil, Hash<Symbol, Object] returns the nodes current running
       #   configuration as a Hash.  If mlag is not configured on the node this
       #   method will return nil
-      def get()
+      def get
         config = get_block('mlag configuration')
 
         global = {}
@@ -75,7 +76,6 @@ module Rbeapi
         global.merge!(parse_shutdown(config))
 
         { global: global, interfaces: parse_interfaces }
-
       end
 
       ##
@@ -428,7 +428,7 @@ module Rbeapi
         when true
           cmds << 'default mlag'
         when false
-          cmds << (value ? "mlag #{value}"  : 'no mlag')
+          cmds << (value ? "mlag #{value}" : 'no mlag')
         end
         configure(cmds)
       end

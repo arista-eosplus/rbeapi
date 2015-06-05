@@ -12,9 +12,11 @@ describe Rbeapi::Api::StpInstances do
   end
 
   describe '#get' do
-    before { node.config(['spanning-tree mode mstp',
-                          'spanning-tree mst configuration',
-                          'instance 1 vlans 1', 'exit']) }
+    before do
+      node.config(['spanning-tree mode mstp',
+                   'spanning-tree mst configuration',
+                   'instance 1 vlans 1', 'exit'])
+    end
 
     it 'returns the stp instance resource as a hash' do
       expect(subject.get('1')).to be_a_kind_of(Hash)
@@ -26,8 +28,9 @@ describe Rbeapi::Api::StpInstances do
   end
 
   describe '#getall' do
-    before { node.config(['no spanning-tree mode mstp',
-                          'spanning-tree mode mstp']) }
+    before do
+      node.config(['no spanning-tree mode mstp', 'spanning-tree mode mstp'])
+    end
 
     it 'returns a kind of hash' do
       expect(subject.getall).to be_a_kind_of(Hash)
@@ -35,9 +38,11 @@ describe Rbeapi::Api::StpInstances do
   end
 
   describe '#delete' do
-    before { node.config(['spanning-tree mode mstp',
-                          'spanning-tree mst configuration',
-                          'instance 1 vlans 1', 'exit']) }
+    before do
+      node.config(['spanning-tree mode mstp',
+                   'spanning-tree mst configuration',
+                   'instance 1 vlans 1', 'exit'])
+    end
 
     it 'deletes the mst instance' do
       expect(subject.get('1')).not_to be_nil
@@ -47,10 +52,12 @@ describe Rbeapi::Api::StpInstances do
   end
 
   describe '#set_priority' do
-    before { node.config(['spanning-tree mode mstp',
-                          'default spanning-tree mst configuration',
-                          'spanning-tree mst configuration',
-                          'instance 1 vlans 1', 'exit']) }
+    before do
+      node.config(['spanning-tree mode mstp',
+                   'default spanning-tree mst configuration',
+                   'spanning-tree mst configuration',
+                   'instance 1 vlans 1', 'exit'])
+    end
 
     it 'set the instance priority' do
       expect(subject.get('1')[:priority]).to eq('32768')

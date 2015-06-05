@@ -31,15 +31,16 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Api
   module Api
-
     ##
     # The Ospf class is a global class that provides an instance for working
     # with the node's OSPF configuration
     class Ospf < Entity
-
       ##
       # Returns the global OSPF configuration from the node
       #
@@ -58,11 +59,9 @@ module Rbeapi
         config = get_block("router ospf #{inst}")
         return nil unless config
 
-        resp = {}
         mdata = /(?<=^\s{3}router-id\s)(.+)$/.match(config)
         resp['router_id'] = mdata.nil? ? '' : mdata[0]
 
-        mdata = /^\s{3}network\s(.+)\sarea\s(.+)$/.match(config)
         networks = config.scan(/^\s{3}network\s(.+)\sarea\s(.+)$/)
         areas = networks.each_with_object({}) do |cfg, hsh|
           net, area = cfg
@@ -74,7 +73,8 @@ module Rbeapi
         end
         resp['areas'] = areas
 
-        values = config.scan(/(?<=^\s{3}redistribute\s)(\w+)[\s|$]*(route-map\s(.+))?/)
+        values = config.scan(/(?<=^\s{3}redistribute\s)
+                             (\w+)[\s|$]*(route-map\s(.+))?/)
 
         resp['redistribute'] = values.each_with_object({}) do |value, hsh|
           hsh[value[0]] = { 'route_map' => value[2] }
@@ -91,8 +91,6 @@ module Rbeapi
       #   "interfaces": {...}
       # }
       def getall
-        response = {}
-
         instances = config.scan(/(?<=^router\sospf\s)\d+$/)
         response = instances.each_with_object({}) do |inst, hsh|
           hsh[inst] = get inst
@@ -145,8 +143,10 @@ module Rbeapi
       end
     end
 
+    ##
+    # The OspfInterfaces class is a global class that provides an instance
+    # for working with the node's OSPF interface configuration
     class OspfInterfaces < Entity
-
       ##
       # Returns a single MLAG interface configuration
       #

@@ -10,7 +10,6 @@ describe Rbeapi::Api::Varp do
   let(:node) { Rbeapi::Client.connect_to('veos02') }
 
   describe '#get' do
-
     it 'returns a varp resource instance' do
       expect(subject.get).to be_a_kind_of(Hash)
     end
@@ -38,7 +37,5 @@ describe Rbeapi::Api::Varp do
       expect(subject.set_mac_address(value: 'aa:bb:cc:dd:ee:ff')).to be_truthy
       expect(subject.get['mac_address']).to eq('aa:bb:cc:dd:ee:ff')
     end
-
   end
-
 end

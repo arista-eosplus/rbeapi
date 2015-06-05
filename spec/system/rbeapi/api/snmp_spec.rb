@@ -12,7 +12,6 @@ describe Rbeapi::Api::Snmp do
   end
 
   describe '#get' do
-
     let(:keys) do
       [:location, :contact, :chassis_id, :source_interface]
     end
@@ -64,5 +63,3 @@ describe Rbeapi::Api::Snmp do
     end
   end
 end
-
-

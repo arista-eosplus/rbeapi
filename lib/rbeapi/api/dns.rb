@@ -31,12 +31,15 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Api
   module Api
-
+    ##
+    # The Dns class manages DNS settings on an EOS node.
     class Dns < Entity
-
       ##
       # Returns the DNS resource
       #
@@ -173,7 +176,7 @@ module Rbeapi
 
         case default
         when true
-            cmds = 'default ip domain-list'
+          cmds = 'default ip domain-list'
         when false
           cmds = []
           parse_domain_list[:domain_list].each do |name|

@@ -23,7 +23,7 @@ describe Rbeapi::Api::BaseInterface do
     let(:resource) { subject.get('Loopback0') }
 
     let(:keys) do
-      [ :type, :shutdown, :description, :name ]
+      [:type, :shutdown, :description, :name]
     end
 
     it 'returns an ethernet resource as a hash' do
@@ -62,53 +62,62 @@ describe Rbeapi::Api::BaseInterface do
 
   describe '#set_description' do
     it 'sets the interface description' do
-      expect(node).to receive(:config).with(['interface Loopback0', 'description test string'])
-      expect(subject.set_description('Loopback0', value: 'test string')).to be_truthy
+      expect(node).to receive(:config).with(['interface Loopback0',
+                                             'description test string'])
+      expect(subject.set_description('Loopback0', value: 'test string'))
+        .to be_truthy
     end
 
     it 'negates the interface description' do
-      expect(node).to receive(:config).with(['interface Loopback0', 'no description'])
+      expect(node).to receive(:config).with(['interface Loopback0',
+                                             'no description'])
       expect(subject.set_description('Loopback0')).to be_truthy
     end
 
     it 'defaults the interface description' do
-      expect(node).to receive(:config).with(['interface Loopback0', 'default description'])
+      expect(node).to receive(:config).with(['interface Loopback0',
+                                             'default description'])
       expect(subject.set_description('Loopback0', default: true)).to be_truthy
     end
 
     it 'default is preferred over value' do
-      expect(node).to receive(:config).with(['interface Loopback0', 'default description'])
-      expect(subject.set_description('Loopback0', value: 'test', default: true)).to be_truthy
+      expect(node).to receive(:config).with(['interface Loopback0',
+                                             'default description'])
+      expect(subject.set_description('Loopback0', value: 'test',
+                                                  default: true)).to be_truthy
     end
   end
 
   describe '#set_shutdown' do
     it 'enables the interface' do
-      expect(node).to receive(:config).with(['interface Loopback0', 'no shutdown'])
+      expect(node).to receive(:config).with(['interface Loopback0',
+                                             'no shutdown'])
       expect(subject.set_shutdown('Loopback0', value: false)).to be_truthy
     end
 
     it 'disables the interface' do
-      expect(node).to receive(:config).with(['interface Loopback0', 'shutdown'])
+      expect(node).to receive(:config).with(['interface Loopback0',
+                                             'shutdown'])
       expect(subject.set_shutdown('Loopback0', value: true)).to be_truthy
     end
 
     it 'negates the interface description' do
-      expect(node).to receive(:config).with(['interface Loopback0', 'no shutdown'])
+      expect(node).to receive(:config).with(['interface Loopback0',
+                                             'no shutdown'])
       expect(subject.set_shutdown('Loopback0')).to be_truthy
     end
 
     it 'defaults the interface state' do
-      expect(node).to receive(:config).with(['interface Loopback0', 'default shutdown'])
+      expect(node).to receive(:config).with(['interface Loopback0',
+                                             'default shutdown'])
       expect(subject.set_shutdown('Loopback0', default: true)).to be_truthy
     end
 
     it 'default is preferred over value' do
-      expect(node).to receive(:config).with(['interface Loopback0', 'default shutdown'])
-      expect(subject.set_shutdown('Loopback0', value: 'test', default: true)).to be_truthy
+      expect(node).to receive(:config).with(['interface Loopback0',
+                                             'default shutdown'])
+      expect(subject.set_shutdown('Loopback0', value: 'test',
+                                               default: true)).to be_truthy
     end
   end
-
-
 end
-

@@ -94,7 +94,6 @@ describe Rbeapi::Api::Vlans do
   end
 
   describe '#set_state' do
-
     it 'sets vlan 1 state to suspend' do
       node.config(['default vlan 1', 'vlan 1'])
       expect(subject.get('1')[:state]).to eq('active')

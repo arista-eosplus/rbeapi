@@ -33,9 +33,7 @@
 require 'rbeapi/api'
 
 module Rbeapi
-
   module Netdev
-
     ##
     # The Netdev class is a straight port of the original PuppetX netdev
     # code that existed prior to rbeapi.  This should be considered a legacy
@@ -250,12 +248,12 @@ module Rbeapi
           user_s.scan(/^(\w+).*?: (.*)/).each_with_object({}) do |(h, v), m|
             key = SNMP_USER_PARAM[h.downcase.intern] || h.downcase.intern
             m[key] = case key
-                      when :privacy  then /AES/.match(v) ? :aes128 : :des
-                      when :version  then v.sub('v2c', 'v2').intern
-                      when :auth     then v.downcase.intern
-                      when :roles    then v.sub(/ \(.*?\)/, '')
-                      else v.downcase
-                      end
+                     when :privacy  then /AES/.match(v) ? :aes128 : :des
+                     when :version  then v.sub('v2c', 'v2').intern
+                     when :auth     then v.downcase.intern
+                     when :roles    then v.sub(/ \(.*?\)/, '')
+                     else v.downcase
+                     end
           end
         end
       end
@@ -305,7 +303,7 @@ module Rbeapi
         if opts[:password] && version == 'v3'
           privacy = opts[:privacy].to_s.scan(/aes|des/).first
           fail ArgumentError,
-                'privacy is required when managing passwords' unless privacy
+               'privacy is required when managing passwords' unless privacy
           cmd += " auth #{opts[:auth] || 'sha'} #{opts[:password]} "\
             "priv #{privacy} #{opts[:password]}"
         end

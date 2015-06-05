@@ -12,7 +12,6 @@ describe Rbeapi::Api::Interfaces do
   end
 
   describe '#get' do
-
     let(:entity) do
       { name: 'Ethernet1', type: 'ethernet', description: '', shutdown: false,
         sflow: true, flowcontrol_send: 'off', flowcontrol_receive: 'off' }
@@ -35,7 +34,7 @@ describe Rbeapi::Api::Interfaces do
     it 'returns a hash collection' do
       expect(subject.getall).to be_a_kind_of(Hash)
     end
- end
+  end
 
   describe '#create' do
     it 'raises an error on create' do
@@ -63,7 +62,8 @@ describe Rbeapi::Api::Interfaces do
     it 'sets the description value on the interface' do
       node.config(['interface Ethernet1', 'no description'])
       expect(subject.get('Ethernet1')[:description]).to be_empty
-      expect(subject.set_description('Ethernet1', value: 'foo bar')).to be_truthy
+      expect(subject.set_description('Ethernet1', value: 'foo bar'))
+        .to be_truthy
       expect(subject.get('Ethernet1')[:description]).to eq('foo bar')
     end
   end
@@ -104,14 +104,16 @@ describe Rbeapi::Api::Interfaces do
     it 'sets the flowcontrol send value to on' do
       node.config(['interface Ethernet1', 'flowcontrol send off'])
       expect(subject.get('Ethernet1')[:flowcontrol_send]).to eq('off')
-      expect(subject.set_flowcontrol_send('Ethernet1', value: 'on')).to be_truthy
+      expect(subject.set_flowcontrol_send('Ethernet1', value: 'on'))
+        .to be_truthy
       expect(subject.get('Ethernet1')[:flowcontrol_send]).to eq('on')
     end
 
     it 'sets the flowcontrol send value to off' do
       node.config(['interface Ethernet1', 'flowcontrol send on'])
       expect(subject.get('Ethernet1')[:flowcontrol_send]).to eq('on')
-      expect(subject.set_flowcontrol_send('Ethernet1', value: 'off')).to be_truthy
+      expect(subject.set_flowcontrol_send('Ethernet1', value: 'off'))
+        .to be_truthy
       expect(subject.get('Ethernet1')[:flowcontrol_send]).to eq('off')
     end
   end
@@ -120,16 +122,17 @@ describe Rbeapi::Api::Interfaces do
     it 'sets the flowcontrol receive value to on' do
       node.config(['interface Ethernet1', 'flowcontrol receive off '])
       expect(subject.get('Ethernet1')[:flowcontrol_receive]).to eq('off')
-      expect(subject.set_flowcontrol_receive('Ethernet1', value: 'on')).to be_truthy
+      expect(subject.set_flowcontrol_receive('Ethernet1', value: 'on'))
+        .to be_truthy
       expect(subject.get('Ethernet1')[:flowcontrol_receive]).to eq('on')
     end
 
     it 'sets the flowcontrol receive value to off' do
       node.config(['interface Ethernet1', 'flowcontrol receive on'])
       expect(subject.get('Ethernet1')[:flowcontrol_receive]).to eq('on')
-      expect(subject.set_flowcontrol_receive('Ethernet1', value: 'off')).to be_truthy
+      expect(subject.set_flowcontrol_receive('Ethernet1', value: 'off'))
+        .to be_truthy
       expect(subject.get('Ethernet1')[:flowcontrol_receive]).to eq('off')
     end
   end
 end
-
