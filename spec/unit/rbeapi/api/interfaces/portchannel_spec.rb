@@ -20,6 +20,11 @@ describe Rbeapi::Api::PortchannelInterface do
   end
 
   describe '#get' do
+    before :each do
+      allow(subject.node).to receive(:enable)
+        .with(include('show port-channel'), format: 'text')
+        .and_return([{ result: { 'output' => "Port Channel Port-Channel1:\n  Active Ports: Ethernet1 PeerEthernet1 \n\n" } }])
+    end
     let(:resource) { subject.get('Port-Channel1') }
 
     let(:keys) do
@@ -37,6 +42,14 @@ describe Rbeapi::Api::PortchannelInterface do
 
     it 'has all keys' do
       expect(resource.keys).to match_array(keys)
+    end
+
+    it 'does not return PeerEthernet members' do
+      expect(resource[:members]).to_not include 'PeerEthernet'
+    end
+
+    it 'returns 1 member' do
+      expect(resource[:members]).to contain_exactly('Ethernet1')
     end
   end
 
