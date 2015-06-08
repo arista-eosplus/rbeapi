@@ -63,8 +63,6 @@ module Rbeapi
       # parse_snmp_hosts parses the raw text from the `show snmp host`
       # command and returns an Array of resource hashes.
       #
-      # rubocop:disable Metrics/MethodLength
-      #
       # @param [String] text The text of the `show snmp host` output, e.g.
       #   for three hosts:
       #
@@ -235,9 +233,6 @@ module Rbeapi
       # Group          : sysops
       # ```
       #
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/MethodLength
-      #
       # @param [String] text The text to parse
       #
       # @api private
@@ -272,8 +267,6 @@ module Rbeapi
       ##
       # snmp_user_set creates or updates an SNMP user account on the target
       # device.
-      #
-      # rubocop:disable Metrics/MethodLength
       #
       # @option opts [String] :name ('johndoe') The username
       #

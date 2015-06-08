@@ -320,6 +320,8 @@ module Rbeapi
       # The enable method is a convenience method that will handling putting
       # the switch into priviledge mode prior to executing commands.
       #
+      # rubocop:disable Metrics/MethodLength
+      #
       # @param [Array<String>] commands An ordered list of commands to execute
       # @param [String] :encoding The encoding scheme to use for sending and
       #   receive eAPI messages.  Valid values are json and text.  The default
