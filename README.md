@@ -10,11 +10,11 @@
 6. [License] (#license)
 
 
-The Ruby Cliet for eAPI provides a native Ruby implementation for programming Arista EOS network devices using Ruby.  The Ruby client provides the ability to build native applications in Ruby that can communicate with EOS either locally via Unix domain sockets (on-box) or remotely over a HTTP/S transport (off-box).  It uses a standard INI-style configuration file to specifiy one or more connection profiles.
+The Ruby Client for eAPI provides a native Ruby implementation for programming Arista EOS network devices using Ruby.  The Ruby client provides the ability to build native applications in Ruby that can communicate with EOS either locally via Unix domain sockets (on-box) or remotely over a HTTP/S transport (off-box).  It uses a standard INI-style configuration file to specify one or more connection profiles.
 
-The rbeapi implemenation also provides an API layer for building native Ruby objects that allow for configuration and state extraction of EOS nodes.  The API layer provides a consistent implementation for working with EOS configuration resources.  The implementation of the API layer is highly extensible and can be used as a foundation for building custom data models.
+The rbeapi implementation also provides an API layer for building native Ruby objects that allow for configuration and state extraction of EOS nodes.  The API layer provides a consistent implementation for working with EOS configuration resources.  The implementation of the API layer is highly extensible and can be used as a foundation for building custom data models.
 
-The libray is freely provided to the open source community for building robust applications using Arista EOS eAPI.  Support is provided as best effort through Github iusses.
+The library is freely provided to the open source community for building robust applications using Arista EOS eAPI.  Support is provided as best effort through Github issues.
 
 ## Requirements
 
@@ -26,7 +26,7 @@ The libray is freely provided to the open source community for building robust a
 In order to use rbeapi, the EOS command API must be enabled using ``management
 api http-commands`` configuration mode.  This library supports eAPI calls over
 both HTTP and UNIX Domain Sockets.  Once the command API is enabled on the
-destination node, create a configuration file with the node properities. 
+destination node, create a configuration file with the node proprieties. 
 
 **Note:** The default search path for the conf file is ``~/.eapi.conf``
 followed by ``/mnt/flash/eapi.conf``.  This can be overridden by setting
@@ -193,6 +193,12 @@ and uploaded to RubyGems.
 * To create an RPM, run ``rake rpm``
 * To generate a SWIX file for EOS with necessary dependencies, run
   ``rake all_rpms`` then follow the ``swix create`` instructions at the end.
+
+# Testing
+The rbeapi library provides spec tests.
+
+* To run the spec tests, run ``bundle exec rspec spec`` from the root of the
+  rbeapi source folder.
 
 
 # Contributing
