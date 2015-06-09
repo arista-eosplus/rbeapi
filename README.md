@@ -195,7 +195,8 @@ and uploaded to RubyGems.
   ``rake all_rpms`` then follow the ``swix create`` instructions at the end.
 
 # Testing
-The rbeapi library provides spec tests.
+The rbeapi library provides spec tests.  To run the spec tests, you will need to
+update the ``dut.conf`` file found in spec/fixtures.
 
 * To run the spec tests, run ``bundle exec rspec spec`` from the root of the
   rbeapi source folder.
