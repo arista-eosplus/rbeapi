@@ -5,6 +5,7 @@
 1. [Overview] (#overview)
     * [Requirements] (#requirements)
 2. [Getting Started] (#getting-started)
+    * [Example eapi.conf File] (#example-eapiconf-file)
     * [Using rbeapi] (#using-rbeapi)
 3. [Installation] (#installation)
 4. [Contributing] (#contributing)
@@ -13,7 +14,7 @@
 
 # Overview
 
-The Ruby Cliet for eAPI provides a native Ruby implementation for programming Arista EOS network devices using Ruby.  The Ruby client provides the ability to build native applications in Ruby that can communicate with EOS either locally via Unix domain sockets (on-box) or remotely over a HTTP/S transport (off-box).  It uses a standard INI-style configuration file to specifiy one or more connection profiles.
+The Ruby Client for eAPI provides a native Ruby implementation for programming Arista EOS network devices using Ruby.  The Ruby client provides the ability to build native applications in Ruby that can communicate with EOS either locally via Unix domain sockets (on-box) or remotely over a HTTP/S transport (off-box).  It uses a standard INI-style configuration file to specifiy one or more connection profiles.
 
 The rbeapi implemenation also provides an API layer for building native Ruby objects that allow for configuration and state extraction of EOS nodes.  The API layer provides a consistent implementation for working with EOS configuration resources.  The implementation of the API layer is highly extensible and can be used as a foundation for building custom data models.
 
@@ -188,7 +189,7 @@ folder.  See the examples folder for additional examples.
 The source code for rbeapi is provided on Github at
 http://github.com/arista-eosplus/rbeapi.  All current development is done in
 the develop branch.  Stable released versions are tagged in the master branch
-and uploaded to RubyGems.
+and uploaded to [RubyGems](https://rubygems.org/).
 
 * To install the latest stable version of rbeapi, simply run ``gem install rbeapi``
 * To install the latest development version from Github, simply clone the
@@ -203,11 +204,11 @@ and uploaded to RubyGems.
 * To generate a SWIX file for EOS with necessary dependencies, run
   ``rake all_rpms`` then follow the ``swix create`` instructions, provided
   by the build.  NOTE: 
-  PuppetLabs provides a puppet agent SWIX which includes Ruby 1.9.3 in
+  [PuppetLabs](https://puppetlabs.com/misc/pe-files) provides a puppet agent SWIX which includes Ruby 1.9.3 in
   /opt/puppet/bin/ which is different from where you might otherwise install
   Ruby.  If you have installed the puppet-enterprise SWIX, then you should
   build and use the ``pe-rbeapi`` swix, below.   Otherwise, if you have installed
-  Ruby 1.9+ in the standard system location, then the ``rbeapi`` SWIX may be
+  Ruby 1.9.3 in the standard system location, then the ``rbeapi`` SWIX may be
   used.
 
   ```
