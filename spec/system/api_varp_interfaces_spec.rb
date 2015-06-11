@@ -7,13 +7,14 @@ describe Rbeapi::Api::VarpInterfaces do
   subject { described_class.new(node) }
 
   let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-  let(:node) { Rbeapi::Client.connect_to('veos02') }
+  let(:node) { Rbeapi::Client.connect_to('dut') }
 
   describe '#get' do
     before do
       node.config(['ip virtual-router mac-address aabb.ccdd.eeff',
-                   'interface vlan 100', 'ip address 99.99.99.99/24',
-                   'ip virtual-router address 99.99.99.98'])
+                   'default interface vlan 100', 'interface vlan 100',
+                   'ip address 99.99.99.99/24',
+                   'ip virtual-router address 99.99.99.98', 'exit'])
     end
 
     it 'returns an instance for vlan 100' do
@@ -28,8 +29,9 @@ describe Rbeapi::Api::VarpInterfaces do
   describe '#getall' do
     before do
       node.config(['ip virtual-router mac-address aabb.ccdd.eeff',
-                   'interface vlan 100', 'ip address 99.99.99.99/24',
-                   'ip virtual-router address 99.99.99.98'])
+                   'default interface vlan 100', 'interface vlan 100',
+                   'ip address 99.99.99.99/24',
+                   'ip virtual-router address 99.99.99.98', 'exit'])
     end
 
     it 'returns a collection that includes vlan 100' do
@@ -44,8 +46,8 @@ describe Rbeapi::Api::VarpInterfaces do
   describe '#set_addresses' do
     before do
       node.config(['ip virtual-router mac-address aabb.ccdd.eeff',
-                   'no interface vlan 100', 'interface vlan 100',
-                   'ip address 99.99.99.99/24'])
+                   'default interface vlan 100', 'interface vlan 100',
+                   'ip address 99.99.99.99/24', 'exit'])
     end
 
     it 'adds new address to the list of addresses' do

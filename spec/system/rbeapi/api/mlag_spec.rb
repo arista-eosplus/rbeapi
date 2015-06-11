@@ -12,17 +12,17 @@ describe Rbeapi::Api::Mlag do
   end
 
   describe '#get' do
-    let(:keys) do
-      [:domain_id, :local_interface, :peer_address, :peer_link, :shutdown,
-       :interfaces]
+    let(:global_keys) do
+      [:domain_id, :local_interface, :peer_address, :peer_link, :shutdown]
     end
 
     before { node.config('default mlag configuration') }
 
-    it 'contains all required keys' do
-      keys.each do |key|
-        expect(subject.get).to include(key)
+    it 'contains all required global keys' do
+      global_keys.each do |key|
+        expect(subject.get[:global]).to include(key)
       end
+      expect(subject.get).to include(:interfaces)
     end
   end
 
@@ -30,9 +30,9 @@ describe Rbeapi::Api::Mlag do
     before { node.config('default mlag configuration') }
 
     it 'configures the mlag domain-id value' do
-      expect(subject.get[:domain_id]).to be_empty
+      expect(subject.get[:global][:domain_id]).to be_empty
       expect(subject.set_domain_id(value: 'foo')).to be_truthy
-      expect(subject.get[:domain_id]).to eq('foo')
+      expect(subject.get[:global][:domain_id]).to eq('foo')
     end
   end
 
@@ -40,9 +40,9 @@ describe Rbeapi::Api::Mlag do
     before { node.config(['default mlag configuration', 'interface vlan4094']) }
 
     it 'configures the mlag local interface value' do
-      expect(subject.get[:local_interface]).to be_empty
+      expect(subject.get[:global][:local_interface]).to be_empty
       expect(subject.set_local_interface(value: 'Vlan4094')).to be_truthy
-      expect(subject.get[:local_interface]).to eq('Vlan4094')
+      expect(subject.get[:global][:local_interface]).to eq('Vlan4094')
     end
   end
 
@@ -53,9 +53,9 @@ describe Rbeapi::Api::Mlag do
     end
 
     it 'configures the mlag peer link value' do
-      expect(subject.get[:peer_link]).to be_empty
+      expect(subject.get[:global][:peer_link]).to be_empty
       expect(subject.set_peer_link(value: 'Ethernet1')).to be_truthy
-      expect(subject.get[:peer_link]).to eq('Ethernet1')
+      expect(subject.get[:global][:peer_link]).to eq('Ethernet1')
     end
   end
 
@@ -66,31 +66,25 @@ describe Rbeapi::Api::Mlag do
     end
 
     it 'configures the mlag peer address value' do
-      expect(subject.get[:peer_address]).to be_empty
+      expect(subject.get[:global][:peer_address]).to be_empty
       expect(subject.set_peer_address(value: '1.1.1.1')).to be_truthy
-      expect(subject.get[:peer_address]).to eq('1.1.1.1')
+      expect(subject.get[:global][:peer_address]).to eq('1.1.1.1')
     end
   end
 
   describe '#set_shutdown' do
     it 'configures mlag to be enabled' do
       node.config(['mlag configuration', 'shutdown'])
-      expect(subject.get[:shutdown]).to be_truthy
+      expect(subject.get[:global][:shutdown]).to be_truthy
       expect(subject.set_shutdown(value: false)).to be_truthy
-      expect(subject.get[:shutdown]).to be_falsy
+      expect(subject.get[:global][:shutdown]).to be_falsy
     end
 
     it 'configures mlag to be disabled' do
       node.config(['mlag configuration', 'no shutdown'])
-      expect(subject.get[:shutdown]).to be_falsy
+      expect(subject.get[:global][:shutdown]).to be_falsy
       expect(subject.set_shutdown(value: true)).to be_truthy
-      expect(subject.get[:shutdown]).to be_truthy
-    end
-  end
-
-  describe '#interfaces' do
-    it 'is a kind of MlagInterfaces' do
-      expect(subject.interfaces).to be_a_kind_of(Rbeapi::Api::MlagInterfaces)
+      expect(subject.get[:global][:shutdown]).to be_truthy
     end
   end
 end
