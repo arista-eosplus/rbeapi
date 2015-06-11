@@ -232,7 +232,7 @@ module Rbeapi
       #
       # @raises [CommandError] Raised if an eAPI failure response is return
       #   from the destination node.
-      def send(data)
+      def send(data, opts)
         request = Net::HTTP::Post.new('/command-api')
         request.body = JSON.dump(data)
         request.basic_auth @username, @password

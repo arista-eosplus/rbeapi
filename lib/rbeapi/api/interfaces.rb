@@ -476,8 +476,21 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_sflow(name, opts = {})
-        commands = command_builder('sflow', opts)
-        configure_interface(name, commands)
+        value = opts[:value]
+        default = opts.fetch(:default, false)
+
+        case default
+        when true
+          command = 'default sflow enable'
+        when false
+          case value
+          when true
+            command = 'sflow enable'
+          when false
+            command = 'no sflow enable'
+          end
+        end
+        configure_interface(name, command)
       end
 
       ##
