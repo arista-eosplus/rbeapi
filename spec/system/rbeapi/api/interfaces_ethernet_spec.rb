@@ -14,7 +14,8 @@ describe Rbeapi::Api::Interfaces do
   describe '#get' do
     let(:entity) do
       { name: 'Ethernet1', type: 'ethernet', description: '', shutdown: false,
-        sflow: true, flowcontrol_send: 'off', flowcontrol_receive: 'off' }
+        speed: 'auto', forced: false, sflow: true, flowcontrol_send: 'off',
+        flowcontrol_receive: 'off' }
     end
 
     before { node.config(['default interface Ethernet1']) }

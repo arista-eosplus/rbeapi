@@ -13,12 +13,12 @@ describe Rbeapi::Api::Ipinterfaces do
 
   describe '#get' do
     let(:entity) do
-      { address: '99.99.99.99/24', mtu: '1500', helper_addresses: [] }
+      { address: '77.99.99.99/24', mtu: '1500', helper_addresses: [] }
     end
 
     before do
       node.config(['default interface Ethernet1', 'interface Ethernet1',
-                   'no switchport', 'ip address 99.99.99.99/24'])
+                   'no switchport', 'ip address 77.99.99.99/24'])
     end
 
     it 'returns the ipinterface resource' do
@@ -29,7 +29,7 @@ describe Rbeapi::Api::Ipinterfaces do
   describe '#getall' do
     before do
       node.config(['default interface Ethernet1', 'interface Ethernet1',
-                   'no switchport', 'ip address 99.99.99.99/24'])
+                   'no switchport', 'ip address 77.99.99.99/24'])
     end
 
     it 'returns the ipinterface collection' do
@@ -54,7 +54,7 @@ describe Rbeapi::Api::Ipinterfaces do
   describe '#delete' do
     before do
       node.config(['interface Ethernet1', 'no switchport',
-                   'ip address 99.99.99.99/24'])
+                   'ip address 77.99.99.99/24'])
     end
 
     it 'deletes a ipinterface resource' do
@@ -72,9 +72,9 @@ describe Rbeapi::Api::Ipinterfaces do
 
     it 'sets the address value' do
       expect(subject.get('Ethernet1')[:address]).to be_empty
-      expect(subject.set_address('Ethernet1', value: '99.99.99.99/24'))
+      expect(subject.set_address('Ethernet1', value: '77.99.99.99/24'))
         .to be_truthy
-      expect(subject.get('Ethernet1')[:address]).to eq('99.99.99.99/24')
+      expect(subject.get('Ethernet1')[:address]).to eq('77.99.99.99/24')
     end
   end
 
@@ -94,10 +94,10 @@ describe Rbeapi::Api::Ipinterfaces do
   describe '#set_helper_addresses' do
     before do
       node.config(['default interface Ethernet1', 'interface Ethernet1',
-                   'no switchport', 'ip address 99.99.99.99/24'])
+                   'no switchport', 'ip address 77.99.99.99/24'])
     end
 
-    let(:helpers) { %w(99.99.99.98 99.99.99.97) }
+    let(:helpers) { %w(77.99.99.98 77.99.99.97) }
 
     it 'sets the helper addresses on the interface' do
       expect(subject.get('Ethernet1')[:helper_addresses]).to be_empty

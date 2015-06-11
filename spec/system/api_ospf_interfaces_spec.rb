@@ -7,12 +7,12 @@ describe Rbeapi::Api::OspfInterfaces do
   subject { described_class.new(node) }
 
   let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-  let(:node) { Rbeapi::Client.connect_to('veos02') }
+  let(:node) { Rbeapi::Client.connect_to('dut') }
 
   describe '#get' do
     before do
       node.config(['default interface Ethernet1', 'interface Ethernet1',
-                   'no switchport', 'ip address 99.99.99.99/24',
+                   'no switchport', 'ip address 88.99.99.99/24', 'exit',
                    'default interface Ethernet2'])
     end
 
@@ -28,7 +28,7 @@ describe Rbeapi::Api::OspfInterfaces do
   describe '#getall' do
     before do
       node.config(['default interface Ethernet1', 'interface Ethernet1',
-                   'no switchport', 'ip address 99.99.99.99/24',
+                   'no switchport', 'ip address 88.99.99.99/24', 'exit',
                    'default interface Ethernet2'])
     end
 
@@ -48,7 +48,7 @@ describe Rbeapi::Api::OspfInterfaces do
   describe '#set_network_type' do
     before do
       node.config(['default interface Ethernet1', 'interface Ethernet1',
-                   'no switchport', 'ip address 99.99.99.99/24'])
+                   'no switchport', 'ip address 88.99.99.99/24', 'exit'])
     end
 
     it 'configures the ospf interface type to point-to-point' do

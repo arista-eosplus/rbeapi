@@ -7,7 +7,7 @@ describe Rbeapi::Api::Ospf do
   subject { described_class.new(node) }
 
   let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-  let(:node) { Rbeapi::Client.connect_to('veos02') }
+  let(:node) { Rbeapi::Client.connect_to('dut') }
 
   describe '#get' do
     before { node.config(['no router ospf 1', 'router ospf 1']) }

@@ -127,12 +127,12 @@ describe Rbeapi::Api::Interfaces do
     it 'updates the member interfaces on existing interface' do
       node.config(['no interface Port-Channel1', 'interface Ethernet1-2',
                    'channel-group 1 mode on'])
-      expect(subject.get('Port-Channel1')[:members]).to eq(%w('Ethernet1',
-                                                              'Ethernet2'))
+      expect(subject.get('Port-Channel1')[:members]).to eq(%w(Ethernet1
+                                                              Ethernet2))
       expect(subject.set_members('Port-Channel1',
-                                 %w('Ethernet1' 'Ethernet3'))).to be_truthy
-      expect(subject.get('Port-Channel1')[:members]).to eq(%w('Ethernet1'
-                                                              'Ethernet3'))
+                                 %w(Ethernet1 Ethernet3))).to be_truthy
+      expect(subject.get('Port-Channel1')[:members]).to eq(%w(Ethernet1
+                                                              Ethernet3))
     end
   end
 

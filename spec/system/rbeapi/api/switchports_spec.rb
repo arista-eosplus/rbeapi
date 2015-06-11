@@ -122,7 +122,7 @@ describe Rbeapi::Api::Switchports do
     before { node.config(['default interface Ethernet1', 'vlan 100']) }
 
     it 'raises an ArgumentError if value is not an array' do
-      expect(subject.set_trunk_allowed_vlans('Ethernet1', value: '1-100'))
+      expect { subject.set_trunk_allowed_vlans('Ethernet1', value: '1-100') }
         .to raise_error(ArgumentError)
     end
 
