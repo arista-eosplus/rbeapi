@@ -5,12 +5,16 @@
 1. [Overview] (#overview)
     * [Requirements] (#requirements)
 2. [Getting Started] (#getting-started)
+    * [Example eapi.conf File] (#example-eapiconf-file)
+    * [Using rbeapi] (#using-rbeapi)
 3. [Installation] (#installation)
-5. [Contributing] (#contributing)
-6. [License] (#license)
+4. [Contributing] (#contributing)
+5. [License] (#license)
 
 
-The Ruby Cliet for eAPI provides a native Ruby implementation for programming Arista EOS network devices using Ruby.  The Ruby client provides the ability to build native applications in Ruby that can communicate with EOS either locally via Unix domain sockets (on-box) or remotely over a HTTP/S transport (off-box).  It uses a standard INI-style configuration file to specifiy one or more connection profiles.
+# Overview
+
+The Ruby Client for eAPI provides a native Ruby implementation for programming Arista EOS network devices using Ruby.  The Ruby client provides the ability to build native applications in Ruby that can communicate with EOS either locally via Unix domain sockets (on-box) or remotely over a HTTP/S transport (off-box).  It uses a standard INI-style configuration file to specifiy one or more connection profiles.
 
 The rbeapi implemenation also provides an API layer for building native Ruby objects that allow for configuration and state extraction of EOS nodes.  The API layer provides a consistent implementation for working with EOS configuration resources.  The implementation of the API layer is highly extensible and can be used as a foundation for building custom data models.
 
@@ -185,15 +189,56 @@ folder.  See the examples folder for additional examples.
 The source code for rbeapi is provided on Github at
 http://github.com/arista-eosplus/rbeapi.  All current development is done in
 the develop branch.  Stable released versions are tagged in the master branch
-and uploaded to RubyGems.
+and uploaded to [RubyGems](https://rubygems.org/).
 
 * To install the latest stable version of rbeapi, simply run ``gem install rbeapi``
 * To install the latest development version from Github, simply clone the
-  develop branch and run ``rake build``
+  develop branch and run
+
+  ```
+  $ rake build
+  $ rake install
+  ```
+
 * To create an RPM, run ``rake rpm``
 * To generate a SWIX file for EOS with necessary dependencies, run
-  ``rake all_rpms`` then follow the ``swix create`` instructions at the end.
+  ``rake all_rpms`` then follow the ``swix create`` instructions, provided
+  by the build.  NOTE: 
+  [PuppetLabs](https://puppetlabs.com/misc/pe-files) provides a puppet agent SWIX which includes Ruby 1.9.3 in
+  /opt/puppet/bin/ which is different from where you might otherwise install
+  Ruby.  If you have installed the puppet-enterprise SWIX, then you should
+  build and use the ``pe-rbeapi`` swix, below.   Otherwise, if you have installed
+  Ruby 1.9.3 in the standard system location, then the ``rbeapi`` SWIX may be
+  used.
 
+  ```
+  $ bundle install --path .bundle/gems/
+  $ bundle exec rake all_rpms
+  ...
+  RPMs are available in rpms/noarch/
+  Copy the RPMs to an EOS device then run the 'swix create' command.
+    With Puppet: cd/mnt/flash; swix create pe-rbeapi-0.1.0-1.swix \
+                 pe-rubygem-rbeapi-0.1.0-1.eos4.noarch.rpm \
+                 pe-rubygem-inifile-3.0.0-1.eos4.noarch.rpm 
+    No Puppet:   cd /mnt/flash; swix create rbeapi-0.1.0-1.swix \
+                 rubygem-rbeapi-0.1.0-1.eos4.noarch.rpm \
+                 rubygem-inifile-3.0.0-1.eos4.noarch.rpm \
+                 rubygem-net_http_unix-0.2.1-1.eos4.noarch.rpm
+  ```
+
+  On EOS:
+  ```
+  Arista# copy <URI-to-RPMs> flash:
+  Arista# bash
+  -bash-4.1# cd /mnt/flash/
+  -bash-4.1# swix create pe-rbeapi-0.1.0-1.swix \
+             pe-rubygem-rbeapi-0.1.0-1.eos4.noarch.rpm \
+             pe-rubygem-inifile-3.0.0-1.eos4.noarch.rpm
+  -bash-4.1# exit
+  Arista# copy flash:pe-rbeapi-0.1.0-1.swix extension:
+  Arista# extension pe-rbeapi-0.1.0-1.swix
+  Arista# copy installed-extensions boot-extensions
+  ```
 
 # Contributing
 
