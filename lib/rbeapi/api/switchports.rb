@@ -199,9 +199,7 @@ module Rbeapi
         value = opts[:value]
         default = opts[:default] || false
 
-        unless value.is_a?(Array)
-          fail ArgumentError, 'value must be an Array'
-        end
+        fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
 
         value = value.map(&:inspect).join(',') if value
 

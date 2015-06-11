@@ -42,6 +42,8 @@ module Rbeapi
     # nodes SNMP conifguration entity.  This class presents an abstraction
     # of the node's snmp configuration from the running config.
     #
+    # rubocop:disable Metrics/ClassLength
+    #
     # @eos_version 4.13.7M
     class Snmp < Entity
       DEFAULT_SNMP_LOCATION = ''

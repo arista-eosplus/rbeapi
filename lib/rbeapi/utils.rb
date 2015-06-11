@@ -46,7 +46,7 @@ module Rbeapi
     #   symboles
     def self.transform_keys_to_symbols(value)
       return value unless value.is_a?(Hash)
-      hash = value.each_with_object({}) do |hsh, (k, v)|
+      hash = value.each_with_object({}) do |(k, v), hsh|
         hsh[k.to_sym] = transform_keys_to_symbols(v)
         hsh
       end

@@ -42,6 +42,9 @@ module Rbeapi
     # that control the redistribution of IP routes into a protocol domain on
     # the basis of such criteria as route metrics, access control lists, next
     # hop addresses, and route tags.
+    #
+    # rubocop:disable Metrics/MethodLength
+    #
     class Routemaps < Entity
       def get(name)
         entries = config.scan(/^route-map\s#{name}\s.+$/)

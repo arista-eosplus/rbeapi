@@ -23,7 +23,9 @@ describe Rbeapi::Api::PortchannelInterface do
     before :each do
       allow(subject.node).to receive(:enable)
         .with(include('show port-channel'), format: 'text')
-        .and_return([{ result: { 'output' => "Port Channel Port-Channel1:\n  Active Ports: Ethernet1 PeerEthernet1 \n\n" } }])
+        .and_return([{ result:
+                       { 'output' => "Port Channel Port-Channel1:\n  Active " \
+                                     "Ports: Ethernet1 PeerEthernet1 \n\n" } }])
     end
     let(:resource) { subject.get('Port-Channel1') }
 

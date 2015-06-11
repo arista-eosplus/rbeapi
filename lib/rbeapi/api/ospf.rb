@@ -44,6 +44,8 @@ module Rbeapi
       ##
       # Returns the global OSPF configuration from the node
       #
+      # rubocop:disable Metrics/MethodLength
+      #
       # @example
       #   {
       #     "router_id": <string>
@@ -59,8 +61,9 @@ module Rbeapi
         config = get_block("router ospf #{inst}")
         return nil unless config
 
+        response = {}
         mdata = /(?<=^\s{3}router-id\s)(.+)$/.match(config)
-        resp['router_id'] = mdata.nil? ? '' : mdata[0]
+        response['router_id'] = mdata.nil? ? '' : mdata[0]
 
         networks = config.scan(/^\s{3}network\s(.+)\sarea\s(.+)$/)
         areas = networks.each_with_object({}) do |cfg, hsh|
@@ -71,15 +74,15 @@ module Rbeapi
             hsh[area] = [net]
           end
         end
-        resp['areas'] = areas
+        response['areas'] = areas
 
-        values = config.scan(/(?<=^\s{3}redistribute\s)
-                             (\w+)[\s|$]*(route-map\s(.+))?/)
+        values = \
+          config.scan(/(?<=^\s{3}redistribute\s)(\w+)[\s|$]*(route-map\s(.+))?/)
 
-        resp['redistribute'] = values.each_with_object({}) do |value, hsh|
+        response['redistribute'] = values.each_with_object({}) do |value, hsh|
           hsh[value[0]] = { 'route_map' => value[2] }
         end
-        resp
+        response
       end
 
       ##
