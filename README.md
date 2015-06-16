@@ -64,6 +64,12 @@ using the following values:
     * transport: https, deafult port: 443
     * transport: https_local, default port: 8080
     * transport: socket, default port: n/a
+* **open_timeout** - The default number of seconds to wait for the eAPI
+  connection to open. Any number may be used, including Floats for fractional
+  seconds. Default value is 10 seconds.
+* **read_timeout** - The default number of seconds to wait for one block of
+  eAPI results to be read (via one read(2) call).  Any number may be used,
+  including Floats for fractional seconds. Default value is 10 seconds.
 
 
 _Note:_ See the EOS User Manual found at arista.com for more details on
