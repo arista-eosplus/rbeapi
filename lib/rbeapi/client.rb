@@ -221,7 +221,9 @@ module Rbeapi
       end
 
       ##
-      # Returns the configuration for the connection specified
+      # Returns the configuration for the connection specified. If a
+      # connection is not found matching the name and if a default
+      # connection has been specified then return the default connection.
       #
       # @param [String] :name The name of the connection to return from
       #   the configuration.  This should be the string right of the :
@@ -231,8 +233,10 @@ module Rbeapi
       #   properities from the loaded config.  This method will return nil
       #   if the connection name is not found.
       def get_connection(name)
-        return nil unless sections.include? "connection:#{name}"
-        self["connection:#{name}"]
+        return self["connection:#{name}"] \
+          if sections.include? "connection:#{name}"
+        return self['connection:*'] if sections.include? 'connection:*'
+        nil
       end
 
       ##
