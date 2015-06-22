@@ -1,0 +1,22 @@
+ip access-list standard test
+   no statistics per-entry
+   fragment-rules
+   10 permit host 1.2.3.4 log
+   20 permit 1.2.3.4 255.255.0.0 log
+   30 deny any
+   40 permit 5.6.7.0/24
+   50 permit 16.0.0.0/8
+   60 permit 9.10.11.0 255.255.255.0 log
+!
+ip access-list standard test2
+   no statistics per-entry
+   fragment-rules
+   10 permit 100.1.1.0 255.255.0.0
+   20 permit 100.2.1.0 255.255.0.0
+   30 permit 100.3.1.0 255.255.0.0
+   40 permit 100.4.1.0 255.255.0.0
+   50 permit 100.5.1.0 255.255.0.0
+   60 deny 100.6.1.0 255.255.0.0 log
+   70 permit 11.12.13.14
+   80 permit 15.16.17.18
+!
