@@ -188,14 +188,15 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :seqno The sequence number of the entry in
+      # @param [Hash] :opts the options for the entry
+      # @option :opts  [String] :seqno The sequence number of the entry in
       #   the ACL to add. Default is nil, will be assigned.
-      # @param [String] :action The action triggered by the ACL. Valid
+      # @option :opts  [String] :action The action triggered by the ACL. Valid
       #   values are 'permit', 'deny', or 'remark'
-      # @param [String] :addr The IP address to permit or deny.
-      # @param [String] :prefixlen The prefixlen for the IP address.
-      # @param [Boolean] :log Triggers an informational log message to the
-      #   console about the matching packet.
+      # @option :opts  [String] :addr The IP address to permit or deny.
+      # @option :opts  [String] :prefixlen The prefixlen for the IP address.
+      # @option :opts  [Boolean] :log Triggers an informational log message
+      #   to the console about the matching packet.
       #
       # @return [String] returns commands to create an entry
       def build_entry(entry)
@@ -213,14 +214,15 @@ module Rbeapi
       # @eos_version 4.13.7M
       #
       # @param [String] :name The ACL name to update on the node.
-      # @param [String] :seqno The sequence number of the entry in
+      # @param [Hash] :opts the options for the entry
+      # @option :opts  [String] :seqno The sequence number of the entry in
       #   the ACL to update.
-      # @param [String] :action The action triggered by the ACL. Valid
+      # @option :opts  [String] :action The action triggered by the ACL. Valid
       #   values are 'permit', 'deny', or 'remark'
-      # @param [String] :addr The IP address to permit or deny.
-      # @param [String] :prefixlen The prefixlen for the IP address.
-      # @param [Boolean] :log Triggers an informational log message to the
-      #   console about the matching packet.
+      # @option :opts  [String] :addr The IP address to permit or deny.
+      # @option :opts  [String] :prefixlen The prefixlen for the IP address.
+      # @option :opts  [Boolean] :log Triggers an informational log message
+      #   to the console about the matching packet.
       #
       # @return [Boolean] returns true if the command complete successfully
       def update_entry(name, entry)
@@ -237,13 +239,14 @@ module Rbeapi
       #
       # @eos_version 4.13.7M
       #
-      # @param [String] :name The ACL name to update on the node.
-      # @param [String] :action The action triggered by the ACL. Valid
+      # @param [String] :name The ACL name to add an entry to on the node.
+      # @param [Hash] :opts the options for the entry
+      # @option :opts  [String] :action The action triggered by the ACL. Valid
       #   values are 'permit', 'deny', or 'remark'
-      # @param [String] :addr The IP address to permit or deny.
-      # @param [String] :prefixlen The prefixlen for the IP address.
-      # @param [Boolean] :log Triggers an informational log message to the
-      #   console about the matching packet.
+      # @option :opts  [String] :addr The IP address to permit or deny.
+      # @option :opts  [String] :prefixlen The prefixlen for the IP address.
+      # @option :opts  [Boolean] :log Triggers an informational log message
+      #   to the console about the matching packet.
       #
       # @return [Boolean] returns true if the command complete successfully
       def add_entry(name, entry)
