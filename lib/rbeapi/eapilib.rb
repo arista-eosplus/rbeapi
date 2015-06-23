@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014, 2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,7 @@ module Rbeapi
       # @param [String] :message The error message to return from raising
       #   this exception
       # @param [Integer] :code The error code associated with the error
-      #   messsage to be raised
+      #   message to be raised
       # @param [Array] :commands The list of commands that were used  in the
       #   eAPI request message
       def initialize(message, code, commands = nil)
@@ -134,17 +134,32 @@ module Rbeapi
 
       ##
       # Configures the connection authentication values (username and
-      # and password).  The authentication values are used to authenticate
+      # password).  The authentication values are used to authenticate
       # the eAPI connection.  Using authentication is only required for
       # connections that use Http or Https transports
       #
-      # @param [String] :username The username to use to authenticate to
-      #   eAPI with
-      # @param [String] :password The password to use to authenticate to
-      #   eAPI with
-      def authentication(username, password)
-        @username = username
-        @password = password
+      # @options :opts [String] :username The username to use to
+      #   authenticate with eAPI. Default is 'admin'.
+      # @options :opts [String] :password The password to use to
+      #   authenticate with eAPI. Default is ''.
+      def authentication(opts = {})
+        @username = opts.fetch(:username, 'admin')
+        @password = opts.fetch(:password, '')
+      end
+
+      ##
+      # Configures the connection timeout values (open_timeout and
+      # read_timeout).  The timeout values are used for the eAPI
+      # connection.
+      #
+      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #   eAPI connection to open. Default is DEFAULT_HTTP_OPEN_TIMEOUT.
+      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #   block of eAPI results to be read (via one read(2) call). Default
+      #   is DEFAULT_HTTP_READ_TIMEOUT.
+      def timeouts(opts = {})
+        @open_timeout = opts.fetch(:open_timeout, DEFAULT_HTTP_OPEN_TIMEOUT)
+        @read_timeout = opts.fetch(:read_timeout, DEFAULT_HTTP_READ_TIMEOUT)
       end
 
       ##
@@ -175,7 +190,7 @@ module Rbeapi
       #   value is json
       #
       # @return [Hash] Returns a Ruby hash of the request message that is
-      #   suitable to be JSON encoded and sent to the desitination node
+      #   suitable to be JSON encoded and sent to the destination node
       def request(commands, opts = {})
         id = opts.fetch(:reqid, object_id)
         format = opts.fetch(:format, 'json')
@@ -227,6 +242,10 @@ module Rbeapi
       #
       # @param [Hash] :data A hash containing the body of the request
       #   message.  This should be a valid eAPI request message.
+      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #   eAPI connection to open.
+      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #   block of eAPI results to be read (via one read(2) call).
       #
       # @return [Hash] returns the response message as a Ruby hash object
       #
@@ -237,8 +256,8 @@ module Rbeapi
         request.body = JSON.dump(data)
         request.basic_auth @username, @password
 
-        open_timeout = opts.fetch(:open_timeout, DEFAULT_HTTP_OPEN_TIMEOUT)
-        read_timeout = opts.fetch(:read_timeout, DEFAULT_HTTP_READ_TIMEOUT)
+        open_timeout = opts.fetch(:open_timeout, @open_timeout)
+        read_timeout = opts.fetch(:read_timeout, @read_timeout)
 
         begin
           @transport.open_timeout = open_timeout
@@ -262,11 +281,15 @@ module Rbeapi
       # Executes the commands on the destination node and returns the
       # response from the node.
       #
-      # @param [Array] :commands The ordered list of commandst to execute
+      # @param [Array] :commands The ordered list of commands to execute
       #   on the destination node.
       # @param [Hash] :opts Optional keyword arguments
       # @option :opts [String] :encoding Used to specify the encoding to be
       #   used for the response.  Valid encoding values are json or text
+      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #   eAPI connection to open.
+      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #   block of eAPI results to be read (via one read(2) call).
       #
       # @returns [Array<Hash>] This method will return the array of responses
       #   for each command executed on the node.
@@ -274,7 +297,7 @@ module Rbeapi
       # @raises [CommandError] Raises a CommandError if rescued from the
       #   send method and adds the list of commands to the exception message
       #
-      # @raises [ConnectionError] Raises a ConnectionError if resuced and
+      # @raises [ConnectionError] Raises a ConnectionError if rescued and
       #   adds the list of commands to the exception message
       def execute(commands, opts = {})
         @error = nil
@@ -310,9 +333,8 @@ module Rbeapi
         transport = Net::HTTP.new(host, port.to_i)
         super(transport)
 
-        user = opts.fetch(:username, 'admin')
-        pass = opts.fetch(:password, '')
-        authentication(user, pass)
+        authentication(opts)
+        timeouts(opts)
       end
     end
 
@@ -325,9 +347,8 @@ module Rbeapi
         transport = Net::HTTP.new('localhost', port)
         super(transport)
 
-        user = opts.fetch(:username, 'admin')
-        pass = opts.fetch(:password, '')
-        authentication(user, pass)
+        authentication(opts)
+        timeouts(opts)
       end
     end
 
@@ -344,9 +365,8 @@ module Rbeapi
         transport.verify_mode = OpenSSL::SSL::VERIFY_NONE
         super(transport)
 
-        user = opts.fetch(:username, 'admin')
-        pass = opts.fetch(:password, '')
-        authentication(user, pass)
+        authentication(opts)
+        timeouts(opts)
       end
     end
   end

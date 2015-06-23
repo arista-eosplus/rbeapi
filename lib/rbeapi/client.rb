@@ -311,13 +311,20 @@ module Rbeapi
       # to the caller
       #
       # @param [Array<String>] commands An ordered list of commands to execute
+      # @option :opts [String] :encoding The encoding scheme to use for sending
+      #   and receive eAPI messages.  Valid values are json and text.  The
+      #   default value is json
+      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #   eAPI connection to open.
+      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #   block of eAPI results to be read (via one read(2) call).
       #
       # @return [Array<Hash>] ordered list of output from commands
-      def config(commands)
+      def config(commands, opts = {})
         commands = [*commands] unless commands.respond_to?('each')
 
         commands.insert(0, 'configure')
-        response = run_commands commands
+        response = run_commands(commands, opts)
 
         refresh if @autorefresh
 
@@ -332,34 +339,37 @@ module Rbeapi
       # rubocop:disable Metrics/MethodLength
       #
       # @param [Array<String>] commands An ordered list of commands to execute
-      # @param [String] :encoding The encoding scheme to use for sending and
-      #   receive eAPI messages.  Valid values are json and text.  The default
-      #   value is json
+      # @option :opts [String] :encoding The encoding scheme to use for sending
+      #   and receive eAPI messages.  Valid values are json and text.  The
+      #   default value is json
+      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #   eAPI connection to open.
+      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #   block of eAPI results to be read (via one read(2) call).
       #
       # @return [Array<Hash>] ordered list of output from commands
       def enable(commands, opts = {})
         commands = [*commands] unless commands.respond_to?('each')
 
         encoding = opts.fetch(:encoding, 'json')
+        opts[:encoding] = encoding
         strict = opts.fetch(:strict, false)
-        open_timeout = opts.fetch(:open_timeout, 10)
-        read_timeout = opts.fetch(:read_timeout, 10)
 
         results = []
         if strict
-          responses = run_commands(commands, encoding, open_timeout,
-                                   read_timeout)
+          responses = run_commands(commands, opts)
           responses.each_with_index do |resp, idx|
             results << make_response(commands[idx], resp, encoding)
           end
         else
           commands.each do |cmd|
             begin
-              response = run_commands(cmd, encoding, open_timeout, read_timeout)
+              response = run_commands(cmd, opts)
               results << make_response(cmd, response.first, encoding)
             rescue Rbeapi::Eapilib::CommandError => exc
               raise unless exc.error_code == 1003
-              response = run_commands(cmd, 'text', open_timeout, read_timeout)
+              opts[:encoding] = 'text'
+              response = run_commands(cmd, opts)
               results << make_response(cmd, response.first, encoding)
             end
           end
@@ -390,11 +400,15 @@ module Rbeapi
       #
       # @param [Array] :commands The ordered list of commands to send to the
       #   destination node.
-      # @param [String] :encoding The encoding scheme to use for sending and
-      #   receive eAPI requests.  This argument is optional.  Valid values
-      #   include json or text.  The default is json
-      def run_commands(commands, encoding = 'json', open_timeout = 10,
-                       read_timeout = 10)
+      # @option :opts [String] :encoding The encoding scheme to use for
+      #   sending and receive eAPI requests.  This argument is optional.
+      #   Valid values include json or text.  The default is json
+      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #   eAPI connection to open.
+      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #   block of eAPI results to be read (via one read(2) call).
+      def run_commands(commands, opts = {})
+        encoding = opts.fetch(:encoding, 'json')
         commands = [*commands] unless commands.respond_to?('each')
         commands = commands.dup
 
@@ -404,9 +418,8 @@ module Rbeapi
           commands.insert(0, 'enable')
         end
 
-        response = @connection.execute(commands, format: encoding,
-                                                 open_timeout: open_timeout,
-                                                 read_timeout: read_timeout)
+        opts[:format] = encoding
+        response = @connection.execute(commands, opts)
         response.shift
         response
       end
@@ -441,7 +454,7 @@ module Rbeapi
         config = opts.fetch(:config, 'running-config')
         params = opts.fetch(:params, '')
         as_string = opts.fetch(:as_string, false)
-        result = run_commands("show #{config} #{params}", 'text')
+        result = run_commands("show #{config} #{params}", encoding: 'text')
         return result.first['output'].strip.split("\n") unless as_string
         result.first['output'].strip
       end
