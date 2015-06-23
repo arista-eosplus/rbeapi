@@ -42,7 +42,7 @@ module Rbeapi
   # Rbeapi::Client
   module Client
     class << self
-      DEFAULT_TRANSPORT = 'http'
+      DEFAULT_TRANSPORT = 'https'
 
       TRANSPORTS = { 'http' => 'Rbeapi::Eapilib::HttpEapiConnection',
                      'https' => 'Rbeapi::Eapilib::HttpsEapiConnection',
