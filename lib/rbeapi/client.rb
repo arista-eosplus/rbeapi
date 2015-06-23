@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014, 2015 Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@ module Rbeapi
       # load_config overrides the default conf file loaded in the config
       # instances using the supplied conf argument as the conf file.  This
       # method will clear out an previously loaded configuration and replace
-      # all entries with the contects of the supplied file.
+      # all entries with the contents of the supplied file.
       #
       # @param [String] :conf The full path to the conf file to load into
       #   the config instance.
@@ -75,8 +75,8 @@ module Rbeapi
       end
 
       ##
-      # Returns the configuration options for the named connection from the
-      # the loaded configuuration.  The configuration name is specified as
+      # Returns the configuration options for the named connection from
+      # the loaded configuration.  The configuration name is specified as
       # the string right of the colon in the section name.
       #
       # @param [String] :name The connection name to return from the loaded
@@ -116,13 +116,13 @@ module Rbeapi
       #
       # @param [Hash] :opts the options to create a message with
       # @option :opts [String] :host The IP address or hostname of the remote
-      #   eAPI endpint
+      #   eAPI endpoint
       # @option :opts [String] :username The username to use to authenticate
       #   the eAPI connection with
       # @option :opts [String] :password The password to use to authenticate
       #   the eAPI connection with
       # @option :opts [String] :enable_pwd The enable password (if defined) to
-      #   pass to the remote node to enter priviledged mode
+      #   pass to the remote node to enter privilege mode
       # @option :opts [String] :use_ssl Specifies whether or not to use the
       #   HTTP or HTTPS protocol
       # @option :opts [String] :port The port to connect to.  If not specified
@@ -171,7 +171,7 @@ module Rbeapi
       end
 
       ##
-      # This private method automtically finds and loads the conf file
+      # This private method automatically finds and loads the conf file
       # into the instance using the class variable CONFIG_SEARCH_PATH.  The
       # connections should be retrieved using the get_connection method
       #
@@ -204,6 +204,15 @@ module Rbeapi
       def read(filename)
         super(filename: filename)
 
+        # For each section, if the host parameter is omitted then the
+        # connection name is used
+        sections.each do |name|
+          if name.start_with?('connection:')
+            conn = self["#{name}"]
+            conn['host'] = name.split(':')[1] unless conn['host']
+          end
+        end
+
         return if get_connection 'localhost'
         add_connection('localhost', transport: 'socket')
       end
@@ -211,7 +220,7 @@ module Rbeapi
       ##
       # This method will cause the config to be loaded.  The process of
       # finding the configuration will be repeated so it is possible a
-      # different conf file could be choosen if the original file was
+      # different conf file could be chosen if the original file was
       # removed or a new file added higher on the search priority list
       #
       # @param [Hash] :opts The options for specifying the message
@@ -228,7 +237,7 @@ module Rbeapi
       #   in the config section header
       #
       # @return [nil, Hash<String, String> Returns a hash of the connection
-      #   properities from the loaded config.  This method will return nil
+      #   properties from the loaded config.  This method will return nil
       #   if the connection name is not found.
       def get_connection(name)
         return nil unless sections.include? "connection:#{name}"
@@ -247,8 +256,8 @@ module Rbeapi
     end
 
     ##
-    # The Node object provies an instance for sending and receiveing messages
-    # with a specific EOS device. The methods provided in this calss allow
+    # The Node object provides an instance for sending and receiving messages
+    # with a specific EOS device. The methods provided in this class allow
     # for handling both enable mode and config mode commands
     class Node
       attr_reader :connection
@@ -275,7 +284,7 @@ module Rbeapi
 
       ##
       # Provides access to the nodes startup-configuration.  This is a lazily
-      # loaded memoized prpoerty for working with the nodes startup config
+      # loaded memoized property for working with the nodes startup config
       #
       # @return [String] The node's startup-config as a string
       def startup_config
@@ -318,7 +327,7 @@ module Rbeapi
 
       ##
       # The enable method is a convenience method that will handling putting
-      # the switch into priviledge mode prior to executing commands.
+      # the switch into privilege mode prior to executing commands.
       #
       # rubocop:disable Metrics/MethodLength
       #
@@ -438,7 +447,7 @@ module Rbeapi
       end
 
       ##
-      # Returns an API module for working with the active conifguraiton
+      # Returns an API module for working with the active configuration
       # of the node
       def api(name, opts = {})
         path = opts.fetch(:path, 'rbeapi/api')
