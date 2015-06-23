@@ -1,7 +1,9 @@
 source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
-gem 'net_http_unix'
 gem 'inifile'
+gem 'json'
+gem 'net_http_unix'
+gem 'netaddr'
 
 group :development do
   gem 'guard'
