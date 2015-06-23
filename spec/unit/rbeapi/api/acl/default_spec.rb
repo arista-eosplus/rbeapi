@@ -51,7 +51,7 @@ describe Rbeapi::Api::StandardAcls do
   end
 
   describe '#get' do
-    let(:test_entries) do
+    let(:test1_entries) do
       { '10' => { seq: '10', action: 'permit', srcaddr: '1.2.3.4',
                   srclen: '255.255.255.255', log: 'log' },
         '20' => { seq: '20', action: 'permit', srcaddr: '1.2.3.4',
@@ -68,13 +68,13 @@ describe Rbeapi::Api::StandardAcls do
     end
 
     it 'returns the ACL resource' do
-      expect(subject.get('test')).to eq(test_entries)
+      expect(subject.get('test1')).to eq(test1_entries)
     end
   end
 
   describe '#getall' do
     it 'returns the ACL collection' do
-      expect(subject.getall).to include('test')
+      expect(subject.getall).to include('test1')
       expect(subject.getall).to include('test2')
     end
 
@@ -82,7 +82,7 @@ describe Rbeapi::Api::StandardAcls do
       expect(subject.getall).to be_a_kind_of(Hash)
     end
 
-    it 'has only one entry' do
+    it 'has two entries' do
       expect(subject.getall.size).to eq(2)
     end
   end

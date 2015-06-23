@@ -39,14 +39,15 @@ describe Rbeapi::Api::StandardAcls do
   end
 
   let(:test2_entries) do
-    { '10' => { seq: '10', action: 'permit', srcaddr: '1.2.3.4',
-                srclen: '255.255.255.255', log: 'log' }
+    { '10' => { seq: '10', action: 'deny', srcaddr: '16.0.0.0',
+                srclen: '8', log: nil }
     }
   end
 
   describe '#get' do
     it 'returns the test ACL entries' do
       expect(subject.get('test1')).to eq(test1_entries)
+      expect(subject.get('test2')).to eq(test2_entries)
     end
   end
 
