@@ -21,10 +21,8 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'inifile'
   spec.add_runtime_dependency 'json'
-  spec.add_runtime_dependency 'net/http'
   spec.add_runtime_dependency 'net_http_unix'
   spec.add_runtime_dependency 'netaddr'
-  spec.add_runtime_dependency 'openssl'
 
   spec.add_development_dependency 'bundler', '~> 1.3'
   spec.add_development_dependency 'yard'

@@ -1,6 +1,7 @@
 source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
 gem 'inifile'
+gem 'json'
 gem 'net_http_unix'
 gem 'netaddr'
 
