@@ -39,8 +39,8 @@ module Rbeapi
   # Api is module namespace for working with the EOS command API
   module Api
     ##
-    # The StarndardAcls class manages the set of standard ACLs.
-    class StandardAcls < Entity
+    # The Acl class manages the set of standard ACLs.
+    class Acl < Entity
       def initialize(node)
         super(node)
         @entry_re = Regexp.new(%r{(\d+)
@@ -112,16 +112,16 @@ module Rbeapi
         lines = config.scan(/\d+ [p|d].*$/)
         lines.each do |line|
           entry = line.scan(@entry_re).map \
-            do |(seq, act, _anyip, _host, ip, mlen, mask, log)|
+            do |(seqno, act, _anyip, _host, ip, mlen, mask, log)|
             {
-              seq: seq,
+              seqno: seqno,
               action: act,
               srcaddr: ip || '0.0.0.0',
-              srclen: mlen || mask_to_prefixlen(mask),
+              srcprefixlen: mlen || mask_to_prefixlen(mask),
               log: log
             }
           end
-          entries[entry[0][:seq]] = entry[0]
+          entries[entry[0][:seqno]] = entry[0]
         end
         entries
       end
@@ -200,8 +200,8 @@ module Rbeapi
       #
       # @return [String] returns commands to create an entry
       def build_entry(entry)
-        cmds = "#{entry[:seq]} " if entry[:seq]
-        cmds << "#{entry[:action]} #{entry[:srcaddr]}/#{entry[:srclen]}"
+        cmds = "#{entry[:seqno]} " if entry[:seqno]
+        cmds << "#{entry[:action]} #{entry[:srcaddr]}/#{entry[:srcprefixlen]}"
         cmds << ' log' if entry[:log]
         cmds
       end
@@ -227,7 +227,7 @@ module Rbeapi
       # @return [Boolean] returns true if the command complete successfully
       def update_entry(name, entry)
         cmds = ["ip access-list standard #{name}"]
-        cmds << "no #{entry[:seq]}"
+        cmds << "no #{entry[:seqno]}"
         cmds << build_entry(entry)
         cmds << 'exit'
         configure(cmds)
