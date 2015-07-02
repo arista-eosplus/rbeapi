@@ -101,6 +101,7 @@ module Rbeapi
       def connect_to(name)
         config = config_for(name)
         return nil unless config
+        config["host"] = name if config["host"] == "*"
         config = Rbeapi::Utils.transform_keys_to_symbols(config)
         connection = connect config
         Node.new(connection)
