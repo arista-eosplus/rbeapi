@@ -86,12 +86,15 @@ task all_rpms: :build do
   Rake::Task['netaddr'].invoke
   puts 'RPMs are available in rpms/noarch/'
   puts "Copy the RPMs to an EOS device then run the 'swix create' command."
-  puts '  Example: cd /mnt/flash; swix create rbeapi-0.1.0-2.swix \\'
+  puts '  Examples: '
+  puts '      Puppet Open Source: '
+  puts '           cd /mnt/flash; swix create rbeapi-0.1.0-2.swix \\'
   puts '           rubygem-rbeapi-0.1.0-2.eos4.noarch.rpm \\'
   puts '           rubygem-inifile-3.0.0-2.eos4.noarch.rpm \\'
   puts '           rubygem-netaddr-1.5.0-1.eos4.noarch.rpm \\'
   puts '           rubygem-net_http_unix-0.2.1-2.eos4.noarch.rpm'
-  puts '  For PE:: cd/mnt/flash; swix create pe-rbeapi-0.1.0-1.swix \\'
+  puts '      Puppet-enterprise: '
+  puts '           cd/mnt/flash; swix create pe-rbeapi-0.1.0-2.swix \\'
   puts '           pe-rubygem-rbeapi-0.1.0-2.eos4.noarch.rpm \\'
   puts '           pe-rubygem-inifile-3.0.0-2.eos4.noarch.rpm \\'
   puts '           pe-rubygem-netaddr-1.5.0-1.eos4.noarch.rpm'
