@@ -88,13 +88,15 @@ task all_rpms: :build do
   puts "Copy the RPMs to an EOS device then run the 'swix create' command."
   puts '  Examples: '
   puts '      Puppet Open Source: '
-  puts "           cd /mnt/flash; swix create rbeapi-#{Rbeapi::VERSION}-1.swix \\"
+  puts '           cd /mnt/flash; \\'
+  puts "           swix create rbeapi-#{Rbeapi::VERSION}-1.swix \\"
   puts "           rubygem-rbeapi-#{Rbeapi::VERSION}-1.eos4.noarch.rpm \\"
   puts '           rubygem-inifile-3.0.0-2.eos4.noarch.rpm \\'
   puts '           rubygem-netaddr-1.5.0-1.eos4.noarch.rpm \\'
   puts '           rubygem-net_http_unix-0.2.1-2.eos4.noarch.rpm'
   puts '      Puppet-enterprise: '
-  puts "           cd/mnt/flash; swix create pe-rbeapi-#{Rbeapi::VERSION}-1.swix \\"
+  puts '           cd/mnt/flash; \\'
+  puts "           swix create pe-rbeapi-#{Rbeapi::VERSION}-1.swix \\"
   puts "           pe-rubygem-rbeapi-#{Rbeapi::VERSION}-1.eos4.noarch.rpm \\"
   puts '           pe-rubygem-inifile-3.0.0-2.eos4.noarch.rpm \\'
   puts '           pe-rubygem-netaddr-1.5.0-1.eos4.noarch.rpm'
