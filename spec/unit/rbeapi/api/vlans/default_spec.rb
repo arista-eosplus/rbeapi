@@ -20,7 +20,6 @@ describe Rbeapi::Api::Vlans do
   end
 
   describe '#get' do
-
     let(:entity) do
       { name: 'default', state: 'active', trunk_groups: [] }
     end
@@ -85,7 +84,6 @@ describe Rbeapi::Api::Vlans do
       expect(node).to receive(:config).with(['vlan 1', 'default name'])
       expect(subject.set_name('1', value: 'foo', default: true)).to be_truthy
     end
-
   end
 
   describe '#set_state' do
@@ -111,13 +109,14 @@ describe Rbeapi::Api::Vlans do
 
     it 'default option take precedence' do
       expect(node).to receive(:config).with(['vlan 1', 'default state'])
-      expect(subject.set_state('1', value: 'active', default: true)).to be_truthy
+      expect(subject.set_state('1', value: 'active', default: true)).to \
+        be_truthy
     end
 
     it 'raises ArgumentError for invalid state' do
-      expect { subject.set_state('1', value: 'foo') }.to raise_error ArgumentError
+      expect { subject.set_state('1', value: 'foo') }.to \
+        raise_error ArgumentError
     end
-
   end
 
   describe '#add_trunk_group' do
@@ -134,5 +133,3 @@ describe Rbeapi::Api::Vlans do
     end
   end
 end
-
-

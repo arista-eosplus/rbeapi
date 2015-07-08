@@ -12,10 +12,10 @@ describe Rbeapi::Api::Interfaces do
   end
 
   describe '#get' do
-
     let(:entity) do
       { name: 'Vxlan1', type: 'vxlan', description: '', shutdown: false,
-        source_interface: '', multicast_group: ''}
+        source_interface: '', multicast_group: '', udp_port: 4789,
+        flood_list: [], vlans: {} }
     end
 
     before { node.config(['no interface Vxlan1', 'interface Vxlan1']) }
@@ -35,7 +35,7 @@ describe Rbeapi::Api::Interfaces do
     it 'returns a hash collection' do
       expect(subject.getall).to be_a_kind_of(Hash)
     end
- end
+  end
 
   describe '#create' do
     before { node.config('no interface Vxlan1') }
@@ -97,7 +97,8 @@ describe Rbeapi::Api::Interfaces do
 
     it 'sets the source interface value on the interface' do
       expect(subject.get('Vxlan1')[:source_interface]).to be_empty
-      expect(subject.set_source_interface('Vxlan1', value: 'Loopback0')).to be_truthy
+      expect(subject.set_source_interface('Vxlan1', value: 'Loopback0'))
+        .to be_truthy
       expect(subject.get('Vxlan1')[:source_interface]).to eq('Loopback0')
     end
   end
@@ -107,9 +108,9 @@ describe Rbeapi::Api::Interfaces do
 
     it 'sets the multicast group value on the interface' do
       expect(subject.get('Vxlan1')[:multicast_group]).to be_empty
-      expect(subject.set_multicast_group('Vxlan1', value: '239.10.10.10')).to be_truthy
+      expect(subject.set_multicast_group('Vxlan1', value: '239.10.10.10'))
+        .to be_truthy
       expect(subject.get('Vxlan1')[:multicast_group]).to eq('239.10.10.10')
     end
   end
 end
-

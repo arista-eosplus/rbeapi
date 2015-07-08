@@ -20,11 +20,10 @@ describe Rbeapi::Api::Mlag do
   end
 
   describe '#get' do
-
-    let(:keys) { [ :global, :interfaces ] }
+    let(:keys) { [:global, :interfaces] }
 
     let(:global_keys) do
-      [ :domain_id, :local_interface, :peer_address, :peer_link, :shutdown ]
+      [:domain_id, :local_interface, :peer_address, :peer_link, :shutdown]
     end
 
     let(:interface_keys) { [:mlag_id] }
@@ -53,139 +52,167 @@ describe Rbeapi::Api::Mlag do
 
   describe '#set_domain_id' do
     it 'sets the domain_id to foo' do
-      expect(node).to receive(:config).with(['mlag configuration', 'domain-id foo'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'domain-id foo'])
       expect(subject.set_domain_id(value: 'foo')).to be_truthy
     end
 
     it 'negates the domain_id' do
-      expect(node).to receive(:config).with(['mlag configuration', 'no domain-id'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'no domain-id'])
       expect(subject.set_domain_id).to be_truthy
     end
 
     it 'defaults the domain_id' do
-      expect(node).to receive(:config).with(['mlag configuration', 'default domain-id'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'default domain-id'])
       expect(subject.set_domain_id(default: true)).to be_truthy
     end
 
     it 'default option takes precedence' do
-      expect(node).to receive(:config).with(['mlag configuration', 'default domain-id'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'default domain-id'])
       expect(subject.set_domain_id(value: 'foo', default: true)).to be_truthy
     end
   end
 
   describe '#set_local_interface' do
     it 'sets the local_interface to foo' do
-      expect(node).to receive(:config).with(['mlag configuration', 'local-interface Port-Channel1'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'local-interface Port-Channel1'])
       expect(subject.set_local_interface(value: 'Port-Channel1')).to be_truthy
     end
 
     it 'negates the local_interface' do
-      expect(node).to receive(:config).with(['mlag configuration', 'no local-interface'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'no local-interface'])
       expect(subject.set_local_interface).to be_truthy
     end
 
     it 'defaults the local_interface' do
-      expect(node).to receive(:config).with(['mlag configuration', 'default local-interface'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'default local-interface'])
       expect(subject.set_local_interface(default: true)).to be_truthy
     end
 
     it 'default option takes precedence' do
-      expect(node).to receive(:config).with(['mlag configuration', 'default local-interface'])
-      expect(subject.set_local_interface(value: 'Port-Channel1', default: true)).to be_truthy
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'default local-interface'])
+      expect(subject.set_local_interface(value: 'Port-Channel1',
+                                         default: true)).to be_truthy
     end
   end
 
   describe '#set_peer_address' do
     it 'sets the peer_address to foo' do
-      expect(node).to receive(:config).with(['mlag configuration', 'peer-address 1.1.1.1'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'peer-address 1.1.1.1'])
       expect(subject.set_peer_address(value: '1.1.1.1')).to be_truthy
     end
 
     it 'negates the peer_address' do
-      expect(node).to receive(:config).with(['mlag configuration', 'no peer-address'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'no peer-address'])
       expect(subject.set_peer_address).to be_truthy
     end
 
     it 'defaults the peer_address' do
-      expect(node).to receive(:config).with(['mlag configuration', 'default peer-address'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'default peer-address'])
       expect(subject.set_peer_address(default: true)).to be_truthy
     end
 
     it 'default option takes precedence' do
-      expect(node).to receive(:config).with(['mlag configuration', 'default peer-address'])
-      expect(subject.set_peer_address(value: '1.1.1.1', default: true)).to be_truthy
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'default peer-address'])
+      expect(subject.set_peer_address(value: '1.1.1.1',
+                                      default: true)).to be_truthy
     end
   end
 
   describe '#set_peer_link' do
     it 'sets the peer_link to foo' do
-      expect(node).to receive(:config).with(['mlag configuration', 'peer-link Vlan4094'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'peer-link Vlan4094'])
       expect(subject.set_peer_link(value: 'Vlan4094')).to be_truthy
     end
 
     it 'negates the peer_link' do
-      expect(node).to receive(:config).with(['mlag configuration', 'no peer-link'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'no peer-link'])
       expect(subject.set_peer_link).to be_truthy
     end
 
     it 'defaults the peer_link' do
-      expect(node).to receive(:config).with(['mlag configuration', 'default peer-link'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'default peer-link'])
       expect(subject.set_peer_link(default: true)).to be_truthy
     end
 
     it 'default option takes precedence' do
-      expect(node).to receive(:config).with(['mlag configuration', 'default peer-link'])
-      expect(subject.set_peer_link(value: 'Vlan4094', default: true)).to be_truthy
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'default peer-link'])
+      expect(subject.set_peer_link(value: 'Vlan4094', default: true))
+        .to be_truthy
     end
   end
 
   describe '#set_mlag_id' do
     it 'sets the mlag_id to 5' do
-      expect(node).to receive(:config).with(['interface Port-Channel1', 'mlag 5'])
+      expect(node).to receive(:config).with(['interface Port-Channel1',
+                                             'mlag 5'])
       expect(subject.set_mlag_id('Port-Channel1', value: 5)).to be_truthy
     end
 
     it 'negates the mlag_id' do
-      expect(node).to receive(:config).with(['interface Port-Channel1', 'no mlag'])
+      expect(node).to receive(:config).with(['interface Port-Channel1',
+                                             'no mlag'])
       expect(subject.set_mlag_id('Port-Channel1')).to be_truthy
     end
 
     it 'defaults the mlag_id' do
-      expect(node).to receive(:config).with(['interface Port-Channel1', 'default mlag'])
+      expect(node).to receive(:config).with(['interface Port-Channel1',
+                                             'default mlag'])
       expect(subject.set_mlag_id('Port-Channel1', default: true)).to be_truthy
     end
 
     it 'default option takes precedence' do
-      expect(node).to receive(:config).with(['interface Port-Channel1', 'default mlag'])
-      expect(subject.set_mlag_id('Port-Channel1', value: 'Vlan4094', default: true)).to be_truthy
+      expect(node).to receive(:config).with(['interface Port-Channel1',
+                                             'default mlag'])
+      expect(subject.set_mlag_id('Port-Channel1', value: 'Vlan4094',
+                                                  default: true)).to be_truthy
     end
   end
 
   describe '#set_shutdown' do
     it 'disables the mlag configuration' do
-      expect(node).to receive(:config).with(['mlag configuration', 'shutdown'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'shutdown'])
       expect(subject.set_shutdown(value: true)).to be_truthy
     end
 
     it 'enables the mlag configuration' do
-      expect(node).to receive(:config).with(['mlag configuration', 'no shutdown'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'no shutdown'])
       expect(subject.set_shutdown(value: false)).to be_truthy
     end
 
     it 'negates the shutdown value' do
-      expect(node).to receive(:config).with(['mlag configuration', 'no shutdown'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'no shutdown'])
       expect(subject.set_shutdown).to be_truthy
     end
 
     it 'defaults the shutdown value' do
-      expect(node).to receive(:config).with(['mlag configuration', 'default shutdown'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'default shutdown'])
       expect(subject.set_shutdown(default: true)).to be_truthy
     end
 
     it 'default option takes precedence' do
-      expect(node).to receive(:config).with(['mlag configuration', 'default shutdown'])
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'default shutdown'])
       expect(subject.set_shutdown(value: true, default: true)).to be_truthy
     end
   end
 end
-

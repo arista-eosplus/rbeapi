@@ -7,12 +7,15 @@ describe Rbeapi::Api::VarpInterfaces do
   subject { described_class.new(node) }
 
   let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-  let(:node) { Rbeapi::Client.connect_to('veos02') }
+  let(:node) { Rbeapi::Client.connect_to('dut') }
 
   describe '#get' do
-    before { node.config(['ip virtual-router mac-address aabb.ccdd.eeff',
-                          'interface vlan 100', 'ip address 99.99.99.99/24',
-                          'ip virtual-router address 99.99.99.98']) }
+    before do
+      node.config(['ip virtual-router mac-address aabb.ccdd.eeff',
+                   'default interface vlan 100', 'interface vlan 100',
+                   'ip address 99.99.99.99/24',
+                   'ip virtual-router address 99.99.99.98', 'exit'])
+    end
 
     it 'returns an instance for vlan 100' do
       expect(subject.get('Vlan100')).not_to be_nil
@@ -24,9 +27,12 @@ describe Rbeapi::Api::VarpInterfaces do
   end
 
   describe '#getall' do
-    before { node.config(['ip virtual-router mac-address aabb.ccdd.eeff',
-                          'interface vlan 100', 'ip address 99.99.99.99/24',
-                          'ip virtual-router address 99.99.99.98']) }
+    before do
+      node.config(['ip virtual-router mac-address aabb.ccdd.eeff',
+                   'default interface vlan 100', 'interface vlan 100',
+                   'ip address 99.99.99.99/24',
+                   'ip virtual-router address 99.99.99.98', 'exit'])
+    end
 
     it 'returns a collection that includes vlan 100' do
       expect(subject.getall).to include('Vlan100')
@@ -38,13 +44,16 @@ describe Rbeapi::Api::VarpInterfaces do
   end
 
   describe '#set_addresses' do
-    before { node.config(['ip virtual-router mac-address aabb.ccdd.eeff',
-                          'no interface vlan 100', 'interface vlan 100',
-                          'ip address 99.99.99.99/24']) }
+    before do
+      node.config(['ip virtual-router mac-address aabb.ccdd.eeff',
+                   'default interface vlan 100', 'interface vlan 100',
+                   'ip address 99.99.99.99/24', 'exit'])
+    end
 
     it 'adds new address to the list of addresses' do
       expect(subject.get('Vlan100')['addresses']).not_to include('99.99.99.98')
-      expect(subject.set_addresses('Vlan100', value: ['99.99.99.98'])).to be_truthy
+      expect(subject.set_addresses('Vlan100', value: ['99.99.99.98']))
+        .to be_truthy
       expect(subject.get('Vlan100')['addresses']).to include('99.99.99.98')
     end
 
@@ -52,9 +61,9 @@ describe Rbeapi::Api::VarpInterfaces do
       node.config(['interface vlan 100', 'ip address 99.99.99.99/24',
                    'ip virtual-router address 99.99.99.98'])
       expect(subject.get('Vlan100')['addresses']).to include('99.99.99.98')
-      expect(subject.set_addresses('Vlan100', value: ['99.99.99.97'])).to be_truthy
+      expect(subject.set_addresses('Vlan100', value: ['99.99.99.97']))
+        .to be_truthy
       expect(subject.get('Vlan100')['addresses']).not_to include('99.99.99.98')
     end
-
   end
 end

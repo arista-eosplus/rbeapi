@@ -31,12 +31,12 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
   ##
   # Api is module namesapce for working with the EOS command API
   module Api
-
     ##
     # The Vlan class provides a class implementation for working with the
     # collection of Vlans on the node.  This class presents an abstraction
@@ -44,7 +44,6 @@ module Rbeapi
     #
     # @eos_version 4.13.7M
     class Vlans < Entity
-
       ##
       # get returns the specified vlan resource Hash that represents the
       # nodes current vlan configuration.
@@ -106,7 +105,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_name(config)
-        mdata = /name (\w+)$/.match(config)
+        mdata = /name ([^\s]+)$/.match(config)
         { name: mdata[1] }
       end
       private :parse_name
@@ -236,7 +235,7 @@ module Rbeapi
         when true
           cmds << 'default name'
         when false
-          cmds << (value.nil? ?  'no name' : "name #{value}")
+          cmds << (value.nil? ? 'no name' : "name #{value}")
         end
         configure(cmds)
       end
@@ -278,7 +277,7 @@ module Rbeapi
         default = opts[:default] || false
 
         unless ['active', 'suspend', nil].include?(value)
-          raise ArgumentError, 'state must be active, suspend or nil'
+          fail ArgumentError, 'state must be active, suspend or nil'
         end
 
         cmds = ["vlan #{id}"]

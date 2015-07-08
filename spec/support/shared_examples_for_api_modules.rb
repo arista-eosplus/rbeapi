@@ -1,11 +1,10 @@
 RSpec.shared_examples 'a configurable entity' do |opts|
-
   before(:each) do
     allow(subject.node).to receive(:config)
   end
 
   applies_to = opts.fetch(:applies_to, [])
-  if applies_to.include?(opts[:args[0,2]]) or applies_to.empty?
+  if applies_to.include?(opts[:args[0, 2]]) || applies_to.empty?
     context 'with node#config' do
       [:create, :delete, :default].each do |action|
         it "calls #{action} using #{opts[:args]}" do
@@ -18,13 +17,12 @@ RSpec.shared_examples 'a configurable entity' do |opts|
 end
 
 RSpec.shared_examples 'a tristate attr' do |opts|
-
   before(:each) do
     allow(subject.node).to receive(:config)
   end
 
   applies_to = opts.fetch(:applies_to, [])
-  if applies_to.include?(opts[:args[0,2]]) or applies_to.empty?
+  if applies_to.include?(opts[:args[0, 2]]) || applies_to.empty?
     context 'with node#config' do
       it "configures with #{opts[:name]}" do
         expect(subject.node).to receive(:config).with(opts[:config])
@@ -36,7 +34,7 @@ RSpec.shared_examples 'a tristate attr' do |opts|
         subject.send(opts[:name], *opts[:args])
       end
 
-      it "defaults" do
+      it 'defaults' do
         expect(subject.node).to receive(:config).with(opts[:default])
         subject.send(opts[:name], *opts[:args], default: true)
       end
@@ -45,7 +43,6 @@ RSpec.shared_examples 'a tristate attr' do |opts|
 end
 
 RSpec.shared_examples 'a settable attr' do |opts|
-
   before(:each) do
     allow(subject.node).to receive(:config)
   end
@@ -59,7 +56,6 @@ RSpec.shared_examples 'a settable attr' do |opts|
 end
 
 RSpec.shared_examples 'a creatable entity' do |args, setup, block|
-
   before(:each) do
     subject.node.config(setup)
   end
@@ -74,7 +70,6 @@ RSpec.shared_examples 'a creatable entity' do |args, setup, block|
 end
 
 RSpec.shared_examples 'a deletable entity' do |args, setup, block|
-
   before(:each) do
     subject.node.config(setup)
   end
@@ -89,7 +84,6 @@ RSpec.shared_examples 'a deletable entity' do |args, setup, block|
 end
 
 RSpec.shared_examples 'a configurable attr' do |opts|
-
   before(:each) do
     subject.node.config(opts[:setup])
   end
@@ -104,21 +98,12 @@ RSpec.shared_examples 'a configurable attr' do |opts|
 end
 
 RSpec.shared_examples 'single entity' do |opts|
-
   describe 'match entity attributes from node' do
     let(:entity) { subject.get(opts[:args]) }
     opts[:entity].each do |key, value|
       it "has #{key} with #{value}" do
-        binding.pry
         expect(entity[key]).to eq(value)
       end
     end
   end
 end
-
-
-
-
-
-
-

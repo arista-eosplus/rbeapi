@@ -31,17 +31,16 @@
 #
 
 ##
-# PuppetX is the toplevel namespace for working with Arista EOS nodes
+# Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Eos is module namesapce for working with the EOS command API
+  # Rbeapi::Api
   module Api
     ##
     # The Stp class provides a base class instance for working with
     # the EOS spanning-tree configuration
     #
     class Stp < Entity
-
       ##
       # get returns the current stp configuration parsed from the nodes
       # current running configuration.
@@ -64,7 +63,6 @@ module Rbeapi
         response[:interfaces] = interfaces.getall
         response
       end
-
 
       ##
       # parse_mode scans the nodes running configuration and extracts the
@@ -135,8 +133,11 @@ module Rbeapi
         when true
           cmd = 'default spanning-tree mode'
         when false
-          cmd = (value ? "spanning-tree mode #{value}" : \
-                         'no spanning-tree mode')
+          if value
+            cmd = "spanning-tree mode #{value}"
+          else
+            cmd = 'no spanning-tree mode'
+          end
         end
         configure cmd
       end
@@ -147,7 +148,6 @@ module Rbeapi
     # spanning-tree instances in EOS
     #
     class StpInstances < Entity
-
       DEFAULT_STP_PRIORITY = '32768'
 
       ##
@@ -215,10 +215,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_priority(inst)
-        priority_re = %r{
-          (?<=^spanning-tree\smst\s#{inst}\spriority\s)
-          (.+$)
-        }x
+        priority_re = /(?<=^spanning-tree\smst\s#{inst}\spriority\s)(.+$)/x
         mdata = priority_re.match(config)
         { priority: mdata.nil? ? DEFAULT_STP_PRIORITY : mdata[1] }
       end
@@ -252,8 +249,11 @@ module Rbeapi
         when true
           cmd = "default spanning-tree mst #{inst} priority"
         when false
-          cmd = (value ? "spanning-tree mst #{inst} priority #{value}" : \
-                         "no spanning-tree mst #{inst} priority")
+          if value
+            cmd = "spanning-tree mst #{inst} priority #{value}"
+          else
+            cmd = "no spanning-tree mst #{inst} priority"
+          end
         end
         configure cmd
       end
@@ -264,7 +264,6 @@ module Rbeapi
     # spanning-tree insterfaces in EOS
     #
     class StpInterfaces < Entity
-
       ##
       # get returns the configured stp interfaces from the nodes running
       # configuration as a resource hash.  If the specified interface is not
@@ -284,6 +283,7 @@ module Rbeapi
         return nil if /no switchport$/ =~ config
         response = {}
         response.merge!(parse_portfast(config))
+        response.merge!(parse_portfast_type(config))
         response.merge!(parse_bpduguard(config))
         response
       end
@@ -326,6 +326,26 @@ module Rbeapi
       private :parse_portfast
 
       ##
+      # parse_portfast_type scans the supplied interface configuration block
+      # and parses the value stp portfast type.  The value of portfast type
+      # is either not set which implies normal (default), edge, or network.
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_portfast_type(config)
+        if /spanning-tree portfast network/ =~ config
+          value = 'network'
+        elsif /no spanning-tree portfast/ =~ config
+          value = 'normal'
+        else
+          value = 'edge'
+        end
+        { portfast_type: value }
+      end
+      private :parse_portfast_type
+
+      ##
       # parse_bpduguard scans the supplied interface configuration block and
       # parses the value of stp bpduguard.  The value of bpduguard is either
       # disabled (false) or enabled (true)
@@ -337,6 +357,7 @@ module Rbeapi
         val = /spanning-tree bpduguard enable/ =~ config
         { bpduguard: !val.nil? }
       end
+      private :parse_bpduguard
 
       ##
       # Configures the interface portfast value
@@ -356,12 +377,47 @@ module Rbeapi
         when true
           cmds << 'default spanning-tree portfast'
         when false
-          cmds << (value ? 'spanning-tree portfast' :
-                           'no spanning-tree portfast')
+          if value
+            cmds << 'spanning-tree portfast'
+          else
+            cmds << 'no spanning-tree portfast'
+          end
         end
         configure(cmds)
       end
 
+      ##
+      # Configures the interface portfast type value
+      #
+      # @param [String] name The name of the interface to configure
+      # @param [Hash] opts The configuration parameters for portfast type
+      # @option opts [String] :value The value to set portfast type to.
+      # @option opts [Boolean] :default The value should be set to default
+      #
+      # @return [Boolean] True if the commands succeed otherwise False
+      def set_portfast_type(name, opts = {})
+        value = opts[:value]
+        default = opts[:default] || false
+
+        cmds = ["interface #{name}"]
+        case default
+        when true
+          cmds << 'default spanning-tree portfast normal'
+        when false
+          cmds << "spanning-tree portfast #{value}"
+        end
+        configure(cmds)
+      end
+
+      ##
+      # Configures the interface bpdu guard value
+      #
+      # @param [String] name The name of the interface to configure
+      # @param [Hash] opts The configuration parameters for bpduguard
+      # @option opts [Boolean] :value The value to set bpduguard
+      # @option opts [Boolean] :default The value should be set to default
+      #
+      # @return [Boolean] True if the commands succeed otherwise False
       def set_bpduguard(name, opts = {})
         value = opts[:value]
         default = opts[:default] || false
@@ -371,8 +427,11 @@ module Rbeapi
         when true
           cmds << 'default spanning-tree bpduguard'
         when false
-          cmds << (value ? 'spanning-tree bpduguard enable' :
-                           'spanning-tree bpduguard disable')
+          if value
+            cmds << 'spanning-tree bpduguard enable'
+          else
+            cmds << 'spanning-tree bpduguard disable'
+          end
         end
         configure(cmds)
       end

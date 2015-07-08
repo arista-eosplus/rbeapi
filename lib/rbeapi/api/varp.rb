@@ -31,15 +31,16 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Api
   module Api
-
     ##
     # The Varp class provides an instance for working with the global
     # VARP configuration of the node
     class Varp < Entity
-
       ##
       # Returns the global VARP configuration from the node
       #
@@ -54,10 +55,8 @@ module Rbeapi
       def get
         response = {}
 
-        regex = %r{
-          (?<=^ip\svirtual-router\smac-address\s)
-          ((?:[a-f0-9]{2}:){5}[a-f0-9]{2})$
-        }x
+        regex = /(?<=^ip\svirtual-router\smac-address\s)
+          ((?:[a-f0-9]{2}:){5}[a-f0-9]{2})$/x
 
         mdata = regex.match(config)
         response['mac_address'] = mdata.nil? ? '' : mdata[1]
@@ -87,13 +86,19 @@ module Rbeapi
         when true
           cmds = ['default ip virtual-router mac-address']
         when false
-          cmds = (value ? "ip virtual-router mac-address #{value}" : \
-                          'no ip virtual-router mac-address')
+          if value
+            cmds = "ip virtual-router mac-address #{value}"
+          else
+            cmds = 'no ip virtual-router mac-address'
+          end
         end
         configure(cmds)
       end
     end
 
+    ##
+    # The VarpInterfaces class provides an instance for working with the global
+    # VARP interface configuration of the node
     class VarpInterfaces < Entity
       ##
       # Returns a single VARP interface configuration
@@ -165,7 +170,7 @@ module Rbeapi
             return result unless result
           end
         end
-        return true
+        true
       end
 
       def add_address(name, value)

@@ -52,8 +52,7 @@ module FixtureHelpers
   # `spec/fixtures/fixture_foo.json` will be loaded and returned.  This method
   # is memoized across the life of the process.
   #
-  # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength,
-  # rubocop:disable Metrics/PerceivedComplexity
+  # rubocop:disable Metrics/MethodLength,
   #
   # @param [Symbol] key The fixture name without the `fixture_` prefix or
   #   `.json` suffix.

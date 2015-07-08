@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014, 2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,28 +31,32 @@
 #
 require 'net/http'
 require 'json'
+require 'openssl'
 
 require 'net_http_unix'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Eapilib
   module Eapilib
-
     DEFAULT_HTTP_PORT = 80
     DEFAULT_HTTPS_PORT = 443
     DEFAULT_HTTP_LOCAL_PORT = 8080
-    DEFAULT_HTTP_TIMEOUT = 10
+    DEFAULT_HTTP_OPEN_TIMEOUT = 10
+    DEFAULT_HTTP_READ_TIMEOUT = 10
     DEFAULT_HTTP_PATH = '/command-api'
     DEFAULT_UNIX_SOCKET = '/var/run/command-api.sock'
 
+    ##
+    # Base error class for generating exceptions.  The EapiError class
     class EapiError < StandardError
-
       attr_accessor :commands
 
       ##
-      # Base error class for generating exceptions.  The EapiError class
-      # provides one property for holding the set of commands issued
-      # when the error was generated
+      # The EapiError class provides one property for holding the set of
+      # commands issued when the error was generated.
       #
       # @param [String] :message The error message to return from raising
       #   the exception
@@ -63,20 +67,20 @@ module Rbeapi
       end
     end
 
+    ##
+    # A CommandError exception is raised in response to an eAPI call that
+    # returns a failure message.
     class CommandError < EapiError
-
       attr_reader :error_code
       attr_reader :error_text
 
       ##
-      # A CommandError exception is raised in response to an eAPI call that
-      # returns a failure message.  The exception contains the eAPI error
-      # code and error text.
+      # The exception contains the eAPI error code and error text.
       #
       # @param [String] :message The error message to return from raising
       #   this exception
       # @param [Integer] :code The error code associated with the error
-      #   messsage to be raised
+      #   message to be raised
       # @param [Array] :commands The list of commands that were used  in the
       #   eAPI request message
       def initialize(message, code, commands = nil)
@@ -88,13 +92,14 @@ module Rbeapi
       end
     end
 
+    ##
+    # A ConnectionError exception is raised when the connection object
+    # is unable to establish a connection with eAPI.
     class ConnectionError < EapiError
-
       attr_accessor :connection_type
 
       ##
-      # A ConnectionError exception is raised when the connection object
-      # is unable to establish a connection with eAPI.
+      # The exception contains the eAPI error code and error text.
       #
       # @param [String] :message The error message to return from raising
       #   this exception
@@ -109,16 +114,16 @@ module Rbeapi
       end
     end
 
+    ##
+    # The EapiConnection provides a base class for building eAPI connection
+    # instances with a specific transport for connecting to Arista EOS
+    # devices.  This class handles sending and receiving eAPI calls using
+    # JSON-RPC.  This class should not need to be directly instantiated.
     class EapiConnection
-
       attr_reader :error
 
       ##
-      # The EapiConnection provides a base class for building eAPI connection
-      # instances with a specific transport for connecting to Arista EOS
-      # devices.  This class handles sending and receiving eAPI calls using
-      # JSON-RPC over HTTP.  This class should not need to be directly
-      # instantiated.
+      # The connection contains the transport.
       #
       # @param [Net::HTTP] :transport The HTTP transport to use for sending
       #   and receive eAPI request and response messages
@@ -129,17 +134,32 @@ module Rbeapi
 
       ##
       # Configures the connection authentication values (username and
-      # and password).  The authentication values are used to authenticate
+      # password).  The authentication values are used to authenticate
       # the eAPI connection.  Using authentication is only required for
       # connections that use Http or Https transports
       #
-      # @param [String] :username The username to use to authenticate to
-      #   eAPI with
-      # @param [String] :password The password to use to authenticate to
-      #   eAPI with
-      def authentication(username, password)
-        @username = username
-        @password = password
+      # @options :opts [String] :username The username to use to
+      #   authenticate with eAPI. Default is 'admin'.
+      # @options :opts [String] :password The password to use to
+      #   authenticate with eAPI. Default is ''.
+      def authentication(opts = {})
+        @username = opts.fetch(:username, 'admin')
+        @password = opts.fetch(:password, '')
+      end
+
+      ##
+      # Configures the connection timeout values (open_timeout and
+      # read_timeout).  The timeout values are used for the eAPI
+      # connection.
+      #
+      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #   eAPI connection to open. Default is DEFAULT_HTTP_OPEN_TIMEOUT.
+      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #   block of eAPI results to be read (via one read(2) call). Default
+      #   is DEFAULT_HTTP_READ_TIMEOUT.
+      def timeouts(opts = {})
+        @open_timeout = opts.fetch(:open_timeout, DEFAULT_HTTP_OPEN_TIMEOUT)
+        @read_timeout = opts.fetch(:read_timeout, DEFAULT_HTTP_READ_TIMEOUT)
       end
 
       ##
@@ -170,9 +190,9 @@ module Rbeapi
       #   value is json
       #
       # @return [Hash] Returns a Ruby hash of the request message that is
-      #   suitable to be JSON encoded and sent to the desitination node
+      #   suitable to be JSON encoded and sent to the destination node
       def request(commands, opts = {})
-        id = opts.fetch(:reqid, self.object_id)
+        id = opts.fetch(:reqid, object_id)
         format = opts.fetch(:format, 'json')
         cmds = [*commands]
         params = { 'version' => 1, 'cmds' => cmds, 'format' => format }
@@ -222,18 +242,26 @@ module Rbeapi
       #
       # @param [Hash] :data A hash containing the body of the request
       #   message.  This should be a valid eAPI request message.
+      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #   eAPI connection to open.
+      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #   block of eAPI results to be read (via one read(2) call).
       #
       # @return [Hash] returns the response message as a Ruby hash object
       #
       # @raises [CommandError] Raised if an eAPI failure response is return
       #   from the destination node.
-      def send(data)
+      def send(data, opts)
         request = Net::HTTP::Post.new('/command-api')
         request.body = JSON.dump(data)
         request.basic_auth @username, @password
 
+        open_timeout = opts.fetch(:open_timeout, @open_timeout)
+        read_timeout = opts.fetch(:read_timeout, @read_timeout)
+
         begin
-          @transport.open_timeout = DEFAULT_HTTP_TIMEOUT
+          @transport.open_timeout = open_timeout
+          @transport.read_timeout = read_timeout
           response = @transport.request(request)
           decoded = JSON(response.body)
 
@@ -246,18 +274,22 @@ module Rbeapi
           raise ConnectionError, 'unable to connect to eAPI'
         end
 
-        return decoded
+        decoded
       end
 
       ##
       # Executes the commands on the destination node and returns the
       # response from the node.
       #
-      # @param [Array] :commands The ordered list of commandst to execute
+      # @param [Array] :commands The ordered list of commands to execute
       #   on the destination node.
       # @param [Hash] :opts Optional keyword arguments
       # @option :opts [String] :encoding Used to specify the encoding to be
       #   used for the response.  Valid encoding values are json or text
+      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #   eAPI connection to open.
+      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #   block of eAPI results to be read (via one read(2) call).
       #
       # @returns [Array<Hash>] This method will return the array of responses
       #   for each command executed on the node.
@@ -265,22 +297,23 @@ module Rbeapi
       # @raises [CommandError] Raises a CommandError if rescued from the
       #   send method and adds the list of commands to the exception message
       #
-      # @raises [ConnectionError] Raises a ConnectionError if resuced and
+      # @raises [ConnectionError] Raises a ConnectionError if rescued and
       #   adds the list of commands to the exception message
       def execute(commands, opts = {})
-        begin
-          @error = nil
-          request = request(commands,  opts)
-          response = send request
-          return response['result']
-        rescue ConnectionError, CommandError => exc
-          exc.commands = commands
-          @error = exc
-          raise
-        end
+        @error = nil
+        request = request(commands,  opts)
+        response = send(request, opts)
+        return response['result']
+      rescue ConnectionError, CommandError => exc
+        exc.commands = commands
+        @error = exc
+        raise
       end
     end
 
+    ##
+    # The SocketEapiConnection provides a class for building a domain
+    # socket eAPI connection to Arista EOS devices.
     class SocketEapiConnection < EapiConnection
       def initialize(opts = {})
         path = opts.fetch(:path, DEFAULT_UNIX_SOCKET)
@@ -289,6 +322,9 @@ module Rbeapi
       end
     end
 
+    ##
+    # The HttpEapiConnection provides a class for building an HTTP
+    # eAPI connection to a Arista EOS devices.
     class HttpEapiConnection < EapiConnection
       def initialize(opts = {})
         port = opts.fetch(:port, DEFAULT_HTTP_PORT)
@@ -297,24 +333,28 @@ module Rbeapi
         transport = Net::HTTP.new(host, port.to_i)
         super(transport)
 
-        user = opts.fetch(:username, 'admin')
-        pass = opts.fetch(:password, '')
-        authentication(user, pass)
+        authentication(opts)
+        timeouts(opts)
       end
     end
 
+    ##
+    # The HttpLocalEapiConnection provides a class for building an HTTP
+    # eAPI connection to a local Arista EOS devices.
     class HttpLocalEapiConnection < EapiConnection
       def initialize(opts = {})
         port = opts.fetch(:port, DEFAULT_HTTP_LOCAL_PORT)
         transport = Net::HTTP.new('localhost', port)
         super(transport)
 
-        user = opts.fetch(:username, 'admin')
-        pass = opts.fetch(:password, '')
-        authentication(user, pass)
+        authentication(opts)
+        timeouts(opts)
       end
     end
 
+    ##
+    # The HttpEapiConnection provides a class for building an HTTPS
+    # eAPI connection to a Arista EOS devices.
     class HttpsEapiConnection < EapiConnection
       def initialize(opts = {})
         host = opts.fetch(:host, 'localhost')
@@ -325,9 +365,8 @@ module Rbeapi
         transport.verify_mode = OpenSSL::SSL::VERIFY_NONE
         super(transport)
 
-        user = opts.fetch(:username, 'admin')
-        pass = opts.fetch(:password, '')
-        authentication(user, pass)
+        authentication(opts)
+        timeouts(opts)
       end
     end
   end

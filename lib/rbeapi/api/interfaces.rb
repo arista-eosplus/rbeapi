@@ -32,14 +32,16 @@
 require 'rbeapi/api'
 require 'rbeapi/utils'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Api module namespace
   module Api
-
+    ##
+    # The Interfaces class manages all physical and logical interfaces on an
+    # EOS node.
     class Interfaces < Entity
-
-      METHODS = [:create, :delete, :default]
-
       def initialize(node)
         super(node)
         @instances = {}
@@ -59,7 +61,7 @@ module Rbeapi
       end
 
       def get_instance(name)
-        name = name[0,2].upcase
+        name = name[0, 2].upcase
         case name
         when 'ET'
           cls = 'Rbeapi::Api::EthernetInterface'
@@ -78,10 +80,8 @@ module Rbeapi
       end
 
       def method_missing(method_name, *args, &block)
-        if method_name.to_s =~ /set_(.*)/ || METHODS.include?(method_name)
-          instance = get_instance(args[0])
-          instance.send(method_name.to_sym, *args, &block)
-        end
+        instance = get_instance(args[0])
+        instance.send(method_name.to_sym, *args, &block)
       end
 
       def respond_to?(method_name, name = nil)
@@ -89,14 +89,12 @@ module Rbeapi
         instance = get_instance(name)
         instance.respond_to?(method_name) || super
       end
-
     end
 
     ##
     # The BaseInterface class extends Entity and provides an implementation
     # that is common to all interfaces configured in EOS.
     class BaseInterface < Entity
-
       DEFAULT_INTF_DESCRIPTION = ''
 
       ##
@@ -169,9 +167,6 @@ module Rbeapi
       #
       # @eos_version 4.13.7M
       #
-      # @commands
-      #   interface <value>
-      #
       # @param [String] :value The interface name to create on the node.  The
       #   interface name must be the full interface identifier (ie Loopback,
       #   not Lo)
@@ -189,9 +184,6 @@ module Rbeapi
       #
       # @eos_version 4.13.7M
       #
-      # @commands
-      #   no interface <value>
-      #
       # @param [String] :value The interface name to delete from the node.
       #   The interface name must be the full interface identifier
       #   (ie Loopback, no Lo)
@@ -208,9 +200,6 @@ module Rbeapi
       # to defaults.
       #
       # @eos_version 4.13.7M
-      #
-      # @commands
-      #   default interface <value>
       #
       # @param [String] :value The interface name to default in the node.  The
       #   interface name must be the full interface identifier (ie Loopback,
@@ -232,12 +221,6 @@ module Rbeapi
       #
       # @eos_version 4.13.7M
       #
-      # @commands
-      #   interface <name>
-      #     description <value>
-      #     no description
-      #     default description
-      #
       # @param [String] :name The interface name to apply the configuration
       #   to.  The name value must be the full interface identifier
       #
@@ -251,17 +234,8 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_description(name, opts = {})
-        value = opts[:value]
-        default = opts.fetch(:default, false)
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default description'
-        when false
-          cmds << (value ? "description #{value}" : 'no description')
-        end
-        configure(cmds)
+        commands = command_builder('description', opts)
+        configure_interface(name, commands)
       end
 
       ##
@@ -275,12 +249,6 @@ module Rbeapi
       # keyword takes precedence over the value keyword if both are provided.
       #
       # @eos_version 4.13.7M
-      #
-      # @commands
-      #   interface <name<
-      #     shutdown
-      #     no shutdown
-      #     default shutdown
       #
       # @param [String] :name The interface name to apply the configuration
       #   to.  The name value must be the full interface identifier
@@ -296,22 +264,15 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_shutdown(name, opts = {})
-        value = opts[:value]
-        default = opts.fetch(:default, false)
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default shutdown'
-        when false
-          cmds << (value ? 'shutdown' : 'no shutdown')
-        end
-        configure(cmds)
+        commands = command_builder('shutdown', opts)
+        configure_interface(name, commands)
       end
     end
 
+    ##
+    # The EthernetInterface class manages all Ethernet interfaces on an
+    # EOS node.
     class EthernetInterface < BaseInterface
-
       DEFAULT_ETH_FLOWC_TX = 'off'
       DEFAULT_ETH_FLOWC_RX = 'off'
       DEFAULT_SPEED = 'auto'
@@ -323,18 +284,18 @@ module Rbeapi
       #
       # The resource hash returned contains the following information:
       #
-      # * name (string): the interface name (eg Ethernet1)
-      # * type (string): will always be 'ethernet'
-      # * description (string): the interface description value
-      # * speed (string): the current speed setting for the interface speed
-      # * forced (boolean): true if autonegotiation is disabled otherwise
-      #   false
-      # * sflow (boolean): true if sflow is enabled on the interface
-      #   otherwise false
-      # * flowcontrol_send (string): the inteface flowcontrol send value.
-      #   Valid values are 'on' or 'off'
-      # * flowconrol_receive (string): the interface flowcontrol receive
-      #   value.  Valid values are 'on' or 'off'
+      #   * name (string): the interface name (eg Ethernet1)
+      #   * type (string): will always be 'ethernet'
+      #   * description (string): the interface description value
+      #   * speed (string): the current speed setting for the interface speed
+      #   * forced (boolean): true if autonegotiation is disabled otherwise
+      #     false
+      #   * sflow (boolean): true if sflow is enabled on the interface
+      #     otherwise false
+      #   * flowcontrol_send (string): the inteface flowcontrol send value.
+      #     Valid values are 'on' or 'off'
+      #   * flowconrol_receive (string): the interface flowcontrol receive
+      #     value.  Valid values are 'on' or 'off'
       #
       # @param [String] :name The interface name to return a resource hash
       #   for from the node's running configuration
@@ -370,7 +331,7 @@ module Rbeapi
         value = config.scan(/speed (forced)?[ ]?(\w+)/).first
         return { speed: DEFAULT_SPEED, forced: DEFAULT_FORCED } unless value
         (forced, value) = value.first
-        { speed: value, forced: forced != nil }
+        { speed: value, forced: !forced.nil? }
       end
       private :parse_speed
 
@@ -429,8 +390,8 @@ module Rbeapi
       #
       # @raise [NotImplementedError] Creation of physical Ethernet interfaces
       #   is not supported
-      def create(name)
-        raise NotImplementedError, 'creating Ethernet interfaces is '\
+      def create(_name)
+        fail NotImplementedError, 'creating Ethernet interfaces is '\
               'not supported'
       end
 
@@ -443,8 +404,8 @@ module Rbeapi
       #
       # @raise [NotImplementedError] Deletion of physical Ethernet interfaces
       #   is not supported
-      def delete(name)
-        raise NotImplementedError, 'deleting Ethernet interfaces is '\
+      def delete(_name)
+        fail NotImplementedError, 'deleting Ethernet interfaces is '\
               'not supported'
       end
 
@@ -457,12 +418,6 @@ module Rbeapi
       # precedence.
       #
       # @eos_version 4.13.7M
-      #
-      # @commands
-      #   interface <name>
-      #   speed [forced] <value>
-      #   no speed
-      #   default speed
       #
       # @param [String] :name The interface name to apply the configuration
       #   values to.  The name must be the full interface identifier.
@@ -508,12 +463,6 @@ module Rbeapi
       #
       # @eos_version 4.13.7M
       #
-      # @commands
-      #   interface <name>
-      #     sflow enable
-      #     no sflow enable
-      #     default sflow
-      #
       # @param [String] :name The interface name to apply the configuration
       #   values to.  The name must be the full interface identifier.
       #
@@ -530,14 +479,18 @@ module Rbeapi
         value = opts[:value]
         default = opts.fetch(:default, false)
 
-        cmds = ["interface #{name}"]
         case default
         when true
-          cmds << 'default sflow'
+          command = 'default sflow enable'
         when false
-          cmds << (value ? 'sflow enable' : 'no sflow enable')
+          case value
+          when true
+            command = 'sflow enable'
+          when false
+            command = 'no sflow enable'
+          end
         end
-        configure(cmds)
+        configure_interface(name, command)
       end
 
       ##
@@ -549,12 +502,6 @@ module Rbeapi
       # default keyword takes precedence over the value keyword
       #
       # @eos_version 4.13.7M
-      #
-      # @commands
-      #   interface <name>
-      #   flowcontrol [send | receive] [on, off]
-      #   no flowcontrol [send | receive]
-      #   default flowcontrol [send | receive]
       #
       # @param [String] :name The interface name to apply the configuration
       #   values to.  The name must be the full interface identifier.
@@ -572,18 +519,8 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_flowcontrol(name, direction, opts = {})
-        value = opts[:value]
-        default = opts.fetch(:default, false)
-
-        commands = ["interface #{name}"]
-        case default
-        when true
-          commands << "default flowcontrol #{direction}"
-        when false
-          commands << (value.nil? ? "no flowcontrol #{direction}" :
-                                    "flowcontrol #{direction} #{value}")
-        end
-        configure(commands)
+        commands = command_builder("flowcontrol #{direction}", opts)
+        configure_interface(name, commands)
       end
 
       ##
@@ -593,12 +530,6 @@ module Rbeapi
       # @see set_flowcontrol
       #
       # @eos_version 4.13.7M
-      #
-      # @commands
-      #   interface <name>
-      #   flowcontrol [send | receive] [on, off]
-      #   no flowcontrol [send | receive]
-      #   default flowcontrol [send | receive]
       #
       # @param [String] :name The interface name to apply the configuration
       #   values to.  The name must be the full interface identifier.
@@ -624,12 +555,6 @@ module Rbeapi
       #
       # @eos_version 4.13.7M
       #
-      # @commands
-      #   interface <name>
-      #   flowcontrol [send | receive] [on, off]
-      #   no flowcontrol [send | receive]
-      #   default flowcontrol [send | receive]
-      #
       # @param [String] :name The interface name to apply the configuration
       #   values to.  The name must be the full interface identifier.
       #
@@ -647,8 +572,10 @@ module Rbeapi
       end
     end
 
+    ##
+    # The PortchannelInterface class manages all port channel interfaces on an
+    # EOS node.
     class PortchannelInterface < BaseInterface
-
       DEFAULT_LACP_FALLBACK = 'disabled'
       DEFAULT_LACP_MODE = 'on'
       DEFAULT_MIN_LINKS = '0'
@@ -710,7 +637,7 @@ module Rbeapi
         grpid = name.scan(/(?<=Port-Channel)\d+/)[0]
         command = "show port-channel #{grpid} all-ports"
         config = node.enable(command, format: 'text')
-        values = config.first[:result]['output'].scan(/Ethernet[\d\/]*/)
+        values = config.first[:result]['output'].scan(%r{\bEthernet[\d\/]*})
         { members: values }
       end
       private :parse_members
@@ -733,7 +660,7 @@ module Rbeapi
         return { lacp_mode: DEFAULT_LACP_MODE } unless members
         config = get_block("interface #{members.first}")
         mdata = /channel-group \d+ mode (\w+)/.match(config)
-        { lacp_mode: mdata.nil? ? DEFAULT_LACP_MODE : mdata[1] }
+        { lacp_mode: mdata ? mdata[1] : DEFAULT_LACP_MODE  }
       end
       private :parse_lacp_mode
 
@@ -752,7 +679,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_minimum_links(config)
         mdata = /port-channel min-links (\d+)$/.match(config)
-        { minimum_links: mdata.nil? ? DEFAULT_MIN_LINKS : mdata[1] }
+        { minimum_links: mdata ? mdata[1] : DEFAULT_MIN_LINKS }
       end
       private :parse_minimum_links
 
@@ -771,7 +698,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_lacp_fallback(config)
         mdata = /lacp fallback (static|individual)/.match(config)
-        { lacp_fallback: mdata.nil? ? DEFAULT_LACP_FALLBACK : mdata[1] }
+        { lacp_fallback: mdata ? mdata[1] : DEFAULT_LACP_FALLBACK }
       end
       private :parse_lacp_fallback
 
@@ -804,12 +731,6 @@ module Rbeapi
       #
       # @eos_version 4.13.7M
       #
-      # @commands
-      #   interface <name>
-      #     port-channel min-links <value>
-      #     no port-channel min-links
-      #     default port-channel min-links
-      #
       # @param [String] :name The interface name to apply the configuration
       #   values to.  The name must be the full interface identifier.
       #
@@ -824,18 +745,8 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_minimum_links(name, opts = {})
-        value = opts[:value]
-        default = opts.fetch(:default, false)
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default port-channel min-links'
-        when false
-          cmds << (value ? "port-channel min-links #{value}" : \
-                           'no port-channel min-links')
-        end
-        configure(cmds)
+        commands = command_builder('port-channel min-links', opts)
+        configure_interface(name, commands)
       end
 
       ##
@@ -872,7 +783,7 @@ module Rbeapi
           return false unless result
         end
 
-        return true
+        true
       end
 
       ##
@@ -881,10 +792,6 @@ module Rbeapi
       # the port-channel interface does not already exist, it will be created.
       #
       # @eos_version 4.13.7M
-      #
-      # @commands
-      #   interface <name>
-      #     channel-group <grpid> mode <lacp_mode>
       #
       # @param [String] :name The name of the port-channel interface to apply
       #   the configuration to.
@@ -896,7 +803,7 @@ module Rbeapi
       def add_member(name, member)
         lacp = parse_lacp_mode(name)[:lacp_mode]
         grpid = /(\d+)/.match(name)[0]
-        configure ["interface #{member}", "channel-group #{grpid} mode #{lacp}"]
+        configure_interface(member, "channel-group #{grpid} mode #{lacp}")
       end
 
       ##
@@ -905,10 +812,6 @@ module Rbeapi
       # running-configuration.
       #
       # @eos_version 4.13.7M
-      #
-      # @commands
-      #   interface <name>
-      #     no channel-group <grpid>
       #
       # @param [String] :name The name of the port-channel interface to apply
       #   the configuration to.
@@ -919,7 +822,7 @@ module Rbeapi
       # @return [Boolean] returns true if the command completed successfully
       def remove_member(name, member)
         grpid = /(\d+)/.match(name)[0]
-        configure ["interface #{member}", "no channel-group #{grpid}"]
+        configure_interface(member, "no channel-group #{grpid}")
       end
 
       ##
@@ -929,11 +832,6 @@ module Rbeapi
       # reconfigure them using the mode argument.
       #
       # @eos_version 4.13.7M
-      #
-      # @commands
-      #   interface <name>
-      #     no channel-group <grpid>
-      #     channge-group <grpid> mode <lacp_mode>
       #
       # @param [String] :name The interface name to apply the configuration
       #   values to.  The name must be the full interface identifier.
@@ -969,12 +867,6 @@ module Rbeapi
       #
       # @eos_version 4.13.7M
       #
-      # @commands
-      #   interface <name>
-      #     port-channel lacp fallback <value>
-      #     no port-channel lacp fallback
-      #     default port-channel lacp fallback
-      #
       # @param [String] :name The interface name to apply the configuration
       #   values to.  The name must be the full interface identifier.
       #
@@ -989,21 +881,9 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_lacp_fallback(name, opts = {})
-        value = opts[:value]
-        default = opts.fetch(:default, false)
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default port-channel lacp fallback'
-        when false
-          if [nil, 'disabled'].include?(value)
-            cmds << 'no port-channel lacp fallback'
-          else
-            cmds << "port-channel lacp fallback #{value}"
-          end
-        end
-        configure(cmds)
+        opts[:value] = nil if opts[:value] == 'disabled'
+        commands = command_builder('port-channel lacp fallback', opts)
+        configure_interface(name, commands)
       end
 
       ##
@@ -1015,12 +895,6 @@ module Rbeapi
       # precedence over the value keyword if both options are provided.
       #
       # @eos_version 4.13.7M
-      #
-      # @commands
-      #   interface <name>
-      #     port-channel lacp fallback timeout <value>
-      #     no port-channel lacp fallback timeout
-      #     default port-channel lacp fallback timeout
       #
       # @param [String] :name The interface name to apply the configuration
       #   values to.  The name must be the full interface identifier.
@@ -1036,23 +910,14 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_lacp_timeout(name, opts = {})
-        value = opts[:value]
-        default = opts.fetch(:default, false)
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default port-channel lacp fallback timeout'
-        when false
-          cmds << (value ? "port-channel lacp fallback timeout #{value}" : \
-                           'no port-channel lacp fallback timeout')
-        end
-        configure(cmds)
+        commands = command_builder('port-channel lacp fallback timeout', opts)
+        configure_interface(name, commands)
       end
     end
 
+    ##
+    # The VxlanInterface class manages all Vxlan interfaces on an EOS node.
     class VxlanInterface < BaseInterface
-
       DEFAULT_SRC_INTF = ''
       DEFAULT_MCAST_GRP = ''
 
@@ -1062,15 +927,16 @@ module Rbeapi
       # BaseInterface get method and adds the Vxlan specific attributes to
       # the hash
       #
-      # @example
-      #   {
-      #     "name": <string>,
-      #     "type": 'vxlan',
-      #     "description": <string>,
-      #     "shutdown": [true, false],
-      #     "source_interface": <string>,
-      #     "multicast_group": <string>
-      #   }
+      # The returned resource hash contains the following
+      #
+      #   * name: (String) The full interface name identifier
+      #   * type: (String) 'vxlan'
+      #   * descripition: (String) The configured interface description
+      #   * shutdown: (Boolean) The admin state of the interface
+      #   * source_interface: (String) The vxlan source-interface value
+      #   * multicast_group: (String) The vxlan multicast-group value
+      #   * udp_port: (Fixnum) The vxlan udp-port value
+      #   * flood_list: (Array) The list of VTEPs to flood traffic towards
       #
       # @param [String] :name The interface name to return from the nodes
       #   configuration.  This optional parameter defaults to Vxlan1
@@ -1086,6 +952,9 @@ module Rbeapi
         response[:type] = 'vxlan'
         response.merge!(parse_source_interface(config))
         response.merge!(parse_multicast_group(config))
+        response.merge!(parse_udp_port(config))
+        response.merge!(parse_flood_list(config))
+        response.merge!(parse_vlans(config))
         response
       end
 
@@ -1100,10 +969,10 @@ module Rbeapi
       # @param [String] :config The interface configuration block to extract
       #   the vxlan source-interface value from
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>]
       def parse_source_interface(config)
         mdata = /source-interface ([^\s]+)$/.match(config)
-        { source_interface: mdata.nil? ? DEFAULT_SRC_INTF : mdata[1] }
+        { source_interface: mdata ? mdata[1] : DEFAULT_SRC_INTF }
       end
       private :parse_source_interface
 
@@ -1118,12 +987,70 @@ module Rbeapi
       # @param [String] :config The interface configuration block to extract
       #   the vxlan multicast-group value from
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>]
       def parse_multicast_group(config)
         mdata = /multicast-group ([^\s]+)$/.match(config)
-        { multicast_group: mdata.nil? ? DEFAULT_MCAST_GRP : mdata[1] }
+        { multicast_group: mdata ? mdata[1] : DEFAULT_MCAST_GRP }
       end
       private :parse_multicast_group
+
+      ##
+      # parse_udp_port scans the interface config block and returns the value
+      # of the vxlan udp-port setting.  The vxlan udp-port value is expected to
+      # always be present in the configuration.  The returned value is intended
+      # to be merged into the interface resource Hash
+      #
+      # @api private
+      #
+      # @param [String] :config The interface configuration block to parse the
+      #   vxlan udp-port value from
+      #
+      # @return [Hash<Symbol, Object>]
+      def parse_udp_port(config)
+        value = config.scan(/(?<=vxlan udp-port )\d+/)
+        { udp_port: value.first.to_i }
+      end
+      private :parse_udp_port
+
+      ##
+      # parse_flood_list scans the interface config block and returns the list
+      # of configured VTEPs that comprise the flood list.  If there are no
+      # flood list values configured, the value will return DEFAULT_FLOOD_LIST.
+      # The returned value is intended to be merged into the inteface resource
+      # Hash.
+      #
+      # @api private
+      #
+      # @param [String] :config The interface configuration block to parse the
+      #   vxlan flood list values from
+      #
+      # @return [Hash<Symbol, Object>]
+      def parse_flood_list(config)
+        values = config.scan(/(?<=\s{3}vxlan flood vtep ).+$/)
+        values = values.first.split(' ') unless values.empty?
+        { flood_list: values }
+      end
+      private :parse_flood_list
+
+      ##
+      # parse_vlans scans the interface config block and returns the set of
+      # configured vlan to vni mappings.  if there are no vlans configured, the
+      # value will return an empty Hash
+      #
+      # @api private
+      #
+      # @param [String] :config The interface configuration block to parse the
+      #   vxlan flood list values from
+      #
+      # @return [Hash<Symbol, Object>]
+      def parse_vlans(config)
+        values = config.scan(/vxlan vlan (\d+) vni (\d+)/)
+        values = values.each_with_object({}) do |v, hsh|
+          hsh[v.first] = { vni: v.last }
+        end
+        { vlans: values }
+      end
+      private :parse_vlans
 
       ##
       # Configures the vxlan source-interface to the specified value.  This
@@ -1132,29 +1059,21 @@ module Rbeapi
       #
       # @param [String] :name The name of the interface to apply the
       #   configuration values to
+      #
       # @param [Hash] :opt Optional keyword arguments
+      #
       # @option :opts [String] :value Configures the vxlan source-interface to
       #   the spcified value.  If no value is provided and the
       #   default keyword is not specified then the value is negated
+      #
       # @option :opts [Boolean] :default Specifies whether or not the
       #   multicast-group command is configured as default.  The value of this
       #   option has a higher precedence than :value
       #
-      # @return [Boolean] This method returns true if the commands were
-      #   successful otherwise it returns false
+      # @return [Boolean] Returns true if the commands complete successfully
       def set_source_interface(name = 'Vxlan1', opts = {})
-        value = opts[:value]
-        default = opts.fetch(:default, false)
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default vxlan source-interface'
-        when false
-          cmds << (value ? "vxlan source-interface #{value}" : \
-                           'no vxlan source-interface')
-        end
-        configure(cmds)
+        commands = command_builder('vxlan source-interface', opts)
+        configure_interface(name, commands)
       end
 
       ##
@@ -1163,29 +1082,111 @@ module Rbeapi
       #
       # @param [String] :name The name of the interface to apply the
       #   configuration values to
+      #
       # @param [Hash] :opt Optional keyword arguments
+      #
       # @option :opts [String] :value Configures the mutlicast-group flood
       #   address to the specified value.  If no value is provided and the
       #   default keyword is not specified then the value is negated
+      #
       # @option :opts [Boolean] :default Specifies whether or not the
       #   multicast-group command is configured as default.  The value of this
       #   option has a higher precedence than :value
       #
-      # @return [Boolean] This method returns true if the commands were
-      #   successful otherwise it returns false
+      # @return [Boolean] Returns true if the commands complete successfully
       def set_multicast_group(name = 'Vxlan1', opts = {})
-        value = opts[:value]
-        default = opts.fetch(:default, false)
+        commands = command_builder('vxlan multicast-group', opts)
+        configure_interface(name, commands)
+      end
 
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default vxlan multicast-group'
-        when false
-          cmds << (value ? "vxlan multicast-group #{value}" : \
-                           'no vxlan multtcast-group')
-        end
-        configure(cmds)
+      ##
+      # set_udp_port configures the Vxlan udp-port value in EOS for the
+      # specified interface name.  If the value option is not provided then the
+      # no keyword is used to configure the value.  If the default option is
+      # provided and set to true, then the default keyword is used.  If both
+      # options are provided, the default keyword will take precedence.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @param [String] :name The name of the vxlan interface to configure
+      #
+      # @param [Hash] :opts optional keyword arguments
+      #
+      # @option :opts [String] :value Specifies the value to configure the
+      #   udp-port setting to.  Valid values are in the range of 1024 to
+      #   65535
+      #
+      # @option :opts [Boolean] :default Configures the udp-port value on
+      #   the interface using the default keyword
+      #
+      # @return [Boolean] returns true if the command completed successfully
+      def set_udp_port(name, opts = {})
+        commands = command_builder('vxlan udp-port', opts)
+        configure_interface(name, commands)
+      end
+
+      ##
+      # add_vtep adds a new VTEP endpoint to the global flood list for the
+      # specified interface.  If the VTEP endpoint is already configured, this
+      # method will still return successfully.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @param [String] :name The name of the interface to configure
+      # @param [String] :vtep The IP address of the remote VTEP endpoint
+      #
+      # @return [Boolean] Returns true if the commands completed successfully
+      def add_vtep(name, vtep)
+        configure_interface(name, "vxlan flood vtep add #{vtep}")
+      end
+
+      ##
+      # remove_vtep deletes a VTEP endpoint from the global flood list for the
+      # specified interface.  If the VTEP endpoint specified is not configured,
+      # this method will still return successfully.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @param [String] :name The name of the interface to configure
+      # @param [String] :vtep The IP address of the remote VTEP endpoint
+      #
+      # @return [Boolean] Returns true if the commands completed successfully
+      def remove_vtep(name, vtep)
+        configure_interface(name, "vxlan flood vtep remove #{vtep}")
+      end
+
+      ##
+      # update_vlan creates a new vlan to vni mapping for the specified
+      # interface in the nodes current configuration
+      #
+      # @eos_verson 4.13.7M
+      #
+      # @param [String] :name The name of the interface to configure
+      #
+      # @param [Fixnum] :vlan The VLAN ID to configure.
+      #
+      # @param [Fixnum] :vni The VNI value to map the VLAN into
+      #
+      # @return [Boolean] returns true if the command completed successfully
+      def update_vlan(name, vlan, vni)
+        configure_interface(name, "vxlan vlan #{vlan} vni #{vni}")
+      end
+
+      ##
+      # remove_vlan deletes a previously configured VLAN to VNI mapping on the
+      # specified interface.
+      #
+      # @eos_version 4.13.7M
+      #
+      # @param [String] :name the name of the interface to configure
+      #
+      # @param [Fixnum] :vlan The VLAN ID to remove from the configuration.  If
+      #   the VLAN ID does not exist, this method will still return
+      #   successfully
+      #
+      # @return [Boolean] returns true if the command completed successfully
+      def remove_vlan(name, vlan)
+        configure_interface(name, "no vxlan vlan #{vlan} vni")
       end
     end
   end

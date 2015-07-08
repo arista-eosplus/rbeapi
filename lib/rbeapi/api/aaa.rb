@@ -31,14 +31,16 @@
 #
 require 'rbeapi/api'
 
-
+##
+# Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Eos is module namesapce for working with the EOS command API
+  # Rbeapi::Api
   module Api
-
+    ##
+    # The Aaa class manages Authorization, Authentication and Accounting (AAA)
+    # on an EOS node.
     class Aaa < Entity
-
       def get
         response = {}
         response[:groups] = groups.getall
@@ -52,13 +54,11 @@ module Rbeapi
       end
     end
 
-
+    ##
+    # The AaaGroups class manages the server groups on a EOS node.
     class AaaGroups < Entity
-
-
       DEFAULT_RADIUS_AUTH_PORT = 1812
       DEFAULT_RADIUS_ACCT_PORT = 1813
-
 
       # Regular express that parses the radius servers from the aaa group
       # server radius configuration block
@@ -73,7 +73,6 @@ module Rbeapi
                              [ ]([^\s]+)
                              (?:[ ]vrf[ ](\w+))?
                              (?:[ ]port[ ](\d+))?/x
-
 
       ##
       # get returns the aaa server group resource hash that describes the
@@ -200,7 +199,6 @@ module Rbeapi
       end
       private :parse_radius_server
 
-
       ##
       # find_type is a utility method to find the type of aaa server group for
       # the specified name.  This method will scan the current running
@@ -241,7 +239,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the commands complete successfully
       def create(name, type)
-        configure ["aaa group server #{type} #{name}", "exit"]
+        configure ["aaa group server #{type} #{name}", 'exit']
       end
 
       ##
@@ -292,7 +290,7 @@ module Rbeapi
           hostname = srv[:name]
           return false unless add_server(name, hostname, srv)
         end
-        return true
+        true
       end
 
       ##
@@ -349,9 +347,8 @@ module Rbeapi
         server << "auth-port #{opts[:auth_port]} " if opts[:auth_port]
         server << "acct-port #{opts[:acct_port]} " if opts[:acct_port]
         server << "vrf #{opts[:vrf]}" if opts[:vrf]
-        configure ["aaa group server radius #{name}", server, "exit"]
+        configure ["aaa group server radius #{name}", server, 'exit']
       end
-
 
       ##
       # add_tacacs_server adds a new tacacs server to the nodes current
@@ -379,7 +376,7 @@ module Rbeapi
         server = "server #{server} "
         server << "vrf #{opts[:vrf]} "    if opts[:vrf]
         server << "port #{opts[:port]} "  if opts[:port]
-        configure ["aaa group server tacacs+ #{name}", server, "exit"]
+        configure ["aaa group server tacacs+ #{name}", server, 'exit']
       end
 
       ##
@@ -398,12 +395,12 @@ module Rbeapi
       # @param [String] :server The IP address or host name of the server
       #
       # @return [Boolean] returns true if the commands complete successfully
-      def remove_server(name, server, opts={})
+      def remove_server(name, server, opts = {})
         type = find_type(name)
         return false unless type
         server = "no server #{server} "
         server << "vrf #{opts[:vrf]}" if opts[:vrf]
-        configure ["aaa group server #{type} #{name}", server, "exit"]
+        configure ["aaa group server #{type} #{name}", server, 'exit']
       end
     end
   end

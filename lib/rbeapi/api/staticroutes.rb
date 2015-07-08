@@ -31,16 +31,17 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Api
   module Api
-
     ##
     # The Staticroute class provides a configuration instance for working
     # with static routes in EOS.
     #
     class Staticroute < Entity
-
       ##
       # Returns the static routes configured on the node
       #
@@ -57,14 +58,14 @@ module Rbeapi
       #   there are no static routes configured, this method will return
       #   an empty hash
       def getall
-        regex = %r{
+        regex = /
           (?<=^ip\sroute\s)
           ([^\s]+)\s                # captures network
           ([^\s$]+)                 # captures next hop
           (?:\s\d+)                 # non-capture metric
           (?:\stag\s\d+)            # non-catpure route tag
           [\s|$]{1}(?:name\s(.+))?  # capture route name
-        }x
+        /x
 
         routes = config.scan(regex)
 

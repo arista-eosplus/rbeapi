@@ -31,16 +31,17 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Eos is module namesapce for working with the EOS command API
+  # Api is module namesapce for working with the EOS command API
   module Api
     ##
     # The Switchport class provides a base class instance for working with
     # logical layer-2 interfaces.
     #
     class Switchports < Entity
-
       ##
       # Retrieves the properies for a logical switchport from the
       # running-config using eAPI
@@ -162,8 +163,11 @@ module Rbeapi
         when true
           cmds << 'default switchport mode'
         when false
-          cmds << (value.nil? ? 'no switchport mode' : \
-                                "switchport mode #{value}")
+          if value.nil?
+            cmds << 'no switchport mode'
+          else
+            cmds << "switchport mode #{value}"
+          end
         end
         configure(cmds)
       end
@@ -195,9 +199,7 @@ module Rbeapi
         value = opts[:value]
         default = opts[:default] || false
 
-        unless value.is_a?(Array)
-          raise ArgumentError, 'value must be an Array'
-        end
+        fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
 
         value = value.map(&:inspect).join(',') if value
 
@@ -236,8 +238,11 @@ module Rbeapi
         when true
           cmds << 'default switchport trunk native vlan'
         when false
-          cmds << (value.nil? ? 'no switchport trunk native vlan' : \
-                                "switchport trunk native vlan #{value}")
+          if value.nil?
+            cmds << 'no switchport trunk native vlan'
+          else
+            cmds << "switchport trunk native vlan #{value}"
+          end
         end
         configure(cmds)
       end
@@ -262,8 +267,11 @@ module Rbeapi
         when true
           cmds << 'default switchport access vlan'
         when false
-          cmds << (value.nil? ? 'no switchport access vlan' : \
-                                "switchport access vlan #{value}")
+          if value.nil?
+            cmds << 'no switchport access vlan'
+          else
+            cmds << "switchport access vlan #{value}"
+          end
         end
         configure(cmds)
       end

@@ -7,10 +7,9 @@ describe Rbeapi::Api::Ospf do
   subject { described_class.new(node) }
 
   let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
-  let(:node) { Rbeapi::Client.connect_to('veos02') }
+  let(:node) { Rbeapi::Client.connect_to('dut') }
 
   describe '#get' do
-
     before { node.config(['no router ospf 1', 'router ospf 1']) }
 
     let(:entity) do
@@ -23,7 +22,6 @@ describe Rbeapi::Api::Ospf do
   end
 
   describe '#getall' do
-
     before { node.config(['no router ospf 1', 'router ospf 1']) }
 
     let(:collection) { subject.getall }
@@ -39,7 +37,6 @@ describe Rbeapi::Api::Ospf do
     it 'is a kind of hash' do
       expect(collection).to be_a_kind_of(Hash)
     end
-
   end
 
   describe '#interfaces' do
@@ -83,17 +80,21 @@ describe Rbeapi::Api::Ospf do
 
     it 'adds the network with area to the ospf process' do
       expect(subject.get('1')['areas']).to be_empty
-      expect(subject.add_network('1', '192.168.10.0/24', '0.0.0.0')).to be_truthy
+      expect(subject.add_network('1', '192.168.10.0/24', '0.0.0.0'))
+        .to be_truthy
       expect(subject.get('1')['areas']['0.0.0.0']).to include('192.168.10.0/24')
     end
   end
 
   describe '#remove_network' do
-    before { node.config(['router ospf 1', 'network 192.168.10.10/24 area 0.0.0.0']) }
+    before do
+      node.config(['router ospf 1', 'network 192.168.10.10/24 area 0.0.0.0'])
+    end
 
     it 'removes the network with area to the ospf process' do
       expect(subject.get('1')['areas']['0.0.0.0']).to include('192.168.10.0/24')
-      expect(subject.remove_network('1', '192.168.10.0/24', '0.0.0.0')).to be_truthy
+      expect(subject.remove_network('1', '192.168.10.0/24', '0.0.0.0'))
+        .to be_truthy
       expect(subject.get('1')['areas']).to be_empty
     end
   end
@@ -107,5 +108,4 @@ describe Rbeapi::Api::Ospf do
       expect(subject.get('1')['redistribute']).to include('static')
     end
   end
-
 end

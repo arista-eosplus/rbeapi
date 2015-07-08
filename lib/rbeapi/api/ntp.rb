@@ -37,12 +37,10 @@ module Rbeapi
   ##
   # Api is module namesapce for working with the EOS command API
   module Api
-
     ##
     # The Ntp class provides an intstance for working with the nodes
     # NTP configuraiton.
     class Ntp < Entity
-
       DEFAULT_SRC_INTF = ''
 
       ##
@@ -130,8 +128,7 @@ module Rbeapi
         when true
           cmds = 'default ntp source'
         when false
-          cmds = (value ? "ntp source #{value}" : \
-                          'no ntp source')
+          cmds = (value ? "ntp source #{value}" : 'no ntp source')
         end
         configure(cmds)
       end

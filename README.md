@@ -5,12 +5,18 @@
 1. [Overview] (#overview)
     * [Requirements] (#requirements)
 2. [Getting Started] (#getting-started)
+    * [Example eapi.conf File] (#example-eapiconf-file)
+    * [Using rbeapi] (#using-rbeapi)
 3. [Installation] (#installation)
+4. [Upgrading] (#upgrading)
 5. [Contributing] (#contributing)
-6. [License] (#license)
+6. [Testing] (#testing)
+7. [License] (#license)
 
 
-The Ruby Cliet for eAPI provides a native Ruby implementation for programming Arista EOS network devices using Ruby.  The Ruby client provides the ability to build native applications in Ruby that can communicate with EOS either locally via Unix domain sockets (on-box) or remotely over a HTTP/S transport (off-box).  It uses a standard INI-style configuration file to specifiy one or more connection profiles.
+# Overview
+
+The Ruby Client for eAPI provides a native Ruby implementation for programming Arista EOS network devices using Ruby.  The Ruby client provides the ability to build native applications in Ruby that can communicate with EOS either locally via Unix domain sockets (on-box) or remotely over a HTTP/S transport (off-box).  It uses a standard INI-style configuration file to specifiy one or more connection profiles.
 
 The rbeapi implemenation also provides an API layer for building native Ruby objects that allow for configuration and state extraction of EOS nodes.  The API layer provides a consistent implementation for working with EOS configuration resources.  The implementation of the API layer is highly extensible and can be used as a foundation for building custom data models.
 
@@ -59,6 +65,12 @@ using the following values:
     * transport: https, deafult port: 443
     * transport: https_local, default port: 8080
     * transport: socket, default port: n/a
+* **open_timeout** - The default number of seconds to wait for the eAPI
+  connection to open. Any number may be used, including Floats for fractional
+  seconds. Default value is 10 seconds.
+* **read_timeout** - The default number of seconds to wait for one block of
+  eAPI results to be read (via one read(2) call).  Any number may be used,
+  including Floats for fractional seconds. Default value is 10 seconds.
 
 
 _Note:_ See the EOS User Manual found at arista.com for more details on
@@ -119,10 +131,10 @@ using rbeapi.  For more examples, please see the examples folder.
 require 'rbeapi/client'
 
 # create a node object by specifying the node to work with
-node = Rbeap::Client.connect_to('veos01')
+node = Rbeapi::Client.connect_to('veos01')
 
 # send one or more commands to the node
-node.eanble('show hostname')
+node.enable('show hostname')
 node.enable('show hostname')
 => [{:command=>"show hostname", :result=>{"fqdn"=>"veos01.arista.com", "hostname"=>"veos01"}, :encoding=>"json"}]
 
@@ -130,13 +142,13 @@ node.enable('show hostname')
 node.config('hostname veos01')
 => [{}]
 
-# multiple commands can be sent by using a list (works for both enable or
-config)
+# multiple commands can be sent by using a list (works for both enable or config)
+
 node.config(['interface Ethernet1', 'description foo'])
 => [{}, {}]
 
-# return the running or startup configuration from the node (output omitted for
-brevity)
+# return the running or startup configuration from the node (output omitted for brevity)
+
 node.running_config
 
 node.startup_config
@@ -185,13 +197,80 @@ folder.  See the examples folder for additional examples.
 The source code for rbeapi is provided on Github at
 http://github.com/arista-eosplus/rbeapi.  All current development is done in
 the develop branch.  Stable released versions are tagged in the master branch
-and uploaded to RubyGems.
+and uploaded to [RubyGems](https://rubygems.org/).
 
-* To install the latest stable version of rbeapi, simply run ``gem install
-  rbeapi``
+* To install the latest stable version of rbeapi, simply run ``gem install rbeapi``
 * To install the latest development version from Github, simply clone the
-  develop branch and run ``rake build``
+  develop branch and run
 
+  ```
+  $ rake build
+  $ rake install
+  ```
+
+* To create an RPM, run ``rake rpm``
+* To generate a SWIX file for EOS with necessary dependencies, run
+  ``rake all_rpms`` then follow the ``swix create`` instructions, provided
+  by the build.  NOTE: 
+  [PuppetLabs](https://puppetlabs.com/misc/pe-files) provides a puppet agent SWIX which includes Ruby 1.9.3 in
+  /opt/puppet/bin/ which is different from where you might otherwise install
+  Ruby.  If you have installed the puppet-enterprise SWIX, then you should
+  build and use the ``pe-rbeapi`` swix, below.   Otherwise, if you have installed
+  Ruby 1.9.3 in the standard system location, then the ``rbeapi`` SWIX may be
+  used.
+
+  ```
+  $ bundle install --path .bundle/gems/
+  $ bundle exec rake all_rpms
+  ...
+  RPMs are available in rpms/noarch/
+  Copy the RPMs to an EOS device then run the 'swix create' command.
+    Examples:
+        Puppet Open Source:
+             cd /mnt/flash; swix create rbeapi-0.2.0-1.swix \
+             rubygem-rbeapi-0.2.0-1.eos4.noarch.rpm \
+             rubygem-inifile-3.0.0-2.eos4.noarch.rpm \
+             rubygem-netaddr-1.5.0-1.eos4.noarch.rpm \
+             rubygem-net_http_unix-0.2.1-2.eos4.noarch.rpm
+        Puppet-enterprise:
+             cd/mnt/flash; swix create pe-rbeapi-0.2.0-1.swix \
+             pe-rubygem-rbeapi-0.2.0-1.eos4.noarch.rpm \
+             pe-rubygem-inifile-3.0.0-2.eos4.noarch.rpm \
+             pe-rubygem-netaddr-1.5.0-1.eos4.noarch.rpm
+  ```
+
+  On EOS:
+  ```
+  Arista# copy <URI-to-RPMs> flash:
+  Arista# bash
+  -bash-4.1# cd /mnt/flash/
+  -bash-4.1# swix create pe-rbeapi-0.2.0-1.swix \
+             pe-rubygem-rbeapi-0.1.0-1.eos4.noarch.rpm \
+             pe-rubygem-inifile-3.0.0-1.eos4.noarch.rpm \
+             pe-rubygem-netaddr-1.5.0-1.eos4.noarch.rpm
+  -bash-4.1# exit
+  Arista# copy flash:pe-rbeapi-0.2.0-1.swix extension:
+  Arista# extension pe-rbeapi-0.2.0-1.swix
+  Arista# copy installed-extensions boot-extensions
+  ```
+
+# Upgrading
+
+  On EOS:
+  ```
+  Arista# no extension pe-rbeapi-0.1.0-2.swix
+  Arista# extension pe-rbeapi-0.2.0-1.swix
+  Arista# copy installed-extensions boot-extensions
+  ```
+
+# Testing
+
+The rbeapi library provides spec tests.  To run the spec tests, you will need to
+update the ``dut.conf`` file found in spec/fixtures.  The switch used for testing
+should have at least interfaces Ethernet1-7.
+
+* To run the spec tests, run ``bundle exec rspec spec`` from the root of the
+  rbeapi source folder.
 
 # Contributing
 
@@ -212,7 +291,3 @@ Redistributions in binary form must reproduce the above copyright notice, this l
 Neither the name of Arista Networks nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ARISTA NETWORKS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
-
-

@@ -1,0 +1,2 @@
+# ignore generated RPM .spec files
+*.spec

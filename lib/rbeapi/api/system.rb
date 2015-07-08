@@ -31,15 +31,16 @@
 #
 require 'rbeapi/api'
 
+##
+# Rbeapi toplevel namespace
 module Rbeapi
-
+  ##
+  # Rbeapi::Api
   module Api
-
     ##
     # The System class configures the node system services such as
     # hostname and domain name
     class System < Entity
-
       ##
       # Returns the system settings
       #
@@ -50,7 +51,7 @@ module Rbeapi
       #
       # @return [Hash]  A Ruby hash objec that provides the system settings as
       #   key/value pairs.
-      def get()
+      def get
         response = {}
         response.merge!(parse_hostname(config))
         response
@@ -77,8 +78,7 @@ module Rbeapi
         when true
           cmds = ['default hostname']
         when false
-          cmds = (value.nil? ? 'no hostname' : \
-                               "hostname #{value}")
+          cmds = (value.nil? ? 'no hostname' : "hostname #{value}")
         end
         configure(cmds)
       end
