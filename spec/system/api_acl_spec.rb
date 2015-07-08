@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'rbeapi/client'
 require 'rbeapi/api/acl'
 
-describe Rbeapi::Api::StandardAcls do
+describe Rbeapi::Api::Acl do
   subject { described_class.new(node) }
 
   let(:config) { Rbeapi::Client::Config.new(filename: get_fixture('dut.conf')) }
@@ -25,22 +25,22 @@ describe Rbeapi::Api::StandardAcls do
   end
 
   let(:test1_entries) do
-    { '10' => { seq: '10', action: 'permit', srcaddr: '1.2.3.4',
-                srclen: '255.255.255.255', log: 'log' },
-      '20' => { seq: '20', action: 'permit', srcaddr: '1.2.3.4',
-                srclen: '255.255.0.0', log: 'log' },
-      '30' => { seq: '30', action: 'deny', srcaddr: '0.0.0.0',
-                srclen: '255.255.255.255', log: nil },
-      '40' => { seq: '40', action: 'permit', srcaddr: '5.6.7.0', srclen: '24',
-                log: nil },
-      '50' => { seq: '50', action: 'permit', srcaddr: '9.10.11.0',
-                srclen: '255.255.255.0', log: 'log' }
+    { '10' => { seqno: '10', action: 'permit', srcaddr: '1.2.3.4',
+                srcprefixlen: '255.255.255.255', log: 'log' },
+      '20' => { seqno: '20', action: 'permit', srcaddr: '1.2.3.4',
+                srcprefixlen: '255.255.0.0', log: 'log' },
+      '30' => { seqno: '30', action: 'deny', srcaddr: '0.0.0.0',
+                srcprefixlen: '255.255.255.255', log: nil },
+      '40' => { seqno: '40', action: 'permit', srcaddr: '5.6.7.0',
+                srcprefixlen: '24', log: nil },
+      '50' => { seqno: '50', action: 'permit', srcaddr: '9.10.11.0',
+                srcprefixlen: '255.255.255.0', log: 'log' }
     }
   end
 
   let(:test2_entries) do
-    { '10' => { seq: '10', action: 'deny', srcaddr: '16.0.0.0',
-                srclen: '8', log: nil }
+    { '10' => { seqno: '10', action: 'deny', srcaddr: '16.0.0.0',
+                srcprefixlen: '8', log: nil }
     }
   end
 
@@ -94,8 +94,8 @@ describe Rbeapi::Api::StandardAcls do
 
   describe '#update_entry' do
     let(:update_entry) do
-      { seq: '50', action: 'deny', srcaddr: '100.0.0.0',
-        srclen: '8', log: nil }
+      { seqno: '50', action: 'deny', srcaddr: '100.0.0.0',
+        srcprefixlen: '8', log: nil }
     end
 
     it 'Change entry 50 to values in update_entry' do
@@ -107,8 +107,8 @@ describe Rbeapi::Api::StandardAcls do
 
   describe '#add_entry' do
     let(:new_entry) do
-      { seq: '60', action: 'deny', srcaddr: '1.2.3.0',
-        srclen: '24', log: 'log' }
+      { seqno: '60', action: 'deny', srcaddr: '1.2.3.0',
+        srcprefixlen: '24', log: 'log' }
     end
 
     it 'Add entry 60 to the test1 ACL' do

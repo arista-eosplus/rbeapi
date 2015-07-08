@@ -35,7 +35,7 @@ require 'rbeapi/api/acl'
 
 include FixtureHelpers
 
-describe Rbeapi::Api::StandardAcls do
+describe Rbeapi::Api::Acl do
   subject { described_class.new(node) }
 
   let(:node) { double('node') }
@@ -52,18 +52,18 @@ describe Rbeapi::Api::StandardAcls do
 
   describe '#get' do
     let(:test1_entries) do
-      { '10' => { seq: '10', action: 'permit', srcaddr: '1.2.3.4',
-                  srclen: '255.255.255.255', log: 'log' },
-        '20' => { seq: '20', action: 'permit', srcaddr: '1.2.3.4',
-                  srclen: '255.255.0.0', log: 'log' },
-        '30' => { seq: '30', action: 'deny', srcaddr: '0.0.0.0',
-                  srclen: '255.255.255.255', log: nil },
-        '40' => { seq: '40', action: 'permit', srcaddr: '5.6.7.0', srclen: '24',
-                  log: nil },
-        '50' => { seq: '50', action: 'permit', srcaddr: '16.0.0.0', srclen: '8',
-                  log: nil },
-        '60' => { seq: '60', action: 'permit', srcaddr: '9.10.11.0',
-                  srclen: '255.255.255.0', log: 'log' }
+      { '10' => { seqno: '10', action: 'permit', srcaddr: '1.2.3.4',
+                  srcprefixlen: '255.255.255.255', log: 'log' },
+        '20' => { seqno: '20', action: 'permit', srcaddr: '1.2.3.4',
+                  srcprefixlen: '255.255.0.0', log: 'log' },
+        '30' => { seqno: '30', action: 'deny', srcaddr: '0.0.0.0',
+                  srcprefixlen: '255.255.255.255', log: nil },
+        '40' => { seqno: '40', action: 'permit', srcaddr: '5.6.7.0',
+                  srcprefixlen: '24', log: nil },
+        '50' => { seqno: '50', action: 'permit', srcaddr: '16.0.0.0',
+                  srcprefixlen: '8', log: nil },
+        '60' => { seqno: '60', action: 'permit', srcaddr: '9.10.11.0',
+                  srcprefixlen: '255.255.255.0', log: 'log' }
       }
     end
 
@@ -111,8 +111,8 @@ describe Rbeapi::Api::StandardAcls do
 
   describe '#update_entry' do
     let(:update_entry) do
-      { seq: '60', action: 'permit', srcaddr: '0.0.0.0',
-        srclen: '255.255.255.255', log: nil }
+      { seqno: '60', action: 'permit', srcaddr: '0.0.0.0',
+        srcprefixlen: '255.255.255.255', log: nil }
     end
 
     let(:update_cmd) do
@@ -129,8 +129,8 @@ describe Rbeapi::Api::StandardAcls do
 
   describe '#add_entry' do
     let(:new_entry) do
-      { seq: '90', action: 'deny', srcaddr: '1.2.3.0',
-        srclen: '255.255.255.0', log: nil }
+      { seqno: '90', action: 'deny', srcaddr: '1.2.3.0',
+        srcprefixlen: '255.255.255.0', log: nil }
     end
 
     let(:new_cmd) do
