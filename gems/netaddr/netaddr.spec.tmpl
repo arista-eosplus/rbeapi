@@ -1,75 +1,50 @@
 # Generated from netaddr-1.5.0.gem by gem2rpm -*- rpm-spec -*-
 %global gem_name netaddr
 
-Name: rubygem-%{gem_name}
+Name: %{?enterprise:pe-}rubygem-%{gem_name}
 Version: 1.5.0
-Release: 1%{?dist}
+Release: 1.eos4
 Summary: A package for manipulating network addresses
 Group: Development/Languages
-License: 
+License: Unknown
 Source0: https://rubygems.org/gems/%{gem_name}-%{version}.gem
-Requires: ruby(release)
-Requires: ruby(rubygems) 
-BuildRequires: ruby(release)
-BuildRequires: rubygems-devel 
-BuildRequires: ruby 
+
+%if 0%{?enterprise:1} == 1
+# Use these settings for Puppet Enterprise
+%global gem /opt/puppet/bin/gem
+Requires: pe-ruby
+Requires: pe-rubygems
+Provides: pe-rubygem(%{gem_name}) = %{version}
+Provides: pe-rubygem-%{gem_name} = %{version}
+%else
+# Use these settings for all other installs
+%global gem gem
+Requires: ruby(abi) = %{rubyabi}
+Provides: ruby(%{gem_name}) = %{version}-%{release}
+%endif
+
 BuildArch: noarch
-Provides: rubygem(%{gem_name}) = %{version}
 
 %description
 A package for manipulating network addresses.
 
 
-%package doc
-Summary: Documentation for %{name}
-Group: Documentation
-Requires: %{name} = %{version}-%{release}
-BuildArch: noarch
-
-%description doc
-Documentation for %{name}.
-
 %prep
-gem unpack %{SOURCE0}
-
-%setup -q -D -T -n  %{gem_name}-%{version}
-
-gem spec %{SOURCE0} -l --ruby > %{gem_name}.gemspec
-
-%build
-# Create the gem as gem install only works on a gem file
-gem build %{gem_name}.gemspec
-
-# %%gem_install compiles any C extensions and installs the gem into ./%%gem_dir
-# by default, so that we can move it into the buildroot in %%install
-%gem_install
+%setup -q -D -T -n  .
 
 %install
-mkdir -p %{buildroot}%{gem_dir}
-cp -a .%{gem_dir}/* \
-        %{buildroot}%{gem_dir}/
-
-
-
-
-# Run the test suite
-%check
-pushd .%{gem_instdir}
-
-popd
+mkdir -p %{buildroot}
+install %{SOURCE0} %{buildroot}/
 
 %files
-%dir %{gem_instdir}
-%{gem_libdir}
-%exclude %{gem_cache}
-%{gem_spec}
+/%{gem_name}-%{version}.gem
 
-%files doc
-%doc %{gem_docdir}
-%doc %{gem_instdir}/README
-%doc %{gem_instdir}/Errors
-%doc %{gem_instdir}/changelog
+%post
+%{gem} install --local /%{gem_name}-%{version}.gem > /dev/null 2>&1
+
+%preun
+%{gem} uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
 
 %changelog
-* Tue Jul 07 2015 Jere Julian <jere@jenkins-exec-01.nh.arista.com> - 1.5.0-1
+* Tue Jul 07 2015 Jere Julian <jere@arista.com> - 1.5.0-1
 - Initial package
