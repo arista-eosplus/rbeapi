@@ -59,20 +59,45 @@ task :net_http_unix do
   puts "#\n################################################\n\n"
 end
 
+desc 'Package the netaddr gem in to regular and puppet-enterprise RPMs for EOS'
+task :netaddr do
+  # Get the latest version info
+  NETADDR_VERSION = `wget -q  --output-document=- \
+    https://rubygems.org/gems/netaddr/versions.atom | \
+    awk '/title>netaddr/ {match($2, \"[0-9.]+\", a); print a[0]; exit}'`.strip
+  system "gem fetch netaddr --version '=#{NETADDR_VERSION}'"
+  puts "Building rpm for netaddr (#{NETADDR_VERSION})"
+  system "sed -e 's/^Version:.*/Version: #{NETADDR_VERSION}/g' " \
+    'gems/netaddr/netaddr.spec.tmpl > gems/netaddr/netaddr.spec'
+  system "rpmbuild #{RPM_OPTS} gems/netaddr/netaddr.spec"
+  system "rpmbuild #{RPM_OPTS} --define 'enterprise 1' " \
+    'gems/netaddr/netaddr.spec'
+  RPMS = `find rpms/noarch -name "*netaddr*rpm"`
+  puts "\n################################################\n#"
+  puts "Created the following in rpms/noarch/\n#{RPMS}"
+  puts "#\n################################################\n\n"
+end
+
 desc 'Generate all RPM packages needed for an EOS SWIX'
 task all_rpms: :build do
   Rake::Task['rpm'].invoke
   Rake::Task['inifile'].invoke
   Rake::Task['net_http_unix'].invoke
+  Rake::Task['netaddr'].invoke
   puts 'RPMs are available in rpms/noarch/'
   puts "Copy the RPMs to an EOS device then run the 'swix create' command."
-  puts '  Example: cd /mnt/flash; swix create rbeapi-0.1.0-2.swix \\'
+  puts '  Examples: '
+  puts '      Puppet Open Source: '
+  puts '           cd /mnt/flash; swix create rbeapi-0.1.0-2.swix \\'
   puts '           rubygem-rbeapi-0.1.0-2.eos4.noarch.rpm \\'
   puts '           rubygem-inifile-3.0.0-2.eos4.noarch.rpm \\'
+  puts '           rubygem-netaddr-1.5.0-1.eos4.noarch.rpm \\'
   puts '           rubygem-net_http_unix-0.2.1-2.eos4.noarch.rpm'
-  puts '  For PE:: cd/mnt/flash; swix create pe-rbeapi-0.1.0-1.swix \\'
+  puts '      Puppet-enterprise: '
+  puts '           cd/mnt/flash; swix create pe-rbeapi-0.1.0-2.swix \\'
   puts '           pe-rubygem-rbeapi-0.1.0-2.eos4.noarch.rpm \\'
-  puts '           pe-rubygem-inifile-3.0.0-2.eos4.noarch.rpm '
+  puts '           pe-rubygem-inifile-3.0.0-2.eos4.noarch.rpm \\'
+  puts '           pe-rubygem-netaddr-1.5.0-1.eos4.noarch.rpm'
 end
 
 task release: :build do

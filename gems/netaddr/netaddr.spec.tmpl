@@ -1,0 +1,50 @@
+# Generated from netaddr-1.5.0.gem by gem2rpm -*- rpm-spec -*-
+%global gem_name netaddr
+
+Name: %{?enterprise:pe-}rubygem-%{gem_name}
+Version: 1.5.0
+Release: 1.eos4
+Summary: A package for manipulating network addresses
+Group: Development/Languages
+License: Unknown
+Source0: https://rubygems.org/gems/%{gem_name}-%{version}.gem
+
+%if 0%{?enterprise:1} == 1
+# Use these settings for Puppet Enterprise
+%global gem /opt/puppet/bin/gem
+Requires: pe-ruby
+Requires: pe-rubygems
+Provides: pe-rubygem(%{gem_name}) = %{version}
+Provides: pe-rubygem-%{gem_name} = %{version}
+%else
+# Use these settings for all other installs
+%global gem gem
+Requires: ruby(abi) = %{rubyabi}
+Provides: ruby(%{gem_name}) = %{version}-%{release}
+%endif
+
+BuildArch: noarch
+
+%description
+A package for manipulating network addresses.
+
+
+%prep
+%setup -q -D -T -n  .
+
+%install
+mkdir -p %{buildroot}
+install %{SOURCE0} %{buildroot}/
+
+%files
+/%{gem_name}-%{version}.gem
+
+%post
+%{gem} install --local /%{gem_name}-%{version}.gem > /dev/null 2>&1
+
+%preun
+%{gem} uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
+
+%changelog
+* Tue Jul 07 2015 Jere Julian <jere@arista.com> - 1.5.0-1
+- Initial package
