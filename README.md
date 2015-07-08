@@ -8,9 +8,10 @@
     * [Example eapi.conf File] (#example-eapiconf-file)
     * [Using rbeapi] (#using-rbeapi)
 3. [Installation] (#installation)
-4. [Contributing] (#contributing)
-5. [Testing] (#testing)
-6. [License] (#license)
+4. [Upgrading] (#upgrading)
+5. [Contributing] (#contributing)
+6. [Testing] (#testing)
+7. [License] (#license)
 
 
 # Overview
@@ -224,13 +225,18 @@ and uploaded to [RubyGems](https://rubygems.org/).
   ...
   RPMs are available in rpms/noarch/
   Copy the RPMs to an EOS device then run the 'swix create' command.
-    With Puppet: cd/mnt/flash; swix create pe-rbeapi-0.1.0-1.swix \
-                 pe-rubygem-rbeapi-0.1.0-1.eos4.noarch.rpm \
-                 pe-rubygem-inifile-3.0.0-1.eos4.noarch.rpm 
-    No Puppet:   cd /mnt/flash; swix create rbeapi-0.1.0-1.swix \
-                 rubygem-rbeapi-0.1.0-1.eos4.noarch.rpm \
-                 rubygem-inifile-3.0.0-1.eos4.noarch.rpm \
-                 rubygem-net_http_unix-0.2.1-1.eos4.noarch.rpm
+    Examples:
+        Puppet Open Source:
+             cd /mnt/flash; swix create rbeapi-0.2.0-1.swix \
+             rubygem-rbeapi-0.2.0-1.eos4.noarch.rpm \
+             rubygem-inifile-3.0.0-2.eos4.noarch.rpm \
+             rubygem-netaddr-1.5.0-1.eos4.noarch.rpm \
+             rubygem-net_http_unix-0.2.1-2.eos4.noarch.rpm
+        Puppet-enterprise:
+             cd/mnt/flash; swix create pe-rbeapi-0.2.0-1.swix \
+             pe-rubygem-rbeapi-0.2.0-1.eos4.noarch.rpm \
+             pe-rubygem-inifile-3.0.0-2.eos4.noarch.rpm \
+             pe-rubygem-netaddr-1.5.0-1.eos4.noarch.rpm
   ```
 
   On EOS:
@@ -238,16 +244,27 @@ and uploaded to [RubyGems](https://rubygems.org/).
   Arista# copy <URI-to-RPMs> flash:
   Arista# bash
   -bash-4.1# cd /mnt/flash/
-  -bash-4.1# swix create pe-rbeapi-0.1.0-1.swix \
+  -bash-4.1# swix create pe-rbeapi-0.2.0-1.swix \
              pe-rubygem-rbeapi-0.1.0-1.eos4.noarch.rpm \
-             pe-rubygem-inifile-3.0.0-1.eos4.noarch.rpm
+             pe-rubygem-inifile-3.0.0-1.eos4.noarch.rpm \
+             pe-rubygem-netaddr-1.5.0-1.eos4.noarch.rpm
   -bash-4.1# exit
-  Arista# copy flash:pe-rbeapi-0.1.0-1.swix extension:
-  Arista# extension pe-rbeapi-0.1.0-1.swix
+  Arista# copy flash:pe-rbeapi-0.2.0-1.swix extension:
+  Arista# extension pe-rbeapi-0.2.0-1.swix
+  Arista# copy installed-extensions boot-extensions
+  ```
+
+# Upgrading
+
+  On EOS:
+  ```
+  Arista# no extension pe-rbeapi-0.1.0-2.swix
+  Arista# extension pe-rbeapi-0.2.0-1.swix
   Arista# copy installed-extensions boot-extensions
   ```
 
 # Testing
+
 The rbeapi library provides spec tests.  To run the spec tests, you will need to
 update the ``dut.conf`` file found in spec/fixtures.  The switch used for testing
 should have at least interfaces Ethernet1-7.
