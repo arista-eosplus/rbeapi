@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ module Rbeapi
       #     "areas": {
       #       <string>: array<string>
       #     },
-      #     "resdistribute"
+      #     "redistribute"
       #   }
       #
       # @return [Hash]  A Ruby hash object that provides the OSPF settings as
@@ -117,16 +117,8 @@ module Rbeapi
       end
 
       def set_router_id(pid, opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        cmds = ["router ospf #{pid}"]
-        case default
-        when true
-          cmds << 'default router-id'
-        when false
-          cmds << (value ? "router-id #{value}" : 'no router-id')
-        end
+        cmd = command_builder('router-id', opts)
+        cmds = ["router ospf #{pid}", cmd]
         configure cmds
       end
 
@@ -163,7 +155,7 @@ module Rbeapi
       #   values for.  This must be the full interface identifier.
       #
       # @return [nil, Hash<String, String>] A Ruby hash that represents the
-      #   MLAG interface confguration.  A nil object is returned if the
+      #   MLAG interface configuration.  A nil object is returned if the
       #   specified interface is not configured
       def get(name)
         config = get_block("interface #{name}")
@@ -187,7 +179,7 @@ module Rbeapi
       #   }
       #
       # @return [nil, Hash<String, String>] A Ruby hash that represents the
-      #   MLAG interface confguration.  A nil object is returned if no
+      #   MLAG interface configuration.  A nil object is returned if no
       #   interfaces are configured.
       def getall
         interfaces = config.scan(/(?<=interface\s)[Et|Po|Lo|Vl].+/)
@@ -199,18 +191,9 @@ module Rbeapi
 
       def set_network_type(name, opts = {})
         value = opts[:value]
-        default = opts[:default] || false
-
-        return false unless %w(nil point-to-point).include?(value)
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default ip ospf network'
-        when false
-          cmds << (value ? "ip ospf network #{value}" : 'no ip ospf netework')
-        end
-        configure(cmds)
+        return false unless [nil, 'point-to-point'].include?(value)
+        cmd = command_builder('ip ospf network', opts)
+        configure_interface(name, cmd)
       end
     end
   end

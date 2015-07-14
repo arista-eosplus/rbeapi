@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,7 @@ module Rbeapi
       ##
       # parse_name scans the provided configuration block and parses the
       # vlan name value.  The vlan name should always return a value
-      # from the running conifguration.  The return value is intended to
+      # from the running configuration.  The return value is intended to
       # be merged into the resource hash
       #
       # @api private
@@ -129,7 +129,7 @@ module Rbeapi
       # parse_trunk_groups scans the provided configuration block and parses
       # the trunk groups.  If no trunk groups are found in the nodes
       # running configuration then an empty array is returned as the value.
-      # The return hash is intedned to be merged into the resource hash.
+      # The return hash is intended to be merged into the resource hash.
       #
       # @api private
       #
@@ -199,11 +199,11 @@ module Rbeapi
 
       ##
       # set_name configures the name value for the specified vlan id in the
-      # nodes running configuration.  If the value is not provided in the
+      # nodes running configuration.  If enable is false in the
       # opts keyword Hash then the name value is negated using the no
       # keyword.  If the default keyword is set to true, then the name value
       # is defaulted using the default keyword.  The default keyword takes
-      # precedence over the value keyword
+      # precedence over the enable keyword
       #
       # @eos_version 4.13.7M
       #
@@ -211,7 +211,7 @@ module Rbeapi
       #   vlan <id>
       #     name <value>
       #     no name
-      #     defaul name
+      #     default name
       #
       # @param [String, Integer] :id The vlan id to apply the configuration
       #   to.  The id value should be in the valid range of 1 to 4094
@@ -222,31 +222,26 @@ module Rbeapi
       #   to in the node configuration.  The name parameter accepts a-z, 0-9
       #   and _.
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option :opts [Boolean] :default Configure the vlan name value using
       #   the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_name(id, opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        cmds = ["vlan #{id}"]
-        case default
-        when true
-          cmds << 'default name'
-        when false
-          cmds << (value.nil? ? 'no name' : "name #{value}")
-        end
+        cmd = command_builder('name', opts)
+        cmds = ["vlan #{id}", cmd]
         configure(cmds)
       end
 
       ##
       # set_state configures the state value for the specified vlan id in
-      # the nodes running configuration.  If the value is not provided in
+      # the nodes running configuration.  If enable is set to false in
       # the opts keyword Hash then the state value is negated using the no
       # keyword.  If the default keyword is set to true, then the state
       # value is defaulted using the default keyword.  The default keyword
-      # takes precedence over the value keyword
+      # takes precedence over the enable keyword
       #
       # @eos_version 4.13.7M
       #
@@ -265,7 +260,10 @@ module Rbeapi
       #   to in the node's configuration.  Accepted values are 'active' or
       #   'suspend'
       #
-      # @option :opts [Boolean] :deafult Configure the vlan state value using
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
+      # @option :opts [Boolean] :default Configure the vlan state value using
       #   the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
@@ -274,19 +272,12 @@ module Rbeapi
       #   values
       def set_state(id, opts = {})
         value = opts[:value]
-        default = opts[:default] || false
-
         unless ['active', 'suspend', nil].include?(value)
           fail ArgumentError, 'state must be active, suspend or nil'
         end
 
-        cmds = ["vlan #{id}"]
-        case default
-        when true
-          cmds << 'default state'
-        when false
-          cmds << (value.nil? ? 'no state' : "state #{value}")
-        end
+        cmd = command_builder('state', opts)
+        cmds = ["vlan #{id}", cmd]
         configure(cmds)
       end
 

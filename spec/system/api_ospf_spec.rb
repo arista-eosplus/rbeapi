@@ -53,6 +53,20 @@ describe Rbeapi::Api::Ospf do
       expect(subject.set_router_id('1', value: '1.1.1.1')).to be_truthy
       expect(subject.get('1')['router_id']).to eq('1.1.1.1')
     end
+
+    it 'negates the router id' do
+      expect(subject.set_router_id('1', value: '1.1.1.1')).to be_truthy
+      expect(subject.get('1')['router_id']).to eq('1.1.1.1')
+      expect(subject.set_router_id('1', enable: false)).to be_truthy
+      expect(subject.get('1')['router_id']).to be_empty
+    end
+
+    it 'defaults the router id' do
+      expect(subject.set_router_id('1', value: '1.1.1.1')).to be_truthy
+      expect(subject.get('1')['router_id']).to eq('1.1.1.1')
+      expect(subject.set_router_id('1', default: true)).to be_truthy
+      expect(subject.get('1')['router_id']).to be_empty
+    end
   end
 
   describe '#create' do

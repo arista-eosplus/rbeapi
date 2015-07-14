@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ module Rbeapi
 
       # Regular expression to extract a tacacs server's attributes from the
       # running-configuration text.  The explicit [ ] spaces enable line
-      # wrappping and indentation with the /x flag.
+      # wrapping and indentation with the /x flag.
       SERVER_REGEXP = /tacacs-server[ ]host[ ]([^\s]+)
                        (?:[ ](single-connection))?
                        (?:[ ]vrf[ ]([^\s]+))?
@@ -67,7 +67,7 @@ module Rbeapi
       #  * name: ('settings')
       #  * enable: (true | false) if tacacs functionality is enabled.  This is
       #    always true for EOS.
-      #  * key: (String) the key either in plaintext or hashed format
+      #  * key: (String) the key either in plain text or hashed format
       #  * key_format: (Integer) e.g. 0 or 7
       #  * timeout: (Integer) seconds before the timeout period ends
       #
@@ -130,7 +130,7 @@ module Rbeapi
       #
       #  * hostname: hostname or ip address, part of the identifier
       #  * port: (Fixnum) TCP port of the server, part of the identifier
-      #  * key: (String) the key either in plaintext or hashed format
+      #  * key: (String) the key either in plain text or hashed format
       #  * key_format: (Fixnum) e.g. 0 or 7
       #  * timeout: (Fixnum) seconds before the timeout period ends
       #  * multiplex: (Boolean) true when configured to make requests through a
@@ -161,7 +161,7 @@ module Rbeapi
       #
       # @option opts [String] :key ('070E234F1F5B4A') The key value
       #
-      # @option opts [Fixnum] :key_format (7) The key format, 0 for plaintext
+      # @option opts [Fixnum] :key_format (7) The key format, 0 for plain text
       #   and 7 for a hashed value.  7 will be assumed if this option is not
       #   provided.
       #
@@ -180,27 +180,18 @@ module Rbeapi
       # set_timeout configures the tacacs default timeout.  This method maps to
       # the `tacacs-server timeout` setting.
       #
-      # @option opts [Fixnum] :timeout (50) The timeout in seconds to
-      #   configure.
+      # @param [Hash] opts The configuration parameters
+      # @option opts [string] :value The value to set the timeout to
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      # @option opts [Boolean] :default The value should be set to default
       #
       # @api public
       #
       # @return [Boolean] true if no errors
       def set_global_timeout(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmds = 'default tacacs-server timeout'
-        when false
-          if value
-            cmds = "tacacs-server timeout #{value}"
-          else
-            cmds = 'no tacacs-server timeout'
-          end
-        end
-        configure cmds
+        cmd = command_builder('tacacs-server timeout', opts)
+        configure cmd
       end
 
       ##

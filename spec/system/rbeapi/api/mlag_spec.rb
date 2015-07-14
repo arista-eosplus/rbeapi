@@ -34,6 +34,20 @@ describe Rbeapi::Api::Mlag do
       expect(subject.set_domain_id(value: 'foo')).to be_truthy
       expect(subject.get[:global][:domain_id]).to eq('foo')
     end
+
+    it 'negates the mlag domain_id' do
+      expect(subject.set_domain_id(value: 'foo')).to be_truthy
+      expect(subject.get[:global][:domain_id]).to eq('foo')
+      expect(subject.set_domain_id(enable: false)).to be_truthy
+      expect(subject.get[:global][:domain_id]).to be_empty
+    end
+
+    it 'defaults the mlag domain_id' do
+      expect(subject.set_domain_id(value: 'foo')).to be_truthy
+      expect(subject.get[:global][:domain_id]).to eq('foo')
+      expect(subject.set_domain_id(default: true)).to be_truthy
+      expect(subject.get[:global][:domain_id]).to be_empty
+    end
   end
 
   describe '#set_local_interface' do
@@ -43,6 +57,20 @@ describe Rbeapi::Api::Mlag do
       expect(subject.get[:global][:local_interface]).to be_empty
       expect(subject.set_local_interface(value: 'Vlan4094')).to be_truthy
       expect(subject.get[:global][:local_interface]).to eq('Vlan4094')
+    end
+
+    it 'negates the local interface' do
+      expect(subject.set_local_interface(value: 'Vlan4094')).to be_truthy
+      expect(subject.get[:global][:local_interface]).to eq('Vlan4094')
+      expect(subject.set_local_interface(enable: false)).to be_truthy
+      expect(subject.get[:global][:local_interface]).to be_empty
+    end
+
+    it 'defaults the local interface' do
+      expect(subject.set_local_interface(value: 'Vlan4094')).to be_truthy
+      expect(subject.get[:global][:local_interface]).to eq('Vlan4094')
+      expect(subject.set_local_interface(default: true)).to be_truthy
+      expect(subject.get[:global][:local_interface]).to be_empty
     end
   end
 
@@ -57,6 +85,20 @@ describe Rbeapi::Api::Mlag do
       expect(subject.set_peer_link(value: 'Ethernet1')).to be_truthy
       expect(subject.get[:global][:peer_link]).to eq('Ethernet1')
     end
+
+    it 'negates the mlag peer link' do
+      expect(subject.set_peer_link(value: 'Ethernet1')).to be_truthy
+      expect(subject.get[:global][:peer_link]).to eq('Ethernet1')
+      expect(subject.set_peer_link(enable: false)).to be_truthy
+      expect(subject.get[:global][:peer_link]).to be_empty
+    end
+
+    it 'defaults the mlag peer link' do
+      expect(subject.set_peer_link(value: 'Ethernet1')).to be_truthy
+      expect(subject.get[:global][:peer_link]).to eq('Ethernet1')
+      expect(subject.set_peer_link(default: true)).to be_truthy
+      expect(subject.get[:global][:peer_link]).to be_empty
+    end
   end
 
   describe '#set_peer_address' do
@@ -70,21 +112,67 @@ describe Rbeapi::Api::Mlag do
       expect(subject.set_peer_address(value: '1.1.1.1')).to be_truthy
       expect(subject.get[:global][:peer_address]).to eq('1.1.1.1')
     end
+
+    it 'negates the mlag peer address' do
+      expect(subject.set_peer_address(value: '1.1.1.1')).to be_truthy
+      expect(subject.get[:global][:peer_address]).to eq('1.1.1.1')
+      expect(subject.set_peer_address(enable: false)).to be_truthy
+      expect(subject.get[:global][:peer_address]).to be_empty
+    end
+
+    it 'defaults the mlag peer address' do
+      expect(subject.set_peer_address(value: '1.1.1.1')).to be_truthy
+      expect(subject.get[:global][:peer_address]).to eq('1.1.1.1')
+      expect(subject.set_peer_address(default: true)).to be_truthy
+      expect(subject.get[:global][:peer_address]).to be_empty
+    end
   end
 
   describe '#set_shutdown' do
     it 'configures mlag to be enabled' do
       node.config(['mlag configuration', 'shutdown'])
       expect(subject.get[:global][:shutdown]).to be_truthy
-      expect(subject.set_shutdown(value: false)).to be_truthy
+      expect(subject.set_shutdown(enable: false)).to be_truthy
       expect(subject.get[:global][:shutdown]).to be_falsy
     end
 
     it 'configures mlag to be disabled' do
       node.config(['mlag configuration', 'no shutdown'])
       expect(subject.get[:global][:shutdown]).to be_falsy
-      expect(subject.set_shutdown(value: true)).to be_truthy
+      expect(subject.set_shutdown(enable: true)).to be_truthy
       expect(subject.get[:global][:shutdown]).to be_truthy
+    end
+
+    it 'defaults the shutdown value' do
+      expect(node).to receive(:config).with(['mlag configuration',
+                                             'default shutdown'])
+      expect(subject.set_shutdown(default: true)).to be_truthy
+    end
+  end
+
+  describe '#set_mlag_id' do
+    before do
+      node.config(['default mlag configuration',
+                   'default interface Ethernet1'])
+    end
+
+    # XXX Not clear how to test this feature
+    # it 'configures the mlag id' do
+    #   expect(subject.get[:global][:mlag_id]).to be_nil
+    #   expect(subject.set_mlag_id('Ethernet1', value: '1000')).to be_truthy
+    #   expect(subject.get[:global][:mlag_id]).to eq('1000')
+    # end
+    # XXX Replace the mock calls below
+    it 'negates the mlag id' do
+      expect(node).to receive(:config).with(['interface Ethernet1',
+                                             'no mlag'])
+      expect(subject.set_mlag_id('Ethernet1', enable: false)).to be_truthy
+    end
+
+    it 'defaults the mlag id' do
+      expect(node).to receive(:config).with(['interface Ethernet1',
+                                             'default mlag'])
+      expect(subject.set_mlag_id('Ethernet1', default: true)).to be_truthy
     end
   end
 end

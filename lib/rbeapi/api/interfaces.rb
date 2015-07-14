@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,7 @@ module Rbeapi
       ##
       # get returns the specified interface resource hash that represents the
       # node's current interface configuration.   The BaseInterface class
-      # provides all the set of attributres that are common to all interfaces
+      # provides all the set of attributes that are common to all interfaces
       # in EOS.  This method will return an interface type of generic
       #
       # @example
@@ -129,14 +129,14 @@ module Rbeapi
 
       ##
       # parse_description scans the provided configuration block and parses
-      # the description value if it exists in the cofiguration.  If the
+      # the description value if it exists in the configuration.  If the
       # description value is not configured, then the DEFALT_INTF_DESCRIPTION
-      # value is returned.  The hash returned by this method is inteded to be
+      # value is returned.  The hash returned by this method is intended to be
       # merged into the interface resource hash returned by the get method.
       #
       # @api private
       #
-      # @eturn [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_description(config)
         mdata = /^\s{3}description\s(.+)$/.match(config)
         { description: mdata.nil? ? DEFAULT_INTF_DESCRIPTION : mdata[1] }
@@ -148,7 +148,7 @@ module Rbeapi
       # the shutdown value.  If the shutdown value is configured then true
       # is returned as its value otherwise false is returned.  The hash
       # returned by this method is intended to be merged into the interface
-      # ressource hash returned by the get method.
+      # resource hash returned by the get method.
       #
       # @api private
       #
@@ -171,7 +171,7 @@ module Rbeapi
       #   interface name must be the full interface identifier (ie Loopback,
       #   not Lo)
       #
-      # @return [Boolean] returns true if the command completed succesfully
+      # @return [Boolean] returns true if the command completed successfully
       def create(value)
         configure("interface #{value}")
       end
@@ -212,12 +212,11 @@ module Rbeapi
 
       ##
       # set_description configures the description value for the specified
-      # interface name in the nodes running configuration.  If the value is
-      # not provided in the opts keyword hash then the description value is
-      # negated using the no keyword.  If the default keyword is set to
-      # true, then the description value is defaulted using the default
-      # keyword.  The default keyword takes precedence over the value
-      # keyword if both are provided.
+      # interface name in the nodes running configuration.  If the enable
+      # keyword is false then the description value is negated using the no
+      # keyword.  If the default keyword is set to true, then the description
+      # value is defaulted using the default keyword.  The default keyword takes
+      # precedence over the enable keyword if both are provided.
       #
       # @eos_version 4.13.7M
       #
@@ -229,6 +228,9 @@ module Rbeapi
       # @option :opts [String] :value The value to configure the description
       #   to in the node's configuration.
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option :opts [Boolean] :default Configure the interface description
       #   using the default keyword
       #
@@ -239,14 +241,13 @@ module Rbeapi
       end
 
       ##
-      # set_shutdown configures the adminstrative state of the specified
-      # interface in the node.  If the value is true, then the interface
-      # is adminstratively disabled.  If the value is false, then the
-      # interface is adminstratively enabled.  If no value is provided, then
-      # the interface is configured with the no keyword which is equivalent
-      # to false.  If the default keyword is set to true, then the interface
-      # shutdown value is configured using the default keyword.  The default
-      # keyword takes precedence over the value keyword if both are provided.
+      # set_shutdown configures the administrative state of the specified
+      # interface in the node.  If the enable keyword is false, then the
+      # interface is administratively disabled.  If the enable keyword is
+      # true, then the interface is administratively enabled.  If the default
+      # keyword is set to true, then the interface shutdown value is configured
+      # using the default keyword.  The default keyword takes precedence
+      # over the enable keyword if both are provided.
       #
       # @eos_version 4.13.7M
       #
@@ -255,9 +256,9 @@ module Rbeapi
       #
       # @param [hash] :opts Optional keyword arguments
       #
-      # @option :opts [Boolean] :value True if the interface should be
-      #   administratively disabled or false if the interface should be
-      #   administratively enabled
+      # @option :opts [Boolean] :enable True if the interface should be
+      #   administratively enabled or false if the interface should be
+      #   administratively disabled. Default is true.
       #
       # @option :opts [Boolean] :default Configure the interface shutdown
       #   using the default keyword
@@ -279,8 +280,8 @@ module Rbeapi
       DEFAULT_FORCED = false
 
       ##
-      # get returns the specified Etherent interface resource hash that
-      # respresents the interface's current configuration in th e node.
+      # get returns the specified Ethernet interface resource hash that
+      # represents the interface's current configuration in the node.
       #
       # The resource hash returned contains the following information:
       #
@@ -288,11 +289,11 @@ module Rbeapi
       #   * type (string): will always be 'ethernet'
       #   * description (string): the interface description value
       #   * speed (string): the current speed setting for the interface speed
-      #   * forced (boolean): true if autonegotiation is disabled otherwise
+      #   * forced (boolean): true if auto negotiation is disabled otherwise
       #     false
       #   * sflow (boolean): true if sflow is enabled on the interface
       #     otherwise false
-      #   * flowcontrol_send (string): the inteface flowcontrol send value.
+      #   * flowcontrol_send (string): the interface flowcontrol send value.
       #     Valid values are 'on' or 'off'
       #   * flowconrol_receive (string): the interface flowcontrol receive
       #     value.  Valid values are 'on' or 'off'
@@ -411,7 +412,7 @@ module Rbeapi
 
       ##
       # set_speed configures the interface speed and negotiation values on the
-      # specified interface.  If the value option is not provide, the speed
+      # specified interface.  If the enable option is false the speed
       # setting is configured using the no keyword.  If the default options is
       # set to true, then the speed setting is configured using the default
       # keyword.  If both options are specified, the default keyword takes
@@ -427,7 +428,10 @@ module Rbeapi
       # @option [String] :value The value to configure the speed setting to in
       #   the nodes running configuration
       #
-      # @option [Boolean] :forced Specifies if autonegotiation should be
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
+      # @option [Boolean] :forced Specifies if auto negotiation should be
       #   enabled (true) or disabled (false)
       #
       # @option :opts [Boolean] :default Configures the sflow value on the
@@ -437,6 +441,7 @@ module Rbeapi
       def set_speed(name, opts = {})
         value = opts[:value]
         forced = opts.fetch(:forced, false)
+        enable = opts.fetch(:enable, true)
         default = opts.fetch(:default, false)
 
         forced = 'forced' if forced
@@ -447,19 +452,18 @@ module Rbeapi
         when true
           cmds << 'default speed'
         when false
-          cmds << value ? "speed #{forced} #{value}" : 'no speed'
+          cmds << enable ? "speed #{forced} #{value}" : 'no speed'
         end
         configure cmds
       end
 
       ##
       # set_sflow configures the administrative state of sflow on the
-      # interface.  Setting the value to true enables sflow on the interface
-      # and setting the value to false disables sflow on the interface.  If the
-      # value is not provided, the sflow state is negated using the no keyword.
+      # interface.  Setting the enable keyword to true enables sflow on the
+      # interface and setting enable to false disables sflow on the interface.
       # If the default keyword is set to true, then the sflow value is
       # defaulted using the default keyword.  The default keyword takes
-      # precedence over the value keyword
+      # precedence over the enable keyword
       #
       # @eos_version 4.13.7M
       #
@@ -468,38 +472,25 @@ module Rbeapi
       #
       # @param [Hash] :opts optional keyword arguments
       #
-      # @option :opts [Boolean] :value Enables  sflow if the value is true or
-      #   disables sflow on the interface if false
+      # @option :opts [Boolean] :enable Enables sflow if the value is true or
+      #   disables sflow on the interface if false. Default is true.
       #
       # @option :opts [Boolean] :default Configures the sflow value on the
       #   interface using the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_sflow(name, opts = {})
-        value = opts[:value]
-        default = opts.fetch(:default, false)
-
-        case default
-        when true
-          command = 'default sflow enable'
-        when false
-          case value
-          when true
-            command = 'sflow enable'
-          when false
-            command = 'no sflow enable'
-          end
-        end
-        configure_interface(name, command)
+        commands = command_builder('sflow enable', opts)
+        configure_interface(name, commands)
       end
 
       ##
       # set_flowcontrol configures the flowcontrol value either on or off for
       # the for the specified interface in the specified direction (either send
-      # or receive).  If the value is not provided then the configuration is
+      # or receive).  If the enable keyword is false then the configuration is
       # negated using the no keyword.  If the default keyword is set to true,
       # then the state value is defaulted using the default keyword.  The
-      # default keyword takes precedence over the value keyword
+      # default keyword takes precedence over the enable keyword
       #
       # @eos_version 4.13.7M
       #
@@ -513,6 +504,9 @@ module Rbeapi
       #
       # @option :opts [String] :value Specifies the value to configure the
       #   flowcontrol setting for.  Valid values include on or off
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       #
       # @option :opts [Boolean] :default Configures the flowcontrol value on
       #   the interface using the default keyword
@@ -539,6 +533,9 @@ module Rbeapi
       # @option :opts [String] :value Specifies the value to configure the
       #   flowcontrol setting for.  Valid values include on or off
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option :opts [Boolean] :default Configures the flowcontrol value on
       #   the interface using the default keyword
       #
@@ -562,6 +559,9 @@ module Rbeapi
       #
       # @option :opts [String] :value Specifies the value to configure the
       #   flowcontrol setting for.  Valid values include on or off
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       #
       # @option :opts [Boolean] :default Configures the flowcontrol value on
       #   the interface using the default keyword
@@ -622,7 +622,7 @@ module Rbeapi
 
       ##
       # parse_members scans the nodes running config and returns all of the
-      # ethernet members for the port-channel interface specified.  If the
+      # Ethernet members for the port-channel interface specified.  If the
       # port-channel interface has no members configured, then this method will
       # assign an empty array as the value for members.  The hash returned is
       # intended to be merged into the interface resource hash
@@ -673,7 +673,7 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface configuration blcok to extract
+      # @param [String] :config The interface configuration block to extract
       #   the minimum links value from
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
@@ -685,7 +685,7 @@ module Rbeapi
 
       ##
       # parse_lacp_fallback scans the interface config block and returns the
-      # confiured value of the lacp fallback attribute.  If the value is not
+      # configured value of the lacp fallback attribute.  If the value is not
       # configured, then the method will return the value of
       # DEFAULT_LACP_FALLBACK.  The hash returned is intended to be merged into
       # the interface resource hash
@@ -722,11 +722,11 @@ module Rbeapi
 
       ##
       # set_minimum_links configures the minimum physical links up required to
-      # consider the logical portchannel interface operationally up.  If no
-      # value is provided then the minimum-links is configured using the no
-      # keyword argument.  If the default keyword argument is provided and set
-      # to true, the minimum-links value is defaulted using the default
-      # keyword.  The default keyword takes precedence over the value keyword
+      # consider the logical portchannel interface operationally up.  If the
+      # enable keyword is false then the minimum-links is configured using the
+      # no keyword argument.  If the default keyword argument is provided and
+      # set to true, the minimum-links value is defaulted using the default
+      # keyword.  The default keyword takes precedence over the enable keyword
       # argument if both are provided.
       #
       # @eos_version 4.13.7M
@@ -739,6 +739,9 @@ module Rbeapi
       # @option :opts [String, Integer] :value Specifies the value to
       #   configure the minimum-links to in the configuration.  Valid values
       #   are in the range of 1 to 16.
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       #
       # @option :opts [Boolean] :default Configures the minimum links value on
       #   the interface using the default keyword
@@ -796,7 +799,7 @@ module Rbeapi
       # @param [String] :name The name of the port-channel interface to apply
       #   the configuration to.
       #
-      # @param [String] :member The name of the physical ethernet interface to
+      # @param [String] :member The name of the physical Ethernet interface to
       #   add to the logical port-channel interface.
       #
       # @return [Boolean] returns true if the command completed successfully
@@ -816,7 +819,7 @@ module Rbeapi
       # @param [String] :name The name of the port-channel interface to apply
       #   the configuration to.
       #
-      # @param [String] :member The name of the physical ethernet interface to
+      # @param [String] :member The name of the physical Ethernet interface to
       #   remove from the logical port-channel interface.
       #
       # @return [Boolean] returns true if the command completed successfully
@@ -859,11 +862,11 @@ module Rbeapi
 
       ##
       # set_lacp_fallback configures the lacp fallback mode for the
-      # port-channel interface.  If no value is provided, lacp fallback is
-      # configured using the no keyword argument.  If the default option is
+      # port-channel interface.  If the enable keyword is false, lacp fallback
+      # is configured using the no keyword argument.  If the default option is
       # specified and set to true, the lacp fallback value is configured using
       # the default keyword.  The default keyword takes precedence over the
-      # value keyword if both options are provided.
+      # enable keyword if both options are provided.
       #
       # @eos_version 4.13.7M
       #
@@ -876,23 +879,25 @@ module Rbeapi
       #   the port-channel lacp fallback.  Valid values are individual and
       #   static
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option :opts [Boolean] :default Configures the lacp fallback value on
       #   the interface using the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_lacp_fallback(name, opts = {})
-        opts[:value] = nil if opts[:value] == 'disabled'
         commands = command_builder('port-channel lacp fallback', opts)
         configure_interface(name, commands)
       end
 
       ##
-      # set_lacp_timeout configures the lacp fallback timeou for the
-      # port-channel interface.  If no value is provided, lacp fallback timeout
-      # is configured using the no keyword argument.  If the default option is
-      # specified and set to true, the lacp fallback timeout value is
+      # set_lacp_timeout configures the lacp fallback timeout for the
+      # port-channel interface.  If the enable keyword is false, lacp fallback
+      # timeout is configured using the no keyword argument.  If the default
+      # option is specified and set to true, the lacp fallback timeout value is
       # configured using the default keyword.  The default keyword takes
-      # precedence over the value keyword if both options are provided.
+      # precedence over the enable keyword if both options are provided.
       #
       # @eos_version 4.13.7M
       #
@@ -904,6 +909,9 @@ module Rbeapi
       # @option :opts [String] :value Specifies the value to configure for
       #   the port-channel lacp fallback timeout.  Valid values range from
       #   1 to 100 seconds
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       #
       # @option :opts [Boolean] :default Configures the lacp fallback timeout
       #   value on the interface using the default keyword
@@ -931,7 +939,7 @@ module Rbeapi
       #
       #   * name: (String) The full interface name identifier
       #   * type: (String) 'vxlan'
-      #   * descripition: (String) The configured interface description
+      #   * description: (String) The configured interface description
       #   * shutdown: (Boolean) The admin state of the interface
       #   * source_interface: (String) The vxlan source-interface value
       #   * multicast_group: (String) The vxlan multicast-group value
@@ -960,7 +968,7 @@ module Rbeapi
 
       ##
       # parse_source_interface scans the interface config block and returns the
-      # value of the vxlan source-interace.  If the source-interface is not
+      # value of the vxlan source-interface.  If the source-interface is not
       # configured then the value of DEFAULT_SRC_INTF is used.  The hash
       # returned is intended to be merged into the interface resource hash
       #
@@ -1016,7 +1024,7 @@ module Rbeapi
       # parse_flood_list scans the interface config block and returns the list
       # of configured VTEPs that comprise the flood list.  If there are no
       # flood list values configured, the value will return DEFAULT_FLOOD_LIST.
-      # The returned value is intended to be merged into the inteface resource
+      # The returned value is intended to be merged into the interface resource
       # Hash.
       #
       # @api private
@@ -1034,7 +1042,7 @@ module Rbeapi
 
       ##
       # parse_vlans scans the interface config block and returns the set of
-      # configured vlan to vni mappings.  if there are no vlans configured, the
+      # configured vlan to vni mappings.  If there are no vlans configured, the
       # value will return an empty Hash
       #
       # @api private
@@ -1054,7 +1062,7 @@ module Rbeapi
 
       ##
       # Configures the vxlan source-interface to the specified value.  This
-      # parameter should be a the interface identifier of the interface to act
+      # parameter should be the interface identifier of the interface to act
       # as the source for all Vxlan traffic
       #
       # @param [String] :name The name of the interface to apply the
@@ -1063,12 +1071,14 @@ module Rbeapi
       # @param [Hash] :opt Optional keyword arguments
       #
       # @option :opts [String] :value Configures the vxlan source-interface to
-      #   the spcified value.  If no value is provided and the
-      #   default keyword is not specified then the value is negated
+      #   the specified value
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       #
       # @option :opts [Boolean] :default Specifies whether or not the
       #   multicast-group command is configured as default.  The value of this
-      #   option has a higher precedence than :value
+      #   option has a higher precedence than :enable
       #
       # @return [Boolean] Returns true if the commands complete successfully
       def set_source_interface(name = 'Vxlan1', opts = {})
@@ -1077,7 +1087,7 @@ module Rbeapi
       end
 
       ##
-      # Configures the vxlan multcast-group flood address to the specified
+      # Configures the vxlan multicast-group flood address to the specified
       # value.  The value should be a valid multicast address
       #
       # @param [String] :name The name of the interface to apply the
@@ -1085,9 +1095,11 @@ module Rbeapi
       #
       # @param [Hash] :opt Optional keyword arguments
       #
-      # @option :opts [String] :value Configures the mutlicast-group flood
-      #   address to the specified value.  If no value is provided and the
-      #   default keyword is not specified then the value is negated
+      # @option :opts [String] :value Configures the multicast-group flood
+      #   address to the specified value.
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       #
       # @option :opts [Boolean] :default Specifies whether or not the
       #   multicast-group command is configured as default.  The value of this
@@ -1101,7 +1113,7 @@ module Rbeapi
 
       ##
       # set_udp_port configures the Vxlan udp-port value in EOS for the
-      # specified interface name.  If the value option is not provided then the
+      # specified interface name.  If the enable keyword is false then the
       # no keyword is used to configure the value.  If the default option is
       # provided and set to true, then the default keyword is used.  If both
       # options are provided, the default keyword will take precedence.
@@ -1115,6 +1127,9 @@ module Rbeapi
       # @option :opts [String] :value Specifies the value to configure the
       #   udp-port setting to.  Valid values are in the range of 1024 to
       #   65535
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       #
       # @option :opts [Boolean] :default Configures the udp-port value on
       #   the interface using the default keyword

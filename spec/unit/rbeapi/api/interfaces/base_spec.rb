@@ -71,7 +71,7 @@ describe Rbeapi::Api::BaseInterface do
     it 'negates the interface description' do
       expect(node).to receive(:config).with(['interface Loopback0',
                                              'no description'])
-      expect(subject.set_description('Loopback0')).to be_truthy
+      expect(subject.set_description('Loopback0', enable: false)).to be_truthy
     end
 
     it 'defaults the interface description' do
@@ -80,10 +80,10 @@ describe Rbeapi::Api::BaseInterface do
       expect(subject.set_description('Loopback0', default: true)).to be_truthy
     end
 
-    it 'default is preferred over value' do
+    it 'default is preferred over enable' do
       expect(node).to receive(:config).with(['interface Loopback0',
                                              'default description'])
-      expect(subject.set_description('Loopback0', value: 'test',
+      expect(subject.set_description('Loopback0', enable: false,
                                                   default: true)).to be_truthy
     end
   end
@@ -92,19 +92,13 @@ describe Rbeapi::Api::BaseInterface do
     it 'enables the interface' do
       expect(node).to receive(:config).with(['interface Loopback0',
                                              'no shutdown'])
-      expect(subject.set_shutdown('Loopback0', value: false)).to be_truthy
+      expect(subject.set_shutdown('Loopback0', enable: false)).to be_truthy
     end
 
     it 'disables the interface' do
       expect(node).to receive(:config).with(['interface Loopback0',
                                              'shutdown'])
-      expect(subject.set_shutdown('Loopback0', value: true)).to be_truthy
-    end
-
-    it 'negates the interface description' do
-      expect(node).to receive(:config).with(['interface Loopback0',
-                                             'no shutdown'])
-      expect(subject.set_shutdown('Loopback0')).to be_truthy
+      expect(subject.set_shutdown('Loopback0', enable: true)).to be_truthy
     end
 
     it 'defaults the interface state' do
@@ -113,10 +107,10 @@ describe Rbeapi::Api::BaseInterface do
       expect(subject.set_shutdown('Loopback0', default: true)).to be_truthy
     end
 
-    it 'default is preferred over value' do
+    it 'default is preferred over enable' do
       expect(node).to receive(:config).with(['interface Loopback0',
                                              'default shutdown'])
-      expect(subject.set_shutdown('Loopback0', value: 'test',
+      expect(subject.set_shutdown('Loopback0', enable: false,
                                                default: true)).to be_truthy
     end
   end

@@ -91,6 +91,20 @@ describe Rbeapi::Api::Vlans do
       expect(subject.set_name('1', value: 'foo')).to be_truthy
       expect(subject.get('1')[:name]).to eq('foo')
     end
+
+    it 'negates the vlan name' do
+      expect(subject.set_name('1', value: 'foo')).to be_truthy
+      expect(subject.get('1')[:name]).to eq('foo')
+      expect(subject.set_name('1', enable: false)).to be_truthy
+      expect(subject.get('1')[:name]).to eq('default')
+    end
+
+    it 'defaults the vlan name' do
+      expect(subject.set_name('1', value: 'foo')).to be_truthy
+      expect(subject.get('1')[:name]).to eq('foo')
+      expect(subject.set_name('1', default: true)).to be_truthy
+      expect(subject.get('1')[:name]).to eq('default')
+    end
   end
 
   describe '#set_state' do
@@ -105,6 +119,20 @@ describe Rbeapi::Api::Vlans do
       node.config(['vlan 1', 'state suspend'])
       expect(subject.get('1')[:state]).to eq('suspend')
       expect(subject.set_state('1', value: 'active')).to be_truthy
+      expect(subject.get('1')[:state]).to eq('active')
+    end
+
+    it 'negate vlan 1 state' do
+      node.config(['vlan 1', 'state suspend'])
+      expect(subject.get('1')[:state]).to eq('suspend')
+      expect(subject.set_state('1', enable: false)).to be_truthy
+      expect(subject.get('1')[:state]).to eq('active')
+    end
+
+    it 'set vlan 1 state to default' do
+      node.config(['vlan 1', 'state suspend'])
+      expect(subject.get('1')[:state]).to eq('suspend')
+      expect(subject.set_state('1', default: true)).to be_truthy
       expect(subject.get('1')[:state]).to eq('active')
     end
   end
