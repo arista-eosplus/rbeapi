@@ -76,6 +76,22 @@ describe Rbeapi::Api::Ipinterfaces do
         .to be_truthy
       expect(subject.get('Ethernet1')[:address]).to eq('77.99.99.99/24')
     end
+
+    it 'negates the address value' do
+      expect(subject.set_address('Ethernet1', value: '77.99.99.99/24'))
+        .to be_truthy
+      expect(subject.get('Ethernet1')[:address]).to eq('77.99.99.99/24')
+      expect(subject.set_address('Ethernet1', enable: false)).to be_truthy
+      expect(subject.get('Ethernet1')[:address]).to be_empty
+    end
+
+    it 'defaults the address value' do
+      expect(subject.set_address('Ethernet1', value: '77.99.99.99/24'))
+        .to be_truthy
+      expect(subject.get('Ethernet1')[:address]).to eq('77.99.99.99/24')
+      expect(subject.set_address('Ethernet1', default: true)).to be_truthy
+      expect(subject.get('Ethernet1')[:address]).to be_empty
+    end
   end
 
   describe '#set_mtu' do
@@ -88,6 +104,20 @@ describe Rbeapi::Api::Ipinterfaces do
       expect(subject.get('Ethernet1')[:mtu]).to eq('1500')
       expect(subject.set_mtu('Ethernet1', value: '2000')).to be_truthy
       expect(subject.get('Ethernet1')[:mtu]).to eq('2000')
+    end
+
+    it 'negates the mtu' do
+      expect(subject.set_mtu('Ethernet1', value: '2000')).to be_truthy
+      expect(subject.get('Ethernet1')[:mtu]).to eq('2000')
+      expect(subject.set_mtu('Ethernet1', enable: false)).to be_truthy
+      expect(subject.get('Ethernet1')[:mtu]).to eq('1500')
+    end
+
+    it 'defaults the mtu' do
+      expect(subject.set_mtu('Ethernet1', value: '2000')).to be_truthy
+      expect(subject.get('Ethernet1')[:mtu]).to eq('2000')
+      expect(subject.set_mtu('Ethernet1', default: true)).to be_truthy
+      expect(subject.get('Ethernet1')[:mtu]).to eq('1500')
     end
   end
 

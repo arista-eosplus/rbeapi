@@ -89,7 +89,8 @@ describe Rbeapi::Api::PortchannelInterface do
       expect(node).to receive(:config)
         .with(['interface Port-Channel1', 'no description'])
 
-      expect(subject.set_description('Port-Channel1')).to be_truthy
+      expect(subject.set_description('Port-Channel1',
+                                     enable: false)).to be_truthy
     end
 
     it 'defaults the interface description' do
@@ -100,11 +101,11 @@ describe Rbeapi::Api::PortchannelInterface do
         .to be_truthy
     end
 
-    it 'default is preferred over value' do
+    it 'default is preferred over enable' do
       expect(node).to receive(:config)
         .with(['interface Port-Channel1', 'default description'])
 
-      opts = { value: 'test', default: true }
+      opts = { enable: false, default: true }
       expect(subject.set_description('Port-Channel1', opts)).to be_truthy
     end
   end
@@ -114,21 +115,21 @@ describe Rbeapi::Api::PortchannelInterface do
       expect(node).to receive(:config)
         .with(['interface Port-Channel1', 'no shutdown'])
 
-      expect(subject.set_shutdown('Port-Channel1', value: false)).to be_truthy
+      expect(subject.set_shutdown('Port-Channel1', enable: false)).to be_truthy
     end
 
     it 'disables the interface' do
       expect(node).to receive(:config)
         .with(['interface Port-Channel1', 'shutdown'])
 
-      expect(subject.set_shutdown('Port-Channel1', value: true)).to be_truthy
+      expect(subject.set_shutdown('Port-Channel1', enable: true)).to be_truthy
     end
 
     it 'negates the interface description' do
       expect(node).to receive(:config)
         .with(['interface Port-Channel1', 'no shutdown'])
 
-      expect(subject.set_shutdown('Port-Channel1')).to be_truthy
+      expect(subject.set_shutdown('Port-Channel1', enable: false)).to be_truthy
     end
 
     it 'defaults the interface state' do
@@ -138,11 +139,11 @@ describe Rbeapi::Api::PortchannelInterface do
       expect(subject.set_shutdown('Port-Channel1', default: true)).to be_truthy
     end
 
-    it 'default is preferred over value' do
+    it 'default is preferred over enable' do
       expect(node).to receive(:config)
         .with(['interface Port-Channel1', 'default shutdown'])
 
-      opts = { value: 'test', default: true }
+      opts = { enable: false, default: true }
       expect(subject.set_shutdown('Port-Channel1', opts)).to be_truthy
     end
   end

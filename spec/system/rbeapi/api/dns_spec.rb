@@ -27,6 +27,20 @@ describe Rbeapi::Api::Dns do
       expect(subject.set_domain_name(value: 'arista.com')).to be_truthy
       expect(subject.get[:domain_name]).to eq('arista.com')
     end
+
+    it 'negates the domain name' do
+      expect(subject.set_domain_name(value: 'arista.com')).to be_truthy
+      expect(subject.get[:domain_name]).to eq('arista.com')
+      expect(subject.set_domain_name(enable: false)).to be_truthy
+      expect(subject.get[:domain_name]).to be_empty
+    end
+
+    it 'defaults the domain name' do
+      expect(subject.set_domain_name(value: 'arista.com')).to be_truthy
+      expect(subject.get[:domain_name]).to eq('arista.com')
+      expect(subject.set_domain_name(default: true)).to be_truthy
+      expect(subject.get[:domain_name]).to be_empty
+    end
   end
 
   describe '#add_name_server' do

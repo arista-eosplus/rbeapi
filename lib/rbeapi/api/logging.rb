@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -83,13 +83,11 @@ module Rbeapi
 
       ##
       # set_enable configures the global logging instance on the node as either
-      # enabled or disabled.  If the value is set to true then logging is
-      # globally enabled and if set to false, it is globally disabled.  If no
-      # value is specified, then the no keyword is used to configure the
-      # logging enable value.  If the default keyword is specified and set to
-      # true, then the configuration is defaulted using the default keyword.
-      # The default keyword option takes precedence over the value keyword if
-      # both options are specified.
+      # enabled or disabled.  If the enable keyword is set to true then logging
+      # is globally enabled and if set to false, it is globally disabled.  If
+      # the default keyword is specified and set to true, then the configuration
+      # is defaulted using the default keyword.  The default keyword option
+      # takes precedence over the enable keyword if both options are specified.
       #
       # @eos_version 4.13.7M
       #
@@ -100,23 +98,15 @@ module Rbeapi
       #
       # @param [Hash] :opts Optional keyword arguments
       #
-      # @option :opts [Boolean] :value Enables logging globally if value is true
-      #   or disabled logging glboally if value is false
+      # @option :opts [Boolean] :enable Enables logging globally if value is
+      #   true or disabled logging globally if value is false
       #
       # @option :opts [Boolean] :default Configure the ip address value using
       #   the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_enable(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmd = 'default logging on'
-        when false
-          cmd = value ? 'logging on' : 'no logging on'
-        end
+        cmd = command_builder('logging on', opts)
         configure cmd
       end
 

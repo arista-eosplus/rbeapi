@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,7 @@ module Rbeapi
       ##
       # parse_mode scans the nodes running configuration and extracts the
       # value of the spanning-tree mode.  The spanning tree mode is
-      # expected to be always be avaliable in the running config.  The return
+      # expected to be always be available in the running config.  The return
       # value is intended to be merged into the stp resource hash
       #
       # @api private
@@ -90,7 +90,7 @@ module Rbeapi
       end
 
       ##
-      # interfaces rereturns a memoized instance of StpInterfaces for
+      # interfaces returns a memoized instance of StpInterfaces for
       # configuring individual stp interfaces
       #
       # @return [StpInterfaces] an instance of StpInterfaces class
@@ -102,10 +102,10 @@ module Rbeapi
 
       ##
       # set_mode configures the stp mode in the global nodes running
-      # configuration.  If the value option is not specified, then the stp
+      # configuration.  If the enable option is false, then the stp
       # mode is configured with the no keyword argument.  If the default option
       # is specified then the mode is configured with the default keyword
-      # argument.  The default keyword argument takes precedence over the value
+      # argument.  The default keyword argument takes precedence over the enable
       # option if both are provided
       #
       # @eos_version 4.13.7M
@@ -120,25 +120,16 @@ module Rbeapi
       # @option :opts [String] :value The value to configure the stp mode to
       #   in the nodes current running configuration
       #
-      # @option :opts [Boolean] :deafult Configure the stp mode value using
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
+      # @option :opts [Boolean] :default Configure the stp mode value using
       #   the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       #
       def set_mode(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmd = 'default spanning-tree mode'
-        when false
-          if value
-            cmd = "spanning-tree mode #{value}"
-          else
-            cmd = 'no spanning-tree mode'
-          end
-        end
+        cmd = command_builder('spanning-tree mode', opts)
         configure cmd
       end
     end
@@ -151,7 +142,7 @@ module Rbeapi
       DEFAULT_STP_PRIORITY = '32768'
 
       ##
-      # get returns the specified stp intstance config parsed from the nodes
+      # get returns the specified stp instance config parsed from the nodes
       # current running configuration.
       #
       # @example
@@ -207,7 +198,7 @@ module Rbeapi
       ##
       # parse_priority will scan the nodes current configuration and extract
       # the stp priority value for the given stp instance.  If the stp
-      # instance prioirity is not configured, the priority value will be set
+      # instance priority is not configured, the priority value will be set
       # using DEFAULT_STP_PRIORITY.  The returned hash is intended to be merged
       # into the resource hash
       #
@@ -238,18 +229,21 @@ module Rbeapi
       # @param [String] inst The MST instance to configure
       # @param [Hash] opts The configuration parameters for the priority
       # @option opts [string] :value The value to set the priority to
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       # @option opts [Boolean] :default The value should be set to default
       #
       # @return [Boolean] True if the commands succeed otherwise False
       def set_priority(inst, opts = {})
         value = opts[:value]
+        enable = opts.fetch(:enable, true)
         default = opts[:default] || false
 
         case default
         when true
           cmd = "default spanning-tree mst #{inst} priority"
         when false
-          if value
+          if enable
             cmd = "spanning-tree mst #{inst} priority #{value}"
           else
             cmd = "no spanning-tree mst #{inst} priority"
@@ -261,7 +255,7 @@ module Rbeapi
 
     ##
     # The StpInterfaces class provides a class instance for working with
-    # spanning-tree insterfaces in EOS
+    # spanning-tree interfaces in EOS
     #
     class StpInterfaces < Entity
       ##
@@ -365,25 +359,14 @@ module Rbeapi
       # @param [String] name The name of the interface to configure
       # @param [Hash] opts The configuration parameters for portfast
       # @option opts [Boolean] :value The value to set portfast
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       # @option opts [Boolean] :default The value should be set to default
       #
       # @return [Boolean] True if the commands succeed otherwise False
       def set_portfast(name, opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default spanning-tree portfast'
-        when false
-          if value
-            cmds << 'spanning-tree portfast'
-          else
-            cmds << 'no spanning-tree portfast'
-          end
-        end
-        configure(cmds)
+        cmd = command_builder('spanning-tree portfast', opts)
+        configure_interface(name, cmd)
       end
 
       ##

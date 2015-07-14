@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ module Rbeapi
       #     "domain_list": array<strings>
       #   }
       #
-      # @return [Hash]  A Ruby hash objec that provides the SNMP settings as
+      # @return [Hash]  A Ruby hash object that provides the SNMP settings as
       #   key / value pairs.
       def get
         response = {}
@@ -81,19 +81,13 @@ module Rbeapi
       #
       # @param [Hash] opts The configuration parameters
       # @option opts [string] :value The value to set the domain-name to
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       # @option opts [Boolean] :default The value should be set to default
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_domain_name(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmds = 'default ip domain-name'
-        when false
-          cmds = (value ? "ip domain-name #{value}" : 'no ip domain-name')
-        end
+        cmds = command_builder('ip domain-name', opts)
         configure(cmds)
       end
 
@@ -119,7 +113,7 @@ module Rbeapi
       # @option [Boolean] :default Configures the ip name-servers using the
       #   default keyword argument
       #
-      # @return [Boolean] returns true if the commands completed successfuly
+      # @return [Boolean] returns true if the commands completed successfully
       def set_name_servers(opts = {})
         value = opts[:value] || []
         default = opts[:default] || false
@@ -169,7 +163,7 @@ module Rbeapi
       # @option [Boolean] :default Configures the ip domain-list using the
       #   default keyword argument
       #
-      # @return [Boolean] returns true if the commands completed successfuly
+      # @return [Boolean] returns true if the commands completed successfully
       def set_domain_list(opts = {})
         value = opts[:value] || []
         default = opts[:default] || false

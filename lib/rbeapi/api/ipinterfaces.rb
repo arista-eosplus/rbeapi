@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -132,7 +132,7 @@ module Rbeapi
       private :parse_mtu
 
       ##
-      # parse_helper_addresses scans the provided configuraiton block and
+      # parse_helper_addresses scans the provided configuration block and
       # extracts any configured IP helper address values.  The interface could
       # be configured with one or more helper addresses.  If no helper
       # addresses are configured, then an empty array is set in the return
@@ -194,12 +194,13 @@ module Rbeapi
       end
 
       ##
-      # set_address configures a logical IP interface with an address.  The
-      # address value must be in the form of A.B.C.D/E.  If no value is
-      # provided, then the interface address is negated using the config no
-      # keyword.  If the default option is set to true, then the ip address
-      # value is defaulted using the default keyword.  The default keyword has
-      # precedence over the value keyword if both options are specified
+      # set_address configures a logical IP interface with an address.
+      # The address value must be in the form of A.B.C.D/E.  If the enable
+      # keyword is false, then the interface address is negated using the
+      # config no keyword.  If the default option is set to true, then the
+      # ip address # value is defaulted using the default keyword.  The
+      # default keyword has precedence over the enable keyword if both
+      # options are specified
       #
       # @eos_version 4.13.7M
       #
@@ -218,30 +219,24 @@ module Rbeapi
       #   for the specified interface name.  The value must be in the form
       #   of A.B.C.D/E
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option :opts [Boolean] :default Configure the ip address value using
       #   the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_address(name, opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default ip address'
-        when false
-          cmds << (value.nil? ? 'no ip address' : "ip address #{value}")
-        end
-        configure cmds
+        cmds = command_builder('ip address', opts)
+        configure_interface(name, cmds)
       end
 
       ##
       # set_mtu configures the IP mtu value of the ip interface in the nodes
-      # configuration.  If the value is not provided, then the ip mtu value is
-      # configured using the no keyword.  If the default keywork option is
+      # configuration.  If the enable option is false, then the ip mtu value is
+      # configured using the no keyword.  If the default keyword option is
       # provided and set to true then the ip mtu value is configured using the
-      # default keyword.  The default keyword has precedence over the value
+      # default keyword.  The default keyword has precedence over the enable
       # keyword if both options are specified.
       #
       # @eos_version 4.13.7M
@@ -261,22 +256,16 @@ module Rbeapi
       #   the nodes configuration.  Valid values are in the range of 68 to 9214
       #   bytes.  The default is 1500 bytes
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option :opts [Boolean] :default Configure the ip mtu value using
       #   the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_mtu(name, opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default mtu'
-        when false
-          cmds << (value.nil? ? 'no mtu' : "mtu #{value}")
-        end
-        configure cmds
+        cmds = command_builder('mtu', opts)
+        configure_interface(name, cmds)
       end
 
       ##

@@ -80,14 +80,14 @@ describe Rbeapi::Api::Interfaces do
     it 'sets the shutdown value to true' do
       node.config(['interface Vxlan1', 'no shutdown'])
       expect(subject.get('Vxlan1')[:shutdown]).to be_falsy
-      expect(subject.set_shutdown('Vxlan1', value: true)).to be_truthy
+      expect(subject.set_shutdown('Vxlan1', enable: true)).to be_truthy
       expect(subject.get('Vxlan1')[:shutdown]).to be_truthy
     end
 
     it 'sets the shutdown value to false' do
       node.config(['interface Vxlan1', 'shutdown'])
       expect(subject.get('Vxlan1')[:shutdown]).to be_truthy
-      expect(subject.set_shutdown('Vxlan1', value: false)).to be_truthy
+      expect(subject.set_shutdown('Vxlan1', enable: false)).to be_truthy
       expect(subject.get('Vxlan1')[:shutdown]).to be_falsy
     end
   end

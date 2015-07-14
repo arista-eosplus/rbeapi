@@ -31,6 +31,20 @@ describe Rbeapi::Api::Snmp do
       expect(subject.set_location(value: 'foo')).to be_truthy
       expect(subject.get[:location]).to eq('foo')
     end
+
+    it 'negates the snmp location' do
+      expect(subject.set_location(value: 'foo')).to be_truthy
+      expect(subject.get[:location]).to eq('foo')
+      expect(subject.set_location(enable: false)).to be_truthy
+      expect(subject.get[:location]).to be_empty
+    end
+
+    it 'defaults the snmp location' do
+      expect(subject.set_location(value: 'foo')).to be_truthy
+      expect(subject.get[:location]).to eq('foo')
+      expect(subject.set_location(default: true)).to be_truthy
+      expect(subject.get[:location]).to be_empty
+    end
   end
 
   describe '#set_contact' do
@@ -40,6 +54,20 @@ describe Rbeapi::Api::Snmp do
       expect(subject.get[:contact]).to be_empty
       expect(subject.set_contact(value: 'foo')).to be_truthy
       expect(subject.get[:contact]).to eq('foo')
+    end
+
+    it 'negates the snmp contact' do
+      expect(subject.set_contact(value: 'foo')).to be_truthy
+      expect(subject.get[:contact]).to eq('foo')
+      expect(subject.set_contact(enable: false)).to be_truthy
+      expect(subject.get[:contact]).to be_empty
+    end
+
+    it 'defaults the snmp contact' do
+      expect(subject.set_contact(value: 'foo')).to be_truthy
+      expect(subject.get[:contact]).to eq('foo')
+      expect(subject.set_contact(default: true)).to be_truthy
+      expect(subject.get[:contact]).to be_empty
     end
   end
 
@@ -51,6 +79,20 @@ describe Rbeapi::Api::Snmp do
       expect(subject.set_chassis_id(value: 'foo')).to be_truthy
       expect(subject.get[:chassis_id]).to eq('foo')
     end
+
+    it 'negates the chassis id' do
+      expect(subject.set_chassis_id(value: 'foo')).to be_truthy
+      expect(subject.get[:chassis_id]).to eq('foo')
+      expect(subject.set_chassis_id(enable: false)).to be_truthy
+      expect(subject.get[:chassis_id]).to be_empty
+    end
+
+    it 'defaults the chassis id' do
+      expect(subject.set_chassis_id(value: 'foo')).to be_truthy
+      expect(subject.get[:chassis_id]).to eq('foo')
+      expect(subject.set_chassis_id(default: true)).to be_truthy
+      expect(subject.get[:chassis_id]).to be_empty
+    end
   end
 
   describe '#set_source_interface' do
@@ -60,6 +102,20 @@ describe Rbeapi::Api::Snmp do
       expect(subject.get[:source_interface]).to be_empty
       expect(subject.set_source_interface(value: 'Loopback0')).to be_truthy
       expect(subject.get[:source_interface]).to eq('Loopback0')
+    end
+
+    it 'negates the snmp source-interface' do
+      expect(subject.set_source_interface(value: 'Loopback0')).to be_truthy
+      expect(subject.get[:source_interface]).to eq('Loopback0')
+      expect(subject.set_source_interface(enable: false)).to be_truthy
+      expect(subject.get[:source_interface]).to be_empty
+    end
+
+    it 'defaults the snmp source-interface' do
+      expect(subject.set_source_interface(value: 'Loopback0')).to be_truthy
+      expect(subject.get[:source_interface]).to eq('Loopback0')
+      expect(subject.set_source_interface(default: true)).to be_truthy
+      expect(subject.get[:source_interface]).to be_empty
     end
   end
 end

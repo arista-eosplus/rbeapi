@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ module Rbeapi
   module Api
     ##
     # The Entity class provides a base class implementation for building
-    # API modules.  The Entity class is typcially not instantiated directly
+    # API modules.  The Entity class is typically not instantiated directly
     # but serves as a super class with convenience methods used to
     # work with the node.
     class Entity
@@ -58,7 +58,7 @@ module Rbeapi
 
       ##
       # The Entity class provides a base class implementation for building
-      # API modules.  The Entity class is typcially not instantiated directly
+      # API modules.  The Entity class is typically not instantiated directly
       # but serves as a super class with convenience methods used to
       # work with the node.
       #
@@ -84,7 +84,7 @@ module Rbeapi
       # one exists) of the node's connection instance
       #
       # @return [Rbeapi::Eapilib::CommandError] An instance of CommandError
-      #   that can be used to futher evaluate the root cause of an error
+      #   that can be used to further evaluate the root cause of an error
       def error
         @node.connection.error
       end
@@ -133,29 +133,38 @@ module Rbeapi
       end
 
       ##
-      # command_builder builds the correct version of a command based on the
-      # configuration options.  If the value option is not provided then the
-      # no keyword is used to build the command.  If the default value is
-      # provided and set to true, then the default keyword is used.  If both
-      # options are provided, then the default option will take precedence.
+      # Method called to build the correct version of a command based on
+      # the modifier options.  If value option is set then it is appended
+      # to the command. If the enable option is false then the 'no'
+      # keyword is prefixed to the command.  If the default value is
+      # provided and set to true, then the default keyword is used.  If
+      # both options are provided, then default option takes precedence.
       #
-      # @return [String]
+      # @param [String, Array] :commands The commands to send to the node
+      #   over the API connection to configure the system
+      # @param [Hash] :opts the options for the command
+      #
+      # @option :opts  [String] :value Optional value that is
+      #   appended to the command if set.
+      #
+      # @option :opts  [Boolean] :enable Prefix the command with 'no'.
+      #   Default is true.
+      #
+      # @option :opts  [Boolean] :default Configure the command using
+      #   the default keyword. Default is false.
+      #
+      # @return [String] Returns built command string
       def command_builder(cmd, opts = {})
-        value = opts[:value]
+        enable = opts.fetch(:enable, true)
         default = opts.fetch(:default, false)
-        case default
-        when true then "default #{cmd}"
-        when false
-          case value
-          when nil, false then "no #{cmd}"
-          when true then cmd
-          else "#{cmd} #{value}"
-          end
-        end
+        cmd << " #{opts[:value]}" if opts[:value]
+        return "default #{cmd}" if default
+        return "no #{cmd}" unless enable
+        cmd
       end
 
       ##
-      # configure_interface sends the commands over eAPI to the desitnation
+      # configure_interface sends the commands over eAPI to the destination
       # node to configure a specific interface.
       #
       # @param [String] :name The interface name to apply the configuration

@@ -36,17 +36,24 @@ describe Rbeapi::Api::StpInterfaces do
   end
 
   describe '#set_portfast' do
-    it 'sets the portfast value to true' do
+    it 'enables portfast' do
       node.config(['interface Ethernet1', 'no spanning-tree portfast'])
       expect(subject.get('Ethernet1')[:portfast]).to be_falsy
-      expect(subject.set_portfast('Ethernet1', value: true)).to be_truthy
+      expect(subject.set_portfast('Ethernet1', enable: true)).to be_truthy
       expect(subject.get('Ethernet1')[:portfast]).to be_truthy
     end
 
-    it 'sets the portfast value to false' do
+    it 'disable portfast' do
       node.config(['interface Ethernet1', 'spanning-tree portfast'])
       expect(subject.get('Ethernet1')[:portfast]).to be_truthy
-      expect(subject.set_portfast('Ethernet1', value: false)).to be_truthy
+      expect(subject.set_portfast('Ethernet1', enable: false)).to be_truthy
+      expect(subject.get('Ethernet1')[:portfast]).to be_falsy
+    end
+
+    it 'sets portfast to default value' do
+      node.config(['interface Ethernet1', 'spanning-tree portfast'])
+      expect(subject.get('Ethernet1')[:portfast]).to be_truthy
+      expect(subject.set_portfast('Ethernet1', default: true)).to be_truthy
       expect(subject.get('Ethernet1')[:portfast]).to be_falsy
     end
   end
