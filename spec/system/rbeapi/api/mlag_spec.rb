@@ -153,26 +153,30 @@ describe Rbeapi::Api::Mlag do
   describe '#set_mlag_id' do
     before do
       node.config(['default mlag configuration',
-                   'default interface Ethernet1'])
+                   'default interface Ethernet1',
+                   'default interface Port-Channel20',
+                   'interface Ethernet1',
+                   'channel-group 20 mode active',
+                   'interface port-channel 20',
+                   'mlag 20'])
     end
 
-    # XXX Not clear how to test this feature
-    # it 'configures the mlag id' do
-    #   expect(subject.get[:global][:mlag_id]).to be_nil
-    #   expect(subject.set_mlag_id('Ethernet1', value: '1000')).to be_truthy
-    #   expect(subject.get[:global][:mlag_id]).to eq('1000')
-    # end
-    # XXX Replace the mock calls below
-    it 'negates the mlag id' do
-      expect(node).to receive(:config).with(['interface Ethernet1',
-                                             'no mlag'])
-      expect(subject.set_mlag_id('Ethernet1', enable: false)).to be_truthy
+    it 'configure the mlag id' do
+      expect(subject.get[:interfaces]['Port-Channel20'][:mlag_id]).to eq(20)
+      expect(subject.set_mlag_id('Port-Channel20', value: '1000')).to be_truthy
+      expect(subject.get[:interfaces]['Port-Channel20'][:mlag_id]).to eq(1000)
     end
 
-    it 'defaults the mlag id' do
-      expect(node).to receive(:config).with(['interface Ethernet1',
-                                             'default mlag'])
-      expect(subject.set_mlag_id('Ethernet1', default: true)).to be_truthy
+    it 'negate the mlag id' do
+      expect(subject.get[:interfaces]['Port-Channel20'][:mlag_id]).to eq(20)
+      expect(subject.set_mlag_id('Port-Channel20', enable: false)).to be_truthy
+      expect(subject.get[:interfaces]['Port-Channel20']).to eq(nil)
+    end
+
+    it 'default the mlag id' do
+      expect(subject.get[:interfaces]['Port-Channel20'][:mlag_id]).to eq(20)
+      expect(subject.set_mlag_id('Port-Channel20', default: true)).to be_truthy
+      expect(subject.get[:interfaces]['Port-Channel20']).to eq(nil)
     end
   end
 end
