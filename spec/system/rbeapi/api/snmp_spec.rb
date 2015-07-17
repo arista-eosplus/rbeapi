@@ -118,4 +118,53 @@ describe Rbeapi::Api::Snmp do
       expect(subject.get[:source_interface]).to be_empty
     end
   end
+
+  describe '#set_community_acl' do
+    before do
+      node.config(['no snmp-server community foo',
+                   'no snmp-server community bar'])
+    end
+
+    it 'configures nil acl for snmp community foo and bar' do
+      expect(subject.get[:communities]).to be_empty
+      expect(subject.set_community_acl('foo')).to be_truthy
+      expect(subject.get[:communities]['foo']).to eq(access: 'ro', acl: nil)
+      expect(subject.set_community_acl('bar')).to be_truthy
+      expect(subject.get[:communities]['bar']).to eq(access: 'ro', acl: nil)
+    end
+
+    it 'configures IPv4 acl for snmp community foo and bar' do
+      expect(subject.get[:communities]).to be_empty
+      expect(subject.set_community_acl('foo', value: 'eng')).to be_truthy
+      expect(subject.get[:communities]['foo']).to eq(access: 'ro', acl: 'eng')
+      expect(subject.set_community_acl('bar', value: 'eng')).to be_truthy
+      expect(subject.get[:communities]['bar']).to eq(access: 'ro', acl: 'eng')
+    end
+
+    it 'negates the snmp community ACL for bar' do
+      expect(subject.get[:communities]).to be_empty
+      expect(subject.set_community_acl('foo', value: 'eng')).to be_truthy
+      expect(subject.get[:communities]['foo']).to eq(access: 'ro', acl: 'eng')
+      expect(subject.set_community_acl('bar', value: 'eng')).to be_truthy
+      expect(subject.get[:communities]['bar']).to eq(access: 'ro', acl: 'eng')
+      # Remove bar
+      expect(subject.set_community_acl('bar', enable: false)).to be_truthy
+      expect(subject.get[:communities]['bar']).to be_falsy
+      # Make sure foo is still there
+      expect(subject.get[:communities]['foo']).to eq(access: 'ro', acl: 'eng')
+    end
+
+    it 'defaults the snmp community ACL for bar' do
+      expect(subject.get[:communities]).to be_empty
+      expect(subject.set_community_acl('foo', value: 'eng')).to be_truthy
+      expect(subject.get[:communities]['foo']).to eq(access: 'ro', acl: 'eng')
+      expect(subject.set_community_acl('bar', value: 'eng')).to be_truthy
+      expect(subject.get[:communities]['bar']).to eq(access: 'ro', acl: 'eng')
+      # Default bar
+      expect(subject.set_community_acl('bar', default: true)).to be_truthy
+      expect(subject.get[:communities]['bar']).to be_falsy
+      # Make sure foo is still there
+      expect(subject.get[:communities]['foo']).to eq(access: 'ro', acl: 'eng')
+    end
+  end
 end
