@@ -367,8 +367,8 @@ module Rbeapi
 
       ##
       # set_community_acl configures the acl to apply to the specified
-      # community name.  If the value option is not specified, the acl is
-      # removed from the community name
+      # community name.  When enable is true, it will remove the
+      # the named community and then add the new acl entry.
       #
       # @eos_version 4.13.7M
       #
@@ -379,16 +379,27 @@ module Rbeapi
       # @param [String] :name The name of the snmp community to add to the
       #   nodes running configuration.
       #
-      # @option [String] :value The name of the acl to apply to the snmp
-      #   community in the nodes config
+      # @param [Hash] opts The configuration parameters
+      #
+      # @option opts [String] :value The name of the acl to apply to the snmp
+      #   community in the nodes config. If nil, then the community name
+      #   allows access to all objects.
+      # @option opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      # @option opts [Boolean] :default Configure the snmp community name
+      #   using the default keyword. Default takes precedence over enable.
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_community_acl(name, opts = {})
         value = opts[:value]
+        enable = opts.fetch(:enable, true)
+        default = opts.fetch(:default, false)
+        # Default is same as negate for this command
+        enable = default ? false : enable
         communities = parse_communities[:communities]
         access = communities[name][:access] if communities.include?(name)
-        cmds = ["no snmp-server community #{name}",
-                "snmp-server community #{name} #{access} #{value}"]
+        cmds = ["no snmp-server community #{name}"]
+        cmds << "snmp-server community #{name} #{access} #{value}" if enable
         configure cmds
       end
 
