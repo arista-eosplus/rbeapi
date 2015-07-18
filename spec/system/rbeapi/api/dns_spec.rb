@@ -43,6 +43,30 @@ describe Rbeapi::Api::Dns do
     end
   end
 
+  describe '#set_name_servers' do
+    let(:servers) {  %w(1.2.3.4 5.6.7.8 9.10.11.12) }
+
+    before { node.config('no ip name-server') }
+
+    it 'add all the servers to the name servers list' do
+      expect(subject.get[:name_servers]).to be_empty
+      expect(subject.set_name_servers(value: servers)).to be_truthy
+      expect(subject.get[:name_servers]).to eq(servers)
+    end
+
+    it 'negate the name servers list' do
+      expect(subject.get[:name_servers]).to be_empty
+      expect(subject.set_name_servers(enable: false)).to be_truthy
+      expect(subject.get[:name_servers]).to be_empty
+    end
+
+    it 'default the name servers list' do
+      expect(subject.get[:name_servers]).to be_empty
+      expect(subject.set_name_servers(default: true)).to be_truthy
+      expect(subject.get[:name_servers]).to be_empty
+    end
+  end
+
   describe '#add_name_server' do
     before do
       begin
@@ -66,6 +90,34 @@ describe Rbeapi::Api::Dns do
       expect(subject.get[:name_servers]).to include('1.2.3.4')
       expect(subject.remove_name_server('1.2.3.4')).to be_truthy
       expect(subject.get[:name_servers]).not_to include('1.2.3.4')
+    end
+  end
+
+  describe '#set_domain_list' do
+    let(:servers) {  %w(foo bar baz) }
+
+    before do
+      node.config(['no ip domain-list foo',
+                   'no ip domain-list bar',
+                   'no ip domain-list baz'])
+    end
+
+    it 'add all the servers to the name servers list' do
+      expect(subject.get[:domain_list]).to be_empty
+      expect(subject.set_domain_list(value: servers)).to be_truthy
+      expect(subject.get[:domain_list]).to eq(servers)
+    end
+
+    it 'negate the name servers list' do
+      expect(subject.get[:domain_list]).to be_empty
+      expect(subject.set_domain_list(enable: false)).to be_truthy
+      expect(subject.get[:domain_list]).to be_empty
+    end
+
+    it 'default the name servers list' do
+      expect(subject.get[:domain_list]).to be_empty
+      expect(subject.set_domain_list(default: true)).to be_truthy
+      expect(subject.get[:domain_list]).to be_empty
     end
   end
 

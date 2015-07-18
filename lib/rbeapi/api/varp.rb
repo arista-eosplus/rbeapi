@@ -75,7 +75,7 @@ module Rbeapi
       #
       # @param [Hash] opts The configuration parameters
       # @option opts [string] :value The value to set the mac-address to
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts [Boolean] :enable If false then the command is
       #   negated. Default is true.
       # @option opts [Boolean] :default The value should be set to default
       #
@@ -134,30 +134,39 @@ module Rbeapi
       end
 
       ##
-      # Creates a new MLAG interface with the specified mlag id
+      # The set_addresses method assigns one or more virtual IPv4 address
+      # to the specified VLAN interface. All existing addresses are
+      # removed before the ones in value are added.
       #
-      # @param [String] :name The name of the interface to create.  The
+      # @param [String] :name The name of the interface.  The
       #   name argument must be the full interface name.  Valid interfaces
-      #   are restricted to Port-Channel interfaces
-      # @param [String] :id The MLAG ID to configure for the specified
-      #   interface name
+      #   are restricted to VLAN interfaces
+      # @param [Hash] opts The configuration parameters
+      # @option opts [Array] :value Array of IPv4 addresses to add to
+      #   the virtual router.
+      # @option opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      # @option opts [Boolean] :default The value should be set to default
       #
       # @return [Boolean] True if the commands succeeds otherwise False
       def set_addresses(name, opts = {})
         value = opts[:value]
+        enable = opts.fetch(:enable, true)
         default = opts[:default] || false
 
         case default
         when true
-          return configure('default ip virtual-router address')
+          configure(["interface #{name}", 'default ip virtual-router address'])
         when false
           get(name)['addresses'].each do |addr|
             result = remove_address(name, addr)
             return result unless result
           end
-          value.each do |addr|
-            result = add_address(name, addr)
-            return result unless result
+          if enable
+            value.each do |addr|
+              result = add_address(name, addr)
+              return result unless result
+            end
           end
         end
         true

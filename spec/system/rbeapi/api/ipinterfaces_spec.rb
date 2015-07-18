@@ -136,5 +136,19 @@ describe Rbeapi::Api::Ipinterfaces do
       expect(subject.get('Ethernet1')[:helper_addresses].sort)
         .to eq(helpers.sort)
     end
+
+    it 'negates the helper addresses on the interface' do
+      expect(subject.get('Ethernet1')[:helper_addresses]).to be_empty
+      expect(subject.set_helper_addresses('Ethernet1', enable: false))
+        .to be_truthy
+      expect(subject.get('Ethernet1')[:helper_addresses].sort).to be_empty
+    end
+
+    it 'default the helper addresses on the interface' do
+      expect(subject.get('Ethernet1')[:helper_addresses]).to be_empty
+      expect(subject.set_helper_addresses('Ethernet1', default: true))
+        .to be_truthy
+      expect(subject.get('Ethernet1')[:helper_addresses].sort).to be_empty
+    end
   end
 end
