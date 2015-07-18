@@ -375,21 +375,29 @@ module Rbeapi
       # @param [String] name The name of the interface to configure
       # @param [Hash] opts The configuration parameters for portfast type
       # @option opts [String] :value The value to set portfast type to.
+      #   The value must be set for calls to this method.
+      # @option opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       # @option opts [Boolean] :default The value should be set to default
       #
       # @return [Boolean] True if the commands succeed otherwise False
       def set_portfast_type(name, opts = {})
         value = opts[:value]
+        fail ArgumentError, 'value must be set' unless value
+        enable = opts.fetch(:enable, true)
         default = opts[:default] || false
 
-        cmds = ["interface #{name}"]
         case default
         when true
-          cmds << 'default spanning-tree portfast normal'
+          cmds = "default spanning-tree portfast #{value}"
         when false
-          cmds << "spanning-tree portfast #{value}"
+          if enable
+            cmds = "spanning-tree portfast #{value}"
+          else
+            cmds = "no spanning-tree portfast #{value}"
+          end
         end
-        configure(cmds)
+        configure_interface(name, cmds)
       end
 
       ##
@@ -398,25 +406,26 @@ module Rbeapi
       # @param [String] name The name of the interface to configure
       # @param [Hash] opts The configuration parameters for bpduguard
       # @option opts [Boolean] :value The value to set bpduguard
+      # @option opts [Boolean] :enable If false then the bpduguard is
+      #   disabled. If true then the bpduguard is enabled. Default is true.
       # @option opts [Boolean] :default The value should be set to default
       #
       # @return [Boolean] True if the commands succeed otherwise False
       def set_bpduguard(name, opts = {})
-        value = opts[:value]
+        enable = opts.fetch(:enable, true)
         default = opts[:default] || false
 
-        cmds = ["interface #{name}"]
         case default
         when true
-          cmds << 'default spanning-tree bpduguard'
+          cmds = 'default spanning-tree bpduguard'
         when false
-          if value
-            cmds << 'spanning-tree bpduguard enable'
+          if enable
+            cmds = 'spanning-tree bpduguard enable'
           else
-            cmds << 'spanning-tree bpduguard disable'
+            cmds = 'spanning-tree bpduguard disable'
           end
         end
-        configure(cmds)
+        configure_interface(name, cmds)
       end
     end
   end
