@@ -298,21 +298,17 @@ module Rbeapi
       #
       def set_helper_addresses(name, opts = {})
         value = opts[:value]
+        enable = opts.fetch(:enable, true)
         default = opts[:default] || false
 
-        cmds = ["interface #{name}"]
         case default
         when true
-          cmds << 'default ip helper-address'
+          cmds = 'default ip helper-address'
         when false
-          if value.nil?
-            cmds << 'no ip helper-address'
-          else
-            cmds << 'no ip helper-address'
-            value.each { |addr| cmds << "ip helper-address #{addr}" }
-          end
+          cmds = ['no ip helper-address']
+          value.each { |addr| cmds << "ip helper-address #{addr}" } if enable
         end
-        configure cmds
+        configure_interface(name, cmds)
       end
     end
   end
