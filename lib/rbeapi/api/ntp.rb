@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@ module Rbeapi
   # Api is module namesapce for working with the EOS command API
   module Api
     ##
-    # The Ntp class provides an intstance for working with the nodes
-    # NTP configuraiton.
+    # The Ntp class provides an instance for working with the nodes
+    # NTP configuration.
     class Ntp < Entity
       DEFAULT_SRC_INTF = ''
 
@@ -82,7 +82,7 @@ module Rbeapi
       # parse_servers scans the nodes configuration and parses the configured
       # ntp server host names and/or addresses.  This method will also return
       # the value of prefer.  If no servers are configured, the value will be
-      # set to an empty array.  The return hash is inteded to be merged into
+      # set to an empty array.  The return hash is intended to be merged into
       # the resource hash
       #
       # @api private
@@ -98,39 +98,34 @@ module Rbeapi
 
       ##
       # set_source_interface configures the ntp source value in the nodes
-      # running configuration.  If no value is provided in the options, then
+      # running configuration.  If the enable keyword is false, then
       # the ntp source is configured with the no keyword argument.  If the
       # default keyword argument is provided and set to true, the value is
       # configured used the default keyword.  The default keyword takes
-      # precedence over the value keyword if both optiosn are specified.
+      # precedence over the enable keyword if both options are specified.
       #
       # @eos_version 4.13.7M
       #
       # @commands
       #   ntp source <value>
       #   no ntp source
-      #   deafult ntp source
+      #   default ntp source
       #
       # @param [Hash] :opts Optional keyword arguments
       #
       # @option :opts [String] :value The value to configure the ntp source
       #   in the nodes configuration
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option :opts [Boolean] :default Configure the ntp source value using
       #   the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_source_interface(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmds = 'default ntp source'
-        when false
-          cmds = (value ? "ntp source #{value}" : 'no ntp source')
-        end
-        configure(cmds)
+        cmd = command_builder('ntp source', opts)
+        configure(cmd)
       end
 
       ##

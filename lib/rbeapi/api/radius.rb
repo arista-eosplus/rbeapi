@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ module Rbeapi
 
       # Regular expression to extract a radius server's attributes from the
       # running-configuration text.  The explicit [ ] spaces enable line
-      # wrappping and indentation with the /x flag.
+      # wrapping and indentation with the /x flag.
       SERVER_REGEXP = /radius-server[ ]host[ ](.*?)
                        (?:[ ]vrf[ ]([^\s]+))?
                        (?:[ ]auth-port[ ](\d+))?
@@ -62,7 +62,7 @@ module Rbeapi
       # method.
       #
       # The resource hash returned contains the following information:
-      #  * key: (String) the key either in plaintext or hashed format
+      #  * key: (String) the key either in plain text or hashed format
       #  * key_format: (Fixnum) e.g. 0 or 7
       #  * timeout: (Fixnum) seconds before the timeout period ends
       #  * retransmit: (Fixnum), e.g. 3, attempts after first timeout expiry.
@@ -81,7 +81,7 @@ module Rbeapi
       end
 
       ##
-      # parse_time scans the nodes current configuraiton and parse the
+      # parse_time scans the nodes current configuration and parse the
       # radius-server timeout value.  The timeout value is expected to always
       # be present in the config
       #
@@ -96,7 +96,7 @@ module Rbeapi
 
       ##
       # parse_retransmit scans the cnodes current configuration and parses the
-      # radius-server retransmit value.  the retransmist value is expected to
+      # radius-server retransmit value.  the retransmit value is expected to
       # always be present in the config
       #
       # @api private
@@ -134,7 +134,7 @@ module Rbeapi
       # The resource hash returned contains the following information:
       #  * hostname: hostname or ip address
       #  * vrf: (String) vrf name
-      #  * key: (String) the key either in plaintext or hashed format
+      #  * key: (String) the key either in plain text or hashed format
       #  * key_format: (Fixnum) e.g. 0 or 7
       #  * timeout: (Fixnum) seconds before the timeout period ends
       #  * retransmit: (Integer), e.g. 3, attempts after first timeout expiry.
@@ -164,8 +164,8 @@ module Rbeapi
       private :parse_servers
 
       ##
-      # set_global_key configures the global radius-server key.  If the value
-      # option is not specified, radius-server key is configured using the no
+      # set_global_key configures the global radius-server key.  If the enable
+      # option is false, radius-server key is configured using the no
       # keyword. If the default option is specified, radius-server key is
       # configured using the default keyword. If both options are specified,
       # the default keyword option takes precedence.
@@ -181,8 +181,11 @@ module Rbeapi
       #   in the nodes running configuration
       #
       # @option [Fixnum] :key_format The format of the key to be passed to the
-      #   nodes running configuration.  Valid values are 0 (cleartext) or 7
+      #   nodes running configuration.  Valid values are 0 (clear text) or 7
       #   (encrypted).  The default value is 0 if format is not provided.
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       #
       # @option [Boolean] :default Configures the radius-server key using the
       #   default keyword argument
@@ -190,6 +193,7 @@ module Rbeapi
       # @return [Boolean] returns true if the commands complete successfully
       def set_global_key(opts = {})
         value = opts[:value]
+        enable = opts.fetch(:enable, true)
         key_format = opts[:key_format] || 0
         default = opts[:default] || false
 
@@ -197,7 +201,7 @@ module Rbeapi
         when true
           cmds = 'default radius-server key'
         when false
-          if value
+          if enable
             cmds = "radius-server key #{key_format} #{value}"
           else
             cmds = 'no radius-server key'
@@ -208,7 +212,7 @@ module Rbeapi
 
       ##
       # set_global_timeout configures the radius-server timeout value.  If the
-      # value # options is not specified, radius-server timeout is configured
+      # enable option is false, then radius-server timeout is configured
       # using the no keyword.  If the default option is specified, radius-server
       # timeout is configured using the default keyword.  If both options are
       # specified then the default keyword takes precedence.
@@ -224,30 +228,21 @@ module Rbeapi
       #   radius-server timeout value to.  This value should be in the range of
       #   1 to 1000
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option [Boolean] :default Configures the radius-server timeout value
       #   using the default keyword.
       #
       # @return [Boolean] returns true if the commands complete successfully
       def set_global_timeout(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmds = 'default radius-server timeout'
-        when false
-          if value
-            cmds = "radius-server timeout #{value}"
-          else
-            cmds = 'no radius-server timeout'
-          end
-        end
-        configure cmds
+        cmd = command_builder('radius-server timeout', opts)
+        configure cmd
       end
 
       ##
-      # set_global_retransmit configures the global radius-server restransmit
-      # value. If the value is not specified, the radius-server retransmist
+      # set_global_retransmit configures the global radius-server retransmit
+      # value. If the enable option  is false, then the radius-server retransmit
       # value is configured using the no keyword.  If the default option is
       # specified, the radius-server retransmit value is configured using the
       # default keyword. If both options are specified then the default keyword
@@ -258,31 +253,22 @@ module Rbeapi
       # @commands
       #   radius-server retransmit <value>
       #   no radius-server retransmit
-      #   default radius-server retrasmit
+      #   default radius-server retransmit
       #
-      # @option [String, Fixnum] :value The valu to set the global
+      # @option [String, Fixnum] :value The value to set the global
       #   radius-server retransmit value to.  This value should be in the range
       #   of 1 to 100
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       #
       # @option [Boolean] :default Configures the radius-server retransmit
       #   value using the default keyword
       #
       # @return [Boolean] returns true if the commands complete successfully
       def set_global_retransmit(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmds = 'default radius-server retransmit'
-        when false
-          if value
-            cmds = "radius-server retransmit #{value}"
-          else
-            cmds = 'no radius-server retransmit'
-          end
-        end
-        configure cmds
+        cmd = command_builder('radius-server retransmit', opts)
+        configure cmd
       end
 
       ##

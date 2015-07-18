@@ -85,14 +85,14 @@ describe Rbeapi::Api::Interfaces do
     it 'sets the shutdown value to true' do
       node.config(['interface Port-Channel1', 'no shutdown'])
       expect(subject.get('Port-Channel1')[:shutdown]).to be_falsy
-      expect(subject.set_shutdown('Port-Channel1', value: true)).to be_truthy
+      expect(subject.set_shutdown('Port-Channel1', enable: true)).to be_truthy
       expect(subject.get('Port-Channel1')[:shutdown]).to be_truthy
     end
 
     it 'sets the shutdown value to false' do
-      node.config(['interface Port-Channel1', :shutdown])
+      node.config(['interface Port-Channel1', 'shutdown'])
       expect(subject.get('Port-Channel1')[:shutdown]).to be_truthy
-      expect(subject.set_shutdown('Port-Channel1', value: false)).to be_truthy
+      expect(subject.set_shutdown('Port-Channel1', enable: false)).to be_truthy
       expect(subject.get('Port-Channel1')[:shutdown]).to be_falsy
     end
   end
@@ -183,7 +183,7 @@ describe Rbeapi::Api::Interfaces do
       node.config(['interface Port-Channel1',
                    'port-channel lacp fallback static'])
       expect(subject.get('Port-Channel1')[:lacp_fallback]).to eq('static')
-      expect(subject.set_lacp_fallback('Port-Channel1', value: 'disabled'))
+      expect(subject.set_lacp_fallback('Port-Channel1', enable: false))
         .to be_truthy
       expect(subject.get('Port-Channel1')[:lacp_fallback]).to eq('disabled')
     end

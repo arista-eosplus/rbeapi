@@ -57,5 +57,21 @@ describe Rbeapi::Api::OspfInterfaces do
         .to be_truthy
       expect(subject.get('Ethernet1')['network_type']).to eq('point-to-point')
     end
+
+    it 'negates the ospf interface type' do
+      expect(subject.set_network_type('Ethernet1', value: 'point-to-point'))
+        .to be_truthy
+      expect(subject.get('Ethernet1')['network_type']).to eq('point-to-point')
+      expect(subject.set_network_type('Ethernet1', enable: false)).to be_truthy
+      expect(subject.get('Ethernet1')['network_type']).to eq('broadcast')
+    end
+
+    it 'defaults the ospf interface type' do
+      expect(subject.set_network_type('Ethernet1', value: 'point-to-point'))
+        .to be_truthy
+      expect(subject.get('Ethernet1')['network_type']).to eq('point-to-point')
+      expect(subject.set_network_type('Ethernet1', default: true)).to be_truthy
+      expect(subject.get('Ethernet1')['network_type']).to eq('broadcast')
+    end
   end
 end

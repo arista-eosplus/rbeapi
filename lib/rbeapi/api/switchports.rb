@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015 Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ module Rbeapi
     #
     class Switchports < Entity
       ##
-      # Retrieves the properies for a logical switchport from the
+      # Retrieves the properties for a logical switchport from the
       # running-config using eAPI
       #
       # Example
@@ -145,40 +145,28 @@ module Rbeapi
       end
 
       ##
-      # Configures the switchport mode for the specified interafce.  Valid
-      # modes are access (default) or trunk
+      # Configures the switchport mode for the specified interface.
       #
       # @param [String] name The name of the interface to configure
       # @param [Hash] opts The configuration parameters for the interface
       # @option opts [string] :value The value to set the mode to
+      # @option opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       # @option opts [Boolean] :default The value should be set to default
       #
       # @return [Boolean] True if the commands succeed otherwise False
       def set_mode(name, opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default switchport mode'
-        when false
-          if value.nil?
-            cmds << 'no switchport mode'
-          else
-            cmds << "switchport mode #{value}"
-          end
-        end
-        configure(cmds)
+        cmd = command_builder('switchport mode', opts)
+        configure_interface(name, cmd)
       end
 
       ##
       # set_trunk_allowed_vlans configures the list of vlan ids that are
-      # allowed on the specified trunk port.  If the value option is not
-      # provided, then the allowed trunks is configured using the no keyword.
-      # If the default keyword is provied then the allowed trunks is configured
-      # using the default keywork  The default optio takes precedence over the
-      # value option if both are specified
+      # allowed on the specified trunk port.  If the enable option is set to
+      # false, then the allowed trunks is configured using the no keyword.
+      # If the default keyword is provided then the allowed trunks is configured
+      # using the default keyword  The default option takes precedence over the
+      # enable option if both are specified
       #
       # @eos_version 4.13.7M
       #
@@ -187,35 +175,40 @@ module Rbeapi
       #   no switchport trunk allowed vlan
       #   default switchport trunk allowed vlan
       #
-      # @option [Array] :value The list of vlan ids to configure on the
+      # @param [String] name The name of the interface to configure
+      # @param [Hash] opts The configuration parameters for the interface
+      # @option pts [Array] :value The list of vlan ids to configure on the
       #   switchport to be allowed.  This value must be an array of valid vlan
       #   ids
-      #
+      # @option opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       # @option [Boolean] :default Configures the switchport trunk allowed
-      #     vlans command using the default keyword
+      #     vlans command using the default keyword. Default takes precedence
+      #     over enable.
       #
       # @return [Boolean] returns true if the commands complete successfully
       def set_trunk_allowed_vlans(name, opts = {})
         value = opts[:value]
+        enable = opts.fetch(:enable, true)
         default = opts[:default] || false
 
-        fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+        if value
+          fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+          value = value.map(&:inspect).join(',')
+        end
 
-        value = value.map(&:inspect).join(',') if value
-
-        cmds = ["interface #{name}"]
         case default
         when true
-          cmds << 'default switchport trunk allowed vlan'
+          cmds = 'default switchport trunk allowed vlan'
         when false
-          if value.nil?
-            cmds << 'no switchport trunk allowed vlan'
+          if !enable
+            cmds = 'no switchport trunk allowed vlan'
           else
-            cmds << 'switchport trunk allowed vlan none'
-            cmds << "switchport trunk allowed vlan #{value}"
+            cmds = ['switchport trunk allowed vlan none',
+                    "switchport trunk allowed vlan #{value}"]
           end
         end
-        configure(cmds)
+        configure_interface(name, cmds)
       end
 
       ##
@@ -226,25 +219,15 @@ module Rbeapi
       # @param [String] name The name of the interface to configure
       # @param [Hash] opts The configuration parameters for the interface
       # @option opts [string] :value The value of the trunk native vlan
-      # @option opts [Boolean] :default The value should be set to default
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      # @option opts [Boolean] :default The value should be set to default.
+      #   Default takes precedence over enable.
       #
       # @return [Boolean] True if the commands succeed otherwise False
       def set_trunk_native_vlan(name, opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default switchport trunk native vlan'
-        when false
-          if value.nil?
-            cmds << 'no switchport trunk native vlan'
-          else
-            cmds << "switchport trunk native vlan #{value}"
-          end
-        end
-        configure(cmds)
+        cmd = command_builder('switchport trunk native vlan', opts)
+        configure_interface(name, cmd)
       end
 
       ##
@@ -255,25 +238,15 @@ module Rbeapi
       # @param [String] name The name of the interface to configure
       # @param [Hash] opts The configuration parameters for the interface
       # @option opts [string] :value The value of the access vlan
+      # @option opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       # @option opts [Boolean] :default The value should be set to default
+      #   Default takes precedence over enable.
       #
       # @return [Boolean] True if the commands succeed otherwise False
       def set_access_vlan(name, opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        cmds = ["interface #{name}"]
-        case default
-        when true
-          cmds << 'default switchport access vlan'
-        when false
-          if value.nil?
-            cmds << 'no switchport access vlan'
-          else
-            cmds << "switchport access vlan #{value}"
-          end
-        end
-        configure(cmds)
+        cmd = command_builder('switchport access vlan', opts)
+        configure_interface(name, cmd)
       end
     end
   end

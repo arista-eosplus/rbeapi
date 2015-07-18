@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ module Rbeapi
       #     "domain_list": array<strings>
       #   }
       #
-      # @return [Hash]  A Ruby hash objec that provides the SNMP settings as
+      # @return [Hash]  A Ruby hash object that provides the SNMP settings as
       #   key / value pairs.
       def get
         response = {}
@@ -81,25 +81,19 @@ module Rbeapi
       #
       # @param [Hash] opts The configuration parameters
       # @option opts [string] :value The value to set the domain-name to
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       # @option opts [Boolean] :default The value should be set to default
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_domain_name(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmds = 'default ip domain-name'
-        when false
-          cmds = (value ? "ip domain-name #{value}" : 'no ip domain-name')
-        end
+        cmds = command_builder('ip domain-name', opts)
         configure(cmds)
       end
 
       ##
       # set_name_servers configures the set of name servers that eos will use
-      # to resolve dns queries. If the value option is not provided, the
+      # to resolve dns queries. If the enable option is false, then the
       # name-server list will be configured using the no keyword.  If the
       # default option is specified, then the name server list will be
       # configured using the default keyword.  If both options are provided the
@@ -112,28 +106,30 @@ module Rbeapi
       #   no ip name-server
       #   default ip name-server
       #
-      # @option [Array] :value The set of name servers to configure on the
+      # @param [Hash] opts The configuration parameters
+      # @option opts [string] :value The set of name servers to configure on the
       #   node.  The list of name servers will be replace in the nodes running
       #   configuration by the list provided in value
-      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       # @option [Boolean] :default Configures the ip name-servers using the
-      #   default keyword argument
+      #   default keyword argument. Default takes precedence over enable.
       #
-      # @return [Boolean] returns true if the commands completed successfuly
+      # @return [Boolean] returns true if the commands completed successfully
       def set_name_servers(opts = {})
-        value = opts[:value] || []
+        value = opts[:value]
+        enable = opts.fetch(:enable, true)
         default = opts[:default] || false
 
         case default
         when true
           cmds = 'default ip name-server'
         when false
-          cmds = []
-          parse_name_servers[:name_servers].each do |srv|
-            cmds << "no ip name-server #{srv}"
-          end
-          value.each do |srv|
-            cmds << "ip name-server #{srv}"
+          cmds = ['no ip name-server']
+          if enable
+            value.each do |srv|
+              cmds << "ip name-server #{srv}"
+            end
           end
         end
         configure cmds
@@ -149,8 +145,8 @@ module Rbeapi
 
       ##
       # set_domain_list configures the set of domain names to search when
-      # making dns queries for the FQDN.  If the value option is not provided,
-      # the domain-list will be configured using the no keyword.  If the
+      # making dns queries for the FQDN.  If the enable option is set to false,
+      # then the domain-list will be configured using the no keyword.  If the
       # default option is specified, then the domain list will be configured
       # using the default keyword.  If both options are provided the default
       # keyword option will take precedence.
@@ -169,21 +165,26 @@ module Rbeapi
       # @option [Boolean] :default Configures the ip domain-list using the
       #   default keyword argument
       #
-      # @return [Boolean] returns true if the commands completed successfuly
+      # @return [Boolean] returns true if the commands completed successfully
       def set_domain_list(opts = {})
-        value = opts[:value] || []
+        value = opts[:value]
+        enable = opts.fetch(:enable, true)
         default = opts[:default] || false
 
+        cmds = []
         case default
         when true
-          cmds = 'default ip domain-list'
+          parse_domain_list[:domain_list].each do |name|
+            cmds << "default ip domain-list #{name}"
+          end
         when false
-          cmds = []
           parse_domain_list[:domain_list].each do |name|
             cmds << "no ip domain-list #{name}"
           end
-          value.each do |name|
-            cmds << "ip domain-list #{name}"
+          if enable
+            value.each do |name|
+              cmds << "ip domain-list #{name}"
+            end
           end
         end
         configure cmds
