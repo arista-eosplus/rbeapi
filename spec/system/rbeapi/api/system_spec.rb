@@ -32,6 +32,12 @@ describe Rbeapi::Api::System do
       expect(subject.get[:hostname]).to eq('foo')
     end
 
+    it 'configures the system hostname with a dot value' do
+      expect(subject.get[:hostname]).to eq('localhost')
+      expect(subject.set_hostname(value: 'foo.bar')).to be_truthy
+      expect(subject.get[:hostname]).to eq('foo.bar')
+    end
+
     it 'negates the hostname' do
       expect(subject.set_hostname(enable: false)).to be_truthy
       expect(subject.get[:hostname]).to be_empty
