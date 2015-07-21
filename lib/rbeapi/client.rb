@@ -266,6 +266,7 @@ module Rbeapi
     # for handling both enable mode and config mode commands
     class Node
       attr_reader :connection
+      attr_accessor :dry_run
 
       ##
       # Save the connection and set autorefresh to true.
@@ -275,6 +276,7 @@ module Rbeapi
       def initialize(connection)
         @connection = connection
         @autorefresh = true
+        @dry_run = false
       end
 
       ##
@@ -329,12 +331,18 @@ module Rbeapi
         commands = [*commands] unless commands.respond_to?('each')
 
         commands.insert(0, 'configure')
-        response = run_commands(commands, opts)
 
-        refresh if @autorefresh
+        if @dry_run then
+          puts "[rbeapi dry-run commands]"
+          puts commands
+        else
+          response = run_commands(commands, opts)
 
-        response.shift
-        response
+          refresh if @autorefresh
+
+          response.shift
+          response
+        end
       end
 
       ##
