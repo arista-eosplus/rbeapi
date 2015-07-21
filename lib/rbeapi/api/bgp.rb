@@ -68,14 +68,15 @@ module Rbeapi
 
       ##
       # parse_bgp_as scans the BGP routing configuration for the
-      # AS number. Used by the BgpNeighbors class below.
+      # AS number. Defined as a class method. Used by the BgpNeighbors
+      # class below.
       #
       # @param [String] :config The switch config.
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def self.parse_bgp_as(config)
         value = config.scan(/^router bgp (\d+)/).first
-        { bgp_as: value[0] }
+        { bgp_as: value[0].to_i }
       end
 
       ##
@@ -118,12 +119,13 @@ module Rbeapi
       # @param [String] :config The switch config.
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Array<Hash>] Single element Array of network hashes
       def parse_networks(config)
-        networks = {}
+        networks = []
         lines = config.scan(%r{network (.+)/(\d+)(?: route-map (\w+))*})
         lines.each do |prefix, mask, rmap|
           rmap = rmap == '' ? nil : rmap
-          networks.merge!(prefix: prefix, masklen: mask.to_i, route_map: rmap)
+          networks << { prefix: prefix, masklen: mask.to_i, route_map: rmap }
         end
         { networks: networks }
       end
@@ -135,7 +137,7 @@ module Rbeapi
       # @commands
       #   router bgp <bgp_as>
       #
-      # @param [String] :bgp_as The BGP autonomous system number to be
+      # @param [Integer] :bgp_as The BGP autonomous system number to be
       #   configured for the local BGP routing instance.
       #
       # @return [Boolean] returns true if the command completed successfully
@@ -153,7 +155,7 @@ module Rbeapi
       # @return [Boolean] returns true if the command completed successfully
       def delete
         config = get
-        return True unless config
+        return true unless config
         configure("no router bgp #{config[:bgp_as]}")
       end
 
@@ -168,22 +170,26 @@ module Rbeapi
       # @return [Boolean] returns true if the command complete successfully
       def default
         config = get
-        return True unless config
+        return true unless config
         configure("default router bgp #{config[:bgp_as]}")
       end
 
       ##
-      # configure_bgp returns the command to place the switch in
-      # router-BGP configuration mode. Fails if the BGP router
-      # is not configured.
+      # configure_bgp adds the command to go to BGP config mode.
+      # Then it adds the passed in command. The commands are then
+      # passed on to configure.
       #
       # @api private
       #
-      # @return [Array] returns command string as only member of array
-      def configure_bgp
-        config = get
+      # @param [String] :cmd Command to run under BGP mode
+      #
+      # @return [Boolean] returns true if the command complete successfully
+      def configure_bgp(cmd)
+        config = get_block('^router bgp .*')
         fail 'BGP router is not configured' unless config
-        ["router bgp #{config[:bgp_as]}"]
+        bgp_as = Bgp.parse_bgp_as(config)
+        cmds = ["router bgp #{bgp_as[:bgp_as]}", cmd]
+        configure(cmds)
       end
       private :configure_bgp
 
@@ -214,9 +220,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_router_id(opts = {})
-        cmds = configure_bgp
-        cmds << command_builder('router-id', opts)
-        configure(cmds)
+        configure_bgp(command_builder('router-id', opts))
       end
 
       ##
@@ -229,7 +233,7 @@ module Rbeapi
       #
       # @param [hash] :opts Optional keyword arguments
       #
-      # @option :opts [Boolean] :enable If enable is True then the BGP
+      # @option :opts [Boolean] :enable If enable is true then the BGP
       #   routing process is administratively enabled and if enable is
       #   False then the BGP routing process is administratively
       #   disabled.
@@ -239,9 +243,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_shutdown(opts = {})
-        cmds = configure_bgp
-        cmds << command_builder('shutdown', opts)
-        configure(cmds)
+        configure_bgp(command_builder('shutdown', opts))
       end
 
       ##
@@ -261,10 +263,9 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def add_network(prefix, masklen, route_map = nil)
-        cmds = configure_bgp
-        cmds << "network #{prefix}/#{masklen}"
-        cmds << "route-map #{route_map}" if route_map
-        configure(cmds)
+        cmd = "network #{prefix}/#{masklen}"
+        cmd << " route-map #{route_map}" if route_map
+        configure_bgp(cmd)
       end
 
       ##
@@ -283,16 +284,14 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def remove_network(prefix, masklen, route_map = nil)
-        cmds = configure_bgp
-        cmds << "no network #{prefix}/#{masklen}"
-        cmds << "route-map #{route_map}" if route_map
-        configure(cmds)
+        cmd = "no network #{prefix}/#{masklen}"
+        cmd << " route-map #{route_map}" if route_map
+        configure_bgp(cmd)
       end
     end
 
     ##
     # The BgpNeighbors class implements BGP neighbor configuration
-    # rubocop:disable Metrics/ClassLength
     class BgpNeighbors < Entity
       ##
       # get returns a single BGP neighbor entry from the nodes current
@@ -372,7 +371,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_remote_as(config, name)
         value = config.scan(/neighbor #{name} remote-as (\d+)/)
-        remote_as = value[0] ? value[0][0] : nil
+        remote_as = value[0] ? value[0][0].to_i : nil
         { remote_as: remote_as }
       end
       private :parse_remote_as
@@ -390,7 +389,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_send_community(config, name)
-        value = config.scan(/no neighbor #{name} send_community/)
+        value = config.scan(/no neighbor #{name} send-community/)
         enabled = value[0] ? false : true
         { send_community: enabled }
       end
@@ -492,18 +491,21 @@ module Rbeapi
       private :parse_route_map_out
 
       ##
-      # configure_bgp returns the command to place the switch in
-      # router-BGP configuration mode. Fails if the BGP router
-      # is not configured.
+      # configure_bgp adds the command to go to BGP config mode.
+      # Then it adds the passed in command. The commands are then
+      # passed on to configure.
       #
       # @api private
       #
-      # @return [Array] returns command string as only member of array
-      def configure_bgp
+      # @param [String] :cmd Command to run under BGP mode
+      #
+      # @return [Boolean] returns true if the command complete successfully
+      def configure_bgp(cmd)
         config = get_block('^router bgp .*')
         fail 'BGP router is not configured' unless config
         bgp_as = Bgp.parse_bgp_as(config)
-        ["router bgp #{bgp_as[:bgp_as]}"]
+        cmds = ["router bgp #{bgp_as[:bgp_as]}", cmd]
+        configure(cmds)
       end
       private :configure_bgp
 
@@ -551,14 +553,11 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def delete(name)
-        bgp_cmd = configure_bgp
-        cmds = bgp_cmd
-        cmds << "no neighbor #{name}"
-        response = configure(cmds)
+        cmd = "no neighbor #{name}"
+        response = configure_bgp(cmd)
         unless response
-          cmds = bgp_cmd
-          cmds << "no neighbor #{name} peer-group"
-          response = configure(cmds)
+          cmd = "no neighbor #{name} peer-group"
+          response = configure_bgp(cmd)
         end
         response
       end
@@ -602,9 +601,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_peer_group(name, opts = {})
-        cmds = configure_bgp
-        cmds << neigh_command_builder(name, 'peer-group', opts)
-        configure(cmds)
+        configure_bgp(neigh_command_builder(name, 'peer-group', opts))
       end
 
       ##
@@ -618,16 +615,14 @@ module Rbeapi
       # @param [String] :name The IP address or name of the peer group.
       # @param [hash] :opts Optional keyword arguments
       #
-      # @option :opts [String] :value The remote as-id.
+      # @option :opts [Integer] :value The remote as-id.
       #
       # @option :opts [Boolean] :default Configure the peer group using
       #   the default keyword
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_remote_as(name, opts = {})
-        cmds = configure_bgp
-        cmds << neigh_command_builder(name, 'remote-as', opts)
-        configure(cmds)
+        configure_bgp(neigh_command_builder(name, 'remote-as', opts))
       end
 
       ##
@@ -648,9 +643,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_shutdown(name, opts = {})
-        cmds = configure_bgp
-        cmds << neigh_command_builder(name, 'shutdown', opts)
-        configure(cmds)
+        configure_bgp(neigh_command_builder(name, 'shutdown', opts))
       end
 
       ##
@@ -672,9 +665,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_send_community(name, opts = {})
-        cmds = configure_bgp
-        cmds << neigh_command_builder(name, 'send-community', opts)
-        configure(cmds)
+        configure_bgp(neigh_command_builder(name, 'send-community', opts))
       end
 
       ##
@@ -697,9 +688,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_next_hop_self(name, opts = {})
-        cmds = configure_bgp
-        cmds << neigh_command_builder(name, 'next-hop-self', opts)
-        configure(cmds)
+        configure_bgp(neigh_command_builder(name, 'next-hop-self', opts))
       end
 
       ##
@@ -723,9 +712,8 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_route_map_in(name, opts = {})
-        cmds = configure_bgp
-        cmds << neigh_command_builder(name, 'route-map', opts) + ' in'
-        configure(cmds)
+        cmd = neigh_command_builder(name, 'route-map', opts) + ' in'
+        configure_bgp(cmd)
       end
 
       ##
@@ -749,9 +737,8 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_route_map_out(name, opts = {})
-        cmds = configure_bgp
-        cmds << neigh_command_builder(name, 'route-map', opts) + ' out'
-        configure(cmds)
+        cmd = neigh_command_builder(name, 'route-map', opts) + ' out'
+        configure_bgp(cmd)
       end
 
       ##
@@ -772,9 +759,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_description(name, opts = {})
-        cmds = configure_bgp
-        cmds << neigh_command_builder(name, 'description', opts)
-        configure(cmds)
+        configure_bgp(neigh_command_builder(name, 'description', opts))
       end
     end
   end
