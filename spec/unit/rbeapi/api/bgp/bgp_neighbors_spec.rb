@@ -40,27 +40,28 @@ describe Rbeapi::Api::BgpNeighbors do
 
   let(:node) { double('node') }
 
-  # XXX Values for send_community, netxt_hop_self, ... modified
-  # so test passes for now
-
   let(:test) do
-    { bgp_as: '64600',
+    { bgp_as: 64_600,
       router_id: '192.168.254.1',
       shutdown: false,
-      networks: { prefix: '192.168.254.1', masklen: 32, route_map: nil },
+      networks: [
+        { prefix: '192.168.254.1', masklen: 32, route_map: nil },
+        { prefix: '192.168.254.2', masklen: 32, route_map: 'rmap' },
+        { prefix: '192.168.254.3', masklen: 32, route_map: nil }
+      ],
       neighbors: {
         'eBGP_GROUP' => {
-          peer_group: nil, remote_as: nil, send_community: true,
+          peer_group: nil, remote_as: nil, send_community: false,
           shutdown: false, description: nil, next_hop_self: false,
           route_map_in: nil, route_map_out: nil
         },
         '192.168.255.1' => {
-          peer_group: 'eBGP_GROUP', remote_as: '65000', send_community: true,
+          peer_group: 'eBGP_GROUP', remote_as: 65_000, send_community: true,
           shutdown: true, description: nil, next_hop_self: true,
           route_map_in: nil, route_map_out: nil
         },
         '192.168.255.3' => {
-          peer_group: 'eBGP_GROUP', remote_as: '65001', send_community: true,
+          peer_group: 'eBGP_GROUP', remote_as: 65_001, send_community: true,
           shutdown: true, description: nil, next_hop_self: true,
           route_map_in: nil, route_map_out: nil
         }
@@ -126,16 +127,16 @@ describe Rbeapi::Api::BgpNeighbors do
     end
 
     it 'remove the peer group value' do
-      expect(node).to receive(:config)
-        .with(['router bgp 64600', 'no neighbor eng peer-group 1.2.3.4'])
-      expect(subject.set_peer_group('eng', value: '1.2.3.4', enable: false))
+      expect(node).to receive(:config).with(['router bgp 64600',
+                                             'no neighbor eng peer-group'])
+      expect(subject.set_peer_group('eng', enable: false))
         .to be_truthy
     end
 
     it 'defaults the peer group value' do
-      expect(node).to receive(:config)
-        .with(['router bgp 64600', 'default neighbor eng peer-group 1.2.3.4'])
-      expect(subject.set_peer_group('eng', value: '1.2.3.4', default: true))
+      expect(node).to receive(:config).with(['router bgp 64600',
+                                             'default neighbor eng peer-group'])
+      expect(subject.set_peer_group('eng', default: true))
         .to be_truthy
     end
   end
@@ -148,16 +149,16 @@ describe Rbeapi::Api::BgpNeighbors do
     end
 
     it 'remove the remote AS value' do
-      expect(node).to receive(:config)
-        .with(['router bgp 64600', 'no neighbor eng remote-as 10'])
-      expect(subject.set_remote_as('eng', value: '10', enable: false))
+      expect(node).to receive(:config).with(['router bgp 64600',
+                                             'no neighbor eng remote-as'])
+      expect(subject.set_remote_as('eng', enable: false))
         .to be_truthy
     end
 
     it 'defaults the remote AS value' do
-      expect(node).to receive(:config)
-        .with(['router bgp 64600', 'default neighbor eng remote-as 10'])
-      expect(subject.set_remote_as('eng', value: '10', default: true))
+      expect(node).to receive(:config).with(['router bgp 64600',
+                                             'default neighbor eng remote-as'])
+      expect(subject.set_remote_as('eng', default: true))
         .to be_truthy
     end
   end

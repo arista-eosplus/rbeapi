@@ -67,6 +67,8 @@ router bgp 64600
    neighbor 192.168.255.3 peer-group eBGP_GROUP
    neighbor 192.168.255.3 remote-as 65001
    network 192.168.254.1/32
+   network 192.168.254.2/32 route-map rmap
+   network 192.168.254.3/32 rmap
    bgp redistribute-internal
    aggregate-address 192.168.255.0/28 summary-only
    no redistribute connected
