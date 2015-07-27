@@ -41,7 +41,7 @@ describe Rbeapi::Api::BgpNeighbors do
   let(:node) { double('node') }
 
   let(:test) do
-    { bgp_as: 64_600,
+    { bgp_as: '64600',
       router_id: '192.168.254.1',
       shutdown: false,
       networks: [
@@ -56,12 +56,12 @@ describe Rbeapi::Api::BgpNeighbors do
           route_map_in: nil, route_map_out: nil
         },
         '192.168.255.1' => {
-          peer_group: 'eBGP_GROUP', remote_as: 65_000, send_community: true,
+          peer_group: 'eBGP_GROUP', remote_as: '65000', send_community: true,
           shutdown: true, description: nil, next_hop_self: true,
           route_map_in: nil, route_map_out: nil
         },
         '192.168.255.3' => {
-          peer_group: 'eBGP_GROUP', remote_as: 65_001, send_community: true,
+          peer_group: 'eBGP_GROUP', remote_as: '65001', send_community: true,
           shutdown: true, description: nil, next_hop_self: true,
           route_map_in: nil, route_map_out: nil
         }
@@ -172,7 +172,7 @@ describe Rbeapi::Api::BgpNeighbors do
 
     it 'negate shutdown neighbor' do
       expect(node).to receive(:config).with(['router bgp 64600',
-                                             'no neighbor eng shutdown'])
+                                             'neighbor eng shutdown'])
       expect(subject.set_shutdown('eng', enable: false)).to be_truthy
     end
 

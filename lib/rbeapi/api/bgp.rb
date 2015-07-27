@@ -29,7 +29,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-require 'netaddr'
 require 'rbeapi/api'
 
 ##
@@ -76,7 +75,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] resource hash attribute
       def self.parse_bgp_as(config)
         value = config.scan(/^router bgp (\d+)/).first
-        { bgp_as: value[0].to_i }
+        { bgp_as: value[0] }
       end
 
       ##
@@ -103,7 +102,8 @@ module Rbeapi
       #
       # @param [String] :config The switch config.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] resource hash attribute. Returns
+      # true if shutdown, false otherwise.
       def parse_shutdown(config)
         value = config.include?('no shutdown')
         { shutdown: !value }
@@ -142,7 +142,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def create(bgp_as)
-        value = bgp_as.to_i
+        value = bgp_as
         configure("router bgp #{value}")
       end
 
@@ -225,7 +225,7 @@ module Rbeapi
 
       ##
       # set_shutdown configures the administrative state for the global
-      # BGP routing process.
+      # BGP routing process. The value option is not used by this method.
       #
       # @commands
       #   router bgp <bgp_as>
@@ -243,6 +243,10 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_shutdown(opts = {})
+        fail 'set_shutdown has the value option set' if opts[:value]
+        # Shutdown semantics are opposite of enable semantics so invert enable
+        value = !opts[:enable]
+        opts.merge!(enable: value)
         configure_bgp(command_builder('shutdown', opts))
       end
 
@@ -371,7 +375,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_remote_as(config, name)
         value = config.scan(/neighbor #{name} remote-as (\d+)/)
-        remote_as = value[0] ? value[0][0].to_i : nil
+        remote_as = value[0] ? value[0][0] : nil
         { remote_as: remote_as }
       end
       private :parse_remote_as
@@ -406,11 +410,12 @@ module Rbeapi
       #   This value can be either an IPv4 address or string (in the
       #   case of managing a peer group).
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] resource hash attribute. Returns
+      # true if shutdown, false otherwise.
       def parse_shutdown(config, name)
         value = config.scan(/no neighbor #{name} shutdown/)
-        enabled = value[0] ? false : true
-        { shutdown: enabled }
+        shutdown = value[0] ? false : true
+        { shutdown: shutdown }
       end
       private :parse_shutdown
 
@@ -510,23 +515,6 @@ module Rbeapi
       private :configure_bgp
 
       ##
-      # ispeergroup checks if name is a peer group name. If it is not
-      # a valid IPv4 address then it is assumed to be a peer group name.
-      #
-      # @api private
-      #
-      # @param [String] :name The name of the BGP neighbor to manage.
-      #
-      # @return [Boolean] returns true if the name is a peer group name
-      def ispeergroup(name)
-        Netaddr.validate_ip_addr(name)
-        return false
-      rescue Netaddr::ValidationError
-        return true
-      end
-      private :ispeergroup
-
-      ##
       # create will create a new instance of a BGP neighbor on the node.
       # The neighbor is created in the shutdown state and then enabled.
       #
@@ -536,7 +524,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def create(name)
-        set_shutdown(name, enable: true)
+        set_shutdown(name, enable: false)
       end
 
       ##
@@ -583,18 +571,16 @@ module Rbeapi
       end
 
       ##
-      # set_peer_group sets BGP neighbors to an existing static peer
-      # group.
+      # set_peer_group creates a BGP static peer group name.
       #
       # @commands
       #   router bgp <bgp_as>
       #     {no | default} neighbor <name> peer-group <group-name>
       #
-      # @param [String] :name The name of the peer group.
+      # @param [String] :name The IP address of the neighbor
       # @param [hash] :opts Optional keyword arguments
       #
-      # @option :opts [String] :value The address of neighbor being
-      #   added to peer group.
+      # @option :opts [String] :value The group name.
       #
       # @option :opts [Boolean] :default Configure the peer group using
       #   the default keyword
@@ -615,7 +601,7 @@ module Rbeapi
       # @param [String] :name The IP address or name of the peer group.
       # @param [hash] :opts Optional keyword arguments
       #
-      # @option :opts [Integer] :value The remote as-id.
+      # @option :opts [String] :value The remote as-id.
       #
       # @option :opts [Boolean] :default Configure the peer group using
       #   the default keyword
@@ -626,7 +612,8 @@ module Rbeapi
       end
 
       ##
-      # set_shutdown disables the specified neighbor.
+      # set_shutdown disables the specified neighbor. The value option is
+      # not used by this method.
       #
       # @commands
       #   router bgp <bgp_as>
@@ -643,12 +630,17 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_shutdown(name, opts = {})
+        fail 'set_shutdown has value option set' if opts[:value]
+        # Shutdown semantics are opposite of enable semantics so invert enable
+        value = !opts[:enable]
+        opts.merge!(enable: value)
         configure_bgp(neigh_command_builder(name, 'shutdown', opts))
       end
 
       ##
       # set_send_community configures the switch to send community
-      # attributes to the specified BGP neighbor.
+      # attributes to the specified BGP neighbor. The value option is
+      # not used by this method.
       #
       # @commands
       #   router bgp <bgp_as>
@@ -665,6 +657,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_send_community(name, opts = {})
+        fail 'send_community has the value option set' if opts[:value]
         configure_bgp(neigh_command_builder(name, 'send-community', opts))
       end
 
@@ -672,6 +665,7 @@ module Rbeapi
       # set_next_hop_self configures the switch to list its address as
       # the next hop in routes that it advertises to the specified
       # BGP-speaking neighbor or neighbors in the specified peer group.
+      # The value option is not used by this method.
       #
       # @commands
       #   router bgp <bgp_as>
@@ -688,6 +682,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command complete successfully
       def set_next_hop_self(name, opts = {})
+        fail 'set_next_hop_self has the value option set' if opts[:value]
         configure_bgp(neigh_command_builder(name, 'next-hop-self', opts))
       end
 
