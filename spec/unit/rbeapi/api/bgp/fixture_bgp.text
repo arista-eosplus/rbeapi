@@ -1,0 +1,101 @@
+router bgp 64600
+   no shutdown
+   router-id 192.168.254.1
+   bgp convergence time 300
+   bgp convergence slow-peer time 90
+   no bgp confederation identifier
+   no update wait-for-convergence
+   no update wait-install
+   bgp log-neighbor-changes
+   bgp default ipv4-unicast
+   no bgp default ipv6-unicast
+   timers bgp 60 180
+   distance bgp 20 200 200
+   graceful-restart stalepath-time 300
+   no bgp cluster-id
+   bgp client-to-client reflection
+   graceful-restart-helper
+   bgp peer-mac-resolution-timeout 0
+   bgp enforce-first-as
+   no default-metric
+   no bgp always-compare-med
+   no bgp bestpath med missing-as-worst
+   no bgp bestpath med confed
+   no bgp host-routes fib direct-install
+   maximum-paths 32 ecmp 32
+   bgp listen limit 1000
+   no bgp aspath-cmp-include-nexthop
+   no bgp tie-break-on-age
+   no bgp tie-break-on-router-id
+   no bgp tie-break-on-originator-id
+   no bgp tie-break-on-cluster-list-length
+   neighbor eBGP_GROUP peer-group
+   no neighbor eBGP_GROUP remote-as
+   no neighbor eBGP_GROUP import-localpref
+   no neighbor eBGP_GROUP export-localpref
+   no neighbor eBGP_GROUP description
+   no neighbor eBGP_GROUP next-hop-self
+   no neighbor eBGP_GROUP next-hop-peer
+   no neighbor eBGP_GROUP allowas-in
+   no neighbor eBGP_GROUP send-community
+   no neighbor eBGP_GROUP shutdown
+   no neighbor eBGP_GROUP remove-private-as
+   no neighbor eBGP_GROUP out-delay
+   no neighbor eBGP_GROUP local-as
+   no neighbor eBGP_GROUP weight
+   no neighbor eBGP_GROUP transport connection-mode passive
+   no neighbor eBGP_GROUP update-source
+   no neighbor eBGP_GROUP dont-capability-negotiate
+   neighbor eBGP_GROUP fall-over bfd
+   no neighbor eBGP_GROUP local-v6-addr
+   neighbor eBGP_GROUP soft-reconfiguration inbound
+   no neighbor eBGP_GROUP ebgp-multihop
+   no neighbor eBGP_GROUP route-reflector-client
+   no neighbor eBGP_GROUP timers
+   no neighbor eBGP_GROUP route-map in
+   neighbor eBGP_GROUP graceful-restart-helper
+   no neighbor eBGP_GROUP route-map out
+   no neighbor eBGP_GROUP prefix-list in
+   no neighbor eBGP_GROUP prefix-list out
+   neighbor eBGP_GROUP password 7 6C/HkrwJ53+dsHumQf49Wg==
+   no neighbor eBGP_GROUP default-originate
+   neighbor eBGP_GROUP enforce-first-as
+   no neighbor eBGP_GROUP metric-out
+   neighbor eBGP_GROUP maximum-routes 12000 
+   neighbor 192.168.255.1 peer-group eBGP_GROUP
+   neighbor 192.168.255.1 remote-as 65000
+   neighbor 192.168.255.3 peer-group eBGP_GROUP
+   neighbor 192.168.255.3 remote-as 65001
+   network 192.168.254.1/32
+   network 192.168.254.2/32 route-map rmap
+   network 192.168.254.3/32 rmap
+   bgp redistribute-internal
+   aggregate-address 192.168.255.0/28 summary-only
+   no redistribute connected
+   no redistribute ospf match internal
+   no redistribute ospf match external
+   no redistribute ospf match nssa-external
+   no redistribute ospf3 match internal
+   no redistribute ospf3 match external
+   no redistribute static
+   no redistribute rip
+   no redistribute aggregate
+   address-family ipv4
+      default neighbor eBGP_GROUP activate
+      no neighbor eBGP_GROUP route-map in
+      no neighbor eBGP_GROUP route-map out
+      no neighbor eBGP_GROUP default-originate
+      default neighbor 192.168.255.1 activate
+      default neighbor 192.168.255.3 activate
+   !
+   address-family ipv6
+      default neighbor eBGP_GROUP activate
+      no neighbor eBGP_GROUP route-map in
+      no neighbor eBGP_GROUP route-map out
+      no neighbor eBGP_GROUP prefix-list in
+      no neighbor eBGP_GROUP prefix-list out
+      no neighbor eBGP_GROUP default-originate
+      default neighbor 192.168.255.1 activate
+      default neighbor 192.168.255.3 activate
+   !
+!
