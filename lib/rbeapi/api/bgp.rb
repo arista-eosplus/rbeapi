@@ -119,7 +119,7 @@ module Rbeapi
       # @param [String] :config The switch config.
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
-      # @return [Array<Hash>] Single element Array of network hashes
+      # @return [Array<Hash>] Single element hash with Array of network hashes
       def parse_networks(config)
         networks = []
         lines = config.scan(%r{network (.+)/(\d+)(?: route-map (\w+))*})
@@ -137,7 +137,7 @@ module Rbeapi
       # @commands
       #   router bgp <bgp_as>
       #
-      # @param [Integer] :bgp_as The BGP autonomous system number to be
+      # @param [String] :bgp_as The BGP autonomous system number to be
       #   configured for the local BGP routing instance.
       #
       # @return [Boolean] returns true if the command completed successfully
@@ -582,6 +582,9 @@ module Rbeapi
       #
       # @option :opts [String] :value The group name.
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option :opts [Boolean] :default Configure the peer group using
       #   the default keyword
       #
@@ -603,6 +606,9 @@ module Rbeapi
       #
       # @option :opts [String] :value The remote as-id.
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option :opts [Boolean] :default Configure the peer group using
       #   the default keyword
       #
@@ -622,8 +628,8 @@ module Rbeapi
       # @param [String] :name The IP address or name of the peer group.
       # @param [hash] :opts Optional keyword arguments
       #
-      # @option :opts [String] :enable True enables the specified peer.
-      #   False disables the specified peer.
+      # @option :opts [String] :enable True enables the specified neighbor.
+      #   False disables the specified neighbor.
       #
       # @option :opts [Boolean] :default Configure the peer group using
       #   the default keyword
@@ -748,6 +754,9 @@ module Rbeapi
       # @param [hash] :opts Optional keyword arguments
       #
       # @option :opts [String] :value The description string.
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       #
       # @option :opts [Boolean] :default Configure the peer group using
       #   the default keyword
