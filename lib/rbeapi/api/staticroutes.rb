@@ -38,17 +38,18 @@ module Rbeapi
   # Rbeapi::Api
   module Api
     ##
-    # The Staticroute class provides a configuration instance for working
+    # The Staticroutes class provides a configuration instance for working
     # with static routes in EOS.
     #
-    class Staticroute < Entity
+    class Staticroutes < Entity
       ##
       # Returns the static routes configured on the node
       #
       # @example
       #   {
-      #     <route>: {
-      #       "next_hop": <string>,
+      #     <route_dest/masklen/next_hop>: {
+      #       "distance": <integer>,
+      #       "tag": <integer>,
       #       "name": <string, nil>
       #     }
       #   }
@@ -60,29 +61,36 @@ module Rbeapi
       def getall
         regex = /
           (?<=^ip\sroute\s)
-          ([^\s]+)\s                # captures network
-          ([^\s$]+)                 # captures next hop
-          (?:\s\d+)                 # non-capture metric
-          (?:\stag\s\d+)            # non-catpure route tag
+          ([^\s]+)\s                # capture destination
+          ([^\s$]+)                 # capture next hop IP or egress interface
+          [\s|$](\d+)               # capture metric (distance)
+          [\s|$]{1}(?:tag\s(\d+))?  # catpure route tag
           [\s|$]{1}(?:name\s(.+))?  # capture route name
         /x
 
         routes = config.scan(regex)
 
         routes.each_with_object({}) do |route, hsh|
-          hsh[route[0]] = { 'next_hop' => route[1],
-                            'name' => route[2] }
+          hsh[route[0]<<'/'<<route[1]] = {
+                            distance: route[2],
+                            tag: route[3],
+                            name: route[4] }
         end
       end
 
       def create(route, nexthop, opts = {})
         cmd = "ip route #{route} #{nexthop}"
-        opts.each { |param, value| cmds << "#{param} #{value}" }
+        cmd << " #{opts[:router_ip]}" if opts[:router_ip]
+        cmd << " #{opts[:distance]}" if opts[:distance]
+        cmd << " tag #{opts[:tag]}" if opts[:tag]
+        cmd << " name #{opts[:name]}" if opts[:name]
         configure cmd
       end
 
-      def delete(route)
-        configure "no ip route #{route}"
+      def delete(route, nexthop = nil)
+        cmd = "no ip route #{route}"
+        cmd << " #{nexthop}" if nexthop
+        configure cmd
       end
     end
   end
