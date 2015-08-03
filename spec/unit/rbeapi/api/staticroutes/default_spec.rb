@@ -68,43 +68,53 @@ describe Rbeapi::Api::Staticroutes do
   end
 
   describe '#create' do
-    context "creates a new staticroute resoure" do
+    context 'creates a new staticroute resoure' do
       it 'with minimum input' do
-        expect(node).to receive(:config).with('ip route 192.0.2.0/24 Ethernet1')
+        expect(node).to receive(:config)
+          .with('ip route 192.0.2.0/24 Ethernet1')
         expect(subject.create('192.0.2.0/24', 'Ethernet1')).to be_truthy
       end
 
       it 'with a router_ip' do
-        expect(node).to receive(:config).with('ip route 192.0.2.0/24 Ethernet1 192.168.1.1')
-        expect(subject.create('192.0.2.0/24', 'Ethernet1', {router_ip: '192.168.1.1'})).to be_truthy
+        expect(node).to receive(:config)
+          .with('ip route 192.0.2.0/24 Ethernet1 192.168.1.1')
+        expect(subject.create('192.0.2.0/24', 'Ethernet1',
+                              router_ip: '192.168.1.1')).to be_truthy
       end
 
       it 'with distance (metric)' do
-        expect(node).to receive(:config).with('ip route 192.0.2.0/24 Ethernet1 254')
-        expect(subject.create('192.0.2.0/24', 'Ethernet1', {distance: 254})).to be_truthy
+        expect(node).to receive(:config)
+          .with('ip route 192.0.2.0/24 Ethernet1 254')
+        expect(subject.create('192.0.2.0/24', 'Ethernet1', distance: 254))
+          .to be_truthy
       end
 
       it 'with a tag' do
-        expect(node).to receive(:config).with('ip route 192.0.2.0/24 Ethernet1 tag 3')
-        expect(subject.create('192.0.2.0/24', 'Ethernet1', {tag: 3})).to be_truthy
+        expect(node).to receive(:config)
+          .with('ip route 192.0.2.0/24 Ethernet1 tag 3')
+        expect(subject.create('192.0.2.0/24', 'Ethernet1', tag: 3))
+          .to be_truthy
       end
 
       it 'with a name' do
-        expect(node).to receive(:config).with('ip route 192.0.2.0/24 Ethernet1 name my_route')
-        expect(subject.create('192.0.2.0/24', 'Ethernet1', {name: 'my_route'})).to be_truthy
+        expect(node).to receive(:config)
+          .with('ip route 192.0.2.0/24 Ethernet1 name my_route')
+        expect(subject.create('192.0.2.0/24', 'Ethernet1', name: 'my_route'))
+          .to be_truthy
       end
     end
   end
 
   describe '#delete' do
-    context "deletes a staticroute resoure" do
+    context 'deletes a staticroute resource' do
       it 'given only a destination network' do
         expect(node).to receive(:config).with('no ip route 192.0.2.0/24')
         expect(subject.delete('192.0.2.0/24')).to be_truthy
       end
 
       it 'given a destination and nexthop' do
-        expect(node).to receive(:config).with('no ip route 192.0.2.0/24 Ethernet1')
+        expect(node).to receive(:config)
+          .with('no ip route 192.0.2.0/24 Ethernet1')
         expect(subject.delete('192.0.2.0/24', 'Ethernet1')).to be_truthy
       end
     end

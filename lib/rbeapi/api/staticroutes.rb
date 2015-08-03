@@ -71,10 +71,10 @@ module Rbeapi
         routes = config.scan(regex)
 
         routes.each_with_object({}) do |route, hsh|
-          hsh[route[0]<<'/'<<route[1]] = {
-                            distance: route[2],
-                            tag: route[3],
-                            name: route[4] }
+          hsh[route[0] << '/' << route[1]] = {
+            distance: route[2],
+            tag: route[3],
+            name: route[4] }
         end
       end
 
