@@ -18,12 +18,16 @@ Requires: pe-rubygems
 Requires: pe-ruby
 Requires: pe-rubygem(net-http-unix)
 Requires: pe-rubygem(inifile)
+Requires: pe-rubygem(netaddr)
 Provides: pe-rubygem(%{gem_name}) = %{version}
 Provides: pe-rubygem-%{gem_name} = %{version}
 %else
 # Use these settings for all other installs
 %global gem gem
 Requires: ruby(abi) = %{rubyabi}
+Requires: ruby(net-http-unix)
+Requires: ruby(inifile)
+Requires: ruby(netaddr)
 Provides: ruby(%{gem_name}) = %{version}-%{release}
 %endif
 
