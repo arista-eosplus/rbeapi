@@ -25,7 +25,8 @@ describe Rbeapi::Api::PortchannelInterface do
         .with(include('show port-channel'), format: 'text')
         .and_return([{ result:
                        { 'output' => "Port Channel Port-Channel1:\n  Active " \
-                                     "Ports: Ethernet1 PeerEthernet1 \n\n" } }])
+                                     'Ports: Ethernet1 PeerEthernet1 ' \
+                                     "Ethernet51/1 \n\n" } }])
     end
     let(:resource) { subject.get('Port-Channel1') }
 
@@ -51,7 +52,7 @@ describe Rbeapi::Api::PortchannelInterface do
     end
 
     it 'returns 1 member' do
-      expect(resource[:members]).to contain_exactly('Ethernet1')
+      expect(resource[:members]).to contain_exactly('Ethernet1', 'Ethernet51/1')
     end
   end
 
