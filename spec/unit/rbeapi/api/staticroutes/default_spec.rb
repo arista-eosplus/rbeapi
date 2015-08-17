@@ -52,14 +52,30 @@ describe Rbeapi::Api::Staticroutes do
 
   describe '#getall' do
     it 'returns the staticroute collection' do
-      expect(subject.getall).to include('1.2.3.4/32/Ethernet7')
-      expect(subject.getall).to include('1.2.3.4/32/Null0')
-      expect(subject.getall).to include('192.0.2.0/24/Ethernet7')
-      expect(subject.getall).to include('192.0.3.0/24/192.0.3.1')
+      expect(subject.getall).to include(destination: '1.2.3.4/32',
+                                        nexthop: 'Ethernet7',
+                                        distance: '4',
+                                        tag: '3',
+                                        name: 'frank')
+      expect(subject.getall).to include(destination: '1.2.3.4/32',
+                                        nexthop: 'Null0',
+                                        distance: '32',
+                                        tag: '3',
+                                        name: 'fred')
+      expect(subject.getall).to include(destination: '192.0.2.0/24',
+                                        nexthop: 'Ethernet7',
+                                        distance: '3',
+                                        tag: '0',
+                                        name: 'dummy1')
+      expect(subject.getall).to include(destination: '192.0.3.0/24',
+                                        nexthop: '192.0.3.1',
+                                        distance: '1',
+                                        tag: '0',
+                                        name: 'dummy2')
     end
 
     it 'returns a hash collection' do
-      expect(subject.getall).to be_a_kind_of(Hash)
+      expect(subject.getall).to be_a_kind_of(Array)
     end
 
     it 'has four entries' do
