@@ -22,6 +22,7 @@ group :development, :test do
   gem 'pry',                     require: false
   gem 'pry-doc',                 require: false
   gem 'pry-stack_explorer',      require: false
+  gem 'rbeapi', '0.2.0', path: '.'
 end
 
 # vim:ft=ruby
