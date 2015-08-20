@@ -258,13 +258,17 @@ module Rbeapi
       #
       # @option :opts [Boolean] :enable True if the interface should be
       #   administratively enabled or false if the interface should be
-      #   administratively disabled. Default is true.
+      #   administratively disabled.
       #
       # @option :opts [Boolean] :default Configure the interface shutdown
       #   using the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_shutdown(name, opts = {})
+        fail 'set_shutdown has the value option set' if opts[:value]
+        # Shutdown semantics are opposite of enable semantics so invert enable
+        value = !opts[:enable]
+        opts.merge!(enable: value)
         commands = command_builder('shutdown', opts)
         configure_interface(name, commands)
       end

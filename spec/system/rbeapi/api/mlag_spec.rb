@@ -132,14 +132,14 @@ describe Rbeapi::Api::Mlag do
     it 'configures mlag to be enabled' do
       node.config(['mlag configuration', 'shutdown'])
       expect(subject.get[:global][:shutdown]).to be_truthy
-      expect(subject.set_shutdown(enable: false)).to be_truthy
+      expect(subject.set_shutdown(enable: true)).to be_truthy
       expect(subject.get[:global][:shutdown]).to be_falsy
     end
 
     it 'configures mlag to be disabled' do
       node.config(['mlag configuration', 'no shutdown'])
       expect(subject.get[:global][:shutdown]).to be_falsy
-      expect(subject.set_shutdown(enable: true)).to be_truthy
+      expect(subject.set_shutdown(enable: false)).to be_truthy
       expect(subject.get[:global][:shutdown]).to be_truthy
     end
 

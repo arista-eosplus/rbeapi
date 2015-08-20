@@ -92,13 +92,13 @@ describe Rbeapi::Api::BaseInterface do
     it 'enables the interface' do
       expect(node).to receive(:config).with(['interface Loopback0',
                                              'no shutdown'])
-      expect(subject.set_shutdown('Loopback0', enable: false)).to be_truthy
+      expect(subject.set_shutdown('Loopback0', enable: true)).to be_truthy
     end
 
     it 'disables the interface' do
       expect(node).to receive(:config).with(['interface Loopback0',
                                              'shutdown'])
-      expect(subject.set_shutdown('Loopback0', enable: true)).to be_truthy
+      expect(subject.set_shutdown('Loopback0', enable: false)).to be_truthy
     end
 
     it 'defaults the interface state' do
