@@ -156,7 +156,7 @@ module Rbeapi
     # The Config class holds the loaded configuration file data.  It is a
     # subclass of IniFile.
     class Config < IniFile
-      CONFIG_SEARCH_PATH = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
+      CONFIG_SEARCH_PATH = ['/mnt/flash/eapi.conf']
 
       ##
       # The Config class will automatically search for a filename to load
@@ -182,6 +182,8 @@ module Rbeapi
       #   search path
       def autoload(opts = {})
         search_path = CONFIG_SEARCH_PATH.dup
+        # Add the home directory path if the HOME environement var is defined.
+        search_path.insert(0, '~/.eapi.conf') if ENV.key?('HOME')
         search_path.insert(0, ENV['EAPI_CONF']) if ENV.key?('EAPI_CONF')
 
         path = opts[:filename] || search_path
