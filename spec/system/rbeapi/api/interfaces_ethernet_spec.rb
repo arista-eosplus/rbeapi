@@ -70,17 +70,17 @@ describe Rbeapi::Api::Interfaces do
   end
 
   describe '#set_shutdown' do
-    it 'sets the shutdown value to true' do
+    it 'shutdown the interface' do
       node.config(['interface Ethernet1', 'no shutdown'])
       expect(subject.get('Ethernet1')[:shutdown]).to be_falsy
-      expect(subject.set_shutdown('Ethernet1', enable: true)).to be_truthy
+      expect(subject.set_shutdown('Ethernet1', enable: false)).to be_truthy
       expect(subject.get('Ethernet1')[:shutdown]).to be_truthy
     end
 
-    it 'sets the shutdown value to false' do
+    it 'enable the interface' do
       node.config(['interface Ethernet1', :shutdown])
       expect(subject.get('Ethernet1')[:shutdown]).to be_truthy
-      expect(subject.set_shutdown('Ethernet1', enable: false)).to be_truthy
+      expect(subject.set_shutdown('Ethernet1', enable: true)).to be_truthy
       expect(subject.get('Ethernet1')[:shutdown]).to be_falsy
     end
   end

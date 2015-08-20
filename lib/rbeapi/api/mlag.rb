@@ -348,14 +348,19 @@ module Rbeapi
       #
       # @param [Hash] :opts Optional keyword arguments
       #
-      # @option :opts [Boolean] :enable If false then the command is
-      #   negated. Default is true.
+      # @option :opts [Boolean] :enable True if the interface should be
+      #   administratively enabled or false if the interface should be
+      #   administratively disabled.
       #
       # @option :opts [Boolean] :default Configure the shutdown value using the
       #   default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_shutdown(opts = {})
+        fail 'set_shutdown has the value option set' if opts[:value]
+        # Shutdown semantics are opposite of enable semantics so invert enable
+        value = !opts[:enable]
+        opts.merge!(enable: value)
         cmd = command_builder('shutdown', opts)
         cmds = ['mlag configuration', cmd]
         configure(cmds)
