@@ -212,18 +212,12 @@ describe Rbeapi::Api::VxlanInterface do
     it 'enables the interface' do
       expect(node).to receive(:config).with(['interface Vxlan1',
                                              'no shutdown'])
-      expect(subject.set_shutdown('Vxlan1', enable: false)).to be_truthy
+      expect(subject.set_shutdown('Vxlan1', enable: true)).to be_truthy
     end
 
     it 'disables the interface' do
       expect(node).to receive(:config).with(['interface Vxlan1',
                                              'shutdown'])
-      expect(subject.set_shutdown('Vxlan1', enable: true)).to be_truthy
-    end
-
-    it 'negates the interface description' do
-      expect(node).to receive(:config).with(['interface Vxlan1',
-                                             'no shutdown'])
       expect(subject.set_shutdown('Vxlan1', enable: false)).to be_truthy
     end
 
