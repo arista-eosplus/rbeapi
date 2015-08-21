@@ -227,14 +227,14 @@ and uploaded to [RubyGems](https://rubygems.org/).
   Copy the RPMs to an EOS device then run the 'swix create' command.
     Examples:
         Puppet Open Source:
-             cd /mnt/flash; swix create rbeapi-0.2.0-1.swix \
-             rubygem-rbeapi-0.2.0-1.eos4.noarch.rpm \
+             cd /mnt/flash; swix create rbeapi-0.3.0-1.swix \
+             rubygem-rbeapi-0.3.0-1.eos4.noarch.rpm \
              rubygem-inifile-3.0.0-2.eos4.noarch.rpm \
              rubygem-netaddr-1.5.0-1.eos4.noarch.rpm \
              rubygem-net_http_unix-0.2.1-2.eos4.noarch.rpm
         Puppet-enterprise:
-             cd/mnt/flash; swix create pe-rbeapi-0.2.0-1.swix \
-             pe-rubygem-rbeapi-0.2.0-1.eos4.noarch.rpm \
+             cd/mnt/flash; swix create pe-rbeapi-0.3.0-1.swix \
+             pe-rubygem-rbeapi-0.3.0-1.eos4.noarch.rpm \
              pe-rubygem-inifile-3.0.0-2.eos4.noarch.rpm \
              pe-rubygem-netaddr-1.5.0-1.eos4.noarch.rpm
   ```
@@ -244,13 +244,13 @@ and uploaded to [RubyGems](https://rubygems.org/).
   Arista# copy <URI-to-RPMs> flash:
   Arista# bash
   -bash-4.1# cd /mnt/flash/
-  -bash-4.1# swix create pe-rbeapi-0.2.0-1.swix \
+  -bash-4.1# swix create pe-rbeapi-0.3.0-1.swix \
              pe-rubygem-rbeapi-0.1.0-1.eos4.noarch.rpm \
              pe-rubygem-inifile-3.0.0-1.eos4.noarch.rpm \
              pe-rubygem-netaddr-1.5.0-1.eos4.noarch.rpm
   -bash-4.1# exit
-  Arista# copy flash:pe-rbeapi-0.2.0-1.swix extension:
-  Arista# extension pe-rbeapi-0.2.0-1.swix
+  Arista# copy flash:pe-rbeapi-0.3.0-1.swix extension:
+  Arista# extension pe-rbeapi-0.3.0-1.swix
   Arista# copy installed-extensions boot-extensions
   ```
 
@@ -258,8 +258,8 @@ and uploaded to [RubyGems](https://rubygems.org/).
 
   On EOS:
   ```
-  Arista# no extension pe-rbeapi-0.1.0-2.swix
-  Arista# extension pe-rbeapi-0.2.0-1.swix
+  Arista# no extension pe-rbeapi-0.2.0-1.swix
+  Arista# extension pe-rbeapi-0.3.0-1.swix
   Arista# copy installed-extensions boot-extensions
   ```
 
