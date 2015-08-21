@@ -1,6 +1,13 @@
 Ruby Client for eAPI
 ====================
 
+## v0.3.0, August, 2015
+
+- Add staticroutes API
+- Fix issue which would cause the module to fail to load when $HOME was not set
+- Fix builds (all_rpms) to work on Ubuntu
+- Fix rbeapi rubygem RPM requires
+
 ## v0.2.0, July, 2015
 
 - Change the default transport to https
