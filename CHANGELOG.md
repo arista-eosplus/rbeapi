@@ -3,6 +3,11 @@ Ruby Client for eAPI
 
 ## v0.3.0, August, 2015
 
+- API Change: Eliminated overloading the value option in command_builder. When
+  the value is set it is used as a value in building the command. When the value
+  is false then the command is negated. This doesn’t allow a value to be
+  specified when the command is negated.
+- APIs updated to take advantage of command_builder()
 - Add staticroutes API
 - Fix issue which would cause the module to fail to load when $HOME was not set
 - Fix builds (all_rpms) to work on Ubuntu
