@@ -1,0 +1,5 @@
+ip route 1.2.3.4/32 Ethernet7 4 tag 3 name frank
+ip route 1.2.3.4/32 Null0 32 tag 3 name fred
+ip route 192.0.2.0/24 Ethernet7 3 tag 0 name dummy1
+ip route 192.0.3.0/24 192.0.3.1 1 tag 0 name dummy2
+!
