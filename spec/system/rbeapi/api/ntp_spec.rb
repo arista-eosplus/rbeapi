@@ -35,6 +35,20 @@ describe Rbeapi::Api::Ntp do
       expect(subject.set_source_interface(value: 'Loopback0')).to be_truthy
       expect(subject.get[:source_interface]).to eq('Loopback0')
     end
+
+    it 'negates the ntp source interface' do
+      expect(subject.set_source_interface(value: 'Loopback0')).to be_truthy
+      expect(subject.get[:source_interface]).to eq('Loopback0')
+      expect(subject.set_source_interface(enable: false)).to be_truthy
+      expect(subject.get[:source_interface]).to be_empty
+    end
+
+    it 'defaults the ntp source interface' do
+      expect(subject.set_source_interface(value: 'Loopback0')).to be_truthy
+      expect(subject.get[:source_interface]).to eq('Loopback0')
+      expect(subject.set_source_interface(default: true)).to be_truthy
+      expect(subject.get[:source_interface]).to be_empty
+    end
   end
 
   describe '#add_server' do

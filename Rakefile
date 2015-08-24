@@ -105,3 +105,23 @@ end
 task release: :build do
   system "gem push rbeapi-#{Rbeapi::VERSION}.gem"
 end
+
+require 'ci/reporter/rake/rspec'
+desc 'Prep CI RSpec tests'
+task :ci_prep do
+  require 'rubygems'
+  begin
+    gem 'ci_reporter'
+    require 'ci/reporter/rake/rspec'
+    ENV['CI_REPORTS'] = 'results'
+  rescue LoadError
+    puts 'Missing ci_reporter gem. You must have the ci_reporter gem installed'\
+         ' to run the CI spec tests'
+  end
+end
+
+desc 'Run the CI RSpec tests'
+task ci_spec: [:ci_prep, 'ci:setup:rspec', :spec]
+
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec)

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -75,24 +75,14 @@ module Rbeapi
       #
       # @param [Hash] opts The configuration parameters
       # @option opts [string] :value The value to set the mac-address to
+      # @option opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       # @option opts [Boolean] :default The value should be set to default
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_mac_address(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmds = ['default ip virtual-router mac-address']
-        when false
-          if value
-            cmds = "ip virtual-router mac-address #{value}"
-          else
-            cmds = 'no ip virtual-router mac-address'
-          end
-        end
-        configure(cmds)
+        cmd = command_builder('ip virtual-router mac-address', opts)
+        configure(cmd)
       end
     end
 
@@ -113,7 +103,7 @@ module Rbeapi
       #   values for.  This must be the full interface identifier.
       #
       # @return [nil, Hash<String, String>] A Ruby hash that represents the
-      #   VARP interface confguration.  A nil object is returned if the
+      #   VARP interface configuration.  A nil object is returned if the
       #   specified interface is not configured
       def get(name)
         config = get_block("^interface #{name}")
@@ -133,7 +123,7 @@ module Rbeapi
       #   }
       #
       # @return [nil, Hash<String, String>] A Ruby hash that represents the
-      #   MLAG interface confguration.  A nil object is returned if no
+      #   MLAG interface configuration.  A nil object is returned if no
       #   interfaces are configured.
       def getall
         interfaces = config.scan(/(?<=^interface\s)(Vl.+)$/)
@@ -144,30 +134,39 @@ module Rbeapi
       end
 
       ##
-      # Creates a new MLAG interface with the specified mlag id
+      # The set_addresses method assigns one or more virtual IPv4 address
+      # to the specified VLAN interface. All existing addresses are
+      # removed before the ones in value are added.
       #
-      # @param [String] :name The name of the interface to create.  The
+      # @param [String] :name The name of the interface.  The
       #   name argument must be the full interface name.  Valid interfaces
-      #   are restricted to Port-Channel interfaces
-      # @param [String] :id The MLAG ID to confgure for the specified
-      #   interface name
+      #   are restricted to VLAN interfaces
+      # @param [Hash] opts The configuration parameters
+      # @option opts [Array] :value Array of IPv4 addresses to add to
+      #   the virtual router.
+      # @option opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      # @option opts [Boolean] :default The value should be set to default
       #
       # @return [Boolean] True if the commands succeeds otherwise False
       def set_addresses(name, opts = {})
         value = opts[:value]
+        enable = opts.fetch(:enable, true)
         default = opts[:default] || false
 
         case default
         when true
-          return configure('default ip virtual-router address')
+          configure(["interface #{name}", 'default ip virtual-router address'])
         when false
           get(name)['addresses'].each do |addr|
             result = remove_address(name, addr)
             return result unless result
           end
-          value.each do |addr|
-            result = add_address(name, addr)
-            return result unless result
+          if enable
+            value.each do |addr|
+              result = add_address(name, addr)
+              return result unless result
+            end
           end
         end
         true

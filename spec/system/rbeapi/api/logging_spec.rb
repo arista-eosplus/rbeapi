@@ -31,15 +31,31 @@ describe Rbeapi::Api::Logging do
     it 'configures global logging enabled' do
       node.config('no logging on')
       expect(subject.get[:enable]).to be_falsy
-      expect(subject.set_enable(value: true)).to be_truthy
+      expect(subject.set_enable(enable: true)).to be_truthy
       expect(subject.get[:enable]).to be_truthy
     end
 
     it 'configures global logging disabled' do
       node.config('logging on')
       expect(subject.get[:enable]).to be_truthy
-      expect(subject.set_enable(value: false)).to be_truthy
+      expect(subject.set_enable(enable: false)).to be_truthy
       expect(subject.get[:enable]).to be_falsy
+    end
+
+    it 'defaults the global logging' do
+      # Default is on
+
+      # Validate the on case
+      node.config('logging on')
+      expect(subject.get[:enable]).to be_truthy
+      expect(subject.set_enable(default: true)).to be_truthy
+      expect(subject.get[:enable]).to be_truthy
+
+      # Validate the off case
+      node.config('no logging on')
+      expect(subject.get[:enable]).to be_falsy
+      expect(subject.set_enable(default: true)).to be_truthy
+      expect(subject.get[:enable]).to be_truthy
     end
   end
 

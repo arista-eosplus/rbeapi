@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ module Rbeapi
       #     hostname: <string>
       #   }
       #
-      # @return [Hash]  A Ruby hash objec that provides the system settings as
+      # @return [Hash]  A Ruby hash object that provides the system settings as
       #   key/value pairs.
       def get
         response = {}
@@ -67,20 +67,14 @@ module Rbeapi
       #
       # @param [Hash] opts The configuration parameters
       # @option opts [string] :value The value to set the hostname to
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       # @option opts [Boolean] :default The value should be set to default
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_hostname(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmds = ['default hostname']
-        when false
-          cmds = (value.nil? ? 'no hostname' : "hostname #{value}")
-        end
-        configure(cmds)
+        cmd = command_builder('hostname', opts)
+        configure(cmd)
       end
     end
   end

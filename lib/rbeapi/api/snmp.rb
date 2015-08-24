@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2014,2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,8 @@ module Rbeapi
   module Api
     ##
     # The Snmp class provides a class implementation for working with the
-    # nodes SNMP conifguration entity.  This class presents an abstraction
+    # nodes SNMP configuration entity.  This class presents an abstraction
     # of the node's snmp configuration from the running config.
-    #
-    # rubocop:disable Metrics/ClassLength
     #
     # @eos_version 4.13.7M
     class Snmp < Entity
@@ -145,7 +143,7 @@ module Rbeapi
       ##
       # parse_communities scans the running config from the node and parses all
       # of the configure snmp community strings.  If there are no configured
-      # snmp community strings, the communitys value is set to an empty array.
+      # snmp community strings, the community value is set to an empty array.
       # The returned hash is intended to be merged into the global snmp
       # resource hash
       #
@@ -164,8 +162,8 @@ module Rbeapi
 
       ##
       # parse_notifications scans the running configuration and parses all of
-      # the snmp trap notificaitons configuration.  It is expected the trap
-      # configuration is in the running config.  The returned hash is intendd
+      # the snmp trap notifications configuration.  It is expected the trap
+      # configuration is in the running config.  The returned hash is intended
       # to be merged into the resource hash
       def parse_notifications
         traps = config.scan(/(default|no)?[ ]?snmp-server enable traps (.+)$/)
@@ -181,7 +179,7 @@ module Rbeapi
       private :parse_notifications
 
       ##
-      # set_notification configures the snmp trap notificaiton for the
+      # set_notification configures the snmp trap notification for the
       # specified trap.  The name option accepts the snmp trap name to
       # configure or the keyword all to globally enable or disable
       # notifications.  If the optional state argument is not provided then the
@@ -210,11 +208,10 @@ module Rbeapi
 
       ##
       # set_location updates the snmp location value in the nodes running
-      # configuration.  If the value is not provided in the opts Hash then
-      # the snmp location value is negated using the no keyword.  If the
-      # default keyword is set to true, then the snmp location value is
-      # defaulted using the default keyword.  The default parameter takes
-      # precedence over the value keyword.
+      # configuration.  If enable is false, then the snmp location value is
+      # negated using the no keyword.  If the default keyword is set to true,
+      # then the snmp location value is defaulted using the default keyword.
+      # The default parameter takes precedence over the enable keyword.
       #
       # @eos_version 4.13.7M
       #
@@ -227,34 +224,25 @@ module Rbeapi
       #
       # @option opts [string] :value The snmp location value to configure
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option opts [Boolean] :default Configure the snmp location value
       #   using the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_location(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmds = ['default snmp-server location']
-        when false
-          if value.nil?
-            cmds = 'no snmp-server location'
-          else
-            cmds = "snmp-server location #{value}"
-          end
-        end
-        configure(cmds)
+        cmd = command_builder('snmp-server location', opts)
+        configure(cmd)
       end
 
       ##
       # set_contact updates the snmp contact value in the nodes running
-      # configuration.  If the value is not provided in the opts Hash then
+      # configuration.  If enable is false in the opts Hash then
       # the snmp contact value is negated using the no keyword.  If the
       # default keyword is set to true, then the snmp contact value is
       # defaulted using the default keyword.  The default parameter takes
-      # precedence over the value keyword.
+      # precedence over the enable keyword.
       #
       # @eos_version 4.13.7M
       #
@@ -267,34 +255,25 @@ module Rbeapi
       #
       # @option opts [string] :value The snmp contact value to configure
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option opts [Boolean] :default Configures the snmp contact value
       #   using the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_contact(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmds = ['default snmp-server contact']
-        when false
-          if value.nil?
-            cmds = 'no snmp-server contact'
-          else
-            cmds = "snmp-server contact #{value}"
-          end
-        end
-        configure(cmds)
+        cmd = command_builder('snmp-server contact', opts)
+        configure(cmd)
       end
 
       ##
       # set_chassis_id updates the snmp chassis id value in the nodes
-      # running configuration.  If the value is not provided in the opts
+      # running configuration.  If enable is false in the opts
       # Hash then the snmp chassis id value is negated using the no
       # keyword.  If the default keyword is set to true, then the snmp
       # chassis id value is defaulted using the default keyword.  The default
-      # keyword takes precedence over the value keyword.
+      # keyword takes precedence over the enable keyword.
       #
       # @eos_version 4.13.7M
       #
@@ -307,34 +286,25 @@ module Rbeapi
       #
       # @option opts [string] :value The snmp chassis id value to configure
       #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @option opts [Boolean] :default Configures the snmp chassis id value
       #   using the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_chassis_id(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmds = 'default snmp-server chassis-id'
-        when false
-          if value.nil?
-            cmds = 'no snmp-server chassis-id'
-          else
-            cmds = "snmp-server chassis-id #{value}"
-          end
-        end
-        configure(cmds)
+        cmd = command_builder('snmp-server chassis-id', opts)
+        configure(cmd)
       end
 
       ##
       # set_source_interface updates the snmp source interface value in the
-      # nodes running configuration.  If the value is not provided in the opts
+      # nodes running configuration.  If enable is false in the opts
       # Hash then the snmp source interface is negated using the no keyword.
-      # If the deafult keyword is set to true, then the snmp source interface
-      # value is defaulted using the default keyword.  The deafult keyword
-      # takes precedence over the value keyword.
+      # If the default keyword is set to true, then the snmp source interface
+      # value is defaulted using the default keyword.  The default keyword
+      # takes precedence over the enable keyword.
       #
       # @eos_version 4.13.7M
       #
@@ -348,25 +318,15 @@ module Rbeapi
       # @option opts [string] :value The snmp source interface value to
       #   configure.  This method will not ensure the interface is present
       #   in the configuration
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
       # @option opts [Boolean] :default Configures the snmp source interface
       #   value using the default keyword
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_source_interface(opts = {})
-        value = opts[:value]
-        default = opts[:default] || false
-
-        case default
-        when true
-          cmds = ['default snmp-server source-interface']
-        when false
-          if value.nil?
-            cmds = 'no snmp-server source-interface'
-          else
-            cmds = "snmp-server source-interface #{value}"
-          end
-        end
-        configure(cmds)
+        cmd = command_builder('snmp-server source-interface', opts)
+        configure(cmd)
       end
 
       ##
@@ -407,8 +367,8 @@ module Rbeapi
 
       ##
       # set_community_acl configures the acl to apply to the specified
-      # community name.  If the value option is not specified, the acl is
-      # removed from the community name
+      # community name.  When enable is true, it will remove the
+      # the named community and then add the new acl entry.
       #
       # @eos_version 4.13.7M
       #
@@ -419,16 +379,27 @@ module Rbeapi
       # @param [String] :name The name of the snmp community to add to the
       #   nodes running configuration.
       #
-      # @option [String] :value The name of the acl to apply to the snmp
-      #   community in the nodes config
+      # @param [Hash] opts The configuration parameters
+      #
+      # @option opts [String] :value The name of the acl to apply to the snmp
+      #   community in the nodes config. If nil, then the community name
+      #   allows access to all objects.
+      # @option opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      # @option opts [Boolean] :default Configure the snmp community name
+      #   using the default keyword. Default takes precedence over enable.
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_community_acl(name, opts = {})
         value = opts[:value]
+        enable = opts.fetch(:enable, true)
+        default = opts.fetch(:default, false)
+        # Default is same as negate for this command
+        enable = default ? false : enable
         communities = parse_communities[:communities]
         access = communities[name][:access] if communities.include?(name)
-        cmds = ["no snmp-server community #{name}",
-                "snmp-server community #{name} #{access} #{value}"]
+        cmds = ["no snmp-server community #{name}"]
+        cmds << "snmp-server community #{name} #{access} #{value}" if enable
         configure cmds
       end
 

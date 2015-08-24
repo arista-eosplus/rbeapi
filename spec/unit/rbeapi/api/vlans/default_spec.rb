@@ -72,7 +72,7 @@ describe Rbeapi::Api::Vlans do
 
     it 'negates vlan name' do
       expect(node).to receive(:config).with(['vlan 1', 'no name'])
-      expect(subject.set_name('1')).to be_truthy
+      expect(subject.set_name('1', enable: false)).to be_truthy
     end
 
     it 'defaults the vlan name' do
@@ -82,7 +82,7 @@ describe Rbeapi::Api::Vlans do
 
     it 'default option takes precedence' do
       expect(node).to receive(:config).with(['vlan 1', 'default name'])
-      expect(subject.set_name('1', value: 'foo', default: true)).to be_truthy
+      expect(subject.set_name('1', enable: false, default: true)).to be_truthy
     end
   end
 
@@ -99,7 +99,7 @@ describe Rbeapi::Api::Vlans do
 
     it 'negates the state' do
       expect(node).to receive(:config).with(['vlan 1', 'no state'])
-      expect(subject.set_state('1')).to be_truthy
+      expect(subject.set_state('1', enable: false)).to be_truthy
     end
 
     it 'defaults the state' do
@@ -109,7 +109,7 @@ describe Rbeapi::Api::Vlans do
 
     it 'default option take precedence' do
       expect(node).to receive(:config).with(['vlan 1', 'default state'])
-      expect(subject.set_state('1', value: 'active', default: true)).to \
+      expect(subject.set_state('1', enable: false, default: true)).to \
         be_truthy
     end
 

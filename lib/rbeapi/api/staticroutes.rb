@@ -38,51 +38,98 @@ module Rbeapi
   # Rbeapi::Api
   module Api
     ##
-    # The Staticroute class provides a configuration instance for working
+    # The Staticroutes class provides a configuration instance for working
     # with static routes in EOS.
     #
-    class Staticroute < Entity
+    class Staticroutes < Entity
       ##
       # Returns the static routes configured on the node
       #
       # @example
       #   {
-      #     <route>: {
-      #       "next_hop": <string>,
-      #       "name": <string, nil>
-      #     }
+      #     [
+      #       {
+      #         destination: <route_dest/masklen>,
+      #         nexthop: next_hop>,
+      #         distance: <integer>,
+      #         tag: <integer, nil>,
+      #         name: <string, nil>
+      #       },
+      #       ...
+      #     ]
       #   }
       #
-      # @returns [Hash<String, String> The method will return all of the
-      #   configured static routes on the node as a Ruby hash object.  If
+      # @returns [Array<Hash, Hash>] The method will return all of the
+      #   configured static routes on the node as a Ruby array object
+      #   containing a list of hashes with each hash describing a route.  If
       #   there are no static routes configured, this method will return
-      #   an empty hash
+      #   an empty array.
       def getall
         regex = /
           (?<=^ip\sroute\s)
-          ([^\s]+)\s                # captures network
-          ([^\s$]+)                 # captures next hop
-          (?:\s\d+)                 # non-capture metric
-          (?:\stag\s\d+)            # non-catpure route tag
+          ([^\s]+)\s                # capture destination
+          ([^\s$]+)                 # capture next hop IP or egress interface
+          [\s|$](\d+)               # capture metric (distance)
+          [\s|$]{1}(?:tag\s(\d+))?  # catpure route tag
           [\s|$]{1}(?:name\s(.+))?  # capture route name
         /x
 
         routes = config.scan(regex)
 
-        routes.each_with_object({}) do |route, hsh|
-          hsh[route[0]] = { 'next_hop' => route[1],
-                            'name' => route[2] }
+        routes.each_with_object([]) do |route, arry|
+          arry << { destination: route[0],
+                    nexthop: route[1],
+                    distance: route[2],
+                    tag: route[3],
+                    name: route[4] }
         end
       end
 
-      def create(route, nexthop, opts = {})
-        cmd = "ip route #{route} #{nexthop}"
-        opts.each { |param, value| cmds << "#{param} #{value}" }
+      ##
+      # Creates a static route in EOS. May add or overwrite an existing route.
+      #
+      # @commands
+      #   ip route <destination> <nexthop> [router_ip] [distance] [tag <tag>]
+      #     [name <name>]
+      #
+      # @param [String] :destination The destination and prefix matching the
+      #   route(s). Ex '192.168.0.2/24'.
+      # @param [String] :nexthop The nexthop for this entry, which may an IP
+      #   address or interface name.
+      # @param [Hash] :opts Additional options for the route entry.
+      # @option :opts [String] :router_ip If nexthop is an egress interface,
+      #   router_ip specifies the router to which traffic will be forwarded
+      # @option :opts [String] :distance The administrative distance (metric)
+      # @option :opts [String] :tag The route tag
+      # @option :opts [String] :name A route name
+      #
+      # @return [Boolean] returns true on success
+      def create(destination, nexthop, opts = {})
+        cmd = "ip route #{destination} #{nexthop}"
+        cmd << " #{opts[:router_ip]}" if opts[:router_ip]
+        cmd << " #{opts[:distance]}" if opts[:distance]
+        cmd << " tag #{opts[:tag]}" if opts[:tag]
+        cmd << " name #{opts[:name]}" if opts[:name]
         configure cmd
       end
 
-      def delete(route)
-        configure "no ip route #{route}"
+      ##
+      # Removes a given route from EOS.  May remove multiple routes if nexthop
+      # is not specified.
+      #
+      # @commands
+      #   no ip route <destination> [nexthop]
+      #
+      # @param [String] :destination The destination and prefix matching the
+      #   route(s). Ex '192.168.0.2/24'.
+      # @param [String] :nexthop The nexthop for this entry, which may an IP
+      #   address or interface name.
+      #
+      # @return [Boolean] returns true on success
+      def delete(destination, nexthop = nil)
+        cmd = "no ip route #{destination}"
+        cmd << " #{nexthop}" if nexthop
+        configure cmd
       end
     end
   end

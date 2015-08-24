@@ -46,12 +46,24 @@ describe Rbeapi::Api::Stp do
     end
 
     it 'sets the stp mode to none' do
-      node.config('spanning-tree mode mstp') do
-        node.config('spanning-tree mode mstp')
-        expect(subject.get[:mode]).to eq('mstp')
-        expect(subject.set_mode(value: 'none')).to be_truthy
-        expect(subject.get[:mode]).to eq('none')
-      end
+      node.config('spanning-tree mode mstp')
+      expect(subject.get[:mode]).to eq('mstp')
+      expect(subject.set_mode(value: 'none')).to be_truthy
+      expect(subject.get[:mode]).to eq('none')
+    end
+
+    it 'negates the stp mode' do
+      node.config('spanning-tree mode none')
+      expect(subject.get[:mode]).to eq('none')
+      expect(subject.set_mode(enable: false)).to be_truthy
+      expect(subject.get[:mode]).to eq('mstp')
+    end
+
+    it 'defaults the stp mode' do
+      node.config('spanning-tree mode none')
+      expect(subject.get[:mode]).to eq('none')
+      expect(subject.set_mode(default: true)).to be_truthy
+      expect(subject.get[:mode]).to eq('mstp')
     end
   end
 end

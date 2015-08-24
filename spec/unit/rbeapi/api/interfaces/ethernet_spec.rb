@@ -70,7 +70,7 @@ describe Rbeapi::Api::EthernetInterface do
     it 'negates the interface description' do
       expect(node).to receive(:config).with(['interface Ethernet1',
                                              'no description'])
-      expect(subject.set_description('Ethernet1')).to be_truthy
+      expect(subject.set_description('Ethernet1', enable: false)).to be_truthy
     end
 
     it 'defaults the interface description' do
@@ -79,10 +79,10 @@ describe Rbeapi::Api::EthernetInterface do
       expect(subject.set_description('Ethernet1', default: true)).to be_truthy
     end
 
-    it 'default is preferred over value' do
+    it 'default is preferred over enable' do
       expect(node).to receive(:config).with(['interface Ethernet1',
                                              'default description'])
-      expect(subject.set_description('Ethernet1', value: 'test',
+      expect(subject.set_description('Ethernet1', enable: false,
                                                   default: true)).to be_truthy
     end
   end
