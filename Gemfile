@@ -23,6 +23,9 @@ group :development, :test do
   gem 'pry-doc',                 require: false
   gem 'pry-stack_explorer',      require: false
   gem 'rbeapi', '0.3.0', path: '.'
+  gem 'ci_reporter_rspec',       require: false
+  gem 'simplecov-json',          require: false
+  gem 'simplecov-rcov',          require: false
 end
 
 # vim:ft=ruby
