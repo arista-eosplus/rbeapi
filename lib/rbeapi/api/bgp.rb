@@ -60,6 +60,7 @@ module Rbeapi
         response = Bgp.parse_bgp_as(config)
         response.merge!(parse_router_id(config))
         response.merge!(parse_shutdown(config))
+        response.merge!(parse_max_paths(config))
         response.merge!(parse_networks(config))
         response[:neighbors] = @neighbors.getall
         response
@@ -109,6 +110,21 @@ module Rbeapi
         { shutdown: !value }
       end
       private :parse_shutdown
+
+      ##
+      # parse_max_paths scans the BGP routing configuration for the
+      # maximum paths and maximum ecmp paths.
+      #
+      # @api private
+      #
+      # @param [String] :config The switch config.
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_max_paths(config)
+        values = config.scan(/maximum-paths\s+(\d+)\s+ecmp\s+(\d+)/).first
+        { maximum_paths: values[0].to_i, maximum_ecmp_paths: values[1].to_i }
+      end
+      private :parse_max_paths
 
       ##
       # parse_networks scans the BGP routing configuration for all
@@ -248,6 +264,46 @@ module Rbeapi
         value = !opts[:enable]
         opts.merge!(enable: value)
         configure_bgp(command_builder('shutdown', opts))
+      end
+
+      ##
+      # set_maximum_paths sets the maximum number of equal cost paths and
+      # the maximum number of installed ECMP routes.
+      #
+      # @commands
+      #   router bgp <bgp_as>
+      #     {no | default}
+      #       maximum-paths <maximum_paths> [ecmp <maximum_ecmp_paths>]
+      #
+      # @param [Integer] :max_paths Maximum number of equal cost paths.
+      #
+      # @param [Integer] :max_ecmp_paths Maximum number of installed ECMP
+      #   routes.
+      #
+      # @param [hash] :opts Optional keyword arguments
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
+      # @option :opts [Boolean] :default Configure the maximum paths using
+      #   the default keyword
+      #
+      # @return [Boolean] returns true if the command complete successfully
+      def set_maximum_paths(max_paths, max_ecmp_paths, opts = {})
+        enable = opts.fetch(:enable, true)
+        default = opts[:default] || false
+
+        case default
+        when true
+          cmd = 'default maximum-paths'
+        when false
+          if enable
+            cmd = "maximum-paths #{max_paths} ecmp #{max_ecmp_paths}"
+          else
+            cmd = 'no maximum-paths'
+          end
+        end
+        configure_bgp(cmd)
       end
 
       ##
