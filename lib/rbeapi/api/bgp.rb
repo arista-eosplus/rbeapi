@@ -149,6 +149,8 @@ module Rbeapi
 
       ##
       # create will create a new instance of BGP routing on the node.
+      # Optional parameters can be passed in to initialize BGP specific
+      # settings.
       #
       # @commands
       #   router bgp <bgp_as>
@@ -156,10 +158,41 @@ module Rbeapi
       # @param [String] :bgp_as The BGP autonomous system number to be
       #   configured for the local BGP routing instance.
       #
+      #
+      # @param [hash] :opts Optional keyword arguments
+      #
+      # @option :opts [String] :route_id The BGP routing process router-id
+      #   value.  When no ID has been specified (i.e. value not set), the
+      #   local router ID is set to the following:
+      #   * The loopback IP address when a single loopback interface is
+      #     configured.
+      #   * The loopback with the highest IP address when multiple loopback
+      #     interfaces are configured.
+      #   * The highest IP address on a physical interface when no loopback
+      #     interfaces are configure
+      #
+      # @option :opts [Integer] :max_paths Maximum number of equal cost paths.
+      #
+      # @option :opts [Integer] :max_ecmp_paths Maximum number of installed ECMP
+      #   routes. The max_paths option must be set if max_ecmp_paths is set.
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @return [Boolean] returns true if the command completed successfully
-      def create(bgp_as)
-        value = bgp_as
-        configure("router bgp #{value}")
+      def create(bgp_as, opts = {})
+        if opts[:max_ecmp_paths] && !opts[:max_paths]
+          fail ArgumentError, 'max_paths must be set if max_ecmp_paths is set'
+        end
+        cmds = ["router bgp #{bgp_as}"]
+        cmds << (opts[:enable] ? 'no shutdown' : 'shutdown') if opts[:enable]
+        cmds << "router-id #{opts[:route_id]}" if opts[:route_id]
+        if opts[:max_paths]
+          cmd = "maximum-paths #{opts[:max_paths]}"
+          cmd << " ecmp #{opts[:max_ecmp_paths]}" if opts[:max_ecmp_paths]
+          cmds << cmd
+        end
+        configure(cmds)
       end
 
       ##
