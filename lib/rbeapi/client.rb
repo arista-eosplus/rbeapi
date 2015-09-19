@@ -334,8 +334,8 @@ module Rbeapi
 
         commands.insert(0, 'configure')
 
-        if @dry_run then
-          puts "[rbeapi dry-run commands]"
+        if @dry_run
+          puts '[rbeapi dry-run commands]'
           puts commands
         else
           response = run_commands(commands, opts)
