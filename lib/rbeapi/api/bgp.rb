@@ -60,6 +60,7 @@ module Rbeapi
         response = Bgp.parse_bgp_as(config)
         response.merge!(parse_router_id(config))
         response.merge!(parse_shutdown(config))
+        response.merge!(parse_max_paths(config))
         response.merge!(parse_networks(config))
         response[:neighbors] = @neighbors.getall
         response
@@ -111,6 +112,21 @@ module Rbeapi
       private :parse_shutdown
 
       ##
+      # parse_max_paths scans the BGP routing configuration for the
+      # maximum paths and maximum ecmp paths.
+      #
+      # @api private
+      #
+      # @param [String] :config The switch config.
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
+      def parse_max_paths(config)
+        values = config.scan(/maximum-paths\s+(\d+)\s+ecmp\s+(\d+)/).first
+        { maximum_paths: values[0].to_i, maximum_ecmp_paths: values[1].to_i }
+      end
+      private :parse_max_paths
+
+      ##
       # parse_networks scans the BGP routing configuration for all
       # the network entries.
       #
@@ -133,6 +149,8 @@ module Rbeapi
 
       ##
       # create will create a new instance of BGP routing on the node.
+      # Optional parameters can be passed in to initialize BGP specific
+      # settings.
       #
       # @commands
       #   router bgp <bgp_as>
@@ -140,10 +158,41 @@ module Rbeapi
       # @param [String] :bgp_as The BGP autonomous system number to be
       #   configured for the local BGP routing instance.
       #
+      #
+      # @param [hash] :opts Optional keyword arguments
+      #
+      # @option :opts [String] :route_id The BGP routing process router-id
+      #   value.  When no ID has been specified (i.e. value not set), the
+      #   local router ID is set to the following:
+      #   * The loopback IP address when a single loopback interface is
+      #     configured.
+      #   * The loopback with the highest IP address when multiple loopback
+      #     interfaces are configured.
+      #   * The highest IP address on a physical interface when no loopback
+      #     interfaces are configure
+      #
+      # @option :opts [Integer] :max_paths Maximum number of equal cost paths.
+      #
+      # @option :opts [Integer] :max_ecmp_paths Maximum number of installed ECMP
+      #   routes. The max_paths option must be set if max_ecmp_paths is set.
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
       # @return [Boolean] returns true if the command completed successfully
-      def create(bgp_as)
-        value = bgp_as
-        configure("router bgp #{value}")
+      def create(bgp_as, opts = {})
+        if opts[:max_ecmp_paths] && !opts[:max_paths]
+          fail ArgumentError, 'max_paths must be set if max_ecmp_paths is set'
+        end
+        cmds = ["router bgp #{bgp_as}"]
+        cmds << (opts[:enable] ? 'no shutdown' : 'shutdown') if opts[:enable]
+        cmds << "router-id #{opts[:route_id]}" if opts[:route_id]
+        if opts[:max_paths]
+          cmd = "maximum-paths #{opts[:max_paths]}"
+          cmd << " ecmp #{opts[:max_ecmp_paths]}" if opts[:max_ecmp_paths]
+          cmds << cmd
+        end
+        configure(cmds)
       end
 
       ##
@@ -248,6 +297,46 @@ module Rbeapi
         value = !opts[:enable]
         opts.merge!(enable: value)
         configure_bgp(command_builder('shutdown', opts))
+      end
+
+      ##
+      # set_maximum_paths sets the maximum number of equal cost paths and
+      # the maximum number of installed ECMP routes.
+      #
+      # @commands
+      #   router bgp <bgp_as>
+      #     {no | default}
+      #       maximum-paths <maximum_paths> [ecmp <maximum_ecmp_paths>]
+      #
+      # @param [Integer] :max_paths Maximum number of equal cost paths.
+      #
+      # @param [Integer] :max_ecmp_paths Maximum number of installed ECMP
+      #   routes.
+      #
+      # @param [hash] :opts Optional keyword arguments
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
+      # @option :opts [Boolean] :default Configure the maximum paths using
+      #   the default keyword
+      #
+      # @return [Boolean] returns true if the command complete successfully
+      def set_maximum_paths(max_paths, max_ecmp_paths, opts = {})
+        enable = opts.fetch(:enable, true)
+        default = opts[:default] || false
+
+        case default
+        when true
+          cmd = 'default maximum-paths'
+        when false
+          if enable
+            cmd = "maximum-paths #{max_paths} ecmp #{max_ecmp_paths}"
+          else
+            cmd = 'no maximum-paths'
+          end
+        end
+        configure_bgp(cmd)
       end
 
       ##
