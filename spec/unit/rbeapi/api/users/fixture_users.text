@@ -1,0 +1,4 @@
+username admin privilege 1 role network-admin nopassword
+username rbeapi1 privilege 2 role network-minon secret 0 icanttellyou
+username rbeapi privilege 1 secret 5 $1$Ehb5lL0D$N3MgrkfMFxmeh0FSZ5sEZ1
+username rbeapi sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKL1UtBALa4CvFUsHUipNymA04qCXuAtTwNcMj84bTUzUI+q7mdzRCTLkllXeVxKuBnaTm2PW7W67K5CVpl0EVCm6IY7FS7kc4nlnD/tFvTvShy/fzYQRAdM7ZfVtegW8sMSFJzBR/T/Y/sxI16Y/dQb8fC3la9T25XOrzsFrQiKRZmJGwg8d+0RLxpfMg0s/9ATwQKp6tPoLE4f3dKlAgSk5eENyVLA3RsypWADHpenHPcB7sa8D38e1TS+n+EUyAdb3Yov+5ESAbgLIJLd52Xv+FyYi0c2L49ByBjcRrupp4zfXn4DNRnEG4K6GcmswHuMEGZv5vjJ9OYaaaaaaa
