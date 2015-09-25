@@ -161,7 +161,7 @@ module Rbeapi
       #
       # @param [hash] :opts Optional keyword arguments
       #
-      # @option :opts [String] :route_id The BGP routing process router-id
+      # @option :opts [String] :router_id The BGP routing process router-id
       #   value.  When no ID has been specified (i.e. value not set), the
       #   local router ID is set to the following:
       #   * The loopback IP address when a single loopback interface is
@@ -176,8 +176,8 @@ module Rbeapi
       # @option :opts [Integer] :max_ecmp_paths Maximum number of installed ECMP
       #   routes. The max_paths option must be set if max_ecmp_paths is set.
       #
-      # @option :opts [Boolean] :enable If false then the command is
-      #   negated. Default is true.
+      # @option :opts [Boolean] :enable If true then the BGP router is enabled.
+      #   If false then the BGP router is disabled.
       #
       # @return [Boolean] returns true if the command completed successfully
       def create(bgp_as, opts = {})
@@ -185,11 +185,13 @@ module Rbeapi
           fail ArgumentError, 'max_paths must be set if max_ecmp_paths is set'
         end
         cmds = ["router bgp #{bgp_as}"]
-        cmds << (opts[:enable] ? 'no shutdown' : 'shutdown') if opts[:enable]
-        cmds << "router-id #{opts[:route_id]}" if opts[:route_id]
-        if opts[:max_paths]
+        if opts.key?(:enable)
+          cmds << (opts[:enable] == true ? 'no shutdown' : 'shutdown')
+        end
+        cmds << "router-id #{opts[:router_id]}" if opts.key?(:router_id)
+        if opts.key?(:max_paths)
           cmd = "maximum-paths #{opts[:max_paths]}"
-          cmd << " ecmp #{opts[:max_ecmp_paths]}" if opts[:max_ecmp_paths]
+          cmd << " ecmp #{opts[:max_ecmp_paths]}" if opts.key?(:max_ecmp_paths)
           cmds << cmd
         end
         configure(cmds)
