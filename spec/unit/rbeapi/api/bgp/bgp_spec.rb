@@ -97,9 +97,9 @@ describe Rbeapi::Api::Bgp do
       expect(node).to receive(:config).with(['router bgp 1000', 'no shutdown'])
       expect(subject.create('1000', enable: true)).to be_truthy
     end
-    it 'create with route_id' do
+    it 'create with router_id' do
       expect(node).to receive(:config).with(['router bgp 1000', 'router-id 1'])
-      expect(subject.create('1000', route_id: 1)).to be_truthy
+      expect(subject.create('1000', router_id: 1)).to be_truthy
     end
     it 'create with maximum paths' do
       expect(node).to receive(:config).with(['router bgp 1000',
@@ -120,7 +120,7 @@ describe Rbeapi::Api::Bgp do
       expect(node).to receive(:config).with(['router bgp 1000', 'no shutdown',
                                              'router-id 1',
                                              'maximum-paths 13 ecmp 13'])
-      expect(subject.create('1000', enable: true, route_id: 1, max_paths: 13,
+      expect(subject.create('1000', enable: true, router_id: 1, max_paths: 13,
                                     max_ecmp_paths: 13)).to be_truthy
     end
   end
