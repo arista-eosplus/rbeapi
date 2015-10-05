@@ -321,7 +321,6 @@ module Rbeapi
       #   routes.
       #
       # @param [hash] :opts Optional keyword arguments
-      # _paths
       # @option :opts [Boolean] :enable If false then the command is
       #   negated. Default is true.
       #
