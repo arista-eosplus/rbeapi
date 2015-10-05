@@ -104,24 +104,25 @@ describe Rbeapi::Api::Bgp do
     it 'create with maximum paths' do
       expect(node).to receive(:config).with(['router bgp 1000',
                                              'maximum-paths 1'])
-      expect(subject.create('1000', max_paths: 1)).to be_truthy
+      expect(subject.create('1000', maximum_paths: 1)).to be_truthy
     end
     it 'create with maximum paths and ecmp paths' do
       expect(node).to receive(:config).with(['router bgp 1000',
                                              'maximum-paths 13 ecmp 13'])
-      expect(subject.create('1000', max_paths: 13,
-                                    max_ecmp_paths: 13)).to be_truthy
+      expect(subject.create('1000', maximum_paths: 13,
+                                    maximum_ecmp_paths: 13)).to be_truthy
     end
     it 'raises ArgumentError for create with ecmp paths only' do
-      expect { subject.create('1000', max_ecmp_paths: 13) }.to \
+      expect { subject.create('1000', maximum_ecmp_paths: 13) }.to \
         raise_error ArgumentError
     end
     it 'create with all options set' do
       expect(node).to receive(:config).with(['router bgp 1000', 'no shutdown',
                                              'router-id 1',
                                              'maximum-paths 13 ecmp 13'])
-      expect(subject.create('1000', enable: true, router_id: 1, max_paths: 13,
-                                    max_ecmp_paths: 13)).to be_truthy
+      expect(subject.create('1000', enable: true, router_id: 1,
+                                    maximum_paths: 13,
+                                    maximum_ecmp_paths: 13)).to be_truthy
     end
   end
 
