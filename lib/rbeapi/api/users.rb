@@ -51,7 +51,7 @@ module Rbeapi
         @users_re = Regexp.new(/^username\s+(?<user>[^\s]+)\s+
                                 privilege\s+(?<priv>\d+)
                                 (\s+role\s+(?<role>\S+))?
-                                (?:\s+(?<nopasswd>(nopassword)))?
+                                (?:\s+(?<nopassword>(nopassword)))?
                                 (\s+secret\s+(?<encryption>0|5|7|sha512)\s+
                                 (?<secret>\S+))?.*$\n
                                 (username\s+\k<user>\s+
@@ -70,7 +70,7 @@ module Rbeapi
       #     name: <string>,
       #     privilege: <integer>,
       #     role: <string>,
-      #     nopasswd: <boolean>,
+      #     nopassword: <boolean>,
       #     encryption: <'cleartext', 'md5', 'sha512'>
       #     secret: <string>,
       #     sshkey: <string>
@@ -88,7 +88,7 @@ module Rbeapi
         user_re = Regexp.new(/^username\s+(?<user>#{name})\s+
                               privilege\s+(?<priv>\d+)
                               (\s+role\s+(?<role>\S+))?
-                              (?:\s+(?<nopasswd>(nopassword)))?
+                              (?:\s+(?<nopassword>(nopassword)))?
                               (\s+secret\s+(?<encryption>0|5|7|sha512)\s+
                               (?<secret>\S+))?.*$\n
                               (username\s+#{name}\s+
@@ -109,7 +109,7 @@ module Rbeapi
       #       name: <string>,
       #       privilege: <integer>,
       #       role: <string>,
-      #       nopasswd: <boolean>,
+      #       nopassword: <boolean>,
       #       encryption: <'cleartext', 'md5', 'sha512'>
       #       secret: <string>,
       #       sshkey: <string>
@@ -144,7 +144,7 @@ module Rbeapi
         hsh[:name] = user[0]
         hsh[:privilege] = user[1].to_i
         hsh[:role] = user[2]
-        hsh[:nopasswd] = user[3] ? true : false
+        hsh[:nopassword] = user[3] ? true : false
         # Map the encryption value if set, if there is no mapping then
         # just return the value.
         if user[4]
@@ -196,11 +196,11 @@ module Rbeapi
       # @option :opts [String] :sshkey The sshkey value to assign to the user
       #
       # @return [Boolean] returns true if the command completed successfully
-      def create(name, nopassword = false, secret = nil, opts = {})
+      def create(name, opts = {})
         cmd = "username #{name}"
         cmd << " privilege #{opts[:privilege]}" if opts[:privilege]
         cmd << " role #{opts[:role]}" if opts[:role]
-        if nopassword
+        if opts[:nopassword] == :true
           cmd << ' nopassword'
         else
           # Map the encryption value if set, if there is no mapping then
@@ -211,13 +211,13 @@ module Rbeapi
           end
           enc = @encryption_map[enc]
 
-          unless secret
-            fail ArgumentError, 'secret must be specified if nopasswd is false'
+          unless opts[:secret]
+            fail ArgumentError, 'secret must be specified if nopassword is false'
           end
-          cmd << " secret #{enc} #{secret}"
+          cmd << " secret #{enc} #{opts[:secret]}"
         end
         cmds = [cmd]
-        cmds << "username name sshkey #{opts[:sshkey]}" if opts[:sshkey]
+        cmds << "username #{name} sshkey #{opts[:sshkey]}" if opts[:sshkey]
         configure(cmds)
       end
 
