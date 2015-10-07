@@ -54,7 +54,7 @@ describe Rbeapi::Api::Users do
     { name: 'rbeapi',
       privilege: 1,
       role: nil,
-      nopasswd: false,
+      nopassword: false,
       encryption: 'md5',
       secret: '$1$Ehb5lL0D$N3MgrkfMFxmeh0FSZ5sEZ1',
       sshkey: sshkey
@@ -75,14 +75,14 @@ describe Rbeapi::Api::Users do
   describe '#getall' do
     let(:test1_entries) do
       { 'admin' => { name: 'admin', privilege: 1,
-                     role: 'network-admin', nopasswd: true,
+                     role: 'network-admin', nopassword: true,
                      encryption: nil, secret: nil, sshkey: nil },
         'rbeapi' => { name: 'rbeapi', privilege: 1, role: nil,
-                      nopasswd: false, encryption: 'md5',
+                      nopassword: false, encryption: 'md5',
                       secret: '$1$Ehb5lL0D$N3MgrkfMFxmeh0FSZ5sEZ1',
                       sshkey: sshkey },
         'rbeapi1' => { name: 'rbeapi1', privilege: 2,
-                       role: 'network-minon', nopasswd: false,
+                       role: 'network-minon', nopassword: false,
                        encryption: 'cleartext', secret: 'icanttellyou',
                        sshkey: nil }
       }
@@ -118,61 +118,71 @@ describe Rbeapi::Api::Users do
   describe '#create' do
     it 'create a new user name with no password' do
       expect(node).to receive(:config).with(['username rbeapi nopassword'])
-      expect(subject.create('rbeapi', true, nil)).to be_truthy
+      expect(subject.create('rbeapi', nopassword: :true)).to be_truthy
     end
     it 'create a new user name with no password and privilege' do
       expect(node).to receive(:config)
         .with(['username rbeapi privilege 4 nopassword'])
-      expect(subject.create('rbeapi', true, nil, privilege: 4)).to be_truthy
+      expect(subject.create('rbeapi',
+                            privilege: 4,
+                            nopassword: :true)).to be_truthy
     end
     it 'create a new user name with no password, privilege, and role' do
       expect(node).to receive(:config)
         .with(['username rbeapi privilege 4 role net-minion nopassword'])
-      expect(subject.create('rbeapi', true, nil,
-                            privilege: 4, role: 'net-minion')).to be_truthy
+      expect(subject.create('rbeapi',
+                            privilege: 4,
+                            role: 'net-minion',
+                            nopassword: :true)).to be_truthy
     end
     it 'create a new user name with a password' do
       expect(node).to receive(:config)
         .with(['username rbeapi secret 0 icanttellyou'])
-      expect(subject.create('rbeapi', false, 'icanttellyou')).to be_truthy
+      expect(subject.create('rbeapi', secret: 'icanttellyou')).to be_truthy
     end
     it 'create a new user name with a password and privilege' do
       expect(node).to receive(:config)
         .with(['username rbeapi privilege 5 secret 0 icanttellyou'])
-      expect(subject.create('rbeapi', false, 'icanttellyou',
+      expect(subject.create('rbeapi',
+                            secret: 'icanttellyou',
                             privilege: 5)).to be_truthy
     end
     it 'create a new user name with a password, privilege, and role' do
       expect(node).to receive(:config)
         .with(['username rbeapi privilege 5 role net secret 0 icanttellyou'])
-      expect(subject.create('rbeapi', false, 'icanttellyou',
+      expect(subject.create('rbeapi',
+                            secret: 'icanttellyou',
                             privilege: 5, role: 'net')).to be_truthy
     end
     it 'create a new user name with a password and md5 encryption' do
       expect(node).to receive(:config)
         .with(['username rbeapi secret 5 icanttellyou'])
-      expect(subject.create('rbeapi', false, 'icanttellyou',
+      expect(subject.create('rbeapi',
+                            secret: 'icanttellyou',
                             encryption: 'md5')).to be_truthy
     end
     it 'create a new user name with a password and sha512 encryption' do
       expect(node).to receive(:config)
         .with(['username rbeapi secret sha512 icanttellyou'])
-      expect(subject.create('rbeapi', false, 'icanttellyou',
+      expect(subject.create('rbeapi',
+                            secret: 'icanttellyou',
                             encryption: 'sha512')).to be_truthy
     end
     it 'create a new user name with a password, sha512 encryption, and key' do
       expect(node).to receive(:config)
         .with(['username rbeapi secret sha512 icanttellyou',
-               "username name sshkey #{sshkey}"])
-      expect(subject.create('rbeapi', false, 'icanttellyou',
-                            encryption: 'sha512', sshkey: sshkey)).to be_truthy
+               "username rbeapi sshkey #{sshkey}"])
+      expect(subject.create('rbeapi',
+                            secret: 'icanttellyou',
+                            encryption: 'sha512',
+                            sshkey: sshkey)).to be_truthy
     end
     it 'raises ArgumentError for create without required args ' do
-      expect { subject.create('rbeapi', false, nil) }.to \
+      expect { subject.create('rbeapi') }.to \
         raise_error ArgumentError
     end
     it 'raises ArgumentError for invalid encryption value' do
-      expect { subject.create('name', false, 'pass', encryption: 'bogus') }.to \
+      expect { subject.create('name', encryption: 'bogus') }.to \
         raise_error ArgumentError
     end
   end

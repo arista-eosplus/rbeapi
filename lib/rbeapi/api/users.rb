@@ -177,12 +177,12 @@ module Rbeapi
       #
       # @param [String] :name The name of the user to create
       #
-      # @param [Boolean] :nopassword Configures the user to be able to
+      # @param [hash] :opts Optional keyword arguments
+      #
+      # @option :opts [Boolean] :nopassword Configures the user to be able to
       #   authenticate without a password challenge
       #
-      # @param [String] :secret The secret (password) to assign to this user
-      #
-      # @param [hash] :opts Optional keyword arguments
+      # @option :opts [String] :secret The secret (password) to assign to this user
       #
       # @option :opts [String] :encryption Specifies how the secret is encoded.
       #   Valid values are "cleartext", "md5", "sha512".  The default is
