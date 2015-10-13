@@ -911,8 +911,7 @@ module Rbeapi
       # @param [Hash] :opts optional keyword arguments
       #
       # @option :opts [String] :value Specifies the value to configure for
-      #   the port-channel lacp fallback timeout.  Valid values range from
-      #   1 to 100 seconds
+      #   the port-channel lacp fallback timeout.
       #
       # @option :opts [Boolean] :enable If false then the command is
       #   negated. Default is true.
