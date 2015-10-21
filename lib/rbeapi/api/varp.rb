@@ -54,15 +54,17 @@ module Rbeapi
       #   key / value pairs.
       def get
         response = {}
-
-        regex = /(?<=^ip\svirtual-router\smac-address\s)
-          ((?:[a-f0-9]{2}:){5}[a-f0-9]{2})$/x
-
-        mdata = regex.match(config)
-        response['mac_address'] = mdata.nil? ? '' : mdata[1]
-        response['interfaces'] = interfaces.getall
+        response.merge!(parse_mac_address(config))
+        response[:interfaces] = interfaces.getall
         response
       end
+
+      def parse_mac_address(config)
+        regex = /mac-address ((?:[a-f0-9]{2}:){5}[a-f0-9]{2})$/
+        mdata = regex.match(config)
+        { mac_address: mdata.nil? ? '' : mdata[1] }
+      end
+      private :parse_mac_address
 
       def interfaces
         return @interfaces if @interfaces
@@ -108,8 +110,8 @@ module Rbeapi
       def get(name)
         config = get_block("^interface #{name}")
         return nil unless config
-        addrs = config.scan(/(?<=\s{3}ip\svirtual-router\saddress\s).+$/)
-        { 'addresses' => addrs }
+        response = parse_addresses(config)
+        response
       end
 
       ##
@@ -127,11 +129,19 @@ module Rbeapi
       #   interfaces are configured.
       def getall
         interfaces = config.scan(/(?<=^interface\s)(Vl.+)$/)
-        interfaces.first.each_with_object({}) do |name, resp|
-          data = get(name)
-          resp[name] = data if data
+        return nil unless interfaces
+
+        interfaces.each_with_object({}) do |name, resp|
+          data = get(name[0])
+          resp[name.first] = data if data
         end
       end
+
+      def parse_addresses(config)
+        addrs = config.scan(/(?<=\s{3}ip\svirtual-router\saddress\s).+$/)
+        { addresses: addrs }
+      end
+      private :parse_addresses
 
       ##
       # The set_addresses method assigns one or more virtual IPv4 address
@@ -158,15 +168,20 @@ module Rbeapi
         when true
           configure(["interface #{name}", 'default ip virtual-router address'])
         when false
-          get(name)['addresses'].each do |addr|
-            result = remove_address(name, addr)
-            return result unless result
+          unless get(name).nil? || get(name)[:addresses].nil?
+            get(name)[:addresses].each do |addr|
+              result = remove_address(name, addr)
+              return result unless result
+            end
           end
-          if enable
+          if enable && !value.nil?
             value.each do |addr|
               result = add_address(name, addr)
               return result unless result
             end
+          end
+          if enable == false
+            configure(["no interface #{name}"])
           end
         end
         true
