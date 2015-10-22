@@ -162,13 +162,13 @@ module Rbeapi
         value = opts[:value]
         enable = opts.fetch(:enable, true)
         default = opts[:default] || false
-        cmds = [ "interface #{name}" ]
+        cmds = ["interface #{name}"]
 
         case default
         when true
-          cmds << "default ip virtual-router address"
+          cmds << 'default ip virtual-router address'
         when false
-          cmds << "no ip virtual-router address"
+          cmds << 'no ip virtual-router address'
           if enable
             if value.nil?
               fail ArgumentError, 'no values for addresses provided'

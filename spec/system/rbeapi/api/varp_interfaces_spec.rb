@@ -88,7 +88,7 @@ describe Rbeapi::Api::VarpInterfaces do
     end
 
     it 'can not evaluate without addresses' do
-      expect{subject.set_addresses('Vlan100')}.to raise_error ArgumentError
+      expect{ subject.set_addresses('Vlan100') }.to raise_error ArgumentError
     end
   end
 end
