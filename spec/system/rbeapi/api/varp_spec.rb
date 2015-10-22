@@ -43,10 +43,28 @@ describe Rbeapi::Api::Varp do
   describe '#set_mac_address' do
     before { node.config('no ip virtual-router mac-address') }
 
-    it 'configures the virtual-router mac-address' do
+    it 'set mac-address to aa:bb:cc:dd:ee:ff' do
       expect(subject.get[:mac_address]).to be_empty
       expect(subject.set_mac_address(value: 'aa:bb:cc:dd:ee:ff')).to be_truthy
       expect(subject.get[:mac_address]).to eq('aa:bb:cc:dd:ee:ff')
+    end
+
+    it 'set mac-address to ff-ff-ff-ff-ff-ff' do
+      expect(subject.get[:mac_address]).to be_empty
+      expect(subject.set_mac_address(value: 'ff-ff-ff-ff-ff-ff')).to be_truthy
+      expect(subject.get[:mac_address]).to eq('ff:ff:ff:ff:ff:ff')
+    end
+
+    it 'set mac-address to ffff:ffff:ffff fails' do
+      expect(subject.get[:mac_address]).to be_empty
+      expect(subject.set_mac_address(value: 'ffff:ffff:ffff')).to be_falsey
+      expect(subject.get[:mac_address]).to eq("")
+    end
+
+    it 'set mac-address to ff.ff.ff.ff.ff.ff fails' do
+      expect(subject.get[:mac_address]).to be_empty
+      expect(subject.set_mac_address(value: 'ff.ff.ff.ff.ff.ff')).to be_falsey
+      expect(subject.get[:mac_address]).to eq("")
     end
   end
 end

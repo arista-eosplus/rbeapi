@@ -60,6 +60,8 @@ module Rbeapi
       end
 
       def parse_mac_address(config)
+        # ip virtual-router mac-address value will always
+        #   be stored aa:bb:cc:dd:ee:ff format
         regex = /mac-address ((?:[a-f0-9]{2}:){5}[a-f0-9]{2})$/
         mdata = regex.match(config)
         { mac_address: mdata.nil? ? '' : mdata[1] }
