@@ -61,7 +61,7 @@ module Rbeapi
 
       def parse_mac_address(config)
         # ip virtual-router mac-address value will always
-        #   be stored aa:bb:cc:dd:ee:ff format
+        #   be stored in aa:bb:cc:dd:ee:ff format
         regex = /mac-address ((?:[a-f0-9]{2}:){5}[a-f0-9]{2})$/
         mdata = regex.match(config)
         { mac_address: mdata.nil? ? '' : mdata[1] }
@@ -178,6 +178,11 @@ module Rbeapi
             value.each do |addr|
               cmds << "ip virtual-router address #{addr}"
             end
+          else
+            # XXX For some reason I'm having a hard time making this
+            #   idempotent without destroying the interface. Ideally
+            #   we are looking to just remove the addresses. XXX
+            cmds = ["no interface #{name}"]
           end
         end
         configure(cmds)

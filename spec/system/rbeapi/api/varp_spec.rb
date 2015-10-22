@@ -58,13 +58,13 @@ describe Rbeapi::Api::Varp do
     it 'set mac-address to ffff:ffff:ffff fails' do
       expect(subject.get[:mac_address]).to be_empty
       expect(subject.set_mac_address(value: 'ffff:ffff:ffff')).to be_falsey
-      expect(subject.get[:mac_address]).to eq("")
+      expect(subject.get[:mac_address]).to eq('')
     end
 
     it 'set mac-address to ff.ff.ff.ff.ff.ff fails' do
       expect(subject.get[:mac_address]).to be_empty
       expect(subject.set_mac_address(value: 'ff.ff.ff.ff.ff.ff')).to be_falsey
-      expect(subject.get[:mac_address]).to eq("")
+      expect(subject.get[:mac_address]).to eq('')
     end
   end
 end
