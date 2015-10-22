@@ -97,7 +97,6 @@ module Rbeapi
       #
       # Example
       #   {
-      #     "name": <string>,
       #     "addresses": array<string>
       #   }
       #
@@ -120,8 +119,8 @@ module Rbeapi
       #
       # Example
       #   {
-      #     <name>: {...},
-      #     <name>: {...}
+      #     "name": {...},
+      #     "name": {...}
       #   }
       #
       # @return [nil, Hash<String, String>] A Ruby hash that represents the
@@ -163,34 +162,48 @@ module Rbeapi
         value = opts[:value]
         enable = opts.fetch(:enable, true)
         default = opts[:default] || false
+        cmds = [ "interface #{name}" ]
 
         case default
         when true
-          configure(["interface #{name}", 'default ip virtual-router address'])
+          cmds << "default ip virtual-router address"
         when false
-          unless get(name).nil? || get(name)[:addresses].nil?
-            get(name)[:addresses].each do |addr|
-              result = remove_address(name, addr)
-              return result unless result
+          cmds << "no ip virtual-router address"
+          if enable
+            if value.nil?
+              fail ArgumentError, 'no values for addresses provided'
             end
-          end
-          if enable && !value.nil?
             value.each do |addr|
-              result = add_address(name, addr)
-              return result unless result
+              cmds << "ip virtual-router address #{addr}"
             end
-          end
-          if enable == false
-            configure(["no interface #{name}"])
           end
         end
+        configure(cmds)
         true
       end
 
+      ##
+      # The add_address method assigns one virtual IPv4 address
+      #
+      # @param [String] :name The name of the interface.  The
+      #   name argument must be the full interface name.  Valid interfaces
+      #   are restricted to VLAN interfaces
+      # @param [string] :address The virtual router address to add
+      #
+      # @return [Boolean] True if the commands succeeds otherwise False
       def add_address(name, value)
         configure(["interface #{name}", "ip virtual-router address #{value}"])
       end
 
+      ##
+      # The remove_address method removes one virtual IPv4 address
+      #
+      # @param [String] :name The name of the interface.  The
+      #   name argument must be the full interface name.  Valid interfaces
+      #   are restricted to VLAN interfaces
+      # @param [string] :address The virtual router address to remove
+      #
+      # @return [Boolean] True if the commands succeeds otherwise False
       def remove_address(name, value)
         configure(["interface #{name}",
                    "no ip virtual-router address #{value}"])

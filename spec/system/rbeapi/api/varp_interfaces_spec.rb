@@ -62,7 +62,7 @@ describe Rbeapi::Api::VarpInterfaces do
       expect(subject.get('Vlan100')[:addresses]).to include('99.99.99.98')
     end
 
-    it 'removes address to the list of addresses' do
+    it 'removes address from the list of addresses' do
       node.config(['interface vlan 100', 'ip address 99.99.99.99/24',
                    'ip virtual-router address 99.99.99.98'])
       expect(subject.get('Vlan100')[:addresses]).to include('99.99.99.98')
@@ -76,6 +76,7 @@ describe Rbeapi::Api::VarpInterfaces do
         .to be_truthy
       expect(subject.get('Vlan100')[:addresses]).to include('99.99.99.98')
       expect(subject.set_addresses('Vlan100', enable: false)).to be_truthy
+      expect(subject.get('Vlan100')[:addresses]).to be_empty
     end
 
     it 'default the list of addresses' do
@@ -84,6 +85,10 @@ describe Rbeapi::Api::VarpInterfaces do
       expect(subject.get('Vlan100')[:addresses]).to include('99.99.99.98')
       expect(subject.set_addresses('Vlan100', default: true)).to be_truthy
       expect(subject.get('Vlan100')[:addresses]).to be_empty
+    end
+
+    it 'can not evaluate without addresses' do
+      expect{subject.set_addresses('Vlan100')}.to raise_error ArgumentError
     end
   end
 end
