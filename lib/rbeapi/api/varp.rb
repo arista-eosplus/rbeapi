@@ -178,15 +178,9 @@ module Rbeapi
             value.each do |addr|
               cmds << "ip virtual-router address #{addr}"
             end
-          else
-            # XXX For some reason I'm having a hard time making this
-            #   idempotent without destroying the interface. Ideally
-            #   we are looking to just remove the addresses. XXX
-            cmds = ["no interface #{name}"]
           end
         end
         configure(cmds)
-        true
       end
 
       ##

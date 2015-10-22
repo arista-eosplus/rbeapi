@@ -76,7 +76,7 @@ describe Rbeapi::Api::VarpInterfaces do
         .to be_truthy
       expect(subject.get('Vlan100')[:addresses]).to include('99.99.99.98')
       expect(subject.set_addresses('Vlan100', enable: false)).to be_truthy
-      expect(subject.get('Vlan100')).to be_falsey
+      expect(subject.get('Vlan100')[:addresses]).to be_empty
     end
 
     it 'default the list of addresses' do
