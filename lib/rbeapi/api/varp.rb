@@ -172,9 +172,8 @@ module Rbeapi
         when false
           cmds << 'no ip virtual-router address'
           if enable
-            if value.nil?
-              fail ArgumentError, 'no values for addresses provided'
-            end
+            fail ArgumentError,
+                 'no values for addresses provided' unless value
             value.each do |addr|
               cmds << "ip virtual-router address #{addr}"
             end
