@@ -54,15 +54,19 @@ module Rbeapi
       #   key / value pairs.
       def get
         response = {}
-
-        regex = /(?<=^ip\svirtual-router\smac-address\s)
-          ((?:[a-f0-9]{2}:){5}[a-f0-9]{2})$/x
-
-        mdata = regex.match(config)
-        response['mac_address'] = mdata.nil? ? '' : mdata[1]
-        response['interfaces'] = interfaces.getall
+        response.merge!(parse_mac_address(config))
+        response[:interfaces] = interfaces.getall
         response
       end
+
+      def parse_mac_address(config)
+        # ip virtual-router mac-address value will always
+        #   be stored in aa:bb:cc:dd:ee:ff format
+        regex = /mac-address ((?:[a-f0-9]{2}:){5}[a-f0-9]{2})$/
+        mdata = regex.match(config)
+        { mac_address: mdata.nil? ? '' : mdata[1] }
+      end
+      private :parse_mac_address
 
       def interfaces
         return @interfaces if @interfaces
@@ -95,7 +99,6 @@ module Rbeapi
       #
       # Example
       #   {
-      #     "name": <string>,
       #     "addresses": array<string>
       #   }
       #
@@ -108,8 +111,8 @@ module Rbeapi
       def get(name)
         config = get_block("^interface #{name}")
         return nil unless config
-        addrs = config.scan(/(?<=\s{3}ip\svirtual-router\saddress\s).+$/)
-        { 'addresses' => addrs }
+        response = parse_addresses(config)
+        response
       end
 
       ##
@@ -118,8 +121,8 @@ module Rbeapi
       #
       # Example
       #   {
-      #     <name>: {...},
-      #     <name>: {...}
+      #     "name": {...},
+      #     "name": {...}
       #   }
       #
       # @return [nil, Hash<String, String>] A Ruby hash that represents the
@@ -127,11 +130,19 @@ module Rbeapi
       #   interfaces are configured.
       def getall
         interfaces = config.scan(/(?<=^interface\s)(Vl.+)$/)
-        interfaces.first.each_with_object({}) do |name, resp|
-          data = get(name)
-          resp[name] = data if data
+        return nil unless interfaces
+
+        interfaces.each_with_object({}) do |name, resp|
+          data = get(name[0])
+          resp[name.first] = data if data
         end
       end
+
+      def parse_addresses(config)
+        addrs = config.scan(/(?<=\s{3}ip\svirtual-router\saddress\s).+$/)
+        { addresses: addrs }
+      end
+      private :parse_addresses
 
       ##
       # The set_addresses method assigns one or more virtual IPv4 address
@@ -153,29 +164,46 @@ module Rbeapi
         value = opts[:value]
         enable = opts.fetch(:enable, true)
         default = opts[:default] || false
+        cmds = ["interface #{name}"]
 
         case default
         when true
-          configure(["interface #{name}", 'default ip virtual-router address'])
+          cmds << 'default ip virtual-router address'
         when false
-          get(name)['addresses'].each do |addr|
-            result = remove_address(name, addr)
-            return result unless result
-          end
+          cmds << 'no ip virtual-router address'
           if enable
+            fail ArgumentError,
+                 'no values for addresses provided' unless value
             value.each do |addr|
-              result = add_address(name, addr)
-              return result unless result
+              cmds << "ip virtual-router address #{addr}"
             end
           end
         end
-        true
+        configure(cmds)
       end
 
+      ##
+      # The add_address method assigns one virtual IPv4 address
+      #
+      # @param [String] :name The name of the interface.  The
+      #   name argument must be the full interface name.  Valid interfaces
+      #   are restricted to VLAN interfaces
+      # @param [string] :address The virtual router address to add
+      #
+      # @return [Boolean] True if the commands succeeds otherwise False
       def add_address(name, value)
         configure(["interface #{name}", "ip virtual-router address #{value}"])
       end
 
+      ##
+      # The remove_address method removes one virtual IPv4 address
+      #
+      # @param [String] :name The name of the interface.  The
+      #   name argument must be the full interface name.  Valid interfaces
+      #   are restricted to VLAN interfaces
+      # @param [string] :address The virtual router address to remove
+      #
+      # @return [Boolean] True if the commands succeeds otherwise False
       def remove_address(name, value)
         configure(["interface #{name}",
                    "no ip virtual-router address #{value}"])
