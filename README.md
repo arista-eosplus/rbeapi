@@ -1,5 +1,7 @@
 # Arista eAPI Ruby Library
 
+Jenkins [![Build Status](https://revproxy.arista.com/eosplus/ci/buildStatus/icon?job=rbeapi_start)](https://revproxy.arista.com/eosplus/ci/job/rbeapi_start/)
+
 #### Table of Contents
 
 1. [Overview] (#overview)
