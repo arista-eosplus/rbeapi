@@ -64,9 +64,7 @@ module Rbeapi
       #   Hash. If the specified name is not found in the nodes current
       #   configuration a nil object is returned
       def get(name)
-        entries = entries_regex(name)
-        return nil unless entries
-        parse_entries(entries)
+        parse_entries(name)
       end
 
       ##
@@ -96,20 +94,10 @@ module Rbeapi
         return nil unless routemaps
         response = {}
         routemaps.each do |name|
-          entries = entries_regex(name)
-          response[name] = parse_entries(entries)
+          response[name] = parse_entries(name)
         end
         response
       end
-
-      ##
-      # entries regex scans the config for the specified route-name. The method
-      #   reduces duplication.
-      #
-      def entries_regex(name)
-        config.scan(/^route-map\s#{name}\s.+$/)
-      end
-      private :entries_regex
 
       ##
       # parse entries is a private method to get the routemap rules.
@@ -119,7 +107,9 @@ module Rbeapi
       #   there are no routemaps configured, this method will return an empty
       #    hash.
       #
-      def parse_entries(entries)
+      def parse_entries(name)
+        entries = config.scan(/^route-map\s#{name}\s.+$/)
+
         entries.each_with_object([]) do |rm|
           mdata = /route-map\s(.+)\s(.+)\s(\d+)$/.match(rm)
           rules = get_block(rm)
@@ -167,24 +157,25 @@ module Rbeapi
       #
       def name_commands(name, opts)
         if opts[:enable] == false
-          @cmd = "no route-map #{name}"
+          cmd = "no route-map #{name}"
         elsif opts[:default] == true
-          @cmd = "default route-map #{name}"
+          cmd = "default route-map #{name}"
         else
-          @cmd = "route-map #{name}"
+          cmd = "route-map #{name}"
         end
         if opts[:action]
-          @cmd << " #{opts[:action]}"
+          cmd << " #{opts[:action]}"
         else
-          @cmd << ' permit'
+          cmd << ' permit'
         end
         if opts[:seqno]
-          @cmd << " #{opts[:seqno]}"
+          cmd << " #{opts[:seqno]}"
         else
           # Extract seqno from composite names
           seqno = name.partition(':').last
-          @cmd << " #{seqno}" if seqno
+          cmd << " #{seqno}" if seqno
         end
+        [cmd]
       end
       private :name_commands
 
@@ -221,8 +212,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def create(name, opts = {})
-        name_commands(name, opts)
-        cmds = [@cmd]
+        cmds = name_commands(name, opts)
         cmds << "description #{opts[:description]}" if opts[:description]
         cmds << "continue #{opts[:continue]}" if opts[:continue]
         Array(opts[:match]).each do |options|
