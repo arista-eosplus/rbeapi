@@ -146,6 +146,24 @@ describe Rbeapi::Api::Vrrp do
       end
     end
 
+    it 'creates a new virtual router resource with all options set' do
+      @test_opts3 = []
+      opts = {}
+      cmds = ['interface Vlan100']
+      @values.each do |entry|
+        # Skip boolean pairs in the options that are false because
+        # the option can only be set once.
+        next unless entry[:value]
+        opts[entry[:option]] = entry[:value]
+        entry[:cmd].each do |cmd|
+          cmds << cmd
+        end
+      end
+
+      expect(node).to receive(:config).with(cmds)
+      expect(subject.create('Vlan100', 9, opts)).to be_truthy
+    end
+
     it 'raises ArgumentError for create without options' do
       expect { subject.create('Vlan100', 9) }.to \
         raise_error ArgumentError
