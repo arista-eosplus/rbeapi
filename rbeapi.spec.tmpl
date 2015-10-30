@@ -11,25 +11,6 @@ License:    New BSD
 URL:		https://github.com/arista-eosplus/rbeapi
 Source0:	%{gem_name}-%{version}.gem
 
-#%if 0%{?enterprise:1} == 1
-## Use these settings for Puppet Enterprise
-#Requires: pe-rubygems
-#Requires: pe-ruby
-#Requires: pe-rubygem(net-http-unix)
-#Requires: pe-rubygem(inifile)
-#Requires: pe-rubygem(netaddr)
-#Provides: pe-rubygem(%{gem_name}) = %{version}
-#Provides: pe-rubygem-%{gem_name} = %{version}
-#%else
-## Use these settings for all other installs
-#Requires: ruby(abi) = %{rubyabi}
-#Requires: ruby(net-http-unix)
-#Requires: ruby(inifile)
-#Requires: ruby(netaddr)
-#Provides: ruby(%{gem_name}) = %{version}-%{release}
-#%endif
-
-
 BuildArch: noarch
 
 %description
