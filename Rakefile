@@ -15,7 +15,6 @@ task rpm: :build do
   system "sed -e 's/^Version:.*/Version: #{Rbeapi::VERSION}/g' " \
     'rbeapi.spec.tmpl > rbeapi.spec'
   system "rpmbuild #{RPM_OPTS} rbeapi.spec"
-  system "rpmbuild #{RPM_OPTS} --define 'enterprise 1' rbeapi.spec"
   RPMS = `find rpms/noarch -name "*rbeapi*rpm"`
   puts "\n################################################\n#"
   puts "Created the following in rpms/noarch/\n#{RPMS}"
