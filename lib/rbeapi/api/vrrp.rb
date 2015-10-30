@@ -306,7 +306,9 @@ module Rbeapi
       #   { name: 'Ethernet2', action: 'decrement', amount: 22 },
       #   { name: 'Ethernet2', action: 'shutdown' }
       def parse_track(config, vrid)
-        matches = config.scan(/^\s+vrrp #{vrid} track (\S+) (decrement|shutdown)\s*(?:(\d+$|$))/)
+        pre = "vrrp #{vrid} track "
+        matches = \
+          config.scan(/^\s+#{pre}(\S+) (decrement|shutdown)\s*(?:(\d+$|$))/)
         response = []
         matches.each do |name, action, amount|
           hsh = { name: name, action: action }
