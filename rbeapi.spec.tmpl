@@ -11,31 +11,10 @@ License:    New BSD
 URL:		https://github.com/arista-eosplus/rbeapi
 Source0:	%{gem_name}-%{version}.gem
 
-%if 0%{?enterprise:1} == 1
-# Use these settings for Puppet Enterprise
-%global gem /opt/puppet/bin/gem
-Requires: pe-rubygems
-Requires: pe-ruby
-Requires: pe-rubygem(net-http-unix)
-Requires: pe-rubygem(inifile)
-Requires: pe-rubygem(netaddr)
-Provides: pe-rubygem(%{gem_name}) = %{version}
-Provides: pe-rubygem-%{gem_name} = %{version}
-%else
-# Use these settings for all other installs
-%global gem gem
-Requires: ruby(abi) = %{rubyabi}
-Requires: ruby(net-http-unix)
-Requires: ruby(inifile)
-Requires: ruby(netaddr)
-Provides: ruby(%{gem_name}) = %{version}-%{release}
-%endif
-
-
 BuildArch: noarch
 
 %description
-The Ruby Cliet for eAPI provides a native Ruby implementation for programming
+The Ruby Client for eAPI provides a native Ruby implementation for programming
 Arista EOS network devices using Ruby. The Ruby client provides the ability
 to build native applications in Ruby that can communicate with EOS either
 locally via Unix domain sockets (on-box) or remotely over a HTTP/S transport
@@ -52,6 +31,31 @@ The library is freely provided to the open source community for building robust
 applications using Arista EOS eAPI. Support is provided as best effort through
 Github iusses.
 
+%package puppet3
+Summary:	Arista eAPI Ruby Library Puppet Enterprise 3.x agents
+Group:		Development/Languages
+# Use these settings for Puppet Enterprise
+Requires: pe-rubygems
+Requires: pe-ruby
+Requires: pe-rubygem(net-http-unix)
+Requires: pe-rubygem(inifile)
+Requires: pe-rubygem(netaddr)
+Provides: pe-rubygem(%{gem_name}) = %{version}
+Provides: pe-rubygem-%{gem_name} = %{version}
+%description puppet3
+The Ruby eAPI Client for Puppet Enterprise 3.x agents
+
+%package puppet-aio
+Summary:	Arista eAPI Ruby Library for Puppet All-In-One (4.x) agents
+Group:		Development/Languages
+Requires: ruby(abi) = %{rubyabi}
+Requires: ruby(net-http-unix)
+Requires: ruby(inifile)
+Requires: ruby(netaddr)
+Provides: ruby(%{gem_name}) = %{version}-%{release}
+%description puppet-aio
+The Ruby eAPI Client for Puppet All-In-One (4.x) agents
+
 %prep
 %setup -q -D -T -n  .
 
@@ -62,14 +66,42 @@ install %{SOURCE0} %{buildroot}/
 %files
 /%{gem_name}-%{version}.gem
 
+%files puppet3
+/%{gem_name}-%{version}.gem
+
+%files puppet-aio
+/%{gem_name}-%{version}.gem
+
 %post
-%{gem} install --local /%{gem_name}-%{version}.gem > /dev/null 2>&1
+GEM_OPTS="--no-document --local"
+gem install ${GEM_OPTS} /%{gem_name}-%{version}.gem > /dev/null 2>&1
 
 %preun
-%{gem} uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
+gem uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
+
+%post puppet3
+GEM=/opt/puppet/bin/gem
+GEM_OPTS="--no-document --local"
+${GEM} install ${GEM_OPTS} /%{gem_name}-%{version}.gem > /dev/null 2>&1
+
+%preun puppet3
+GEM=/opt/puppet/bin/gem
+${GEM} uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
+
+%post puppet-aio
+GEM=/opt/puppetlabs/puppet/bin/gem
+GEM_OPTS="--no-document --local"
+${GEM} install ${GEM_OPTS} /%{gem_name}-%{version}.gem > /dev/null 2>&1
+
+%preun puppet-aio
+GEM=/opt/puppetlabs/puppet/bin/gem
+${GEM} uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
 
 %changelog
-* Tue May 21 2015 Jere Julian - 0.1.0-2
+* Fri Oct 30 2015 Jere Julian - 0.4.0-1
+- Detect the location of the puppet-agent's gem install
+
+* Thu May 21 2015 Jere Julian - 0.1.0-2
 - Ubuntu requires we manually create the buildroot
 
 * Tue Mar 17 2015 Jere Julian - 0.1.0-1
