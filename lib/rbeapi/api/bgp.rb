@@ -55,7 +55,7 @@ module Rbeapi
       #   Hash.
       def get
         config = get_block('^router bgp .*')
-        return {} unless config
+        return nil unless config
 
         response = Bgp.parse_bgp_as(config)
         response.merge!(parse_router_id(config))
