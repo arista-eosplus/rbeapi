@@ -48,11 +48,11 @@ The Ruby eAPI Client for Puppet Enterprise 3.x agents
 %package puppet-aio
 Summary:	Arista eAPI Ruby Library for Puppet All-In-One (4.x) agents
 Group:		Development/Languages
-Requires: ruby(abi) = %{rubyabi}
-Requires: ruby(net-http-unix)
-Requires: ruby(inifile)
-Requires: ruby(netaddr)
-Provides: ruby(%{gem_name}) = %{version}-%{release}
+Requires: puppet >= 4.0.0
+Requires: rubygem-net-http-unix
+Requires: rubygem-inifile
+Requires: rubygem-netaddr
+Provides: rubygem-%{gem_name} = %{version}
 %description puppet-aio
 The Ruby eAPI Client for Puppet All-In-One (4.x) agents
 
