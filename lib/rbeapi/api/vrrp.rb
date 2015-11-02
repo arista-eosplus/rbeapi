@@ -973,12 +973,36 @@ module Rbeapi
       #
       # @param [Array<Hash>] :tracks Array of a hash of track information.
       #   Hash format: { name: 'Eth2', action: 'decrement', amount: 33 },
-      #   An empty array will remove all tracks set for
-      #   the virtual router on the specified layer 3 interface.
+      #   The name and action key are required. The amount key should only
+      #   be specified if the action is shutdown. The valid actions are
+      #   'decrement' and 'shutdown'.  An empty array will remove all tracks
+      #   set for the virtual router on the specified layer 3 interface.
       #
       # @return [Array<String>] Returns the array of commands. The
       #   array could be empty.
       def build_tracks_cmd(name, vrid, tracks)
+        # Validate the track hash
+        valid_keys = [:name, :action, :amount]
+        tracks.each do |track|
+          track.keys do |key|
+            unless valid_keys.include?(key)
+              fail ArgumentError, '#{key} invalid in track hash'
+            end
+          end
+          unless track.key?(:name) && track.key?(:action)
+            fail ArgumentError, 'Must specify :name and :action in track hash'
+          end
+          unless track[:action] == 'decrement' || track[:action] == 'shutdown'
+            fail ArgumentError, "Action must be 'decrement' or 'shutdown'"
+          end
+          if track.key?(:amount) && track[:action] != 'decrement'
+            fail ArgumentError, "Action must be 'decrement' to set amount"
+          end
+          if track.key?(:amount) && track[:amount] < 0
+            fail ArgumentError, 'Amount must be greater than zero'
+          end
+        end
+
         tracks = Set.new tracks
 
         # Get the current tracks set for the virtual router

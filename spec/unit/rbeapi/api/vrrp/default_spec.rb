@@ -531,6 +531,12 @@ describe Rbeapi::Api::Vrrp do
     before :all do
       @cmds = ['interface Vlan100']
       @cmds += @track_cmds
+
+      @bad_key = [{ nombre: 'Ethernet3', action: 'decrement', amount: 33 }]
+      @miss_key = [{ action: 'decrement', amount: 33 }]
+      @bad_action = [{ name: 'Ethernet3', action: 'dec', amount: 33 }]
+      @sem_key = [{ name: 'Ethernet3', action: 'shutdown', amount: 33 }]
+      @bad_amount = [{ name: 'Ethernet3', action: 'decrement', amount: -1 }]
     end
 
     it 'set tracks' do
@@ -545,6 +551,31 @@ describe Rbeapi::Api::Vrrp do
       expect(subject.set_tracks('Vlan100', 9, @tracks)).to be_truthy
       # Delete all IP addresses
       expect(subject.set_tracks('Vlan100', 9, [])).to be_truthy
+    end
+
+    it 'raises ArgumentError for track hash with a bad key' do
+      expect { subject.set_tracks('Vlan100', 9, @bad_key) }.to \
+        raise_error ArgumentError
+    end
+
+    it 'raises ArgumentError for track hash with missing required key' do
+      expect { subject.set_tracks('Vlan100', 9, @miss_key) }.to \
+        raise_error ArgumentError
+    end
+
+    it 'raises ArgumentError for track hash with invalid action' do
+      expect { subject.set_tracks('Vlan100', 9, @bad_action) }.to \
+        raise_error ArgumentError
+    end
+
+    it 'raises ArgumentError for track hash with shutdown and amount' do
+      expect { subject.set_tracks('Vlan100', 9, @sem_key) }.to \
+        raise_error ArgumentError
+    end
+
+    it 'raises ArgumentError for track hash with negative amount' do
+      expect { subject.set_tracks('Vlan100', 9, @bad_amount) }.to \
+        raise_error ArgumentError
     end
   end
 end
