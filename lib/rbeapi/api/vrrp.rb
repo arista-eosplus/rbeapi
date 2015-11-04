@@ -218,9 +218,9 @@ module Rbeapi
       def parse_preempt(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} preempt$/)
         if match.empty?
-          value = nil
+          value = false
         else
-          value = match[0][0].to_i
+          value = true
         end
         { preempt: value }
       end

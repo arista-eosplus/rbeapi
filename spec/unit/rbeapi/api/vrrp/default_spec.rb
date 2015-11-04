@@ -44,14 +44,14 @@ describe Rbeapi::Api::Vrrp do
     let(:entity) do
       { 30 => { delay_reload: 0, description: 'The description',
                 enable: true, ip_version: 2, mac_addr_adv_interval: 30,
-                preempt: nil, preempt_delay_min: 0, preempt_delay_reload: 0,
+                preempt: false, preempt_delay_min: 0, preempt_delay_reload: 0,
                 priority: 100, secondary_ip: [], timers_advertise: 1,
                 track: [
                   { name: 'Ethernet1', action: 'decrement', amount: 5 }
                 ]
         },
         40 => { delay_reload: 0, description: nil, enable: true,
-                ip_version: 2, mac_addr_adv_interval: 30, preempt: nil,
+                ip_version: 2, mac_addr_adv_interval: 30, preempt: false,
                 preempt_delay_min: 0, preempt_delay_reload: 0,
                 priority: 200, secondary_ip: [], timers_advertise: 1,
                 track: @tracks
