@@ -180,11 +180,13 @@ describe Rbeapi::Api::Routemaps do
 
   describe '#set_match_statements' do
     before do
-      node.config(['route-map test permit 10'])
+      node.config(['route-map test permit 10',
+                   'match interface Loopback1'])
     end
 
     it 'set match statements on an existing routemap' do
-      expect(subject.get('test')).to eq([{ action: 'permit', seqno: 10 }])
+      expect(subject.get('test')).to eq([{ action: 'permit', seqno: 10,
+                                           match: ['interface Loopback1'] }])
       expect(subject.set_match_statements('test', 'permit', 10,
                                           ['ip address prefix-list MYLOOPBACK',
                                            'interface Loopback0'])).to be_truthy
@@ -209,11 +211,14 @@ describe Rbeapi::Api::Routemaps do
   describe '#set_set_statements' do
     before do
       node.config(['no route-map test', 'no route-map test1',
-                   'route-map test permit 10'])
+                   'route-map test permit 10',
+                   'set community internet 3333:3333'])
     end
 
     it 'set set statements on an existing routemap' do
-      expect(subject.get('test')).to eq([{ action: 'permit', seqno: 10 }])
+      expect(subject.get('test'))
+        .to eq([{ action: 'permit', seqno: 10,
+                  set: ['community internet 3333:3333'] }])
       expect(subject
           .set_set_statements('test', 'permit', 10,
                               ['community internet 5555:5555',
@@ -238,11 +243,12 @@ describe Rbeapi::Api::Routemaps do
   describe '#set_continue' do
     before do
       node.config(['no route-map test', 'no route-map test1',
-                   'route-map test permit 10'])
+                   'route-map test permit 10', 'continue 50'])
     end
 
     it 'set continue on an existing routemap' do
-      expect(subject.get('test')).to eq([{ action: 'permit', seqno: 10 }])
+      expect(subject.get('test')).to eq([{ action: 'permit', seqno: 10,
+                                           continue: 50 }])
       expect(subject.set_continue('test', 'permit', 10, 99)).to be_truthy
       expect(subject.get('test'))
         .to eq([{ action: 'permit', seqno: 10, continue: 99 }])
@@ -259,11 +265,12 @@ describe Rbeapi::Api::Routemaps do
   describe '#set_description' do
     before do
       node.config(['no route-map test', 'no route-map test1',
-                   'route-map test permit 10'])
+                   'route-map test permit 10', 'description temp'])
     end
 
     it 'set description on an existing routemap' do
-      expect(subject.get('test')).to eq([{ action: 'permit', seqno: 10 }])
+      expect(subject.get('test')).to eq([{ action: 'permit', seqno: 10,
+                                           description: 'temp' }])
       expect(subject
         .set_description('test', 'permit', 10, 'descript')).to be_truthy
       expect(subject.get('test')).to eq([{ action: 'permit', seqno: 10,
