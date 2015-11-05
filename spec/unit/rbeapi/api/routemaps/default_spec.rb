@@ -41,15 +41,18 @@ describe Rbeapi::Api::Routemaps do
   let(:node) { double('node') }
 
   let(:test) do
-    {
-      action: 'permit',
-      seqno: 20,
-      match_rules: ['interface Vlan100'],
-      continue: 99,
-      description: 'description'
-    }
+    [
+      {
+        action: 'permit',
+        seqno: 10,
+        match: ['interface Loopback0', 'ip address prefix-list MYLOOPBACK'],
+        set: ['community internet 5555:5555'],
+        continue: 99,
+        description: 'description'
+      }
+    ]
   end
-  let(:name) { 'test:20' }
+  let(:name) { 'test1' }
 
   def routemaps
     routemaps = Fixtures[:routemaps]
@@ -64,16 +67,21 @@ describe Rbeapi::Api::Routemaps do
   describe '#getall' do
     let(:test1_entries) do
       {
-        'test:10' => { action: 'permit', seqno: 10,
-                       match_rules: ['interface Loopback0',
-                                     'ip address prefix-list MYLOOPBACK'],
-                       set_rules: ['community internet 5555:5555'],
-                       continue: 99,
-                       description: 'description' },
-        'test:20' => { action: 'permit', seqno: 20,
-                       match_rules: ['interface Vlan100'],
-                       continue: 99,
-                       description: 'description' }
+        'test1' => [{ action: 'permit', seqno: 10,
+                      match: ['interface Loopback0',
+                              'ip address prefix-list MYLOOPBACK'],
+                      set: ['community internet 5555:5555'],
+                      continue: 99,
+                      description: 'description' }],
+        'test' => [{ action: 'permit', seqno: 10,
+                     match: ['interface Vlan100'],
+                     continue: 99,
+                     description: 'description' },
+                   { action: 'permit', seqno: 20,
+                     description: 'description',
+                     continue: 99,
+                     set: ['community internet 5555:5555']
+                   }]
       }
     end
 
@@ -96,153 +104,136 @@ describe Rbeapi::Api::Routemaps do
     end
 
     it 'returns a hash' do
-      expect(subject.get(name)).to be_a_kind_of(Hash)
+      expect(subject.get(name)).to be_a_kind_of(Array)
     end
 
     it 'has two entries' do
-      expect(subject.get(name).size).to eq(5)
+      expect(subject.get(name).size).to eq(1)
     end
   end
 
   describe '#create' do
     it 'create a new routemap' do
-      expect(node).to receive(:config).with(['route-map test:20 permit 20'])
-      expect(subject.create('test:20')).to be_truthy
+      expect(node).to receive(:config).with(['route-map test1 permit 10'])
+      expect(subject.create('test1', 'permit', 10)).to be_truthy
     end
 
     it 'create a new routemap with description' do
       expect(node).to receive(:config)
-        .with(['route-map test:20 permit 20', 'description description'])
-      expect(subject.create('test:20',
+        .with(['route-map test1 permit 10', 'no description',
+               'description description',
+               'no match interface Loopback0',
+               'no match ip address prefix-list MYLOOPBACK',
+               'no set community internet 5555:5555'])
+      expect(subject.create('test1', 'permit', 10,
                             description: 'description')).to be_truthy
     end
 
     it 'create a new routemap with match' do
       expect(node).to receive(:config)
-        .with(['route-map test:20 permit 20',
+        .with(['route-map test1 permit 10',
+               'no match interface Loopback0',
+               'no match ip address prefix-list MYLOOPBACK',
                'match ip address prefix-list MYLOOPBACK',
-               'match interface Loopback0'])
-      expect(subject.create('test:20',
+               'match interface Loopback0',
+               'no set community internet 5555:5555'])
+      expect(subject.create('test1', 'permit', 10,
                             match: ['ip address prefix-list MYLOOPBACK',
                                     'interface Loopback0'])).to be_truthy
     end
 
     it 'create a new routemap with set' do
       expect(node).to receive(:config)
-        .with(['route-map test:20 permit 20',
+        .with(['route-map test1 permit 10',
+               'no match interface Loopback0',
+               'no match ip address prefix-list MYLOOPBACK',
+               'no set community internet 5555:5555',
                'set community internet 5555:5555'])
-      expect(subject.create('test:20',
+      expect(subject.create('test1', 'permit', 10,
                             set: ['community internet 5555:5555'])).to be_truthy
     end
 
     it 'create a new routemap with continue' do
       expect(node).to receive(:config)
-        .with(['route-map test:20 permit 20', 'continue 99'])
-      expect(subject.create('test:20',
+        .with(['route-map test1 permit 10', 'no continue', 'continue 99',
+               'no match interface Loopback0',
+               'no match ip address prefix-list MYLOOPBACK',
+               'no set community internet 5555:5555'])
+      expect(subject.create('test1', 'permit', 10,
                             continue: 99)).to be_truthy
     end
 
     it 'create a new routemap with default' do
       expect(node).to receive(:config)
-        .with(['default route-map test:20 permit 20'])
-      expect(subject.create('test:20',
+        .with(['default route-map test1 permit 10',
+               'no match interface Loopback0',
+               'no match ip address prefix-list MYLOOPBACK',
+               'no set community internet 5555:5555'])
+      expect(subject.create('test1', 'permit', 10,
                             default: true)).to be_truthy
     end
   end
 
   describe '#delete' do
     it 'delete a routemap resource' do
-      expect(node).to receive(:config).with(['no route-map test:20'])
-      expect(subject.delete('test:20')).to be_truthy
+      expect(node).to receive(:config).with(['no route-map test1'])
+      expect(subject.delete('test1')).to be_truthy
     end
   end
 
   describe '#set_match_statements' do
     it 'set the match statements' do
-      expect(node).to receive(:config).with(['route-map test:20',
-                                             'match interface Vlan100'])
-      expect(
-        subject.set_match_statements('test:20', value: ['interface Vlan100'])
-      ).to be_truthy
-    end
-
-    it 'set the match statements' do
       expect(node).to receive(:config)
-        .with(['route-map test:20',
+        .with(['route-map test1 permit 10',
+               'no match interface Loopback0',
+               'no match ip address prefix-list MYLOOPBACK',
                'match ip address prefix-list MYLOOPBACK',
                'match interface Loopback0'])
       expect(
         subject
-          .set_match_statements('test:20',
-                                value: ['ip address prefix-list MYLOOPBACK',
-                                        'interface Loopback0'])
+          .set_match_statements('test1', 'permit', 10,
+                                ['ip address prefix-list MYLOOPBACK',
+                                 'interface Loopback0'])
       ).to be_truthy
-    end
-  end
-
-  describe '#remove_match_statements' do
-    it 'remove the match statements' do
-      expect(node).to receive(:config).with(['route-map test:20',
-                                             'no match interface Vlan100'])
-      expect(
-        subject.remove_match_statements('test:20', value: ['interface Vlan100'])
-      ).to be_truthy
+      expect(subject.get('test1')[0][:match])
+        .to include('ip address prefix-list MYLOOPBACK',
+                    'interface Loopback0')
     end
   end
 
   describe '#set_set_statements' do
     it 'set the set statements' do
       expect(node).to receive(:config)
-        .with(['route-map test:20', 'set community internet 5555:5555'])
+        .with(['route-map test1 permit 10',
+               'no set community internet 5555:5555',
+               'set community internet 5555:5555'])
       expect(
-        subject.set_set_statements('test:20',
-                                   value: ['community internet 5555:5555'])
+        subject.set_set_statements('test1', 'permit', 10,
+                                   ['community internet 5555:5555'])
       ).to be_truthy
-    end
-  end
-
-  describe '#remove_set_statement' do
-    it 'remove the set statements' do
-      expect(node).to receive(:config)
-        .with(['route-map test:20', 'no set community internet 5555:5555'])
-      expect(
-        subject.remove_set_statements('test:20',
-                                      value: ['community internet 5555:5555'])
-      ).to be_truthy
+      expect(subject.get('test1')[0][:set])
+        .to include('community internet 5555:5555')
     end
   end
 
   describe '#set_continue' do
     it 'set the continue statement' do
-      expect(node).to receive(:config).with(['route-map test:20',
+      expect(node).to receive(:config).with(['route-map test1 permit 10',
+                                             'no continue',
                                              'continue 99'])
-      expect(subject.set_continue('test:20',
-                                  value: 99)).to be_truthy
-    end
-  end
-
-  describe '#remove_continue' do
-    it 'remove the continue statement' do
-      expect(node).to receive(:config).with(['route-map test:20',
-                                             'no continue'])
-      expect(subject.remove_continue('test:20')).to be_truthy
+      expect(subject.set_continue('test1', 'permit', 10, 99)).to be_truthy
+      expect(subject.get('test1')[0][:continue]).to eq(99)
     end
   end
 
   describe '#set_description' do
     it 'set the description statement' do
-      expect(node).to receive(:config).with(['route-map test:20',
-                                             'description testdesc'])
-      expect(subject.set_description('test:20',
-                                     value: 'testdesc')).to be_truthy
-    end
-  end
-
-  describe '#remove_description' do
-    it 'remove the description statements' do
-      expect(node).to receive(:config).with(['route-map test:20',
-                                             'no description'])
-      expect(subject.remove_description('test:20')).to be_truthy
+      expect(node).to receive(:config).with(['route-map test1 permit 10',
+                                             'no description',
+                                             'description description'])
+      expect(subject.set_description('test1', 'permit', 10,
+                                     'description')).to be_truthy
+      expect(subject.get('test1')[0][:description]).to eq('description')
     end
   end
 end

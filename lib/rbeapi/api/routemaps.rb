@@ -45,16 +45,26 @@ module Rbeapi
     #
     class Routemaps < Entity
       ##
-      # get returns the routemap configuration
+      # get returns a hash of routemap configurations for the given name
       #
       # @example
       #   {
-      #     action: <string>,
-      #     seqno: <integer>,
-      #     match_rules: <array>,
-      #     set_rules: <array>,
-      #     continue: <integer>
-      #     description: <string>
+      #     [{
+      #       action: <string>,
+      #       seqno: <integer>,
+      #       match: <array>,
+      #       set: <array>,
+      #       continue: <integer>,
+      #       description: <string>
+      #     },
+      #     {
+      #       action: <string>,
+      #       seqno: <integer>,
+      #       match: <array>,
+      #       set: <array>,
+      #       continue: <integer>,
+      #       description: <string>
+      #     }]
       #   }
       #
       # @param [String] name The routemap name to return a resource for from the
@@ -73,17 +83,35 @@ module Rbeapi
       # by the unique routemap name.
       #
       # @example
-      #   [
-      #     <test:10>: {
+      #   {
+      #     <test>:
+      #     [{
       #       action: <string>,
       #       seqno: <integer>,
-      #       match_rules: <array>,
-      #       set_rules: <array>,
-      #       continue: <integer>
+      #       match: <array>,
+      #       set: <array>,
+      #       continue: <integer>,
       #       description: <string>
       #     },
-      #     ...
-      #   ]
+      #     {
+      #       action: <string>,
+      #       seqno: <integer>,
+      #       match: <array>,
+      #       set: <array>,
+      #       continue: <integer>,
+      #       description: <string>
+      #     }],
+      #     <test1>:
+      #     [{
+      #       action: <string>,
+      #       seqno: <integer>,
+      #       match: <array>,
+      #       set: <array>,
+      #       continue: <integer>,
+      #       description: <string>
+      #     }],
+      #     ....
+      #   }
       #
       # @return [Hash<Symbol, Object>] returns a hash that represents the
       #   entire routemap collection from the nodes running configuration.  If
@@ -105,13 +133,14 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] returns a hash that represents the
       #   rules for routemaps from the nodes running configuration.  If
       #   there are no routemaps configured, this method will return an empty
-      #    hash.
+      #   hash.
       #
       def parse_entries(name)
         entries = config.scan(/^route-map\s#{name}\s.+$/)
-
-        entries.each_with_object([]) do |rm|
-          mdata = /route-map\s(.+)\s(.+)\s(\d+)$/.match(rm)
+        response = {}
+        response[:entries] = []
+        entries.each_with_object({}) do |rm|
+          mdata = /^route-map\s(.+)\s(.+)\s(\d+)$/.match(rm)
           rules = get_block(rm)
           rule_hsh = { action: mdata[2], seqno: mdata[3].to_i }
           unless rules.nil?
@@ -119,8 +148,9 @@ module Rbeapi
               parse_rule(rule, rule_hsh)
             end
           end
-          return rule_hsh
+          response[:entries] << rule_hsh
         end
+        response[:entries]
       end
       private :parse_entries
 
@@ -136,11 +166,11 @@ module Rbeapi
         mdata = /\s{3}(\w+)\s/.match(rule)
         case mdata.nil? ? nil : mdata[1]
         when 'match'
-          rule_hsh[:match_rules] = [] unless rule_hsh.include?(:match_rules)
-          rule_hsh[:match_rules] << rule.sub('match', '').strip
+          rule_hsh[:match] = [] unless rule_hsh.include?(:match)
+          rule_hsh[:match] << rule.sub('match', '').strip
         when 'set'
-          rule_hsh[:set_rules] = [] unless rule_hsh.include?(:set_rules)
-          rule_hsh[:set_rules] << rule.sub('set', '').strip
+          rule_hsh[:set] = [] unless rule_hsh.include?(:set)
+          rule_hsh[:set] << rule.sub('set', '').strip
         when 'continue'
           rule_hsh[:continue] = nil unless rule_hsh.include?(:continue)
           rule_hsh[:continue] = rule.sub('continue', '').strip.to_i
@@ -154,26 +184,19 @@ module Rbeapi
       ##
       # name_commands is utilized by create to prepare the specified
       # routemap.
-      #
-      def name_commands(name, opts)
-        if opts[:enable] == false
-          cmd = "no route-map #{name}"
-        elsif opts[:default] == true
-          cmd = "default route-map #{name}"
+      def name_commands(name, action, seqno, opts = {})
+        if opts
+          if opts[:default] == true
+            cmd = "default route-map #{name}"
+          elsif opts[:enable] == false
+            cmd = "no route-map #{name}"
+          else
+            cmd = "route-map #{name}"
+          end
+          cmd << " #{action}"
+          cmd << " #{seqno}"
         else
           cmd = "route-map #{name}"
-        end
-        if opts[:action]
-          cmd << " #{opts[:action]}"
-        else
-          cmd << ' permit'
-        end
-        if opts[:seqno]
-          cmd << " #{opts[:seqno]}"
-        else
-          # Extract seqno from composite names
-          seqno = name.partition(':').last
-          cmd << " #{seqno}" if seqno
         end
         [cmd]
       end
@@ -188,13 +211,13 @@ module Rbeapi
       #
       # @param [String] :name The name of the routemap to create
       #
+      # @param [String] :action Either permit or deny
+      #
+      # @param [Integer] :seqno The sequence number
+      #
       # @param [hash] :opts Optional keyword arguments
       #
       # @option :opts [Boolean] :default Set routemap to default
-      #
-      # @option :opts [String] :action Either permit or deny
-      #
-      # @option :opts [Integer] :seqno The sequence number
       #
       # @option :opts [String] :description A description for the routemap
       #
@@ -211,18 +234,60 @@ module Rbeapi
       # @option :opts [Boolean] :default Configure the routemap to default.
       #
       # @return [Boolean] returns true if the command completed successfully
-      def create(name, opts = {})
-        cmds = name_commands(name, opts)
-        cmds << "description #{opts[:description]}" if opts[:description]
-        cmds << "continue #{opts[:continue]}" if opts[:continue]
-        Array(opts[:match]).each do |options|
-          cmds << "match #{options}"
-        end
-        Array(opts[:set]).each do |options|
-          cmds << "set #{options}"
+      def create(name, action, seqno, opts = {})
+        if opts.empty?
+          cmds = name_commands(name, action, seqno)
+        else
+          cmds = name_commands(name, action, seqno, opts)
+          if opts[:description]
+            cmds << 'no description'
+            cmds << "description #{opts[:description]}"
+          end
+          if opts[:continue]
+            cmds << 'no continue'
+            cmds << "continue #{opts[:continue]}"
+          end
+          remove_match_statements(name, action, seqno, cmds)
+          Array(opts[:match]).each do |options|
+            cmds << "match #{options}"
+          end
+          remove_set_statements(name, action, seqno, cmds)
+          Array(opts[:set]).each do |options|
+            cmds << "set #{options}"
+          end
         end
         configure(cmds)
       end
+
+      ##
+      # remove_match_statemements removes all match rules for the
+      # specified routemap
+      def remove_match_statements(name, action, seqno, cmds)
+        entries = parse_entries(name)
+        return true unless entries
+        entries.each do |entry|
+          next unless entry[:action] == action && entry[:seqno] == seqno
+          Array(entry[:match]).each do |options|
+            cmds << "no match #{options}"
+          end
+        end
+      end
+      private :remove_match_statements
+
+      ##
+      # remove_set_statemements removes all set rules for the
+      # specified routemap
+      def remove_set_statements(name, action, seqno, cmds)
+        entries = parse_entries(name)
+        return true unless entries
+        entries.each do |entry|
+          next unless entry[:action] == action && entry[:seqno] == seqno
+          Array(entry[:set]).each do |options|
+            cmds << "no set #{options}"
+          end
+        end
+      end
+      private :remove_set_statements
 
       ##
       # delete will delete an existing routemap name from the nodes current
@@ -234,42 +299,34 @@ module Rbeapi
       #
       # @param [String] :name The routemap name to delete from the node.
       #
-      # @param [hash] :opts Optional keyword arguments
-      #
-      # @option :opts [String] :action Either permit or deny
-      #
-      # @option :opts [Integer] :seqno The sequence number
-      #
       # @return [Boolean] returns true if the command completed successfully
-      def delete(name, opts = {})
-        cmds = []
-        cmds << "no route-map #{name}"
-        cmd << " #{opts[:action]}" if opts[:action]
-        cmd << " #{opts[:seqno]}" if opts[:seqno]
-        configure(cmds)
+      def delete(name)
+        configure(["no route-map #{name}"])
       end
 
       ##
-      # default will set the specified routemap to default. If the specified
-      # routemap does not exist it will be created.
+      # This method will attempt to default the routemap from the nodes
+      # operational config. Since routemaps do not exist by default,
+      # the default action is essentially a negation and the result will
+      # be the removal of the routemap clause.
+      # If the routemap does not exist then this
+      # method will not perform any changes but still return True
       #
       # @commands
       #   no route-map <name>
       #
       # @param [String] :name The routemap name to set to default.
       #
-      # @param [hash] :opts Optional keyword arguments
+      # @param [String] :action Either permit or deny
       #
-      # @option :opts [String] :action Either permit or deny
-      #
-      # @option :opts [Integer] :seqno The sequence number
+      # @param [Integer] :seqno The sequence number
       #
       # @return [Boolean] returns true if the command completed successfully
-      def default(name, opts = {})
+      def default(name, action, seqno)
         cmds = []
         cmds << "default route-map #{name}"
-        cmd << " #{opts[:action]}" if opts[:action]
-        cmd << " #{opts[:seqno]}" if opts[:seqno]
+        cmd << " #{action}"
+        cmd << " #{seqno}"
         configure(cmds)
       end
 
@@ -282,49 +339,21 @@ module Rbeapi
       #
       # @param [String] :name The name of the routemap to create
       #
-      # @param [hash] :opts Optional keyword arguments
+      # @param [String] :action Either permit or deny
       #
-      # @option :opts [String] :action Either permit or deny
+      # @param [Integer] :seqno The sequence number
       #
-      # @option :opts [Integer] :seqno The sequence number
-      #
-      # @option :opts [Array] :value The routemap match rules
-      #
-      # @option :opts [Boolean] :enable If false then the command is
-      #   negated. Default is true.
-      #
-      # @option :opts [Boolean] :default Configure the routemap to default.
+      # @param [Array] :value The routemap match rules
       #
       # @return [Boolean] returns true if the command completed successfully
-      def set_match_statements(name, opts = {})
+      def set_match_statements(name, action, seqno, value)
         cmd = "route-map #{name}"
-        cmd << " #{opts[:action]}" if opts[:action]
-        cmd << " #{opts[:seqno]}" if opts[:seqno]
+        cmd << " #{action}"
+        cmd << " #{seqno}"
         cmds = [cmd]
-        Array(opts[:value]).each do |options|
+        remove_match_statements(name, action, seqno, cmds)
+        Array(value).each do |options|
           cmds << "match #{options}"
-        end
-        configure(cmds)
-      end
-
-      ##
-      # remove_match_statements removes the specified match rules from the
-      # specified routemap.
-      #
-      # @commands
-      #   route-map <value> no match <value>
-      #
-      # @param [String] :name The name of the routemap to create
-      #
-      # @param [hash] :opts Optional keyword arguments
-      #
-      # @option :opts [Array] :value The routemap match rules
-      #
-      # @return [Boolean] returns true if the command completed successfully
-      def remove_match_statements(name, opts = {})
-        cmds = ["route-map #{name}"]
-        Array(opts[:value]).each do |options|
-          cmds << "no match #{options}"
         end
         configure(cmds)
       end
@@ -338,44 +367,21 @@ module Rbeapi
       #
       # @param [String] :name The name of the routemap to create
       #
-      # @param [hash] :opts Optional keyword arguments
+      # @param [String] :action Either permit or deny
       #
-      # @option :opts [String] :action Either permit or deny
+      # @param [Integer] :seqno The sequence number
       #
-      # @option :opts [Integer] :seqno The sequence number
-      #
-      # @option :opts [Array] :value The routemap set rules
+      # @param [Array] :value The routemap set rules
       #
       # @return [Boolean] returns true if the command completed successfully
-      def set_set_statements(name, opts = {})
+      def set_set_statements(name, action, seqno, value)
         cmd = "route-map #{name}"
-        cmd << " #{opts[:action]}" if opts[:action]
-        cmd << " #{opts[:seqno]}" if opts[:seqno]
+        cmd << " #{action}"
+        cmd << " #{seqno}"
         cmds = [cmd]
-        Array(opts[:value]).each do |options|
+        remove_set_statements(name, action, seqno, cmds)
+        Array(value).each do |options|
           cmds << "set #{options}"
-        end
-        configure(cmds)
-      end
-
-      ##
-      # remove_set_statements removes the specified set rules from the
-      # specified routemap.
-      #
-      # @commands
-      #   route-map <value> no set <value>
-      #
-      # @param [String] :name The name of the routemap to create
-      #
-      # @param [hash] :opts Optional keyword arguments
-      #
-      # @option :opts [Array] :value The routemap set rules
-      #
-      # @return [Boolean] returns true if the command completed successfully
-      def remove_set_statements(name, opts = {})
-        cmds = ["route-map #{name}"]
-        Array(opts[:value]).each do |options|
-          cmds << "no set #{options}"
         end
         configure(cmds)
       end
@@ -389,39 +395,20 @@ module Rbeapi
       #
       # @param [String] :name The name of the routemap to create
       #
-      # @param [hash] :opts Optional keyword arguments
+      # @param [String] :action Either permit or deny
       #
-      # @option :opts [String] :action Either permit or deny
+      # @param [Integer] :seqno The sequence number
       #
-      # @option :opts [Integer] :seqno The sequence number
-      #
-      # @option :opts [Integer] :value The continue value
+      # @param [Integer] :value The continue value
       #
       # @return [Boolean] returns true if the command completed successfully
-      def set_continue(name, opts = {})
+      def set_continue(name, action, seqno, value)
         cmd = "route-map #{name}"
-        cmd << " #{opts[:action]}" if opts[:action]
-        cmd << " #{opts[:seqno]}" if opts[:seqno]
+        cmd << " #{action}"
+        cmd << " #{seqno}"
         cmds = [cmd]
-        Array(opts[:value]).each do |options|
-          cmds << "continue #{options}"
-        end
-        configure(cmds)
-      end
-
-      ##
-      # remove_continue removes the specified continue rules from the
-      # specified routemap.
-      #
-      # @commands
-      #   route-map <value> no continue
-      #
-      # @param [String] :name The name of the routemap to remove continue from
-      #
-      # @return [Boolean] returns true if the command completed successfully
-      def remove_continue(name)
-        cmds = ["route-map #{name}"]
         cmds << 'no continue'
+        cmds << "continue #{value}"
         configure(cmds)
       end
 
@@ -434,37 +421,20 @@ module Rbeapi
       #
       # @param [String] :name The name of the routemap to create
       #
-      # @param [hash] :opts Optional keyword arguments
+      # @param [String] :action Either permit or deny
       #
-      # @option :opts [String] :action Either permit or deny
+      # @param [Integer] :seqno The sequence number
       #
-      # @option :opts [Integer] :seqno The sequence number
-      #
-      # @option :opts [String] :value The description value
+      # @param [String] :value The description value
       #
       # @return [Boolean] returns true if the command completed successfully
-      def set_description(name, opts = {})
+      def set_description(name, action, seqno, value)
         cmd = "route-map #{name}"
-        cmd << " #{opts[:action]}" if opts[:action]
-        cmd << " #{opts[:seqno]}" if opts[:seqno]
+        cmd << " #{action}"
+        cmd << " #{seqno}"
         cmds = [cmd]
-        cmds << "description #{opts[:value]}" if opts[:value]
-        configure(cmds)
-      end
-
-      ##
-      # remove_description removes the descriptions from the specified routemap.
-      #
-      # @commands
-      #   route-map <value> no description
-      #
-      # @param [String] :name The name of the routemap to remove description
-      #   from
-      #
-      # @return [Boolean] returns true if the command completed successfully
-      def remove_description(name)
-        cmds = ["route-map #{name}"]
         cmds << 'no description'
+        cmds << "description #{value}"
         configure(cmds)
       end
     end
