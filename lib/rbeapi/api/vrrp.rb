@@ -156,7 +156,7 @@ module Rbeapi
         else
           value = match[0][0]
         end
-        { priority: value }
+        { primary_ip: value }
       end
       private :parse_primary_ip
 
@@ -263,7 +263,7 @@ module Rbeapi
         matches = config.scan(/^\s+#{regex} (\d+\.\d+\.\d+\.\d+) secondary$/)
         response = []
         matches.each do |ip|
-          response << ip
+          response << ip[0]
         end
         { secondary_ip: response }
       end
@@ -721,7 +721,7 @@ module Rbeapi
         vrrp = [] if vrrp.nil?
 
         if vrrp.key?(vrid)
-          current_addrs = Set.new vrrp[vrid][:secondary_ips]
+          current_addrs = Set.new vrrp[vrid][:secondary_ip]
         else
           current_addrs = Set.new []
         end
@@ -983,10 +983,11 @@ module Rbeapi
       def build_tracks_cmd(name, vrid, tracks)
         # Validate the track hash
         valid_keys = [:name, :action, :amount]
+        # rubocop:disable Style/Next
         tracks.each do |track|
           track.keys do |key|
             unless valid_keys.include?(key)
-              fail ArgumentError, '#{key} invalid in track hash'
+              fail ArgumentError, 'Key: #{key} invalid in track hash'
             end
           end
           unless track.key?(:name) && track.key?(:action)
@@ -998,8 +999,11 @@ module Rbeapi
           if track.key?(:amount) && track[:action] != 'decrement'
             fail ArgumentError, "Action must be 'decrement' to set amount"
           end
-          if track.key?(:amount) && track[:amount] < 0
-            fail ArgumentError, 'Amount must be greater than zero'
+          if track.key?(:amount)
+            track[:amount] = track[:amount].to_i
+            if track[:amount] < 0
+              fail ArgumentError, 'Amount must be greater than zero'
+            end
           end
         end
 

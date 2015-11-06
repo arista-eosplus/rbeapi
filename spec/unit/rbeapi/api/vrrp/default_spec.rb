@@ -42,17 +42,18 @@ describe Rbeapi::Api::Vrrp do
 
   describe '#get' do
     let(:entity) do
-      { 30 => { delay_reload: 0, description: 'The description',
-                enable: true, ip_version: 2, mac_addr_adv_interval: 30,
-                preempt: false, preempt_delay_min: 0, preempt_delay_reload: 0,
-                priority: 100, secondary_ip: [], timers_advertise: 1,
+      { 30 => { primary_ip: '40.10.5.31', delay_reload: 0,
+                description: 'The description', enable: true, ip_version: 2,
+                mac_addr_adv_interval: 30, preempt: false, preempt_delay_min: 0,
+                preempt_delay_reload: 0, priority: 100, secondary_ip: [],
+                timers_advertise: 1,
                 track: [
                   { name: 'Ethernet1', action: 'decrement', amount: 5 }
                 ]
         },
-        40 => { delay_reload: 0, description: nil, enable: true,
-                ip_version: 2, mac_addr_adv_interval: 30, preempt: false,
-                preempt_delay_min: 0, preempt_delay_reload: 0,
+        40 => { primary_ip: '40.10.5.32', delay_reload: 0, description: nil,
+                enable: true, ip_version: 2, mac_addr_adv_interval: 30,
+                preempt: false, preempt_delay_min: 0, preempt_delay_reload: 0,
                 priority: 200, secondary_ip: [], timers_advertise: 1,
                 track: @tracks
         }
