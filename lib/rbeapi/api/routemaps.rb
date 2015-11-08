@@ -223,19 +223,15 @@ module Rbeapi
       ##
       # name_commands is utilized to initially prepare the routemap
       def name_commands(name, action, seqno, opts = {})
-        if opts
-          if opts[:default] == true
-            cmd = "default route-map #{name}"
-          elsif opts[:enable] == false
-            cmd = "no route-map #{name}"
-          else
-            cmd = "route-map #{name}"
-          end
-          cmd << " #{action}"
-          cmd << " #{seqno}"
+        if opts[:default] == true
+          cmd = "default route-map #{name}"
+        elsif opts[:enable] == false
+          cmd = "no route-map #{name}"
         else
-          cmd = "route-map #{name} #{action} #{seqno}"
+          cmd = "route-map #{name}"
         end
+        cmd << " #{action}"
+        cmd << " #{seqno}"
         [cmd]
       end
       private :name_commands

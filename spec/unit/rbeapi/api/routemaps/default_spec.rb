@@ -151,6 +151,16 @@ describe Rbeapi::Api::Routemaps do
       expect(subject.create('test4', 'permit', 20)).to be_truthy
     end
 
+    it 'create a new routemap test4 permit 20 with enable false' do
+      expect(node).to receive(:config).with(['no route-map test4 permit 20'])
+      expect(subject.create('test4', 'permit', 20, enable: false)).to be_truthy
+    end
+
+    it 'create a new routemap test4 permit 20 with enable true' do
+      expect(node).to receive(:config).with(['route-map test4 permit 20'])
+      expect(subject.create('test4', 'permit', 20, enable: true)).to be_truthy
+    end
+
     it 'add description to routemap test1 permit 10 with create' do
       expect(node).to receive(:config)
         .with(['route-map test1 permit 10', 'no description',
@@ -250,6 +260,14 @@ describe Rbeapi::Api::Routemaps do
     it 'delete non existent routemap' do
       expect(node).to receive(:config).with(['no route-map blah deny 30'])
       expect(subject.delete('blah', 'deny', 30)).to be_truthy
+    end
+  end
+
+  describe '#default' do
+    it 'default test1 permit 10 routemap resource' do
+      expect(node).to receive(:config)
+        .with(['default route-map test1 permit 10'])
+      expect(subject.default('test1', 'permit', 10)).to be_truthy
     end
   end
 
