@@ -49,22 +49,34 @@ module Rbeapi
       #
       # @example
       #   {
-      #     [{
-      #       action: <string>,
-      #       seqno: <integer>,
-      #       match: <array>,
-      #       set: <array>,
-      #       continue: <integer>,
-      #       description: <string>
+      #     <action>: {
+      #       <seqno>: {
+      #         match: <array>,
+      #         set: <array>,
+      #         continue: <integer>,
+      #         description: <string>
+      #       },
+      #       <seqno>: {
+      #         match: <array>,
+      #         set: <array>,
+      #         continue: <integer>,
+      #         description: <string>
+      #       }
       #     },
-      #     {
-      #       action: <string>,
-      #       seqno: <integer>,
-      #       match: <array>,
-      #       set: <array>,
-      #       continue: <integer>,
-      #       description: <string>
-      #     }]
+      #     <action>: {
+      #       <seqno>: {
+      #         match: <array>,
+      #         set: <array>,
+      #         continue: <integer>,
+      #         description: <string>
+      #       },
+      #       <seqno>: {
+      #         match: <array>,
+      #         set: <array>,
+      #         continue: <integer>,
+      #         description: <string>
+      #       }
+      #     }
       #   }
       #
       # @param [String] name The routemap name to return a resource for from the
@@ -84,73 +96,98 @@ module Rbeapi
       #
       # @example
       #   {
-      #     <test>:
-      #     [{
-      #       action: <string>,
-      #       seqno: <integer>,
-      #       match: <array>,
-      #       set: <array>,
-      #       continue: <integer>,
-      #       description: <string>
+      #     <name>: {
+      #       <action>: {
+      #         <seqno>: {
+      #           match: <array>,
+      #           set: <array>,
+      #           continue: <integer>,
+      #           description: <string>
+      #         },
+      #         <seqno>: {
+      #           match: <array>,
+      #           set: <array>,
+      #           continue: <integer>,
+      #           description: <string>
+      #         }
+      #       },
+      #       <action>: {
+      #         <seqno>: {
+      #           match: <array>,
+      #           set: <array>,
+      #           continue: <integer>,
+      #           description: <string>
+      #         },
+      #         <seqno>: {
+      #           match: <array>,
+      #           set: <array>,
+      #           continue: <integer>,
+      #           description: <string>
+      #         }
+      #       }
       #     },
-      #     {
-      #       action: <string>,
-      #       seqno: <integer>,
-      #       match: <array>,
-      #       set: <array>,
-      #       continue: <integer>,
-      #       description: <string>
-      #     }],
-      #     <test1>:
-      #     [{
-      #       action: <string>,
-      #       seqno: <integer>,
-      #       match: <array>,
-      #       set: <array>,
-      #       continue: <integer>,
-      #       description: <string>
-      #     }],
-      #     ....
+      #     <name>: {
+      #       <action>: {
+      #         <seqno>: {
+      #           match: <array>,
+      #           set: <array>,
+      #           continue: <integer>,
+      #           description: <string>
+      #         },
+      #         <seqno>: {
+      #           match: <array>,
+      #           set: <array>,
+      #           continue: <integer>,
+      #           description: <string>
+      #         }
+      #       },
+      #       <action>: {
+      #         <seqno>: {
+      #           match: <array>,
+      #           set: <array>,
+      #           continue: <integer>,
+      #           description: <string>
+      #         },
+      #         <seqno>: {
+      #           match: <array>,
+      #           set: <array>,
+      #           continue: <integer>,
+      #           description: <string>
+      #         }
+      #       }
+      #     }
       #   }
       #
-      # @return [Hash<Symbol, Object>] returns a hash that represents the
+      # @return [nil, Hash<Symbol, Object>] returns a hash that represents the
       #   entire routemap collection from the nodes running configuration.  If
-      #   there are no routemap names configured, this method will return an
-      #   empty hash.
+      #   there are no routemap names configured, this method will return nil.
       def getall
         routemaps = config.scan(/(?<=^route-map\s)[^\s]+/)
-        return nil unless routemaps
-        response = {}
-        routemaps.each do |name|
+        return nil if routemaps.empty?
+        routemaps.each_with_object({}) do |name, response|
           response[name] = parse_entries(name)
         end
-        response
       end
 
       ##
       # parse entries is a private method to get the routemap rules.
       #
-      # @return [Hash<Symbol, Object>] returns a hash that represents the
+      # @return [nil, Hash<Symbol, Object>] returns a hash that represents the
       #   rules for routemaps from the nodes running configuration.  If
-      #   there are no routemaps configured, this method will return an empty
-      #   hash.
+      #   there are no routemaps configured, this method will return nil.
       #
       def parse_entries(name)
         entries = config.scan(/^route-map\s#{name}\s.+$/)
-        response = {}
-        response[:entries] = []
-        entries.each_with_object({}) do |rm|
+        return nil if entries.empty?
+        entries.each_with_object({}) do |rm, response|
           mdata = /^route-map\s(.+)\s(.+)\s(\d+)$/.match(rm)
-          rules = get_block(rm)
-          rule_hsh = { action: mdata[2], seqno: mdata[3].to_i }
-          unless rules.nil?
-            rules.split("\n").each_with_object({}) do |rule|
-              parse_rule(rule, rule_hsh)
-            end
+          rule_hsh = parse_rules(get_block(rm))
+          if response[mdata[2]]
+            response[mdata[2]].merge!(mdata[3].to_i => rule_hsh)
+          else
+            response[mdata[2]] = { mdata[3].to_i => rule_hsh }
           end
-          response[:entries] << rule_hsh
         end
-        response[:entries]
       end
       private :parse_entries
 
@@ -162,28 +199,29 @@ module Rbeapi
       #   there are no routemaps configured, this method will return an empty
       #    hash.
       #
-      def parse_rule(rule, rule_hsh)
-        mdata = /\s{3}(\w+)\s/.match(rule)
-        case mdata.nil? ? nil : mdata[1]
-        when 'match'
-          rule_hsh[:match] = [] unless rule_hsh.include?(:match)
-          rule_hsh[:match] << rule.sub('match', '').strip
-        when 'set'
-          rule_hsh[:set] = [] unless rule_hsh.include?(:set)
-          rule_hsh[:set] << rule.sub('set', '').strip
-        when 'continue'
-          rule_hsh[:continue] = nil unless rule_hsh.include?(:continue)
-          rule_hsh[:continue] = rule.sub('continue', '').strip.to_i
-        when 'description'
-          rule_hsh[:description] = nil unless rule_hsh.include?(:description)
-          rule_hsh[:description] = rule.sub('description', '').strip
+      def parse_rules(rules)
+        rules.split("\n").each_with_object({}) do |rule, rule_hsh|
+          mdata = /\s{3}(\w+)\s/.match(rule)
+          case mdata.nil? ? nil : mdata[1]
+          when 'match'
+            rule_hsh[:match] = [] unless rule_hsh.include?(:match)
+            rule_hsh[:match] << rule.sub('match', '').strip
+          when 'set'
+            rule_hsh[:set] = [] unless rule_hsh.include?(:set)
+            rule_hsh[:set] << rule.sub('set', '').strip
+          when 'continue'
+            rule_hsh[:continue] = nil unless rule_hsh.include?(:continue)
+            rule_hsh[:continue] = rule.sub('continue', '').strip.to_i
+          when 'description'
+            rule_hsh[:description] = nil unless rule_hsh.include?(:description)
+            rule_hsh[:description] = rule.sub('description', '').strip
+          end
         end
       end
-      private :parse_rule
+      private :parse_rules
 
       ##
-      # name_commands is utilized by create to prepare the specified
-      # routemap.
+      # name_commands is utilized to initially prepare the routemap
       def name_commands(name, action, seqno, opts = {})
         if opts
           if opts[:default] == true
@@ -196,7 +234,7 @@ module Rbeapi
           cmd << " #{action}"
           cmd << " #{seqno}"
         else
-          cmd = "route-map #{name}"
+          cmd = "route-map #{name} #{action} #{seqno}"
         end
         [cmd]
       end
@@ -247,13 +285,17 @@ module Rbeapi
             cmds << 'no continue'
             cmds << "continue #{opts[:continue]}"
           end
-          remove_match_statements(name, action, seqno, cmds)
-          Array(opts[:match]).each do |options|
-            cmds << "match #{options}"
+          if opts[:match]
+            remove_match_statements(name, action, seqno, cmds)
+            opts[:match].each do |options|
+              cmds << "match #{options}"
+            end
           end
-          remove_set_statements(name, action, seqno, cmds)
-          Array(opts[:set]).each do |options|
-            cmds << "set #{options}"
+          if opts[:set]
+            remove_set_statements(name, action, seqno, cmds)
+            opts[:set].each do |options|
+              cmds << "set #{options}"
+            end
           end
         end
         configure(cmds)
@@ -264,10 +306,11 @@ module Rbeapi
       # specified routemap
       def remove_match_statements(name, action, seqno, cmds)
         entries = parse_entries(name)
-        return true unless entries
+        return nil unless entries
         entries.each do |entry|
-          next unless entry[:action] == action && entry[:seqno] == seqno
-          Array(entry[:match]).each do |options|
+          next unless entry[0] == action && entry[1].assoc(seqno) && \
+                      entry[1].assoc(seqno)[0] == seqno
+          Array(entry[1].assoc(seqno)[1][:match]).each do |options|
             cmds << "no match #{options}"
           end
         end
@@ -279,10 +322,11 @@ module Rbeapi
       # specified routemap
       def remove_set_statements(name, action, seqno, cmds)
         entries = parse_entries(name)
-        return true unless entries
+        return nil unless entries
         entries.each do |entry|
-          next unless entry[:action] == action && entry[:seqno] == seqno
-          Array(entry[:set]).each do |options|
+          next unless entry[0] == action && entry[1].assoc(seqno) && \
+                      entry[1].assoc(seqno)[0] == seqno
+          Array(entry[1].assoc(seqno)[1][:set]).each do |options|
             cmds << "no set #{options}"
           end
         end
@@ -295,13 +339,17 @@ module Rbeapi
       # routemap name does not exist, this method will succeed.
       #
       # @commands
-      #   no route-map <name>
+      #   no route-map <name> <action> <seqno>
       #
       # @param [String] :name The routemap name to delete from the node.
       #
+      # @param [String] :action Either permit or deny
+      #
+      # @param [Integer] :seqno The sequence number
+      #
       # @return [Boolean] returns true if the command completed successfully
-      def delete(name)
-        configure(["no route-map #{name}"])
+      def delete(name, action, seqno)
+        configure(["no route-map #{name} #{action} #{seqno}"])
       end
 
       ##
@@ -323,11 +371,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def default(name, action, seqno)
-        cmds = []
-        cmds << "default route-map #{name}"
-        cmd << " #{action}"
-        cmd << " #{seqno}"
-        configure(cmds)
+        configure(["default route-map #{name} #{action} #{seqno}"])
       end
 
       ##
@@ -347,10 +391,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_match_statements(name, action, seqno, value)
-        cmd = "route-map #{name}"
-        cmd << " #{action}"
-        cmd << " #{seqno}"
-        cmds = [cmd]
+        cmds = ["route-map #{name} #{action} #{seqno}"]
         remove_match_statements(name, action, seqno, cmds)
         Array(value).each do |options|
           cmds << "match #{options}"
@@ -375,10 +416,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_set_statements(name, action, seqno, value)
-        cmd = "route-map #{name}"
-        cmd << " #{action}"
-        cmd << " #{seqno}"
-        cmds = [cmd]
+        cmds = ["route-map #{name} #{action} #{seqno}"]
         remove_set_statements(name, action, seqno, cmds)
         Array(value).each do |options|
           cmds << "set #{options}"
@@ -403,10 +441,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_continue(name, action, seqno, value)
-        cmd = "route-map #{name}"
-        cmd << " #{action}"
-        cmd << " #{seqno}"
-        cmds = [cmd]
+        cmds = ["route-map #{name} #{action} #{seqno}"]
         cmds << 'no continue'
         cmds << "continue #{value}"
         configure(cmds)
@@ -429,10 +464,7 @@ module Rbeapi
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_description(name, action, seqno, value)
-        cmd = "route-map #{name}"
-        cmd << " #{action}"
-        cmd << " #{seqno}"
-        cmds = [cmd]
+        cmds = ["route-map #{name} #{action} #{seqno}"]
         cmds << 'no description'
         cmds << "description #{value}"
         configure(cmds)
