@@ -91,7 +91,7 @@ describe Rbeapi::Api::Routemaps do
     end
 
     it 'has a key for description' do
-      expect(subject.getall.count).to eq(3)
+      expect(subject.getall.count).to eq(2)
     end
 
     it 'returns the routemap collection' do
