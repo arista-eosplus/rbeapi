@@ -38,10 +38,7 @@ describe Rbeapi::Api::Interfaces do
   end
 
   describe '#create' do
-    before(:each) do
-      node.config('no interface Vxlan 1')
-      node.refresh
-    end
+    before { node.config('no interface Vxlan1') }
 
     it 'creates a new interface resource' do
       expect(subject.get('Vxlan1')).to be_nil
