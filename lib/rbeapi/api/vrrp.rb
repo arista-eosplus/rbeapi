@@ -152,7 +152,7 @@ module Rbeapi
       def parse_primary_ip(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} ip (\d+\.\d+\.\d+\.\d+)$/)
         if match.empty?
-          fail RuntimeError, 'Did not get a default value for primary_ip'
+          fail 'Did not get a default value for primary_ip'
         else
           value = match[0][0]
         end
@@ -174,7 +174,7 @@ module Rbeapi
       def parse_priority(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} priority (\d+)$/)
         if match.empty?
-          fail RuntimeError, 'Did not get a default value for priority'
+          fail 'Did not get a default value for priority'
         else
           value = match[0][0].to_i
         end
@@ -196,7 +196,7 @@ module Rbeapi
       def parse_timers_advertise(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} timers advertise (\d+)$/)
         if match.empty?
-          fail RuntimeError, 'Did not get a default value for timers advertise'
+          fail 'Did not get a default value for timers advertise'
         else
           value = match[0][0].to_i
         end
@@ -333,7 +333,7 @@ module Rbeapi
       def parse_ip_version(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} ip version (\d+)$/)
         if match.empty?
-          fail RuntimeError, 'Did not get a default value for ip version'
+          fail 'Did not get a default value for ip version'
         else
           value = match[0][0].to_i
         end
@@ -357,8 +357,8 @@ module Rbeapi
         regex = "vrrp #{vrid} mac-address advertisement-interval"
         match = config.scan(/^\s+#{regex} (\d+)$/)
         if match.empty?
-          fail RuntimeError, 'Did not get a default value for mac address ' \
-                              'advertisement interval'
+          fail 'Did not get a default value for mac address ' \
+               'advertisement interval'
         else
           value = match[0][0].to_i
         end
@@ -380,8 +380,7 @@ module Rbeapi
       def parse_preempt_delay_min(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} preempt delay minimum (\d+)$/)
         if match.empty?
-          fail RuntimeError, 'Did not get a default value for preempt ' \
-                              'delay minimum'
+          fail 'Did not get a default value for preempt delay minimum'
         else
           value = match[0][0].to_i
         end
@@ -403,8 +402,7 @@ module Rbeapi
       def parse_preempt_delay_reload(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} preempt delay reload (\d+)$/)
         if match.empty?
-          fail RuntimeError, 'Did not get a default value for preempt ' \
-                              'delay reload'
+          fail 'Did not get a default value for preempt delay reload'
         else
           value = match[0][0].to_i
         end
@@ -426,7 +424,7 @@ module Rbeapi
       def parse_delay_reload(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} delay reload (\d+)$/)
         if match.empty?
-          fail RuntimeError, 'Did not get a default value for delay reload'
+          fail 'Did not get a default value for delay reload'
         else
           value = match[0][0].to_i
         end
