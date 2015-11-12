@@ -54,12 +54,18 @@ module Rbeapi
       def get
         response = {}
         response.merge!(parse_hostname(config))
+        response.merge!(parse_iprouting(config))
         response
       end
 
       def parse_hostname(config)
         mdata = /(?<=^hostname\s)(.+)$/.match(config)
         { hostname: mdata.nil? ? '' : mdata[1] }
+      end
+
+      def parse_iprouting(config)
+        mdata = /no\sip\srouting/.match(config)
+        { iprouting: mdata.nil? ? true : false }
       end
 
       ##
@@ -74,6 +80,21 @@ module Rbeapi
       # @return [Boolean] returns true if the command completed successfully
       def set_hostname(opts = {})
         cmd = command_builder('hostname', opts)
+        configure(cmd)
+      end
+
+      ##
+      # Configures the state of global ip routing
+      #
+      # @param [Hash] opts The configuration parameters
+      # @option :opts [Boolean] :enable True if ip routing should be enabled
+      #  or False if ip routing should be disabled. Default is true.
+      # @option opts [Boolean] :default Controls the use of the default
+      #  keyword. Default is false.
+      #
+      # @return [Boolean] returns true if the command completed successfully
+      def set_iprouting(opts = {})
+        cmd = command_builder('ip routing', opts)
         configure(cmd)
       end
     end
