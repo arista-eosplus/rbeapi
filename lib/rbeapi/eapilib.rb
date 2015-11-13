@@ -301,7 +301,7 @@ module Rbeapi
       #   adds the list of commands to the exception message
       def execute(commands, opts = {})
         @error = nil
-        request = request(commands,  opts)
+        request = request(commands, opts)
         response = send(request, opts)
         return response['result']
       rescue ConnectionError, CommandError => exc

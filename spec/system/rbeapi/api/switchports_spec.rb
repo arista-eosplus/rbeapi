@@ -112,7 +112,7 @@ describe Rbeapi::Api::Switchports do
   end
 
   describe '#set_access_vlan' do
-    before { node.config(['default interface Ethernet1', 'vlan 100'])  }
+    before { node.config(['default interface Ethernet1', 'vlan 100']) }
 
     it 'sets the access vlan value to 100' do
       expect(subject.get('Ethernet1')[:access_vlan]).to eq('1')
