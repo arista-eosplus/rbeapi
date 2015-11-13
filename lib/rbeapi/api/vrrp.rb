@@ -152,11 +152,11 @@ module Rbeapi
       def parse_primary_ip(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} ip (\d+\.\d+\.\d+\.\d+)$/)
         if match.empty?
-          value = nil
+          fail 'Did not get a default value for primary_ip'
         else
           value = match[0][0]
         end
-        { priority: value }
+        { primary_ip: value }
       end
       private :parse_primary_ip
 
@@ -174,7 +174,7 @@ module Rbeapi
       def parse_priority(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} priority (\d+)$/)
         if match.empty?
-          value = nil
+          fail 'Did not get a default value for priority'
         else
           value = match[0][0].to_i
         end
@@ -196,7 +196,7 @@ module Rbeapi
       def parse_timers_advertise(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} timers advertise (\d+)$/)
         if match.empty?
-          value = nil
+          fail 'Did not get a default value for timers advertise'
         else
           value = match[0][0].to_i
         end
@@ -218,9 +218,9 @@ module Rbeapi
       def parse_preempt(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} preempt$/)
         if match.empty?
-          value = nil
+          value = false
         else
-          value = match[0][0].to_i
+          value = true
         end
         { preempt: value }
       end
@@ -263,7 +263,7 @@ module Rbeapi
         matches = config.scan(/^\s+#{regex} (\d+\.\d+\.\d+\.\d+) secondary$/)
         response = []
         matches.each do |ip|
-          response << ip
+          response << ip[0]
         end
         { secondary_ip: response }
       end
@@ -333,7 +333,7 @@ module Rbeapi
       def parse_ip_version(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} ip version (\d+)$/)
         if match.empty?
-          value = nil
+          fail 'Did not get a default value for ip version'
         else
           value = match[0][0].to_i
         end
@@ -357,7 +357,8 @@ module Rbeapi
         regex = "vrrp #{vrid} mac-address advertisement-interval"
         match = config.scan(/^\s+#{regex} (\d+)$/)
         if match.empty?
-          value = nil
+          fail 'Did not get a default value for mac address ' \
+               'advertisement interval'
         else
           value = match[0][0].to_i
         end
@@ -379,7 +380,7 @@ module Rbeapi
       def parse_preempt_delay_min(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} preempt delay minimum (\d+)$/)
         if match.empty?
-          value = nil
+          fail 'Did not get a default value for preempt delay minimum'
         else
           value = match[0][0].to_i
         end
@@ -401,7 +402,7 @@ module Rbeapi
       def parse_preempt_delay_reload(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} preempt delay reload (\d+)$/)
         if match.empty?
-          value = nil
+          fail 'Did not get a default value for preempt delay reload'
         else
           value = match[0][0].to_i
         end
@@ -423,7 +424,7 @@ module Rbeapi
       def parse_delay_reload(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} delay reload (\d+)$/)
         if match.empty?
-          value = nil
+          fail 'Did not get a default value for delay reload'
         else
           value = match[0][0].to_i
         end
@@ -721,7 +722,7 @@ module Rbeapi
         vrrp = [] if vrrp.nil?
 
         if vrrp.key?(vrid)
-          current_addrs = Set.new vrrp[vrid][:secondary_ips]
+          current_addrs = Set.new vrrp[vrid][:secondary_ip]
         else
           current_addrs = Set.new []
         end
@@ -973,12 +974,40 @@ module Rbeapi
       #
       # @param [Array<Hash>] :tracks Array of a hash of track information.
       #   Hash format: { name: 'Eth2', action: 'decrement', amount: 33 },
-      #   An empty array will remove all tracks set for
-      #   the virtual router on the specified layer 3 interface.
+      #   The name and action key are required. The amount key should only
+      #   be specified if the action is shutdown. The valid actions are
+      #   'decrement' and 'shutdown'.  An empty array will remove all tracks
+      #   set for the virtual router on the specified layer 3 interface.
       #
       # @return [Array<String>] Returns the array of commands. The
       #   array could be empty.
       def build_tracks_cmd(name, vrid, tracks)
+        # Validate the track hash
+        valid_keys = [:name, :action, :amount]
+        # rubocop:disable Style/Next
+        tracks.each do |track|
+          track.keys do |key|
+            unless valid_keys.include?(key)
+              fail ArgumentError, 'Key: #{key} invalid in track hash'
+            end
+          end
+          unless track.key?(:name) && track.key?(:action)
+            fail ArgumentError, 'Must specify :name and :action in track hash'
+          end
+          unless track[:action] == 'decrement' || track[:action] == 'shutdown'
+            fail ArgumentError, "Action must be 'decrement' or 'shutdown'"
+          end
+          if track.key?(:amount) && track[:action] != 'decrement'
+            fail ArgumentError, "Action must be 'decrement' to set amount"
+          end
+          if track.key?(:amount)
+            track[:amount] = track[:amount].to_i
+            if track[:amount] < 0
+              fail ArgumentError, 'Amount must be greater than zero'
+            end
+          end
+        end
+
         tracks = Set.new tracks
 
         # Get the current tracks set for the virtual router

@@ -160,7 +160,7 @@ interface Vlan150
    vrrp 30 ip 40.10.5.31
    vrrp 30 ipv6 ::
    vrrp 30 description The description
-   no vrrp 30 shutdown
+   vrrp 30 shutdown
    vrrp 30 track Ethernet1 decrement 5
    no vrrp 30 bfd ip
    no vrrp 30 bfd ipv6
@@ -168,7 +168,7 @@ interface Vlan150
    vrrp 40 priority 200
    vrrp 40 timers advertise 1
    vrrp 40 mac-address advertisement-interval 30
-   no vrrp 40 preempt
+   vrrp 40 preempt
    vrrp 40 preempt delay minimum 0
    vrrp 40 preempt delay reload 0
    vrrp 40 delay reload 0
