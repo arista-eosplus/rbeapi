@@ -6,7 +6,7 @@ gem 'net_http_unix'
 gem 'netaddr'
 
 group :development do
-  gem 'rubocop', '0.35.1'
+  gem 'rubocop', '>=0.35.1'
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'
