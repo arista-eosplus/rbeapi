@@ -148,7 +148,7 @@ module Rbeapi
       # @return [Array<Hash<Symbol,Object>>] Array of resource hashes
       def parse_servers
         tuples = config.scan(SERVER_REGEXP)
-        tuples.map do |(host, vrf,  authp, acctp, tout, tries, keyfm, key)|
+        tuples.map do |(host, vrf, authp, acctp, tout, tries, keyfm, key)|
           hsh = {}
           hsh[:hostname]         = host
           hsh[:vrf]              = vrf

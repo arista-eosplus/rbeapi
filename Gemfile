@@ -6,6 +6,7 @@ gem 'net_http_unix'
 gem 'netaddr'
 
 group :development do
+  gem 'rubocop', '>=0.35.1'
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'
@@ -13,6 +14,7 @@ group :development do
 end
 
 group :development, :test do
+  gem 'listen', '<=3.0.3'
   gem 'rake', '~> 10.1.0'
   gem 'rspec', '~> 3.0.0'
   gem 'rspec-mocks', '~> 3.0.0'

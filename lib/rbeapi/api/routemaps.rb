@@ -43,6 +43,8 @@ module Rbeapi
     # the basis of such criteria as route metrics, access control lists, next
     # hop addresses, and route tags.
     #
+    # rubocop:disable Metrics/ClassLength
+    #
     class Routemaps < Entity
       ##
       # get returns a hash of routemap configurations for the given name
@@ -238,6 +240,8 @@ module Rbeapi
 
       ##
       # create will create a new routemap with the specified name.
+      #
+      # rubocop:disable Metrics/MethodLength
       #
       # @commands
       #   route-map <name> action <value> seqno <value> description <value>

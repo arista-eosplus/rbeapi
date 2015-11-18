@@ -44,7 +44,7 @@ describe Rbeapi::Api::Dns do
   end
 
   describe '#set_name_servers' do
-    let(:servers) {  %w(1.2.3.4 5.6.7.8 9.10.11.12) }
+    let(:servers) { %w(1.2.3.4 5.6.7.8 9.10.11.12) }
 
     before { node.config('no ip name-server') }
 
@@ -94,7 +94,7 @@ describe Rbeapi::Api::Dns do
   end
 
   describe '#set_domain_list' do
-    let(:servers) {  %w(foo bar baz) }
+    let(:servers) { %w(foo bar baz) }
 
     before do
       node.config(['no ip domain-list foo',
