@@ -214,8 +214,10 @@ and uploaded to [RubyGems](https://rubygems.org/).
   by the build.  NOTE: 
   [PuppetLabs](https://puppetlabs.com/misc/pe-files) provides a puppet agent SWIX which includes Ruby 1.9.3 in
   /opt/puppet/bin/ which is different from where you might otherwise install
-  Ruby.  If you have installed the puppet-enterprise SWIX, then you should
-  build and use the ``pe-rbeapi`` swix, below.   Otherwise, if you have installed
+  Ruby.  If you have installed the puppet-enterprise 3.x SWIX, then you should
+  build and use the ``rbeapi-puppet3`` swix, below.   If you have installed
+  the puppet-enterprise 2015.x SWIX, then you should build and use the
+  ``rbeapi-puppet-aio`` swix, below.  Otherwise, if you have installed at least
   Ruby 1.9.3 in the standard system location, then the ``rbeapi`` SWIX may be
   used.
 
@@ -223,20 +225,29 @@ and uploaded to [RubyGems](https://rubygems.org/).
   $ bundle install --path .bundle/gems/
   $ bundle exec rake all_rpms
   ...
-  RPMs are available in rpms/noarch/
-  Copy the RPMs to an EOS device then run the 'swix create' command.
-    Examples:
-        Puppet Open Source:
-             cd /mnt/flash; swix create rbeapi-0.3.0-1.swix \
-             rubygem-rbeapi-0.3.0-1.eos4.noarch.rpm \
-             rubygem-inifile-3.0.0-2.eos4.noarch.rpm \
-             rubygem-netaddr-1.5.0-1.eos4.noarch.rpm \
-             rubygem-net_http_unix-0.2.1-2.eos4.noarch.rpm
-        Puppet-enterprise:
-             cd/mnt/flash; swix create pe-rbeapi-0.3.0-1.swix \
-             pe-rubygem-rbeapi-0.3.0-1.eos4.noarch.rpm \
-             pe-rubygem-inifile-3.0.0-2.eos4.noarch.rpm \
-             pe-rubygem-netaddr-1.5.0-1.eos4.noarch.rpm
+RPMs are available in rpms/noarch/
+Copy the RPMs to an EOS device then run the 'swix create' command.
+  Examples: 
+    Puppet Open Source: 
+      cd /mnt/flash; \
+      swix create rbeapi-0.4.0-1.swix \
+      rubygem-rbeapi-0.4.0-1.eos4.noarch.rpm \
+      rubygem-inifile-3.0.0-3.eos4.noarch.rpm \
+      rubygem-netaddr-1.5.0-2.eos4.noarch.rpm \
+      rubygem-net_http_unix-0.2.1-3.eos4.noarch.rpm
+    Puppet-enterprise agent (3.x): 
+      cd/mnt/flash; \
+      swix create rbeapi-puppet3-0.4.0-1.swix \
+      rubygem-rbeapi-puppet3-0.4.0-1.eos4.noarch.rpm \
+      rubygem-inifile-puppet3-3.0.0-3.eos4.noarch.rpm \
+      rubygem-netaddr-puppet3-1.5.0-2.eos4.noarch.rpm
+    Puppet-All-in-one agent (2015.x/4.x): 
+      cd/mnt/flash; \
+      swix create rbeapi-puppet-aio-0.4.0-1.swix \
+      rubygem-rbeapi-puppet-aio-0.4.0-1.eos4.noarch.rpm \
+      rubygem-inifile-puppet-aio-3.0.0-3.eos4.noarch.rpm \
+      rubygem-netaddr-puppet-aio-1.5.0-2.eos4.noarch.rpm \
+      rubygem-net_http_unix-puppet-aio-0.2.1-3.eos4.noarch.rpm
   ```
 
   On EOS:
@@ -244,13 +255,13 @@ and uploaded to [RubyGems](https://rubygems.org/).
   Arista# copy <URI-to-RPMs> flash:
   Arista# bash
   -bash-4.1# cd /mnt/flash/
-  -bash-4.1# swix create pe-rbeapi-0.3.0-1.swix \
-             pe-rubygem-rbeapi-0.1.0-1.eos4.noarch.rpm \
-             pe-rubygem-inifile-3.0.0-1.eos4.noarch.rpm \
-             pe-rubygem-netaddr-1.5.0-1.eos4.noarch.rpm
+  -bash-4.1# swix create rbeapi-puppet3-0.4.0-1.swix \
+             rubygem-rbeapi-puppet3-0.4.0-1.eos4.noarch.rpm \
+             rubygem-inifile-puppet3-3.0.0-1.eos4.noarch.rpm \
+             rubygem-netaddr-puppet3-1.5.0-1.eos4.noarch.rpm
   -bash-4.1# exit
-  Arista# copy flash:pe-rbeapi-0.3.0-1.swix extension:
-  Arista# extension pe-rbeapi-0.3.0-1.swix
+  Arista# copy flash:rbeapi-puppet3-0.4.0-1.swix extension:
+  Arista# extension rbeapi-puppet3-0.4.0-1.swix
   Arista# copy installed-extensions boot-extensions
   ```
 
@@ -258,8 +269,8 @@ and uploaded to [RubyGems](https://rubygems.org/).
 
   On EOS:
   ```
-  Arista# no extension pe-rbeapi-0.2.0-1.swix
-  Arista# extension pe-rbeapi-0.3.0-1.swix
+  Arista# no extension pe-rbeapi-0.3.0-1.swix
+  Arista# extension rbeapi-puppet3-0.4.0-1.swix
   Arista# copy installed-extensions boot-extensions
   ```
 
