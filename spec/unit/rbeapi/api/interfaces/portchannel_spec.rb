@@ -22,7 +22,7 @@ describe Rbeapi::Api::PortchannelInterface do
   describe '#get' do
     before :each do
       allow(subject.node).to receive(:enable)
-        .with(include('show port-channel'), format: 'text')
+        .with(include('show port-channel'), encoding: 'text')
         .and_return([{ result:
                        { 'output' => "Port Channel Port-Channel1:\n  Active " \
                                      'Ports: Ethernet1 PeerEthernet1 ' \

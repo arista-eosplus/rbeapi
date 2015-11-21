@@ -155,7 +155,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_shutdown(config)
         value = /no shutdown/ =~ config
-        { shutdown: value.nil?  }
+        { shutdown: value.nil? }
       end
       private :parse_shutdown
 
@@ -640,7 +640,7 @@ module Rbeapi
       def parse_members(name)
         grpid = name.scan(/(?<=Port-Channel)\d+/)[0]
         command = "show port-channel #{grpid} all-ports"
-        config = node.enable(command, format: 'text')
+        config = node.enable(command, encoding: 'text')
         values = config.first[:result]['output'].scan(/\bEthernet[^\s]+/)
         { members: values }
       end
@@ -664,7 +664,7 @@ module Rbeapi
         return { lacp_mode: DEFAULT_LACP_MODE } unless members
         config = get_block("interface #{members.first}")
         mdata = /channel-group \d+ mode (\w+)/.match(config)
-        { lacp_mode: mdata ? mdata[1] : DEFAULT_LACP_MODE  }
+        { lacp_mode: mdata ? mdata[1] : DEFAULT_LACP_MODE }
       end
       private :parse_lacp_mode
 
@@ -911,8 +911,7 @@ module Rbeapi
       # @param [Hash] :opts optional keyword arguments
       #
       # @option :opts [String] :value Specifies the value to configure for
-      #   the port-channel lacp fallback timeout.  Valid values range from
-      #   1 to 100 seconds
+      #   the port-channel lacp fallback timeout.
       #
       # @option :opts [Boolean] :enable If false then the command is
       #   negated. Default is true.

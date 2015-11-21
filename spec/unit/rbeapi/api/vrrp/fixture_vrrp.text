@@ -1,0 +1,186 @@
+interface Vlan100
+   no description
+   no shutdown
+   default load-interval
+   mtu 1500
+   logging event link-status use-global
+   autostate
+   no private-vlan mapping
+   snmp trap link-status
+   no ip proxy-arp
+   no ip local-proxy-arp
+   ip address 10.10.4.2/24
+   no ip verify unicast
+   default arp timeout 14400
+   default ipv6 nd cache expire 14400
+   bfd interval 300 min_rx 300 multiplier 3
+   no bfd echo
+   default ip dhcp smart-relay
+   no ip helper-address
+   no ipv6 dhcp relay destination
+   ip dhcp relay information option circuit-id Vlan100
+   no ip igmp
+   ip igmp version 3
+   ip igmp last-member-query-count 2
+   ip igmp last-member-query-interval 10
+   ip igmp query-max-response-time 100
+   ip igmp query-interval 125
+   ip igmp startup-query-count 2
+   ip igmp startup-query-interval 310
+   ip igmp router-alert optional connected
+   ip igmp host-proxy
+   no ip igmp host-proxy report-interval
+   ip igmp host-proxy version 3
+   no ip igmp host-proxy
+   no ipv6 enable
+   no ipv6 address
+   no ipv6 verify unicast
+   no ipv6 nd ra suppress
+   ipv6 nd ra interval msec 200000
+   ipv6 nd ra lifetime 1800
+   no ipv6 nd ra mtu suppress
+   no ipv6 nd managed-config-flag
+   no ipv6 nd other-config-flag
+   ipv6 nd reachable-time 0
+   ipv6 nd router-preference medium
+   ipv6 nd ra dns-servers lifetime 300
+   ipv6 nd ra dns-suffixes lifetime 300
+   ipv6 nd ra hop-limit 64
+   ip mfib fastdrop
+   default ntp serve
+   no ip pim sparse-mode
+   no ip pim border-router
+   ip pim query-interval 30
+   ip pim join-prune-interval 60
+   ip pim dr-priority 1
+   no ip pim neighbor-filter
+   default ip pim bfd-instance
+   no ip pim bsr-border
+   no ip virtual address
+   vrrp 10 priority 100
+   vrrp 10 timers advertise 1
+   vrrp 10 mac-address advertisement-interval 30
+   no vrrp 10 preempt
+   vrrp 10 preempt delay minimum 0
+   vrrp 10 preempt delay reload 0
+   vrrp 10 delay reload 0
+   no vrrp 10 authentication
+   vrrp 10 ip 10.10.4.10
+   vrrp 10 ip 1.2.3.4 secondary
+   vrrp 10 ip 10.10.4.4 secondary
+   vrrp 10 ipv6 ::
+   no vrrp 10 description
+   no vrrp 10 shutdown
+   no vrrp 10 bfd ip
+   no vrrp 10 bfd ipv6
+   vrrp 10 ip version 2
+   vrrp 20 priority 200
+   vrrp 20 timers advertise 1
+   vrrp 20 mac-address advertisement-interval 30
+   no vrrp 20 preempt
+   vrrp 20 preempt delay minimum 0
+   vrrp 20 preempt delay reload 0
+   vrrp 20 delay reload 0
+   no vrrp 20 authentication
+   vrrp 20 ip 10.10.4.20
+   vrrp 20 ipv6 ::
+   no vrrp 20 description
+   no vrrp 20 shutdown
+   no vrrp 20 bfd ip
+   no vrrp 20 bfd ipv6
+   vrrp 20 ip version 2
+!
+interface Vlan150
+   no description
+   no shutdown
+   default load-interval
+   mtu 1500
+   logging event link-status use-global
+   autostate
+   no private-vlan mapping
+   snmp trap link-status
+   no ip proxy-arp
+   no ip local-proxy-arp
+   ip address 40.10.5.8/24
+   no ip verify unicast
+   default arp timeout 14400
+   default ipv6 nd cache expire 14400
+   bfd interval 300 min_rx 300 multiplier 3
+   no bfd echo
+   default ip dhcp smart-relay
+   no ip helper-address
+   no ipv6 dhcp relay destination
+   ip dhcp relay information option circuit-id Vlan150
+   no ip igmp
+   ip igmp version 3
+   ip igmp last-member-query-count 2
+   ip igmp last-member-query-interval 10
+   ip igmp query-max-response-time 100
+   ip igmp query-interval 125
+   ip igmp startup-query-count 2
+   ip igmp startup-query-interval 310
+   ip igmp router-alert optional connected
+   ip igmp host-proxy
+   no ip igmp host-proxy report-interval
+   ip igmp host-proxy version 3
+   no ip igmp host-proxy
+   no ipv6 enable
+   no ipv6 address
+   no ipv6 verify unicast
+   no ipv6 nd ra suppress
+   ipv6 nd ra interval msec 200000
+   ipv6 nd ra lifetime 1800
+   no ipv6 nd ra mtu suppress
+   no ipv6 nd managed-config-flag
+   no ipv6 nd other-config-flag
+   ipv6 nd reachable-time 0
+   ipv6 nd router-preference medium
+   ipv6 nd ra dns-servers lifetime 300
+   ipv6 nd ra dns-suffixes lifetime 300
+   ipv6 nd ra hop-limit 64
+   ip mfib fastdrop
+   default ntp serve
+   no ip pim sparse-mode
+   no ip pim border-router
+   ip pim query-interval 30
+   ip pim join-prune-interval 60
+   ip pim dr-priority 1
+   no ip pim neighbor-filter
+   default ip pim bfd-instance
+   no ip pim bsr-border
+   no ip virtual address
+   vrrp 30 priority 100
+   vrrp 30 timers advertise 1
+   vrrp 30 mac-address advertisement-interval 30
+   no vrrp 30 preempt
+   vrrp 30 preempt delay minimum 0
+   vrrp 30 preempt delay reload 0
+   vrrp 30 delay reload 0
+   no vrrp 30 authentication
+   vrrp 30 ip 40.10.5.31
+   vrrp 30 ipv6 ::
+   vrrp 30 description The description
+   vrrp 30 shutdown
+   vrrp 30 track Ethernet1 decrement 5
+   no vrrp 30 bfd ip
+   no vrrp 30 bfd ipv6
+   vrrp 30 ip version 2
+   vrrp 40 priority 200
+   vrrp 40 timers advertise 1
+   vrrp 40 mac-address advertisement-interval 30
+   vrrp 40 preempt
+   vrrp 40 preempt delay minimum 0
+   vrrp 40 preempt delay reload 0
+   vrrp 40 delay reload 0
+   no vrrp 40 authentication
+   vrrp 40 ip 40.10.5.32
+   vrrp 40 ipv6 ::
+   no vrrp 40 description
+   no vrrp 40 shutdown
+   vrrp 40 track Ethernet3 decrement 33
+   vrrp 40 track Ethernet2 decrement 22
+   vrrp 40 track Ethernet2 shutdown
+   no vrrp 40 bfd ip
+   no vrrp 40 bfd ipv6
+   vrrp 40 ip version 2
+!

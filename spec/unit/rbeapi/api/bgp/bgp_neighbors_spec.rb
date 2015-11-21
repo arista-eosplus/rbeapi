@@ -44,6 +44,8 @@ describe Rbeapi::Api::BgpNeighbors do
     { bgp_as: '64600',
       router_id: '192.168.254.1',
       shutdown: false,
+      maximum_paths: 32,
+      maximum_ecmp_paths: 32,
       networks: [
         { prefix: '192.168.254.1', masklen: 32, route_map: nil },
         { prefix: '192.168.254.2', masklen: 32, route_map: 'rmap' },

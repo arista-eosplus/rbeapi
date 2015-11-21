@@ -1,6 +1,22 @@
 Ruby Client for eAPI
 ====================
 
+## v0.4.0, November, 2015
+
+- New users API
+- New routemap API
+- New vrrp API
+- BGP API: Add support for maximum_paths and maximum_ecmp_paths
+- System API: add support for managing the global EOS ‘ip routing’ setting
+- Updated RPM/SWIX packaging to handle Puppet All-In-One (AIO) agent paths
+  New package names are: rbeapi, rbeapi-puppet3 (formerly pe-puppet),
+  and rbeapi-puppet-aio
+- Fixed port-channel get_members() issue with EOS 4.15 and above.
+- Fixed issue with the eapi.conf wildcard connection
+- Fixed issue that would cause a traceback when searching for eapi.conf if
+  $HOME was not set
+
+
 ## v0.3.0, August, 2015
 
 - API Change: Eliminated overloading the value option in command_builder. When

@@ -1,0 +1,27 @@
+route-map test1 permit 10
+   description description
+   match interface Loopback0
+   match ip address prefix-list MYLOOPBACK
+   continue 99
+   set community internet 5555:5555
+!
+route-map test permit 10
+   description description
+   match interface Vlan100
+   continue 99
+!
+route-map test permit 20
+   description description
+   continue 99
+   set community internet 5555:5555
+!
+route-map test deny 10
+   description description
+   match interface Vlan100
+   continue 99
+!
+route-map test deny 20
+   description description
+   continue 99
+   set community internet 5555:5555
+!  
