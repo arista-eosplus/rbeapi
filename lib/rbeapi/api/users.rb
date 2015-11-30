@@ -94,7 +94,7 @@ module Rbeapi
                               (username\s+#{name}\s+
                                sshkey\s+(?<sshkey>.*)$)?/x)
         user = config.scan(user_re)
-        return nil unless user
+        return nil unless user && user[0]
         parse_user_entry(user[0])
       end
 
