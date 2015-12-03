@@ -53,6 +53,11 @@ describe Rbeapi::Api::Users do
   end
 
   let(:secret) do
+    '$6$RMxgK5ALGIf.nWEC$tHuKCyfNtJMCY561P52dTzHUmYMmLxb/M' \
+    'xik.j3vMUs8lMCPocM00/NAS.SN6GCWx7d/vQIgxnClyQLAb7n3x0'
+  end
+
+  let(:md5_secret) do
     '$1$Ehb5lL0D$N3MgrkfMFxmeh0FSZ5sEZ1'
   end
 
@@ -62,7 +67,7 @@ describe Rbeapi::Api::Users do
       role: nil,
       nopassword: false,
       encryption: 'md5',
-      secret: secret,
+      secret: md5_secret,
       sshkey: sshkey
     }
   end
@@ -76,7 +81,7 @@ describe Rbeapi::Api::Users do
                      encryption: nil, secret: nil, sshkey: nil },
         'rbeapi' => { name: 'rbeapi', privilege: 1, role: nil,
                       nopassword: false, encryption: 'md5',
-                      secret: secret,
+                      secret: md5_secret,
                       sshkey: sshkey }
       }
     end
@@ -85,7 +90,7 @@ describe Rbeapi::Api::Users do
       node.config(['no username rbeapi',
                    'no username user1',
                    'username admin privilege 1 role network-admin nopassword',
-                   "username rbeapi privilege 1 secret 5 #{secret}",
+                   "username rbeapi privilege 1 secret 5 #{md5_secret}",
                    "username rbeapi sshkey #{sshkey}"])
     end
 
@@ -184,17 +189,18 @@ describe Rbeapi::Api::Users do
     it 'create a new user name with a password and sha512 encryption' do
       expect(subject.get('rbeapi')).to eq(nil)
       expect(subject.create('rbeapi',
-                            secret: '$6$somesalt$rkDq7Az4Efjo',
+                            secret: secret,
                             encryption: 'sha512')).to be_truthy
-      expect(subject.get('rbeapi')).to eq(nil)
+      expect(subject.get('rbeapi')[:encryption]).to eq('sha512')
     end
 
     it 'create a new user name with a password, sha512 encryption, and key' do
       expect(subject.get('rbeapi')).to eq(nil)
       expect(subject.create('rbeapi',
-                            secret: '$6$somesalt$rkDq7Az4Efjo',
+                            secret: secret,
                             encryption: 'sha512',
                             sshkey: sshkey)).to be_truthy
+      expect(subject.get('rbeapi')[:encryption]).to eq('sha512')
     end
 
     it 'raises ArgumentError for create without required args ' do
