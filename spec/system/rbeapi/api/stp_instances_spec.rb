@@ -65,5 +65,25 @@ describe Rbeapi::Api::StpInstances do
       expect(subject.set_priority('1', value: '4096')).to be_truthy
       expect(subject.get('1')[:priority]).to eq('4096')
     end
+
+    it 'set the instance priority to default' do
+      expect(subject.set_priority('1', value: '4096',
+                                       default: true)).to be_truthy
+      expect(subject.get('1')[:priority]).to eq('32768')
+    end
+
+    it 'set the instance priority to enable false' do
+      expect(subject.set_priority('1', value: '4096',
+                                       default: false,
+                                       enable: false)).to be_truthy
+      expect(subject.get('1')[:priority]).to eq('32768')
+    end
+
+    it 'set the instance priority to enable true' do
+      expect(subject.set_priority('1', value: '4096',
+                                       default: false,
+                                       enable: true)).to be_truthy
+      expect(subject.get('1')[:priority]).to eq('4096')
+    end
   end
 end
