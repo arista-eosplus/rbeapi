@@ -11,15 +11,56 @@ describe Rbeapi::Api::Interfaces do
     Rbeapi::Client.connect_to('dut')
   end
 
+  describe '#respond_to?' do
+    it 'test to validate endpoint' do
+      expect(subject.respond_to?('get', 'Ethernet1')).to be_truthy
+    end
+  end
+
   describe '#get' do
-    let(:entity) do
-      { name: 'Loopback0', type: 'generic', description: '', shutdown: false }
+    context 'with interface Loopback' do
+      let(:entity) do
+        { name: 'Loopback0', type: 'generic', description: '', shutdown: false }
+      end
+
+      before { node.config(['no interface Loopback0', 'interface Loopback0']) }
+
+      it 'returns the interface resource' do
+        expect(subject.get('Loopback0')).to eq(entity)
+      end
     end
 
-    before { node.config(['no interface Loopback0', 'interface Loopback0']) }
+    context 'with interface Port-Channel' do
+      let(:entity) do
+        { name: 'Port-Channel1', type: 'portchannel', description: '',
+          shutdown: false, members: [], lacp_mode: 'on', minimum_links: '0',
+          lacp_fallback: 'disabled', lacp_timeout: '90' }
+      end
 
-    it 'returns the interface resource' do
-      expect(subject.get('Loopback0')).to eq(entity)
+      before do
+        node.config(['no interface Loopback0', 'no interface Port-Channel1',
+                     'interface Port-Channel1'])
+      end
+
+      it 'returns the interface resource' do
+        expect(subject.get('Port-Channel1')).to eq(entity)
+      end
+    end
+
+    context 'with interface Vxlan' do
+      let(:entity) do
+        { name: 'Vxlan1', type: 'vxlan', description: '',
+          shutdown: false, source_interface: '', multicast_group: '',
+          udp_port: 4789, flood_list: [], vlans: {} }
+      end
+
+      before do
+        node.config(['no interface Vxlan1', 'interface Vxlan1'])
+      end
+
+      it 'returns the interface resource' do
+        expect(subject.get('Vxlan1')).to eq(entity)
+      end
     end
   end
 

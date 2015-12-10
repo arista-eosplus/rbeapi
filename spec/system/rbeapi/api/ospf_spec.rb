@@ -15,12 +15,13 @@ describe Rbeapi::Api::Ospf do
                    'router ospf 1',
                    'router-id 1.1.1.1',
                    'redistribute static route-map word',
-                   'network 192.168.10.10/24 area 0.0.0.0'])
+                   'network 192.168.10.10/24 area 0.0.0.0',
+                   'network 192.168.11.10/24 area 0.0.0.0'])
     end
 
     let(:entity) do
       { 'router_id' => '1.1.1.1',
-        'areas' => { '0.0.0.0' => ['192.168.10.0/24'] },
+        'areas' => { '0.0.0.0' => ['192.168.10.0/24', '192.168.11.0/24'] },
         'redistribute' => { 'static' => { 'route_map' => 'word' } } }
     end
 

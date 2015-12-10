@@ -1,3 +1,4 @@
+
 require 'spec_helper'
 
 require 'rbeapi/client'
@@ -82,6 +83,19 @@ describe Rbeapi::Api::Interfaces do
       expect(subject.get('Ethernet1')[:shutdown]).to be_truthy
       expect(subject.set_shutdown('Ethernet1', enable: true)).to be_truthy
       expect(subject.get('Ethernet1')[:shutdown]).to be_falsy
+    end
+  end
+
+  describe '#set_speed' do
+    before { node.config(['default interface Ethernet1']) }
+
+    it 'sets default true' do
+      expect(subject.set_speed('Ethernet1', default: true)).to be_truthy
+    end
+
+    it 'sets enable true' do
+      expect(subject.set_speed('Ethernet1', default: false,
+                                            enable: true)).to be_falsy
     end
   end
 
