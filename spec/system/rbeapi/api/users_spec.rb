@@ -101,10 +101,6 @@ describe Rbeapi::Api::Users do
     it 'returns a hash collection' do
       expect(subject.getall).to be_a_kind_of(Hash)
     end
-
-    it 'has two entries' do
-      expect(subject.getall.size).to eq(2)
-    end
   end
 
   describe '#get' do
