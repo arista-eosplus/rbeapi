@@ -18,64 +18,80 @@ describe Rbeapi::Client do
     subject.connect_to('dut')
   end
 
+  let(:dut) do
+    File.read(dut_conf)
+  end
+
+  let(:test) do
+    File.read(test_conf)
+  end
+
+  let(:veos01) do
+    {
+      'username' => 'eapi',
+      'password' => 'password',
+      'transport' => 'http',
+      'host' => 'veos01'
+    }
+  end
+
   # Client class methods
   describe '#connect_to' do
     it 'retrieves the node config' do
-      expect(node).not_to be_nil
+      expect(node).to be_kind_of(Rbeapi::Client::Node)
     end
   end
 
   describe '#config' do
     it 'returns the currently loaded config object' do
-      expect(subject.config.read(dut_conf))
-        .not_to be_nil
-      expect(subject.connect_to('dut')).not_to be_nil
+      expect(subject.config.read(dut_conf)).to eq(transport: 'socket')
+      expect(subject.connect_to('dut')).to be_kind_of(Rbeapi::Client::Node)
     end
   end
 
   describe '#config_for' do
     it 'returns the configuration options for the connection' do
-      expect(subject.config_for('dut')).not_to be_nil
+      expect(subject.config.read(test_conf)).to eq(nil)
+      expect(subject.config_for('veos01')).to eq(veos01)
     end
   end
 
   describe '#load_config' do
     it 'overrides the default conf file loaded in the config' do
-      expect(subject.load_config(test_conf))
-        .to eq(nil)
+      expect(subject.load_config(test_conf)).to eq(nil)
       expect(subject.config_for('dut')).to eq(nil)
-      expect(subject.config_for('veos01'))
-        .to eq('username' => 'eapi',
-               'password' => 'password',
-               'transport' => 'http',
-               'host' => 'veos01')
+      expect(subject.config_for('veos01')).to eq(veos01)
     end
   end
 
   # Config class methods
   describe 'config' do
     it 'gets the loaded configuration file data' do
-      expect(subject.config).not_to be_nil
+      expect(subject.config.to_s).to eq(test)
     end
   end
 
   describe '#read' do
     it 'read the specified filename and load it' do
-      expect(subject.config.read(dut_conf))
-        .to eq(transport: 'socket')
+      expect(subject.load_config(dut_conf)).to eq(transport: 'socket')
+      expect(subject.config.read(test_conf)).to eq(nil)
+      expect(subject.config.to_s).to eq(test)
     end
   end
 
   describe '#get_connection' do
     it 'get connection dut' do
-      expect(subject.config.get_connection('dut')).not_to be_nil
+      expect(subject.config.get_connection('veos01')).to eq(veos01)
     end
   end
 
   describe '#reload' do
     it 'reloads the configuration file' do
-      expect(subject.config.reload(filename: [dut_conf]))
+      expect(subject.load_config(dut_conf))
         .to eq(transport: 'socket')
+      expect(subject.config.reload(filename: [test_conf]))
+        .to eq(nil)
+      expect(subject.config.to_s).to eq(test)
     end
   end
 
@@ -108,7 +124,7 @@ describe Rbeapi::Client do
 
   describe '#enable_authentication' do
     it 'gets the nodes startup-configuration' do
-      expect(node.enable_authentication('password')).to eq('password')
+      expect(node.enable_authentication('newpassword')).to eq('newpassword')
     end
   end
 
@@ -141,7 +157,7 @@ describe Rbeapi::Client do
 
   describe '#api' do
     it 'returns api module' do
-      expect(node.api('vlans')).not_to be_nil
+      expect(node.api('vlans')).to be_kind_of(Rbeapi::Api::Vlans)
     end
   end
 

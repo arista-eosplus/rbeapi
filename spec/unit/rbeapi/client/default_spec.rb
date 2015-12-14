@@ -83,8 +83,7 @@ describe Rbeapi::Client do
     it 'overrides the default conf file loaded in the config' do
       expect(subject.load_config(test_conf)).to eq(nil)
       expect(subject.config_for('dut')).to eq(nil)
-      expect(subject.config_for('veos01'))
-        .to eq(veos01)
+      expect(subject.config_for('veos01')).to eq(veos01)
     end
   end
 
@@ -98,7 +97,9 @@ describe Rbeapi::Client do
 
   describe '#read' do
     it 'read the specified filename and load it' do
+      expect(subject.load_config(dut_conf)).to eq(transport: 'socket')
       expect(subject.config.read(test_conf)).to eq(nil)
+      expect(subject.config.to_s).to eq(test)
     end
   end
 
@@ -114,6 +115,7 @@ describe Rbeapi::Client do
       expect(subject.config.reload(filename: [dut_conf]))
         .to eq(transport: 'socket')
       expect(subject.config.get_connection('veos01')).to eq(nil)
+      expect(subject.config.get_connection('dut')).not_to be_nil
     end
   end
 
