@@ -184,9 +184,22 @@ describe Rbeapi::Client do
 
   describe '#enable' do
     it 'puts the switch into privilege mode' do
+      expect(node).to receive(:enable).with('show hostname')
+      expect(node.enable('show hostname')).to eq(nil)
+    end
+
+    it 'puts the switch into privilege mode with encoding' do
       expect(node).to receive(:enable).with('show hostname', encoding: 'text')
-      expect(node.enable('show hostname', encoding: 'text'))
-        .to eq(nil)
+      expect(node.enable('show hostname', encoding: 'text')).to eq(nil)
+    end
+
+    it 'puts the switch into privilege mode with read and open timeout' do
+      expect(node).to receive(:enable).with('show hostname',
+                                            read_timeout: 29,
+                                            open_timeout: 29)
+      expect(node.enable('show hostname',
+                         read_timeout: 29,
+                         open_timeout: 29)).to eq(nil)
     end
   end
 
