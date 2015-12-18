@@ -65,6 +65,19 @@ describe Rbeapi::Client do
     }
   end
 
+  let(:veos05) do
+    {
+      'host' => '172.16.131.40',
+      'username' => 'admin',
+      'password' => 'admin',
+      'enablepwd' => 'password',
+      'transport' => 'https',
+      'port' => 1234,
+      'open_timeout' => 12,
+      'read_timeout' => 12
+    }
+  end
+
   # Client class methods
   describe '#config_for' do
     it 'returns the configuration options for the connection' do
@@ -106,6 +119,10 @@ describe Rbeapi::Client do
   describe '#get_connection' do
     it 'get connection dut' do
       expect(subject.config.get_connection('veos01')).to eq(veos01)
+    end
+
+    it 'get connection veos05' do
+      expect(subject.config.get_connection('veos05')).to eq(veos05)
     end
   end
 
