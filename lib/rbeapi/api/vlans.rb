@@ -35,7 +35,7 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Api is module namesapce for working with the EOS command API
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Vlan class provides a class implementation for working with the

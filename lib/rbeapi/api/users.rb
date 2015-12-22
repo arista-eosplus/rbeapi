@@ -35,7 +35,7 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Api is module namesapce for working with the EOS command API
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Users class provides configuration of local user resources for

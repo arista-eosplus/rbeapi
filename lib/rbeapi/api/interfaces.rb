@@ -36,7 +36,7 @@ require 'rbeapi/utils'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Api module namespace
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Interfaces class manages all physical and logical interfaces on an
