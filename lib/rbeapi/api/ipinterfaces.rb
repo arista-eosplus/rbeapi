@@ -35,7 +35,7 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Rbeapi::Api
+  # Api is module namespace for working with the EOS command API
   module Api
     #
     # The Ipinterface class provides an instance for managing logical

@@ -34,7 +34,7 @@
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Rbeapi::Api
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Stp class provides a base class instance for working with

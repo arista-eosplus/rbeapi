@@ -35,7 +35,7 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Api is module namespace for working with eAPI abstractions
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Snmp class provides a class implementation for working with the

@@ -33,7 +33,7 @@ require 'netaddr'
 require 'rbeapi/api'
 
 ##
-# Eos is the toplevel namespace for working with Arista EOS nodes
+# Rbeapi toplevel namespace
 module Rbeapi
   ##
   # Api is module namespace for working with the EOS command API

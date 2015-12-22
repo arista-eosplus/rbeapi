@@ -35,7 +35,7 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Rbeapi::Api
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Varp class provides an instance for working with the global
