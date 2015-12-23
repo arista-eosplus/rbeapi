@@ -69,6 +69,7 @@ module Rbeapi
         response.merge!(parse_access_vlan(config))
         response.merge!(parse_trunk_native_vlan(config))
         response.merge!(parse_trunk_allowed_vlans(config))
+        response.merge!(parse_trunk_groups(config))
         response
       end
 
@@ -76,16 +77,19 @@ module Rbeapi
         mdata = /(?<=\s{3}switchport\smode\s)(.+)$/.match(config)
         { mode: mdata[1] }
       end
+      private :parse_mode
 
       def parse_access_vlan(config)
         mdata = /(?<=access\svlan\s)(.+)$/.match(config)
         { access_vlan: mdata[1] }
       end
+      private :parse_access_vlan
 
       def parse_trunk_native_vlan(config)
         mdata = /(?<=trunk\snative\svlan\s)(.+)$/.match(config)
         { trunk_native_vlan: mdata[1] }
       end
+      private :parse_trunk_native_vlan
 
       def parse_trunk_allowed_vlans(config)
         mdata = /(?<=trunk\sallowed\svlan\s)(.+)$/.match(config)
@@ -101,6 +105,14 @@ module Rbeapi
         end
         { trunk_allowed_vlans: values }
       end
+      private :parse_trunk_allowed_vlans
+
+      def parse_trunk_groups(config)
+        mdata = config.scan(/(?<=trunk\sgroup\s)(.+)$/)
+        mdata = mdata.flatten if mdata.length > 0
+        { trunk_groups: mdata }
+      end
+      private :parse_trunk_groups
 
       ##
       # Retrieves all switchport interfaces from the running-config
@@ -247,6 +259,50 @@ module Rbeapi
       def set_access_vlan(name, opts = {})
         cmd = command_builder('switchport access vlan', opts)
         configure_interface(name, cmd)
+      end
+
+      ##
+      # Configures the trunk group vlans for the specified interface.
+      # Trunk groups not currently set are added and trunk groups
+      # currently configured but not in the passed in value array are removed.
+      #
+      # @param [String] name The name of the interface to configure
+      # @param [Hash] opts The configuration parameters for the interface
+      # @option opts [string] :value Set of values to configure the trunk group
+      # @option opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      # @option opts [Boolean] :default The value should be set to default
+      #   Default takes precedence over enable.
+      #
+      # @return [Boolean] True if the commands succeed otherwise False
+      def set_trunk_groups(name, opts = {})
+        default = opts.fetch(:default, false)
+        if default
+          return configure_interface(name, 'default switchport trunk group')
+        end
+
+        enable = opts.fetch(:enable, true)
+        unless enable
+          return configure_interface(name, 'no switchport trunk group')
+        end
+
+        value = opts.fetch(:value, [])
+        fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+
+        value = Set.new value
+        current_value = Set.new get(name)[:trunk_groups]
+
+        cmds = []
+        # Add trunk groups that are not currently in the list
+        value.difference(current_value).each do |group|
+          cmds << "switchport trunk group #{group}"
+        end
+
+        # Remove trunk groups that are not in the new list
+        current_value.difference(value).each do |group|
+          cmds << "no switchport trunk group #{group}"
+        end
+        configure_interface(name, cmds) if cmds.length > 0
       end
     end
   end
