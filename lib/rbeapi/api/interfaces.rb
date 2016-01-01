@@ -773,24 +773,41 @@ module Rbeapi
       # @param [Array] :members The array of physical interface members to add
       #   to the port-channel logical interface.
       #
+      # @param [str] :mode The LACP mode to configure the member interfaces to.
+      #   Valid values are 'on, 'passive', 'active'. When there are
+      #   existing channel-group members and their lacp mode differs
+      #   from this attribute, all of those members will be removed and
+      #   then re-added using the specified lacp mode. If this attribute
+      #   is omitted, the existing lacp mode will be used for new
+      #   member additions.
+      #
       # @return [Boolean] returns true if the command completed successfully
-      def set_members(name, members)
+      def set_members(name, members, mode = nil)
         current_members = Set.new parse_members(name)[:members]
         members = Set.new members
 
+        lacp_mode = parse_lacp_mode(name)[:lacp_mode]
+        if mode && mode != lacp_mode
+          lacp_mode = mode
+          set_lacp_mode(name, lacp_mode)
+        end
+
+        cmds = []
+        grpid = /(\d+)/.match(name)[0]
+
         # remove members from the current port-channel interface
         current_members.difference(members).each do |intf|
-          result = remove_member(name, intf)
-          return false unless result
+          cmds << "interface #{intf}"
+          cmds << "no channel-group #{grpid}"
         end
 
         # add new member interfaces to the port-channel
         members.difference(current_members).each do |intf|
-          result = add_member(name, intf)
-          return false unless result
+          cmds << "interface #{intf}"
+          cmds << "channel-group #{grpid} mode #{lacp_mode}"
         end
 
-        true
+        configure(cmds)
       end
 
       ##
