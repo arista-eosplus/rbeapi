@@ -12,8 +12,9 @@ describe Rbeapi::Api::OspfInterfaces do
   describe '#get' do
     before do
       node.config(['default interface Ethernet1', 'interface Ethernet1',
-                   'no switchport', 'ip address 88.99.99.99/24', 'exit',
-                   'default interface Ethernet2'])
+                   'no switchport', 'ip address 88.99.99.99/24',
+                   'ip ospf network point-to-point',
+                   'exit', 'default interface Ethernet2'])
     end
 
     it 'returns an ospf interface resource instance' do

@@ -41,7 +41,6 @@ describe Rbeapi::Api::Interfaces do
     before { node.config('no interface Vxlan1') }
 
     it 'creates a new interface resource' do
-      expect(subject.get('Vxlan1')).to be_nil
       expect(subject.create('Vxlan1')).to be_truthy
       expect(subject.get('Vxlan1')).not_to be_nil
     end

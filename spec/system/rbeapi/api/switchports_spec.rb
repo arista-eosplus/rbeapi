@@ -16,26 +16,40 @@ describe Rbeapi::Api::Switchports do
       [:mode, :access_vlan, :trunk_native_vlan, :trunk_allowed_vlans]
     end
 
-    before do
-      node.config(['default interface Ethernet1', 'interface Ethernet2',
-                   'no switchport'])
+    context 'vlan as an integer range' do
+      before do
+        node.config(['default interface Ethernet1', 'interface Ethernet2',
+                     'no switchport'])
+      end
+
+      it 'returns the switchport resource' do
+        expect(subject.get('Ethernet1')).not_to be_nil
+      end
+
+      it 'does not return a nonswitchport resource' do
+        expect(subject.get('Ethernet2')).to be_nil
+      end
+
+      it 'has all required keys' do
+        expect(subject.get('Ethernet1').keys).to eq(keys)
+      end
+
+      it 'returns allowed_vlans as an array' do
+        expect(subject.get('Ethernet1')[:trunk_allowed_vlans])
+          .to be_a_kind_of(Array)
+      end
     end
 
-    it 'returns the switchport resource' do
-      expect(subject.get('Ethernet1')).not_to be_nil
-    end
+    context 'vlan as an integer' do
+      before do
+        node.config(['default interface Ethernet1',
+                     'interface Ethernet1',
+                     'switchport trunk allowed vlan 1'])
+      end
 
-    it 'does not return a nonswitchport resource' do
-      expect(subject.get('Ethernet2')).to be_nil
-    end
-
-    it 'has all required keys' do
-      expect(subject.get('Ethernet1').keys).to eq(keys)
-    end
-
-    it 'returns allowed_vlans as an array' do
-      expect(subject.get('Ethernet1')[:trunk_allowed_vlans])
-        .to be_a_kind_of(Array)
+      it 'returns the switchport resource' do
+        expect(subject.get('Ethernet1')).not_to be_nil
+      end
     end
   end
 

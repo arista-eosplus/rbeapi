@@ -39,3 +39,6 @@ Gemfile.lock
 rpmbuild
 rpms
 *.spec
+
+# Other
+/spec/fixtures/dut.conf
