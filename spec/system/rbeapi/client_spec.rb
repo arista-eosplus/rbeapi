@@ -35,6 +35,19 @@ describe Rbeapi::Client do
     }
   end
 
+  let(:veos05) do
+    {
+      'host' => '172.16.131.40',
+      'username' => 'admin',
+      'password' => 'admin',
+      'enablepwd' => 'password',
+      'transport' => 'https',
+      'port' => 1234,
+      'open_timeout' => 12,
+      'read_timeout' => 12
+    }
+  end
+
   # Client class methods
   describe '#connect_to' do
     it 'retrieves the node config' do
@@ -50,9 +63,14 @@ describe Rbeapi::Client do
   end
 
   describe '#config_for' do
-    it 'returns the configuration options for the connection' do
+    it 'returns the configuration options for veos01' do
       expect(subject.config.read(test_conf)).to eq(nil)
       expect(subject.config_for('veos01')).to eq(veos01)
+    end
+
+    it 'returns the configuration options for veos05' do
+      expect(subject.config.read(test_conf)).to eq(nil)
+      expect(subject.config_for('veos05')).to eq(veos05)
     end
   end
 
@@ -80,8 +98,12 @@ describe Rbeapi::Client do
   end
 
   describe '#get_connection' do
-    it 'get connection dut' do
+    it 'get connection veos01' do
       expect(subject.config.get_connection('veos01')).to eq(veos01)
+    end
+
+    it 'get connection veos05' do
+      expect(subject.config.get_connection('veos05')).to eq(veos05)
     end
   end
 
@@ -143,15 +165,40 @@ describe Rbeapi::Client do
 
   describe '#enable' do
     it 'puts the switch into privilege mode' do
+      expect(node.enable('show hostname')[0])
+        .to include(:command, :result, :encoding)
+    end
+
+    it 'puts the switch into privilege mode with encoding' do
       expect(node.enable('show hostname', encoding: 'text')[0])
         .to include(:command, :result, :encoding)
+    end
+
+    it 'puts the switch into privilege mode with open and read timeout' do
+      expect(node.enable('show hostname',
+                         open_timeout: 29,
+                         read_timeout: 29)[0]).to include(:command,
+                                                          :result,
+                                                          :encoding)
     end
   end
 
   describe '#run_commands' do
-    it 'send commands to node' do
-      expect(node.run_commands('show hostname', encoding: 'text')[0])
-        .to include('output')
+    it 'sends commands to node' do
+      expect(node.run_commands(['show hostname'])[0])
+        .to include('fqdn', 'hostname')
+    end
+
+    it 'sends commands to node with encoding' do
+      expect(node.run_commands('show hostname', encoding: 'text')[0]['output'])
+        .to include('FQDN', 'Hostname')
+    end
+
+    it 'sends commands with open and read timeout' do
+      expect(node.run_commands('show hostname',
+                               open_timeout: 26,
+                               read_timeout: 26)[0]).to include('fqdn',
+                                                                'hostname')
     end
   end
 

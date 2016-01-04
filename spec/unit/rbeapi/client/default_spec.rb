@@ -65,6 +65,19 @@ describe Rbeapi::Client do
     }
   end
 
+  let(:veos05) do
+    {
+      'host' => '172.16.131.40',
+      'username' => 'admin',
+      'password' => 'admin',
+      'enablepwd' => 'password',
+      'transport' => 'https',
+      'port' => 1234,
+      'open_timeout' => 12,
+      'read_timeout' => 12
+    }
+  end
+
   # Client class methods
   describe '#config_for' do
     it 'returns the configuration options for the connection' do
@@ -106,6 +119,10 @@ describe Rbeapi::Client do
   describe '#get_connection' do
     it 'get connection dut' do
       expect(subject.config.get_connection('veos01')).to eq(veos01)
+    end
+
+    it 'get connection veos05' do
+      expect(subject.config.get_connection('veos05')).to eq(veos05)
     end
   end
 
@@ -184,9 +201,22 @@ describe Rbeapi::Client do
 
   describe '#enable' do
     it 'puts the switch into privilege mode' do
+      expect(node).to receive(:enable).with('show hostname')
+      expect(node.enable('show hostname')).to eq(nil)
+    end
+
+    it 'puts the switch into privilege mode with encoding' do
       expect(node).to receive(:enable).with('show hostname', encoding: 'text')
-      expect(node.enable('show hostname', encoding: 'text'))
-        .to eq(nil)
+      expect(node.enable('show hostname', encoding: 'text')).to eq(nil)
+    end
+
+    it 'puts the switch into privilege mode with read and open timeout' do
+      expect(node).to receive(:enable).with('show hostname',
+                                            read_timeout: 29,
+                                            open_timeout: 29)
+      expect(node.enable('show hostname',
+                         read_timeout: 29,
+                         open_timeout: 29)).to eq(nil)
     end
   end
 
