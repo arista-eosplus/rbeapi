@@ -240,6 +240,19 @@ describe Rbeapi::Client do
         .to be_kind_of(Array)
     end
 
+    describe 'set dry run' do
+      before do
+        # Prevents puts from writing to console
+        allow($stdout).to receive(:puts)
+        node.dry_run = true
+      end
+
+      it 'expects config to do dry run' do
+        expect(node.config(['no ip virtual-router mac-address']))
+          .to eq(nil)
+      end
+    end
+
     it 'returns error if invalid command' do
       expect { node.config(['no ip virtual-router mac-addresses']) }
         .to raise_error Rbeapi::Eapilib::CommandError
@@ -284,6 +297,11 @@ describe Rbeapi::Client do
     it 'send commands to node' do
       expect(node.run_commands('show hostname', encoding: 'text')[0]['output'])
         .to include('Hostname:', 'FQDN:')
+    end
+
+    it 'sends commands with enablepwd set' do
+      expect(node.enable_authentication('icanttellyou')).to eq('icanttellyou')
+      expect(node.run_commands('show hostname')).to be_truthy
     end
 
     it 'expects run_commands to raise a command error' do
