@@ -163,6 +163,14 @@ module Rbeapi
       end
 
       ##
+      # Gets values for open_timeout and read_timeout
+      #
+      # @return [Hash] open_timeout and read_timeout
+      def get_timeouts
+        { open_timeout: @open_timeout, read_timeout: @read_timeout }
+      end
+
+      ##
       # Generates the eAPI JSON request message.
       #
       # @example eAPI Request
