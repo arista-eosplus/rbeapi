@@ -38,8 +38,6 @@ include FixtureHelpers
 describe Rbeapi::Client do
   subject { described_class }
 
-  let(:node) { double('node') }
-
   def dut_conf
     fixture_file('dut.conf')
   end
