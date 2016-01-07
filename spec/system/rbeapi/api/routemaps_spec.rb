@@ -90,7 +90,7 @@ describe Rbeapi::Api::Routemaps do
     end
 
     it 'has at least two entries' do
-      expect(subject.getall.count).to be > 2
+      expect(subject.getall.count).to be >= 2
     end
 
     it 'returns the routemap collection' do
