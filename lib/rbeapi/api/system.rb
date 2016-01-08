@@ -62,11 +62,13 @@ module Rbeapi
         mdata = /(?<=^hostname\s)(.+)$/.match(config)
         { hostname: mdata.nil? ? '' : mdata[1] }
       end
+      private :parse_hostname
 
       def parse_iprouting(config)
         mdata = /no\sip\srouting/.match(config)
         { iprouting: mdata.nil? ? true : false }
       end
+      private :parse_iprouting
 
       ##
       # Configures the system hostname value in the running-config

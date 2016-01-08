@@ -95,6 +95,7 @@ module Rbeapi
         end
         { servers: values }
       end
+      private :parse_servers
 
       ##
       # set_source_interface configures the ntp source value in the nodes
