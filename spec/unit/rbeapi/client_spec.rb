@@ -65,6 +65,34 @@ describe Rbeapi::Client do
     }
   end
 
+  let(:veos05) do
+    {
+      'host' => '172.16.131.40',
+      'username' => 'admin',
+      'password' => 'admin',
+      'enablepwd' => 'password',
+      'transport' => 'https',
+      'port' => 1234,
+      'open_timeout' => 12,
+      'read_timeout' => 12
+    }
+  end
+
+  let(:test_data) do
+    [
+      '[connection:veos01]',
+      '[connection:veos02]',
+      '[connection:veos03',
+      '[connection:veos04]',
+      '[connection:veos05]',
+      '[connection: localhost]',
+      'username',
+      'password',
+      'transport',
+      'host'
+    ]
+  end
+
   # Client class methods
   describe '#config_for' do
     it 'returns the configuration options for the connection' do
@@ -91,7 +119,7 @@ describe Rbeapi::Client do
   describe 'config' do
     it 'gets the loaded configuration file data' do
       expect(subject.load_config(test_conf)).to eq(nil)
-      expect(subject.config.to_s).to eq(test)
+      expect(subject.config.to_s).to include(test_data[0])
     end
   end
 
@@ -99,7 +127,7 @@ describe Rbeapi::Client do
     it 'read the specified filename and load it' do
       expect(subject.load_config(dut_conf)).to eq(transport: 'socket')
       expect(subject.config.read(test_conf)).to eq(nil)
-      expect(subject.config.to_s).to eq(test)
+      expect(subject.config.to_s).to include(test_data[0])
     end
   end
 
@@ -135,97 +163,6 @@ describe Rbeapi::Client do
                password: 'test',
                transport: 'http',
                host: 'test2')
-    end
-  end
-
-  # Node Class Methods
-  describe '#running_config' do
-    it 'gets the nodes running config' do
-      allow(node).to receive(:running_config).and_return(test)
-      expect(node).to receive(:running_config)
-      expect(node.running_config.to_s).to eq(test)
-    end
-  end
-
-  describe '#startup_config' do
-    it 'gets the nodes startup-configuration' do
-      allow(node).to receive(:startup_config).and_return(test)
-      expect(node).to receive(:startup_config)
-      expect(node.startup_config).to eq(test)
-    end
-  end
-
-  describe '#enable_authentication' do
-    it 'gets the nodes startup-configuration' do
-      expect(node).to receive(:enable_authentication).with('newpassword')
-      expect(node.enable_authentication('newpassword')).to eq(nil)
-    end
-  end
-
-  describe '#config' do
-    it 'puts switch into config mode' do
-      expect(node).to receive(:config)
-        .with(['no ip virtual-router mac-address'])
-      expect(node.config(['no ip virtual-router mac-address'])).to eq(nil)
-    end
-
-    it 'puts switch into config mode with options' do
-      expect(node).to receive(:config)
-        .with(['no ip virtual-router mac-address'],
-              encoding: 'json',
-              open_timeout: 27.00,
-              read_timeout: 27.00)
-      expect(node.config(['no ip virtual-router mac-address'],
-                         encoding: 'json',
-                         open_timeout: 27.00,
-                         read_timeout: 27.00)).to eq(nil)
-    end
-  end
-
-  describe '#enable' do
-    it 'puts the switch into privilege mode' do
-      expect(node).to receive(:enable).with('show hostname', encoding: 'text')
-      expect(node.enable('show hostname', encoding: 'text'))
-        .to eq(nil)
-    end
-  end
-
-  describe '#run_commands' do
-    it 'send commands to node' do
-      expect(node).to receive(:run_commands)
-        .with('show hostname', encoding: 'text')
-      expect(node.run_commands('show hostname', encoding: 'text'))
-        .to eq(nil)
-    end
-  end
-
-  describe '#get_config' do
-    it 'will retrieve the specified configuration' do
-      expect(node).to receive(:get_config)
-        .with(config: 'running-config')
-      expect(node.get_config(config: 'running-config'))
-        .to eq(nil)
-    end
-
-    it 'will retrieve the specified configuration with param' do
-      expect(node).to receive(:get_config)
-        .with(config: 'running-config', param: 'all')
-      expect(node.get_config(config: 'running-config', param: 'all'))
-        .to eq(nil)
-    end
-  end
-
-  describe '#api' do
-    it 'returns api module' do
-      expect(node).to receive(:api).with('vlans')
-      expect(node.api('vlans')).to eq(nil)
-    end
-  end
-
-  describe '#refresh' do
-    it 'refreshes configs for next call' do
-      expect(node).to receive(:refresh)
-      expect(node.refresh).to eq(nil)
     end
   end
 end

@@ -91,4 +91,38 @@ describe Rbeapi::Api::VarpInterfaces do
       expect { subject.set_addresses('Vlan100') }.to raise_error ArgumentError
     end
   end
+
+  describe '#add_address' do
+    before do
+      node.config(['ip virtual-router mac-address aabb.ccdd.eeff',
+                   'no interface Vlan99', 'no interface Vlan100',
+                   'default interface Vlan100', 'interface Vlan100',
+                   'ip address 99.99.99.99/24', 'exit'])
+    end
+
+    it 'adds a new address to the list of addresses' do
+      expect(subject.get('Vlan100')[:addresses]).not_to include('99.99.99.98')
+      expect(subject.add_address('Vlan100', '99.99.99.98'))
+        .to be_truthy
+      expect(subject.get('Vlan100')[:addresses]).to include('99.99.99.98')
+    end
+  end
+
+  describe '#remove_address' do
+    before do
+      node.config(['ip virtual-router mac-address aabb.ccdd.eeff',
+                   'no interface Vlan99', 'no interface Vlan100',
+                   'default interface Vlan100', 'interface Vlan100',
+                   'ip address 99.99.99.99/24', 'exit'])
+    end
+
+    it 'removes the address from the list of addresses' do
+      expect(subject.add_address('Vlan100', '99.99.99.98'))
+        .to be_truthy
+      expect(subject.get('Vlan100')[:addresses]).to include('99.99.99.98')
+      expect(subject.remove_address('Vlan100', '99.99.99.98'))
+        .to be_truthy
+      expect(subject.get('Vlan100')[:addresses]).to eq([])
+    end
+  end
 end

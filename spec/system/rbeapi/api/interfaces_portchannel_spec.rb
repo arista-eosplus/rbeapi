@@ -134,6 +134,74 @@ describe Rbeapi::Api::Interfaces do
       expect(subject.get('Port-Channel1')[:members]).to eq(%w(Ethernet1
                                                               Ethernet3))
     end
+
+    it 'updates the member interfaces and mode on existing interface' do
+      node.config(['no interface Port-Channel1', 'interface Ethernet1-2',
+                   'channel-group 1 mode on'])
+      expect(subject.get('Port-Channel1')[:members]).to eq(%w(Ethernet1
+                                                              Ethernet2))
+      expect(subject.get('Port-Channel1')[:lacp_mode]).to eq('on')
+      expect(subject.set_members('Port-Channel1',
+                                 %w(Ethernet1 Ethernet3),
+                                 'active')).to be_truthy
+      expect(subject.get('Port-Channel1')[:members]).to eq(%w(Ethernet1
+                                                              Ethernet3))
+      expect(subject.get('Port-Channel1')[:lacp_mode]).to eq('active')
+    end
+  end
+
+  describe '#add_member' do
+    before do
+      node.config(['no interface Port-Channel1',
+                   'interface Port-Channel1'])
+    end
+
+    it 'adds new members to the port-channel interface' do
+      node.config(['no interface Port-Channel1', 'interface Port-Channel1'])
+      expect(subject.get('Port-Channel1')[:members]).not_to include('Ethernet1')
+      expect(subject.add_member('Port-Channel1', 'Ethernet1')).to be_truthy
+      expect(subject.get('Port-Channel1')[:members]).to eq(['Ethernet1'])
+    end
+
+    it 'updates the member interfaces on existing interface' do
+      node.config(['no interface Port-Channel1', 'interface Ethernet1-2',
+                   'channel-group 1 mode on'])
+      expect(subject.get('Port-Channel1')[:members]).to eq(%w(Ethernet1
+                                                              Ethernet2))
+      expect(subject.add_member('Port-Channel1', 'Ethernet3')).to be_truthy
+      expect(subject.get('Port-Channel1')[:members]).to eq(%w(Ethernet1
+                                                              Ethernet2
+                                                              Ethernet3))
+      expect(subject.get('Port-Channel1')[:lacp_mode]).to eq('on')
+    end
+
+    it 'no update to the member interfaces on existing interface' do
+      node.config(['no interface Port-Channel1', 'interface Ethernet1-2',
+                   'channel-group 1 mode active'])
+      expect(subject.get('Port-Channel1')[:members]).to eq(%w(Ethernet1
+                                                              Ethernet2))
+      expect(subject.add_member('Port-Channel1', 'Ethernet2')).to be_truthy
+      expect(subject.get('Port-Channel1')[:members]).to eq(%w(Ethernet1
+                                                              Ethernet2))
+      expect(subject.get('Port-Channel1')[:lacp_mode]).to eq('active')
+    end
+  end
+
+  describe '#remove_member' do
+    before do
+      node.config(['no interface Port-Channel1',
+                   'interface Port-Channel1'])
+    end
+
+    it 'removes the member interface on existing interface' do
+      node.config(['no interface Port-Channel1', 'interface Ethernet1-2',
+                   'channel-group 1 mode on'])
+      expect(subject.get('Port-Channel1')[:members]).to eq(%w(Ethernet1
+                                                              Ethernet2))
+      expect(subject.remove_member('Port-Channel1', 'Ethernet1')).to be_truthy
+      expect(subject.get('Port-Channel1')[:members]).to eq(['Ethernet2'])
+      expect(subject.get('Port-Channel1')[:lacp_mode]).to eq('on')
+    end
   end
 
   describe '#set_lacp_mode' do
