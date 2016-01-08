@@ -57,6 +57,8 @@ describe Rbeapi::Client do
     File.read(test_conf)
   end
 
+  let(:enablepwd) { 'enable_admin' }
+
   let(:veos01) do
     {
       'username' => 'eapi',
@@ -311,14 +313,22 @@ describe Rbeapi::Client do
                                                                 'hostname')
     end
 
-    it 'sends commands with enablepwd set' do
-      expect(node.enable_authentication('icanttellyou')).to eq('icanttellyou')
-      expect(node.run_commands('show hostname')).to be_truthy
-    end
-
     it 'expects run_commands to raise a command error' do
       expect { node.run_commands('do this thing') }
         .to raise_error Rbeapi::Eapilib::CommandError
+    end
+  end
+
+  describe '#run_commands with enable password' do
+    # Before the tests Set the enable password on the dut
+    before(:each) { node.config(["enable secret 0 #{enablepwd}"]) }
+
+    # After the tests clear the enable password on the dut
+    after(:each) { node.config(['no enable secret']) }
+
+    it 'sends commands with enablepwd set' do
+      expect(node.enable_authentication(enablepwd)).to eq(enablepwd)
+      expect(node.run_commands('show hostname')).to be_truthy
     end
   end
 
