@@ -46,6 +46,14 @@ describe Rbeapi::Client do
     fixture_file('test.conf')
   end
 
+  def empty_conf
+    fixture_file('empty.conf')
+  end
+
+  def yaml_conf
+    fixture_file('eapi.conf.yaml')
+  end
+
   let(:dut) do
     File.read(dut_conf)
   end
@@ -78,21 +86,26 @@ describe Rbeapi::Client do
 
   let(:test_data) do
     [
-      '[connection:veos01]',
-      '[connection:veos02]',
-      '[connection:veos03',
-      '[connection:veos04]',
-      '[connection:veos05]',
-      '[connection: localhost]',
-      'username',
-      'password',
-      'transport',
-      'host'
+      '[connection:veos01]'
     ]
   end
 
+  let(:default_entry) { "[connection:localhost]\ntransport : socket\n" }
+
   # Client class methods
   describe '#config_for' do
+    # Verify that the EAPI_CONF env variable path is used by default
+    # when the Config class is instantiated/reload-ed.
+    it 'env path to config file' do
+      # Store env path for the eapi conf file and reload the class
+      conf = fixture_dir + '/env_path.conf'
+      ENV.store('EAPI_CONF', conf)
+      subject.config.reload
+
+      # Verify env_path.conf file was loaded
+      expect(subject.config.to_s).to include('[connection:env_path]')
+    end
+
     it 'returns the configuration options for the connection' do
       expect(subject.load_config(test_conf)).to eq(nil)
       expect(subject.config_for('veos01')).to eq(veos01)
@@ -119,11 +132,21 @@ describe Rbeapi::Client do
       expect(subject.load_config(test_conf)).to eq(nil)
       expect(subject.config.to_s).to include(test_data[0])
     end
+
+    it 'loading empty config file does not fail' do
+      expect(subject.load_config(empty_conf)).to eq(nil)
+      expect(subject.config.to_s).to eq(default_entry)
+    end
+
+    it 'does not load bad config file data' do
+      expect(subject.load_config(yaml_conf)).to eq(nil)
+      expect(subject.config.to_s).to eq('')
+    end
   end
 
   describe '#read' do
     it 'read the specified filename and load it' do
-      expect(subject.load_config(dut_conf)).to eq(transport: 'socket')
+      expect(subject.load_config(dut_conf)).to eq(nil)
       expect(subject.config.read(test_conf)).to eq(nil)
       expect(subject.config.to_s).to include(test_data[0])
     end
@@ -138,8 +161,7 @@ describe Rbeapi::Client do
   describe '#reload' do
     it 'reloads the configuration file' do
       expect(subject.config.get_connection('veos01')).to eq(veos01)
-      expect(subject.config.reload(filename: [dut_conf]))
-        .to eq(transport: 'socket')
+      expect(subject.config.reload(filename: [dut_conf])).to eq(nil)
       expect(subject.config.get_connection('veos01')).to eq(nil)
       expect(subject.config.get_connection('dut')).not_to be_nil
     end
@@ -152,10 +174,7 @@ describe Rbeapi::Client do
                                            password: 'test',
                                            transport: 'http',
                                            host: 'test2'
-                                          )).to eq(username: 'test2',
-                                                   password: 'test',
-                                                   transport: 'http',
-                                                   host: 'test2')
+                                          )).to eq(nil)
       expect(subject.config.get_connection('test2'))
         .to eq(username: 'test2',
                password: 'test',
