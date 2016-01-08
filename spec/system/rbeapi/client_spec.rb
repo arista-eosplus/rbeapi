@@ -81,16 +81,7 @@ describe Rbeapi::Client do
 
   let(:test_data) do
     [
-      '[connection:veos01]',
-      '[connection:veos02]',
-      '[connection:veos03',
-      '[connection:veos04]',
-      '[connection:veos05]',
-      '[connection: localhost]',
-      'username',
-      'password',
-      'transport',
-      'host'
+      '[connection:veos01]'
     ]
   end
 
@@ -142,7 +133,7 @@ describe Rbeapi::Client do
 
   describe '#read' do
     it 'read the specified filename and load dut' do
-      expect(subject.config.read(dut_conf)).to eq(transport: 'socket')
+      expect(subject.config.read(dut_conf)).to eq(nil)
       expect(subject.config.to_s)
         .to include('host', 'username', 'password', '[connection:dut]')
     end
@@ -166,8 +157,7 @@ describe Rbeapi::Client do
   describe '#reload' do
     it 'reloads the configuration file' do
       expect(subject.config.get_connection('veos01')).to eq(veos01)
-      expect(subject.config.reload(filename: [dut_conf]))
-        .to eq(transport: 'socket')
+      expect(subject.config.reload(filename: [dut_conf])).to eq(nil)
       expect(subject.config.get_connection('veos01')).to eq(nil)
       expect(subject.config.get_connection('dut')).not_to be_nil
     end
@@ -180,10 +170,7 @@ describe Rbeapi::Client do
                                            password: 'test',
                                            transport: 'http',
                                            host: 'test2'
-                                          )).to eq(username: 'test2',
-                                                   password: 'test',
-                                                   transport: 'http',
-                                                   host: 'test2')
+                                          )).to eq(nil)
       expect(subject.config.get_connection('test2'))
         .to eq(username: 'test2',
                password: 'test',
@@ -216,12 +203,6 @@ describe Rbeapi::Client do
 
     it 'expects startup-configuration to be a string' do
       expect(node.startup_config).to be_kind_of(String)
-    end
-  end
-
-  describe '#enable_authentication' do
-    it 'gets the nodes startup-configuration' do
-      expect(node.enable_authentication('newpassword')).to eq('newpassword')
     end
   end
 
@@ -309,11 +290,6 @@ describe Rbeapi::Client do
                                open_timeout: 26,
                                read_timeout: 26)[0]).to include('fqdn',
                                                                 'hostname')
-    end
-
-    it 'sends commands with enablepwd set' do
-      expect(node.enable_authentication('icanttellyou')).to eq('icanttellyou')
-      expect(node.run_commands('show hostname')).to be_truthy
     end
 
     it 'expects run_commands to raise a command error' do
