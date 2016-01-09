@@ -79,7 +79,17 @@ module Rbeapi
       #
       # @example
       #   {
-      #     <name>: {...}
+      #     <name>: {
+      #       address: <string>
+      #       mtu: <string>
+      #       helper_addresses: array<strings>
+      #     },
+      #     <name>: {
+      #       address: <string>
+      #       mtu: <string>
+      #       helper_addresses: array<strings>
+      #     },
+      #     ...
       #   }
       #
       # @see get Ipaddress resource example
@@ -103,6 +113,7 @@ module Rbeapi
       # ipaddress resource hash.
       #
       # @api private
+      #
       # @param [String] :config The IP interface configuration block returned
       #   from the node's running configuration
       #

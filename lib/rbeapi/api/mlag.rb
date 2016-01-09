@@ -50,15 +50,25 @@ module Rbeapi
       # get scans the current nodes configuration and returns the values as
       # a Hash describing the current state.
       #
-      # The resource hash returned contains the following:
-      #   * domain_id: (String) The MLAG domain-id value
-      #   * local_interface: (String) The MLAG local-interface value
-      #   * peer_address: (String) The IP address of the MLAG peer
-      #   * peer_link: (String) The MLAG transit peer-link value
-      #   * shutdown: (Boolean) The administrative staet of the mlag
-      #     configuration
-      #   * interfaces: (Hash) The list of configured MLAG interfaces.  (See
-      #     parse_interfaces for the Hash details)
+      # @example
+      #   {
+      #     global: {
+      #       domain_id: <string>,
+      #       local_interface: <string>,
+      #       peer_address: <string>,
+      #       peer_link: <string>,
+      #       shutdown: <boolean>
+      #     },
+      #     interfaces: {
+      #       <name>: {
+      #         mlag_id: <fixnum>
+      #       },
+      #       <name>: {
+      #         mlag_id: <fixnum>
+      #       },
+      #       ...
+      #     }
+      #   }
       #
       # @see parse_interfaces
       #

@@ -41,6 +41,25 @@ module Rbeapi
     # The Aaa class manages Authorization, Authentication and Accounting (AAA)
     # on an EOS node.
     class Aaa < Entity
+      ##
+      # get returns a hash of all Aaa resources
+      #
+      # @example
+      #   {
+      #     <groups>: {
+      #       <name>: {
+      #         type: <string>,
+      #         servers: <array>
+      #       },
+      #       <name>: {
+      #         type: <string>,
+      #         servers: <array>
+      #       }
+      #     }
+      #   }
+      #
+      # @return [Hash<Symbol, Object>] Returns the Aaa resources as a
+      #   Hash. If no Aaa resources are found, an empty hash is returned.
       def get
         response = {}
         response[:groups] = groups.getall
@@ -80,18 +99,18 @@ module Rbeapi
       # get returns the aaa server group resource hash that describes the
       # current configuration for the specified server group name.
       #
-      # The resource hash returned contains the following:
-      #   * type: (String) The server group type.  Valid values are either
-      #   'tacacs' or 'radius'.
-      #   * servers: (Array) The set of servers associated with the group.
-      #   Servers are returned as either IP address or host name.
+      # @example
+      #   {
+      #     type: <string>,
+      #     servers: <array>
+      #   }
       #
       # @param [String] :name The server group name to return from the nodes
       #   current running configuration.  If the name is not configured a nil
       #   object is returned.
       #
       # @return [nil, Hash<Symbol, Object>] returns the resource hash for the
-      #   specified name.  If the name does not exist, a nil object is returned.
+      #   specified name.  If the name does not exist, a nil object is returned
       def get(name)
         block = get_block("aaa group server ([^\s]+) #{name}")
         return nil unless block
@@ -104,12 +123,17 @@ module Rbeapi
       ##
       # getall returns a aaa server groups hash
       #
-      # The resource hash returned contains the following:
-      #   * name: (String) The server group name.
-      #   * type: (String) The server group type.  Valid values are either
-      #   'tacacs' or 'radius'
-      #   * servers: (Array) The set of servers associated with the group.
-      #   Servers are returned as either IP address or host name
+      # @example
+      # {
+      #   <name>: {
+      #     type: <string>,
+      #     servers: <array>
+      #   },
+      #   <name>: {
+      #     type: <string>,
+      #     servers: <array>
+      #   }
+      # }
       #
       # @return [Hash<Symbol, Object>] returns the resource hashes for
       #   configured aaa groups.  If none exist, a nil object is returned
@@ -174,7 +198,6 @@ module Rbeapi
       # @param [String] :config The aaa server group block configuration for the
       #   group name to parse
       #
-      #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_radius_server(config)
         values = config.scan(RADIUS_GROUP_SERVER).map do |(name, auth, acct)|
@@ -198,7 +221,6 @@ module Rbeapi
       #
       # @param [String] :config The aaa server group block configuration for the
       #   group name to parse
-      #
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_tacacs_server(config)

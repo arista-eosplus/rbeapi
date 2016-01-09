@@ -81,8 +81,8 @@ module Rbeapi
       #     }
       #   }
       #
-      # @param [String] name The routemap name to return a resource for from the
-      #   nodes configuration
+      # @param [String] :name The routemap name to return a resource for from
+      #   the nodes configuration
       #
       # @return [nil, Hash<Symbol, Object>] Returns the routemap resource as a
       #   Hash. If the specified name is not found in the nodes current
@@ -174,10 +174,11 @@ module Rbeapi
       ##
       # parse entries is a private method to get the routemap rules.
       #
+      # @api private
+      #
       # @return [nil, Hash<Symbol, Object>] returns a hash that represents the
       #   rules for routemaps from the nodes running configuration.  If
       #   there are no routemaps configured, this method will return nil.
-      #
       def parse_entries(name)
         entries = config.scan(/^route-map\s#{name}\s.+$/)
         return nil if entries.empty?
@@ -196,11 +197,12 @@ module Rbeapi
       ##
       # parse rule is a private method to parse a rule.
       #
+      # @api private
+      #
       # @return [Hash<Symbol, Object>] returns a hash that represents the
       #   rules for routemaps from the nodes running configuration.  If
       #   there are no routemaps configured, this method will return an empty
       #    hash.
-      #
       def parse_rules(rules)
         rules.split("\n").each_with_object({}) do |rule, rule_hsh|
           mdata = /\s{3}(\w+)\s/.match(rule)

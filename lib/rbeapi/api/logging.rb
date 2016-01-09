@@ -46,7 +46,7 @@ module Rbeapi
       #
       # @example
       #   {
-      #     enable: [true, false]
+      #     enable: [true, false],
       #     hosts: array<strings>
       #   }
       #
@@ -65,6 +65,10 @@ module Rbeapi
       # command is expected to always be in the node's configuration.  This
       # methods return value is intended to be merged into the logging resource
       # hash.
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_enable
         value = /no logging on/ !~ config
         { enable: value }
@@ -76,6 +80,10 @@ module Rbeapi
       # logging hosts are configured, then the value for hosts will be an empty
       # array.  The return value is intended to be merged into the logging
       # resource hash
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_hosts
         hosts = config.scan(/(?<=^logging\shost\s)[^\s]+/)
         { hosts: hosts }

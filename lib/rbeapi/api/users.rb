@@ -76,7 +76,7 @@ module Rbeapi
       #     sshkey: <string>
       #   }
       #
-      # @param [String] name The user name to return a resource for from the
+      # @param [String] :name The user name to return a resource for from the
       #   nodes configuration
       #
       # @return [nil, Hash<Symbol, Object>] Returns the user resource as a
@@ -105,6 +105,15 @@ module Rbeapi
       #
       # @example
       #   [
+      #     <username>: {
+      #       name: <string>,
+      #       privilege: <integer>,
+      #       role: <string>,
+      #       nopassword: <boolean>,
+      #       encryption: <'cleartext', 'md5', 'sha512'>
+      #       secret: <string>,
+      #       sshkey: <string>
+      #     },
       #     <username>: {
       #       name: <string>,
       #       privilege: <integer>,
