@@ -60,17 +60,36 @@ module Rbeapi
         response
       end
 
+      ##
+      # parse_domain_name parses the domain-name from config
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_domain_name
         mdata = /ip domain-name ([\w.]+)/.match(config)
         { domain_name: mdata.nil? ? '' : mdata[1] }
       end
 
+      ##
+      # parse_name_servers parses the name-server values from
+      #   config
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Array>] resource hash attribute
       def parse_name_servers
         servers = config.scan(/(?:ip name-server vrf )(?:\w+)\s(.+)/)
         values = servers.each_with_object([]) { |srv, arry| arry << srv.first }
         { name_servers: values }
       end
 
+      ##
+      # parse_domain_list parses the domain-list from config
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_domain_list
         search = config.scan(/(?<=^ip\sdomain-list\s).+$/)
         { domain_list: search }

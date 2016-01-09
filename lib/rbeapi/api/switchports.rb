@@ -55,7 +55,7 @@ module Rbeapi
       #     "access_vlan": <Integer>
       #   }
       #
-      # @param [String] name The full name of the interface to get.  The
+      # @param [String] :name The full name of the interface to get.  The
       #   interface name must be the full interface (ie Ethernet, not Et)
       #
       # @return [Hash] a hash that includes the switchport properties
@@ -73,24 +73,63 @@ module Rbeapi
         response
       end
 
+      ##
+      # parse_mode parses switchport mode from the provided config
+      #
+      # @api private
+      #
+      # @param [String] :config The configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_mode(config)
         mdata = /(?<=\s{3}switchport\smode\s)(.+)$/.match(config)
         { mode: mdata[1] }
       end
       private :parse_mode
 
+      ##
+      # parse_access_vlan parses access vlan from the provided
+      #   config
+      #
+      # @api private
+      #
+      # @param [String] :config The configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_access_vlan(config)
         mdata = /(?<=access\svlan\s)(.+)$/.match(config)
         { access_vlan: mdata[1] }
       end
       private :parse_access_vlan
 
+      ##
+      # parse_trunk_native_vlan parses trunk native vlan from
+      #   the provided config
+      #
+      # @api private
+      #
+      # @param [String] :config The configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_trunk_native_vlan(config)
         mdata = /(?<=trunk\snative\svlan\s)(.+)$/.match(config)
         { trunk_native_vlan: mdata[1] }
       end
       private :parse_trunk_native_vlan
 
+      ##
+      # parse_trunk_allowed_vlans parses trunk allowed vlan from
+      #   the provided config
+      #
+      # @api private
+      #
+      # @param [String] :config The configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_trunk_allowed_vlans(config)
         mdata = /(?<=trunk\sallowed\svlan\s)(.+)$/.match(config)
         return { trunk_allowed_vlans: [] } unless mdata[1] != 'none'
@@ -107,6 +146,16 @@ module Rbeapi
       end
       private :parse_trunk_allowed_vlans
 
+      ##
+      # parse_trunk_groups parses trunk group values from the
+      #   provided config
+      #
+      # @api private
+      #
+      # @param [String] :config The configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_trunk_groups(config)
         mdata = config.scan(/(?<=trunk\sgroup\s)(.+)$/)
         mdata = mdata.flatten if mdata.length > 0
@@ -116,6 +165,25 @@ module Rbeapi
 
       ##
       # Retrieves all switchport interfaces from the running-config
+      #
+      # @example
+      #   {
+      #     <name>: {
+      #       mode: <string>,
+      #       access_vlan: <string>,
+      #       trunk_native_vlan: <string>,
+      #       trunk_allowed_vlans: <array>,
+      #       trunk_groups: <array>
+      #     },
+      #     <name>: {
+      #       mode: <string>,
+      #       access_vlan: <string>,
+      #       trunk_native_vlan: <string>,
+      #       trunk_allowed_vlans: <array>,
+      #       trunk_groups: <array>
+      #     },
+      #     ...
+      #   }
       #
       # @return [Array] an array of switchport hashes
       def getall

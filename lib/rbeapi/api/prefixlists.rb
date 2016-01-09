@@ -48,16 +48,17 @@ module Rbeapi
       # @example
       #   {
       #     <route>: {
-      #       "next_hop": <string>,
-      #       "name": <string, nil>
+      #       next_hop: <string>,
+      #       name: <string, nil>
       #     }
       #   }
+      #
+      # @param [String] :name The name of the prefix-list to return
       #
       # @returns [Hash<String, String> The method will return all of the
       #   configured static routes on the node as a Ruby hash object.  If
       #   there are no static routes configured, this method will return
       #   an empty hash
-
       def get(name)
         config = get_block("ip prefix-list #{name}")
         return nil unless config
@@ -69,6 +70,21 @@ module Rbeapi
         end
       end
 
+      ##
+      # Returns the static routes configured on the node
+      #
+      # @example
+      #   {
+      #     <route>: {
+      #       next_hop: <string>,
+      #       name: <string, nil>
+      #     }
+      #   }
+      #
+      # @returns [Hash<String, String> The method will return all of the
+      #   configured static routes on the node as a Ruby hash object.  If
+      #   there are no static routes configured, this method will return
+      #   an empty hash
       def getall
         lists = config.scan(/(?<=^ip\sprefix-list\s).+/)
         lists.each_with_object({}) do |name, hsh|

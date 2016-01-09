@@ -50,12 +50,12 @@ module Rbeapi
       #
       # @example
       #   {
-      #     name: <string>
-      #     state: <string>
+      #     name: <string>,
+      #     state: <string>,
       #     trunk_groups: array[<string]
       #   }
       #
-      # @param [String] id The vlan id to return a resource for from the
+      # @param [String] :id The vlan id to return a resource for from the
       #   nodes configuration
       #
       # @return [nil, Hash<Symbol, Object>] Returns the vlan resource as a
@@ -78,7 +78,17 @@ module Rbeapi
       #
       # @example
       #   {
-      #     <vlanid>: {...}
+      #     <vlanid>: {
+      #       name: <string>,
+      #       state: <string>,
+      #       trunk_groups: array[<string]
+      #     },
+      #     <vlanid>: {
+      #       name: <string>,
+      #       state: <string>,
+      #       trunk_groups: array[<string]
+      #     },
+      #     ...
       #   }
       #
       # @see get Vlan resource example

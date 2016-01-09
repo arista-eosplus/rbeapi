@@ -47,10 +47,52 @@ module Rbeapi
         @instances = {}
       end
 
+      ##
+      # get returns a hash of interface configurations for the given name
+      #
+      # @example
+      #   {
+      #     name: <string>,
+      #     type: <string>,
+      #     description: <string>,
+      #     shutdown: <boolean>
+      #   }
+      #
+      # @param [String] :name The interface name to return a resource for from
+      #   the nodes configuration
+      #
+      # @return [nil, Hash<Symbol, Object>] Returns the interface resource as a
+      #   Hash. If the specified name is not found in the nodes current
+      #   configuration a nil object is returned
       def get(name)
         get_instance(name).get(name)
       end
 
+      ##
+      # getall returns a hash of interface configurations
+      #
+      # @example
+      #   {
+      #     <name>: {
+      #       name: <string>,
+      #       type: <string>,
+      #       description: <string>,
+      #       shutdown: <boolean>,
+      #       ...
+      #     },
+      #     <name>: {
+      #       name: <string>,
+      #       type: <string>,
+      #       description: <string>,
+      #       shutdown: <boolean>,
+      #       ...
+      #     },
+      #     ...
+      #   }
+      #
+      # @return [Hash<Symbol, Object>] Returns the interface resources as a
+      #   Hash. If none exist in the nodes current
+      #   configuration an empty hash is returned
       def getall
         interfaces = config.scan(/(?<=^interface\s).+$/)
 
@@ -60,6 +102,13 @@ module Rbeapi
         end
       end
 
+      ##
+      # get_instance returns an interface instance for the given name
+      #
+      # @param [String] :name The interface name to return an instance for
+      #
+      # @return [Object] Returns the interface instance as an
+      #   Object.
       def get_instance(name)
         name = name[0, 2].upcase
         case name
@@ -287,20 +336,18 @@ module Rbeapi
       # get returns the specified Ethernet interface resource hash that
       # represents the interface's current configuration in the node.
       #
-      # The resource hash returned contains the following information:
-      #
-      #   * name (string): the interface name (eg Ethernet1)
-      #   * type (string): will always be 'ethernet'
-      #   * description (string): the interface description value
-      #   * speed (string): the current speed setting for the interface speed
-      #   * forced (boolean): true if auto negotiation is disabled otherwise
-      #     false
-      #   * sflow (boolean): true if sflow is enabled on the interface
-      #     otherwise false
-      #   * flowcontrol_send (string): the interface flowcontrol send value.
-      #     Valid values are 'on' or 'off'
-      #   * flowconrol_receive (string): the interface flowcontrol receive
-      #     value.  Valid values are 'on' or 'off'
+      # @example
+      #   {
+      #     name: <string>,
+      #     type: <string>,
+      #     description: <string>,
+      #     shutdown: <boolean>,
+      #     speed: <string>,
+      #     forced: <boolean>,
+      #     sflow: <boolean>,
+      #     flowcontrol_send: <string>,
+      #     flowcontrol_receive: <string>
+      #   }
       #
       # @param [String] :name The interface name to return a resource hash
       #   for from the node's running configuration
@@ -319,7 +366,6 @@ module Rbeapi
         response.merge!(parse_sflow(config))
         response.merge!(parse_flowcontrol_send(config))
         response.merge!(parse_flowcontrol_receive(config))
-
         response
       end
 
@@ -955,16 +1001,18 @@ module Rbeapi
       # BaseInterface get method and adds the Vxlan specific attributes to
       # the hash
       #
-      # The returned resource hash contains the following
-      #
-      #   * name: (String) The full interface name identifier
-      #   * type: (String) 'vxlan'
-      #   * description: (String) The configured interface description
-      #   * shutdown: (Boolean) The admin state of the interface
-      #   * source_interface: (String) The vxlan source-interface value
-      #   * multicast_group: (String) The vxlan multicast-group value
-      #   * udp_port: (Fixnum) The vxlan udp-port value
-      #   * flood_list: (Array) The list of VTEPs to flood traffic towards
+      # @example
+      #   {
+      #     name: <string>,
+      #     type: <string>,
+      #     description: <string>,
+      #     shutdown: <boolean>,
+      #     source_interface: <string>,
+      #     multicast_group: <string>,
+      #     udp_port: <fixnum>,
+      #     flood_list: <array>,
+      #     vlans: <hash>
+      #   }
       #
       # @param [String] :name The interface name to return from the nodes
       #   configuration.  This optional parameter defaults to Vxlan1

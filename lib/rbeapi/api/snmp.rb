@@ -57,9 +57,9 @@ module Rbeapi
       #
       # @example
       #   {
-      #     location: <string>
-      #     contact: <string>
-      #     chassis_id: <string>
+      #     location: <string>,
+      #     contact: <string>,
+      #     chassis_id: <string>,
       #     source_interface: <string>
       #   }
       #

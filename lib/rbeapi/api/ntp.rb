@@ -48,7 +48,7 @@ module Rbeapi
       #
       # @example
       #   {
-      #     source_interface: <string>
+      #     source_interface: <string>,
       #     servers: {
       #       prefer: [true, false]
       #     }

@@ -48,12 +48,14 @@ module Rbeapi
       #
       # @example
       #   {
-      #     "router_id": <string>
-      #     "areas": {
+      #     router_id: <string>
+      #     areas: {
       #       <string>: array<string>
       #     },
-      #     "redistribute"
+      #     redistribute: {}
       #   }
+      #
+      # @param [String] :inst The ospf instance name
       #
       # @return [Hash]  A Ruby hash object that provides the OSPF settings as
       #   key / value pairs.
@@ -90,9 +92,16 @@ module Rbeapi
       #
       # @example
       # {
-      #   <pid>: {...}
-      #   "interfaces": {...}
+      #   <pid>: {
+      #     router_id: <string>,
+      #     areas: {},
+      #     redistribute: {}
+      #   },
+      #   interfaces: {}
       # }
+      #
+      # @return [Hash]  A Ruby hash object that provides the OSPF settings as
+      #   key / value pairs.
       def getall
         instances = config.scan(/(?<=^router\sospf\s)\d+$/)
         response = instances.each_with_object({}) do |inst, hsh|
@@ -147,8 +156,7 @@ module Rbeapi
       #
       # Example
       #   {
-      #     "name": <string>,
-      #     "network_type": <string>
+      #      network_type: <string>
       #   }
       #
       # @param [String] :name The interface name to return the configuration
@@ -174,8 +182,13 @@ module Rbeapi
       #
       # Example
       #   {
-      #     <name>: {...},
-      #     <name>: {...}
+      #     <name>: {
+      #       network_type: <string>
+      #     },
+      #     <name>: {
+      #       network_type: <string>
+      #     },
+      #     ...
       #   }
       #
       # @return [nil, Hash<String, String>] A Ruby hash that represents the

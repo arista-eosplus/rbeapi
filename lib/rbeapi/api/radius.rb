@@ -61,14 +61,14 @@ module Rbeapi
       # This method is intended to be used by a provider's instances class
       # method.
       #
-      # The resource hash returned contains the following information:
-      #  * key: (String) the key either in plain text or hashed format
-      #  * key_format: (Fixnum) e.g. 0 or 7
-      #  * timeout: (Fixnum) seconds before the timeout period ends
-      #  * retransmit: (Fixnum), e.g. 3, attempts after first timeout expiry.
-      #  * servers: (Array),
-      #
-      # @api public
+      # @example
+      #   {
+      #     key: <string>,
+      #     key_format: <fixnum>,
+      #     timeout: <fixnum>,
+      #     retransmit: <fixnum>,
+      #     servers: <array>
+      #   }
       #
       # @return [Array<Hash>] Single element Array of resource hashes
       def get
