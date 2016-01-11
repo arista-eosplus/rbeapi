@@ -90,22 +90,6 @@ describe Rbeapi::Client do
     }
   end
 
-  let(:host1) do
-    {
-      'username' => 'foo',
-      'password' => 'bar',
-      'host' => 'host1'
-    }
-  end
-
-  let(:host2) do
-    {
-      'username' => 'foo',
-      'password' => 'bar',
-      'host' => 'host2'
-    }
-  end
-
   let(:test_data) do
     [
       '[connection:veos01]',
