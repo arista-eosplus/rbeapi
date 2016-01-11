@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Arista Networks, Inc.
+# Copyright (c) 2016, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -89,6 +89,10 @@ describe Rbeapi::Api::Switchports do
 
     it 'returns a hash collection' do
       expect(subject.getall).to be_a_kind_of(Hash)
+    end
+
+    it 'returns a hash collection' do
+      expect(subject.getall.count).to eq(1)
     end
   end
 
