@@ -80,6 +80,7 @@ module Rbeapi
         hosts = config.scan(/(?<=^logging\shost\s)[^\s]+/)
         { hosts: hosts }
       end
+      private :parse_hosts
 
       ##
       # set_enable configures the global logging instance on the node as either

@@ -64,17 +64,20 @@ module Rbeapi
         mdata = /ip domain-name ([\w.]+)/.match(config)
         { domain_name: mdata.nil? ? '' : mdata[1] }
       end
+      private :parse_domain_name
 
       def parse_name_servers
         servers = config.scan(/(?:ip name-server vrf )(?:\w+)\s(.+)/)
         values = servers.each_with_object([]) { |srv, arry| arry << srv.first }
         { name_servers: values }
       end
+      private :parse_name_servers
 
       def parse_domain_list
         search = config.scan(/(?<=^ip\sdomain-list\s).+$/)
         { domain_list: search }
       end
+      private :parse_domain_list
 
       ##
       # Configure the domain-name value in the running-config
