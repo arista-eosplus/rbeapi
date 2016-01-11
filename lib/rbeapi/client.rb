@@ -90,7 +90,7 @@ module Rbeapi
       end
 
       ##
-      # Retrieves the node config form the loaded configuration file and
+      # Retrieves the node config from the loaded configuration file and
       # returns a Rbeapi::Node instance for working with the remote node.
       #
       # @param [String] :name The named configuration to use for creating the
@@ -110,10 +110,7 @@ module Rbeapi
       ##
       # Builds a connection object to a remote node using the specified
       # options and return an instance of Rbeapi::Connection.  All
-      # configuration options can be passed via the :opts param or can be
-      # overridden using environment variables.  Environment variables are
-      # specified by prepending EAPI to the option name.  For instance to
-      # override the host param use EAPI_HOST.
+      # configuration options can be passed via the :opts param.
       #
       # @param [Hash] :opts the options to create a message with
       # @option :opts [String] :host The IP address or hostname of the remote
@@ -205,7 +202,12 @@ module Rbeapi
       #
       # @param [String] :filename The full path to the filename to load
       def read(filename)
-        super(filename: filename)
+        begin
+          super(filename: filename)
+        rescue IniFile::Error => exc
+          Rbeapi::Utils.syslog_warning("#{exc}: in eapi conf file: #{filename}")
+          return
+        end
 
         # For each section, if the host parameter is omitted then the
         # connection name is used
@@ -252,13 +254,14 @@ module Rbeapi
       end
 
       ##
-      # Adds a new connection section  to the current configuration
+      # Adds a new connection section to the current configuration
       #
       # @param [String] :name The name of the connection to add to the
       #   configuration.
       # @param [Hash] :values The properties for the connection
       def add_connection(name, values)
         self["connection:#{name}"] = values
+        nil
       end
     end
 
