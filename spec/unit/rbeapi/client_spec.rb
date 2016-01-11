@@ -54,6 +54,10 @@ describe Rbeapi::Client do
     fixture_file('eapi.conf.yaml')
   end
 
+  def wildcard_conf
+    fixture_file('wildcard.conf')
+  end
+
   let(:dut) do
     File.read(dut_conf)
   end
@@ -81,6 +85,14 @@ describe Rbeapi::Client do
       'port' => 1234,
       'open_timeout' => 12,
       'read_timeout' => 12
+    }
+  end
+
+  let(:wildcard) do
+    {
+      'username' => 'foo',
+      'password' => 'bar',
+      'host' => '*'
     }
   end
 
@@ -115,6 +127,14 @@ describe Rbeapi::Client do
   describe '#connect_to' do
     it 'retrieves the node config' do
       expect(subject.connect_to('veos01')).to be_truthy
+    end
+
+    it 'check connection wildcard host name' do
+      expect(subject.load_config(wildcard_conf)).to eq(nil)
+      expect(subject.connect_to('host1')).to be_truthy
+      expect(subject.config.get_connection('host1')) .to eq(wildcard)
+      expect(subject.connect_to('host2')).to be_truthy
+      expect(subject.config.get_connection('host2')) .to eq(wildcard)
     end
   end
 
@@ -155,6 +175,12 @@ describe Rbeapi::Client do
   describe '#get_connection' do
     it 'get connection dut' do
       expect(subject.config.get_connection('veos01')).to eq(veos01)
+    end
+
+    it 'connection wildcard works' do
+      expect(subject.load_config(wildcard_conf)).to eq(nil)
+      expect(subject.config.get_connection('host1')) .to eq(wildcard)
+      expect(subject.config.get_connection('host2')) .to eq(wildcard)
     end
   end
 
