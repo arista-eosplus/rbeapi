@@ -105,6 +105,10 @@ module Rbeapi
         config = Rbeapi::Utils.transform_keys_to_symbols(config)
         connection = connect config
         Node.new(connection)
+        node = Node.new(connection)
+        enablepwd = config.fetch(:enablepwd, nil)
+        node.enable_authentication(enablepwd) if enablepwd
+        node
       end
 
       ##
@@ -119,7 +123,7 @@ module Rbeapi
       #   the eAPI connection with
       # @option :opts [String] :password The password to use to authenticate
       #   the eAPI connection with
-      # @option :opts [String] :enable_pwd The enable password (if defined) to
+      # @option :opts [String] :enablepwd The enable password (if defined) to
       #   pass to the remote node to enter privilege mode
       # @option :opts [String] :use_ssl Specifies whether or not to use the
       #   HTTP or HTTPS protocol
