@@ -354,4 +354,23 @@ describe Rbeapi::Client do
       expect(node.refresh).to eq(nil)
     end
   end
+
+  describe 'test timeouts' do
+    it 'loads default timeout values' do
+      expect(node.connection.get_timeouts).to eq(open_timeout: 10,
+                                                 read_timeout: 10)
+    end
+
+    describe 'loads veos05' do
+      let(:node) do
+        subject.config.read(fixture_file('test.conf'))
+        subject.connect_to('veos05')
+      end
+
+      it 'loads timeout values from conf file' do
+        expect(node.connection.get_timeouts).to eq(open_timeout: 12,
+                                                   read_timeout: 12)
+      end
+    end
+  end
 end
