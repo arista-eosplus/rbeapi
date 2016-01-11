@@ -32,7 +32,7 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Eos is the toplevel namespace for working with Arista EOS nodes
 module Rbeapi
   ##
   # Api is module namespace for working with the EOS command API
