@@ -35,18 +35,39 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Rbeapi::Api
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Aaa class manages Authorization, Authentication and Accounting (AAA)
     # on an EOS node.
     class Aaa < Entity
+      ##
+      # get returns a hash of all Aaa resources
+      #
+      # @example
+      #   {
+      #     <groups>: {
+      #       <name>: {
+      #         type: <string>,
+      #         servers: <array>
+      #       },
+      #       <name>: {
+      #         type: <string>,
+      #         servers: <array>
+      #       }
+      #     }
+      #   }
+      #
+      # @return [Hash<Symbol, Object>] Returns the Aaa resources as a
+      #   Hash. If no Aaa resources are found, an empty hash is returned.
       def get
         response = {}
         response[:groups] = groups.getall
         response
       end
 
+      ##
+      # Returns an object node for working with AaaGroups class.
       def groups
         return @groups if @groups
         @groups = AaaGroups.new node
@@ -55,20 +76,20 @@ module Rbeapi
     end
 
     ##
-    # The AaaGroups class manages the server groups on a EOS node.
+    # The AaaGroups class manages the server groups on an EOS node.
     class AaaGroups < Entity
       DEFAULT_RADIUS_AUTH_PORT = 1812
       DEFAULT_RADIUS_ACCT_PORT = 1813
 
-      # Regular express that parses the radius servers from the aaa group
-      # server radius configuration block
+      # Regular expression that parses the radius servers from the aaa group
+      # server radius configuration block.
       RADIUS_GROUP_SERVER = /\s{3}server
                              [ ]([^\s]+)
                              [ ]auth-port[ ](\d+)
                              [ ]acct-port[ ](\d+)/x
 
-      # Regular expression that parse the tacacs servers from the aaa group
-      # server tacacs+ configuration block
+      # Regular expression that parses the tacacs servers from the aaa group
+      # server tacacs+ configuration block.
       TACACS_GROUP_SERVER = /\s{3}server
                              [ ]([^\s]+)
                              (?:[ ]vrf[ ](\w+))?
@@ -76,15 +97,15 @@ module Rbeapi
 
       ##
       # get returns the aaa server group resource hash that describes the
-      # current configuration for the specified server group name
+      # current configuration for the specified server group name.
       #
-      # The resource hash returned contains the following:
-      #   * type: (String) The server group type.  Valid values are either
-      #   'tacacs' or 'radius'
-      #   * servers: (Array) The set of servers associated with the group.
-      #   Servers are returned as either IP address or host name
+      # @example
+      #   {
+      #     type: <string>,
+      #     servers: <array>
+      #   }
       #
-      # @param [String] :name The server group name to return f:rom the nodes
+      # @param [String] :name The server group name to return from the nodes
       #   current running configuration.  If the name is not configured a nil
       #   object is returned.
       #
@@ -99,6 +120,23 @@ module Rbeapi
         response
       end
 
+      ##
+      # getall returns a aaa server groups hash
+      #
+      # @example
+      # {
+      #   <name>: {
+      #     type: <string>,
+      #     servers: <array>
+      #   },
+      #   <name>: {
+      #     type: <string>,
+      #     servers: <array>
+      #   }
+      # }
+      #
+      # @return [Hash<Symbol, Object>] returns the resource hashes for
+      #   configured aaa groups.  If none exist, a nil object is returned
       def getall
         cfg = config.scan(/aaa group server (?:radius|tacacs\+) (.+)$/)
         cfg.each_with_object({}) do |name, hsh|
@@ -109,7 +147,7 @@ module Rbeapi
 
       ##
       # parse_type scans the specified configuration block and returns the
-      # server group type as either 'tacacs' or 'radius'  The type value is
+      # server group type as either 'tacacs' or 'radius'.  The type value is
       # expected to always be present in the config.
       #
       # @api private
@@ -160,7 +198,6 @@ module Rbeapi
       # @param [String] :config The aaa server group block configuration for the
       #   group name to parse
       #
-      #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_radius_server(config)
         values = config.scan(RADIUS_GROUP_SERVER).map do |(name, auth, acct)|
@@ -175,8 +212,8 @@ module Rbeapi
       private :parse_radius_server
 
       ##
-      # parse_tacacs_server scans the provide configuration block and returns
-      # the list of servers configured.  The configuration block is expected to
+      # parse_tacacs_server scans the provided configuration block and returns
+      # the list of configured servers.  The configuration block is expected to
       # be a tacacs configuration block.  If there are no servers configured
       # for the group the servers value will return an empty array.
       #
@@ -184,7 +221,6 @@ module Rbeapi
       #
       # @param [String] :config The aaa server group block configuration for the
       #   group name to parse
-      #
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_tacacs_server(config)

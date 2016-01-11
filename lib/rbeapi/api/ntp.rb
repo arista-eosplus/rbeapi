@@ -32,10 +32,10 @@
 require 'rbeapi/api'
 
 ##
-# Eos is the toplevel namespace for working with Arista EOS nodes
+# Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Api is module namesapce for working with the EOS command API
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Ntp class provides an instance for working with the nodes
@@ -48,7 +48,7 @@ module Rbeapi
       #
       # @example
       #   {
-      #     source_interface: <string>
+      #     source_interface: <string>,
       #     servers: {
       #       prefer: [true, false]
       #     }

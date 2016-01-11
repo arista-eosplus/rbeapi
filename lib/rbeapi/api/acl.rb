@@ -33,7 +33,7 @@ require 'netaddr'
 require 'rbeapi/api'
 
 ##
-# Eos is the toplevel namespace for working with Arista EOS nodes
+# Rbeapi toplevel namespace
 module Rbeapi
   ##
   # Api is module namespace for working with the EOS command API
@@ -56,10 +56,29 @@ module Rbeapi
       ##
       # get returns the specified ACL from the nodes current configuration.
       #
+      # @example
+      #   {
+      #     <seqno>: {
+      #       seqno: <integer>,
+      #       action: <string>,
+      #       srcaddr: <string>,
+      #       srcprefixle: <string>,
+      #       log: <string>
+      #     },
+      #     <seqno>: {
+      #       seqno: <integer>,
+      #       action: <string>,
+      #       srcaddr: <string>,
+      #       srcprefixle: <string>,
+      #       log: <string>
+      #     },
+      #     ...
+      #   }
+      #
       # @param [String] :name The ACL name.
       #
       # @return [nil, Hash<Symbol, Object>] Returns the ACL resource as a
-      #   Hash.
+      #   Hash. Returns nil if name does not exist.
       def get(name)
         config = get_block("ip access-list standard #{name}")
         return nil unless config
@@ -71,6 +90,45 @@ module Rbeapi
       # getall returns the collection of ACLs from the nodes running
       # configuration as a hash. The ACL resource collection hash is
       # keyed by the ACL name.
+      #
+      # @example
+      #   {
+      #     <name>: {
+      #       <seqno>: {
+      #         seqno: <integer>,
+      #         action: <string>,
+      #         srcaddr: <string>,
+      #         srcprefixle: <string>,
+      #         log: <string>
+      #       },
+      #       <seqno>: {
+      #         seqno: <integer>,
+      #         action: <string>,
+      #         srcaddr: <string>,
+      #         srcprefixle: <string>,
+      #         log: <string>
+      #       },
+      #       ...
+      #     },
+      #     <name>: {
+      #       <seqno>: {
+      #         seqno: <integer>,
+      #         action: <string>,
+      #         srcaddr: <string>,
+      #         srcprefixle: <string>,
+      #         log: <string>
+      #       },
+      #       <seqno>: {
+      #         seqno: <integer>,
+      #         action: <string>,
+      #         srcaddr: <string>,
+      #         srcprefixle: <string>,
+      #         log: <string>
+      #       },
+      #       ...
+      #     },
+      #     ...
+      #   }
       #
       # @return [nil, Hash<Symbol, Object>] Returns a hash that represents
       #   the entire ACL collection from the nodes running configuration.

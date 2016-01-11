@@ -51,6 +51,50 @@ module Rbeapi
       # get returns the BGP routing configuration from the nodes current
       # configuration.
       #
+      # @example
+      #   {
+      #     bgp_as: <string>,
+      #     router_id: <string>,
+      #     shutdown: <string>,
+      #     maximum_paths: <integer>,
+      #     maximum_ecmp_paths: <integer>
+      #     networks: [
+      #       {
+      #         prefix: <string>,
+      #         masklen: <integer>,
+      #         route_map: <string>
+      #       },
+      #       {
+      #         prefix: <string>,
+      #         masklen: <integer>,
+      #         route_map: <string>
+      #       }
+      #     ],
+      #     neighbors: {
+      #       name: {
+      #         peer_group: <string>,
+      #         remote_as: <string>,
+      #         send_community: <boolean>,
+      #         shutdown: <boolean>,
+      #         description: <string>,
+      #         next_hop_selp: <boolean>,
+      #         route_map_in: <string>,
+      #         route_map_out: <string>
+      #       },
+      #       name: {
+      #         peer_group: <string>,
+      #         remote_as: <string>,
+      #         send_community: <boolean>,
+      #         shutdown: <boolean>,
+      #         description: <string>,
+      #         next_hop_selp: <boolean>,
+      #         route_map_in: <string>,
+      #         route_map_out: <string>
+      #       },
+      #       ...
+      #     }
+      #   }
+      #
       # @return [nil, Hash<Symbol, Object>] Returns the BGP resource as a
       #   Hash.
       def get
@@ -397,6 +441,18 @@ module Rbeapi
       # get returns a single BGP neighbor entry from the nodes current
       # configuration.
       #
+      # @example
+      #   {
+      #     peer_group: <string>,
+      #     remote_as: <string>,
+      #     send_community: <string>,
+      #     shutdown: <boolean>,
+      #     description: <integer>
+      #     next_hop_self: <boolean>
+      #     route_map_in: <string>
+      #     route_map_out: <string>
+      #   }
+      #
       # @param [String] :name The name of the BGP neighbor to manage.
       #   This value can be either an IPv4 address or string (in the
       #   case of managing a peer group).
@@ -421,6 +477,31 @@ module Rbeapi
       ##
       # getall returns the collection of all neighbor entries for the
       # BGP router instance.
+      #
+      # @example
+      #   {
+      #     <name>: {
+      #       peer_group: <string>,
+      #       remote_as: <string>,
+      #       send_community: <string>,
+      #       shutdown: <boolean>,
+      #       description: <integer>
+      #       next_hop_self: <boolean>
+      #       route_map_in: <string>
+      #       route_map_out: <string>
+      #     },
+      #     <name>: {
+      #       peer_group: <string>,
+      #       remote_as: <string>,
+      #       send_community: <string>,
+      #       shutdown: <boolean>,
+      #       description: <integer>
+      #       next_hop_self: <boolean>
+      #       route_map_in: <string>
+      #       route_map_out: <string>
+      #     },
+      #     ...
+      #   }
       #
       # @return [nil, Hash<Symbol, Object>] Returns a hash that
       #   represents the entire BGP neighbor collection from the nodes

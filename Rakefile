@@ -155,3 +155,22 @@ task ci_spec: [:ci_prep, 'ci:setup:rspec', :spec]
 
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec)
+
+desc 'Generate typedoc.rst for the guide'
+task :typedoc do
+  system 'rbeapi doc -r type \
+         | awk \'/This page/{flag=1}/augeas/{flag=0}/eos_/{flag=1}/ exec/\
+         {flag=0}/\*This page/{flag=1}flag\' \
+         | pandoc --from=markdown --to=rst --output=- \
+         > guide/typedoc.rst'
+end
+
+desc 'Generate Getting Started Guide HTML'
+task guide: [:typedoc] do
+  system 'make -C guide html'
+end
+
+desc 'Clean Getting Started docs'
+task :guide_clean do
+  system 'make -C guide clean'
+end

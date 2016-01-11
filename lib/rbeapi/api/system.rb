@@ -35,18 +35,19 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Rbeapi::Api
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The System class configures the node system services such as
     # hostname and domain name
     class System < Entity
       ##
-      # Returns the system settings
+      # Returns the system settings for hostname and iprouting
       #
       # @example
       #   {
-      #     hostname: <string>
+      #     hostname: <string>,
+      #     iprouting: <boolean>
       #   }
       #
       # @return [Hash]  A Ruby hash object that provides the system settings as
@@ -58,12 +59,30 @@ module Rbeapi
         response
       end
 
+      ##
+      # parse_hostname parses hostname values from the provided config
+      #
+      # @api private
+      #
+      # @param [String] :config The configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_hostname(config)
         mdata = /(?<=^hostname\s)(.+)$/.match(config)
         { hostname: mdata.nil? ? '' : mdata[1] }
       end
       private :parse_hostname
 
+      ##
+      # parse_iprouting parses ip routing from the provided config
+      #
+      # @api private
+      #
+      # @param [String] :config The configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_iprouting(config)
         mdata = /no\sip\srouting/.match(config)
         { iprouting: mdata.nil? ? true : false }
