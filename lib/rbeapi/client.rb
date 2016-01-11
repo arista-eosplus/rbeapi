@@ -99,8 +99,9 @@ module Rbeapi
       # @return [Rbeapi::Node, nil] Returns an instance of Rbeapi::Node.  If
       #   the named configuration is not found then nil is returned
       def connect_to(name)
-        config = config_for(name)
-        return nil unless config
+        config_entry = config_for(name)
+        return nil unless config_entry
+        config = config_entry.dup
         config['host'] = name if config['host'] == '*'
         config = Rbeapi::Utils.transform_keys_to_symbols(config)
         connection = connect config
