@@ -93,10 +93,29 @@ module Rbeapi
         end
       end
 
+      ##
+      # create will create a new ip prefix-list with designated name.
+      #
+      # @param [String] :name The name of the ip prefix-list
+      # 
+      # @return [Boolean] returns true if the command completed successfully
       def create(name)
         configure "ip prefix-list #{name}"
       end
 
+      ##
+      # add_rule will create an ip prefix-list with the designated name,
+      #   seqno, action and prefix.
+      #
+      # @param [String] :name The name of the ip prefix-list
+      #
+      # @param [String] :seq The seq value
+      #
+      # @param [String] :action The action value
+      #
+      # @param [String] :prefix The prefix value
+      # 
+      # @return [Boolean] returns true if the command completed successfully
       def add_rule(name, action, prefix, seq = nil)
         cmd = "ip prefix-list #{name}"
         cmd << " seq #{seq}" if seq
@@ -104,6 +123,14 @@ module Rbeapi
         configure cmd
       end
 
+      ##
+      # delete will remove the designated prefix-list
+      #
+      # @param [String] :name The name of the ip prefix-list
+      #
+      # @param [String] :seq The seq value
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def delete(name, seq = nil)
         cmd = "no ip prefix-list #{name}"
         cmd << " seq #{seq}" if seq

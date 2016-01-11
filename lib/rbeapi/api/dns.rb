@@ -41,7 +41,7 @@ module Rbeapi
     # The Dns class manages DNS settings on an EOS node.
     class Dns < Entity
       ##
-      # Returns the DNS resource
+      # get returns the DNS resource
       #
       # @example
       #   {
@@ -154,10 +154,22 @@ module Rbeapi
         configure cmds
       end
 
+      ##
+      # add_name_server adds an ip name-server.
+      #
+      # @param [String] :server The name of the ip name-server to create
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def add_name_server(server)
         configure "ip name-server #{server}"
       end
 
+      ##
+      # remove_name_server removes the specified ip name-server.
+      #
+      # @param [String] :server The name of the ip name-server to remove
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def remove_name_server(server)
         configure "no ip name-server #{server}"
       end
@@ -209,10 +221,22 @@ module Rbeapi
         configure cmds
       end
 
+      ##
+      # add_domain_list adds an ip domain-list.
+      #
+      # @param [String] :name The name of the ip domain-list to add
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def add_domain_list(name)
         configure "ip domain-list #{name}"
       end
 
+      ##
+      # remove_domain_list removes a specified ip domain-list.
+      #
+      # @param [String] :name The name of the ip domain-list to remove
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def remove_domain_list(name)
         configure "no ip domain-list #{name}"
       end

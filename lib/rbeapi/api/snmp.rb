@@ -403,6 +403,15 @@ module Rbeapi
         configure cmds
       end
 
+      ##
+      # set_community_access configures snmp-server community with designated
+      #   name and access values.
+      #
+      # @param [String] :name The snmp-server community name value
+      #
+      # @param [String] :access The snmp-server community access value
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_community_access(name, access)
         configure "snmp-server community #{name} #{access}"
       end
