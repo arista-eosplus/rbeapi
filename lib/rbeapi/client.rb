@@ -339,7 +339,7 @@ module Rbeapi
       def config(commands, opts = {})
         commands = [*commands] unless commands.respond_to?('each')
 
-        commands.insert(0, 'configure')
+        commands.insert(0, 'configure terminal')
 
         if @dry_run
           puts '[rbeapi dry-run commands]'
