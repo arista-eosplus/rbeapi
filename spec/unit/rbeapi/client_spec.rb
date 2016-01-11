@@ -48,6 +48,10 @@ describe Rbeapi::Client do
     fixture_file('test.conf')
   end
 
+  def wildcard_conf
+    fixture_file('wildcard.conf')
+  end
+
   let(:dut) do
     File.read(dut_conf)
   end
@@ -78,6 +82,30 @@ describe Rbeapi::Client do
     }
   end
 
+  let(:wildcard) do
+    {
+      'username' => 'foo',
+      'password' => 'bar',
+      'host' => '*'
+    }
+  end
+
+  let(:host1) do
+    {
+      'username' => 'foo',
+      'password' => 'bar',
+      'host' => 'host1'
+    }
+  end
+
+  let(:host2) do
+    {
+      'username' => 'foo',
+      'password' => 'bar',
+      'host' => 'host2'
+    }
+  end
+
   let(:test_data) do
     [
       '[connection:veos01]',
@@ -104,6 +132,14 @@ describe Rbeapi::Client do
   describe '#connect_to' do
     it 'retrieves the node config' do
       expect(subject.connect_to('veos01')).to be_truthy
+    end
+
+    it 'check connection wildcard host name' do
+      expect(subject.load_config(wildcard_conf)).to eq(nil)
+      expect(subject.connect_to('host1')).to be_truthy
+      expect(subject.config.get_connection('host1')) .to eq(wildcard)
+      expect(subject.connect_to('host2')).to be_truthy
+      expect(subject.config.get_connection('host2')) .to eq(wildcard)
     end
   end
 
@@ -134,6 +170,12 @@ describe Rbeapi::Client do
   describe '#get_connection' do
     it 'get connection dut' do
       expect(subject.config.get_connection('veos01')).to eq(veos01)
+    end
+
+    it 'connection wildcard works' do
+      expect(subject.load_config(wildcard_conf)).to eq(nil)
+      expect(subject.config.get_connection('host1')) .to eq(wildcard)
+      expect(subject.config.get_connection('host2')) .to eq(wildcard)
     end
   end
 
