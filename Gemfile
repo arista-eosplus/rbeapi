@@ -24,7 +24,11 @@ group :development, :test do
   gem 'pry',                     require: false
   gem 'pry-doc',                 require: false
   gem 'pry-stack_explorer',      require: false
+<<<<<<< HEAD
   gem 'rbeapi', '0.5.1', path: '.'
+=======
+  gem 'rbeapi', '0.5.0', path: '.'
+>>>>>>> Bump version strings
   gem 'ci_reporter_rspec',       require: false
   gem 'simplecov-json',          require: false
   gem 'simplecov-rcov',          require: false
