@@ -90,7 +90,7 @@ module Rbeapi
       end
 
       ##
-      # Retrieves the node config form the loaded configuration file and
+      # Retrieves the node config from the loaded configuration file and
       # returns a Rbeapi::Node instance for working with the remote node.
       #
       # @param [String] :name The named configuration to use for creating the
@@ -99,21 +99,23 @@ module Rbeapi
       # @return [Rbeapi::Node, nil] Returns an instance of Rbeapi::Node.  If
       #   the named configuration is not found then nil is returned
       def connect_to(name)
-        config = config_for(name)
-        return nil unless config
+        config_entry = config_for(name)
+        return nil unless config_entry
+        config = config_entry.dup
         config['host'] = name if config['host'] == '*'
         config = Rbeapi::Utils.transform_keys_to_symbols(config)
         connection = connect config
         Node.new(connection)
+        node = Node.new(connection)
+        enablepwd = config.fetch(:enablepwd, nil)
+        node.enable_authentication(enablepwd) if enablepwd
+        node
       end
 
       ##
       # Builds a connection object to a remote node using the specified
       # options and return an instance of Rbeapi::Connection.  All
-      # configuration options can be passed via the :opts param or can be
-      # overridden using environment variables.  Environment variables are
-      # specified by prepending EAPI to the option name.  For instance to
-      # override the host param use EAPI_HOST.
+      # configuration options can be passed via the :opts param.
       #
       # @param [Hash] :opts the options to create a message with
       # @option :opts [String] :host The IP address or hostname of the remote
@@ -122,7 +124,7 @@ module Rbeapi
       #   the eAPI connection with
       # @option :opts [String] :password The password to use to authenticate
       #   the eAPI connection with
-      # @option :opts [String] :enable_pwd The enable password (if defined) to
+      # @option :opts [String] :enablepwd The enable password (if defined) to
       #   pass to the remote node to enter privilege mode
       # @option :opts [String] :use_ssl Specifies whether or not to use the
       #   HTTP or HTTPS protocol
@@ -205,7 +207,12 @@ module Rbeapi
       #
       # @param [String] :filename The full path to the filename to load
       def read(filename)
-        super(filename: filename)
+        begin
+          super(filename: filename)
+        rescue IniFile::Error => exc
+          Rbeapi::Utils.syslog_warning("#{exc}: in eapi conf file: #{filename}")
+          return
+        end
 
         # For each section, if the host parameter is omitted then the
         # connection name is used
@@ -252,13 +259,14 @@ module Rbeapi
       end
 
       ##
-      # Adds a new connection section  to the current configuration
+      # Adds a new connection section to the current configuration
       #
       # @param [String] :name The name of the connection to add to the
       #   configuration.
       # @param [Hash] :values The properties for the connection
       def add_connection(name, values)
         self["connection:#{name}"] = values
+        nil
       end
     end
 
@@ -332,7 +340,7 @@ module Rbeapi
       def config(commands, opts = {})
         commands = [*commands] unless commands.respond_to?('each')
 
-        commands.insert(0, 'configure')
+        commands.insert(0, 'configure terminal')
 
         if @dry_run
           puts '[rbeapi dry-run commands]'

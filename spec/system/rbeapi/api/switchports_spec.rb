@@ -13,29 +13,44 @@ describe Rbeapi::Api::Switchports do
 
   describe '#get' do
     let(:keys) do
-      [:mode, :access_vlan, :trunk_native_vlan, :trunk_allowed_vlans]
+      [:mode, :access_vlan, :trunk_native_vlan, :trunk_allowed_vlans,
+       :trunk_groups]
     end
 
-    before do
-      node.config(['default interface Ethernet1', 'interface Ethernet2',
-                   'no switchport'])
+    context 'vlan as an integer range' do
+      before do
+        node.config(['default interface Ethernet1', 'interface Ethernet2',
+                     'no switchport'])
+      end
+
+      it 'returns the switchport resource' do
+        expect(subject.get('Ethernet1')).not_to be_nil
+      end
+
+      it 'does not return a nonswitchport resource' do
+        expect(subject.get('Ethernet2')).to be_nil
+      end
+
+      it 'has all required keys' do
+        expect(subject.get('Ethernet1').keys).to eq(keys)
+      end
+
+      it 'returns allowed_vlans as an array' do
+        expect(subject.get('Ethernet1')[:trunk_allowed_vlans])
+          .to be_a_kind_of(Array)
+      end
     end
 
-    it 'returns the switchport resource' do
-      expect(subject.get('Ethernet1')).not_to be_nil
-    end
+    context 'vlan as an integer' do
+      before do
+        node.config(['default interface Ethernet1',
+                     'interface Ethernet1',
+                     'switchport trunk allowed vlan 1'])
+      end
 
-    it 'does not return a nonswitchport resource' do
-      expect(subject.get('Ethernet2')).to be_nil
-    end
-
-    it 'has all required keys' do
-      expect(subject.get('Ethernet1').keys).to eq(keys)
-    end
-
-    it 'returns allowed_vlans as an array' do
-      expect(subject.get('Ethernet1')[:trunk_allowed_vlans])
-        .to be_a_kind_of(Array)
+      it 'returns the switchport resource' do
+        expect(subject.get('Ethernet1')).not_to be_nil
+      end
     end
   end
 
@@ -204,6 +219,61 @@ describe Rbeapi::Api::Switchports do
       expect(subject.set_trunk_allowed_vlans('Ethernet1', default: true))
         .to be_truthy
       expect(subject.get('Ethernet1')[:trunk_allowed_vlans].length).to eq(4094)
+    end
+  end
+
+  describe '#set_trunk_groups' do
+    before do
+      node.config(['interface Ethernet1', 'default switchport trunk group'])
+    end
+
+    it 'raises an ArgumentError if value is not an array' do
+      expect { subject.set_trunk_groups('Ethernet1', value: 'foo') }
+        .to raise_error(ArgumentError)
+    end
+
+    it 'sets trunk group to foo bar bang' do
+      node.config(['interface Ethernet1', 'switchport trunk group bang',
+                   'switchport trunk group baz'])
+      expect(subject.get('Ethernet1')[:trunk_groups]).to eq(%w(bang baz))
+      expect(subject.set_trunk_groups('Ethernet1', value: %w(foo bar bang)))
+        .to be_truthy
+      expect(subject.get('Ethernet1')[:trunk_groups].sort)
+        .to eq(%w(bang bar foo))
+    end
+
+    it 'clears trunk group if no value specified' do
+      node.config(['interface Ethernet1', 'switchport trunk group bang',
+                   'switchport trunk group baz'])
+      expect(subject.get('Ethernet1')[:trunk_groups]).to eq(%w(bang baz))
+      expect(subject.set_trunk_groups('Ethernet1')).to be_truthy
+      expect(subject.get('Ethernet1')[:trunk_groups]).to be_empty
+    end
+
+    it 'negate switchport trunk group' do
+      node.config(['interface Ethernet1', 'switchport trunk group bang',
+                   'switchport trunk group baz'])
+      expect(subject.get('Ethernet1')[:trunk_groups]).to eq(%w(bang baz))
+      expect(subject.set_trunk_groups('Ethernet1', value: %w(foo bar bang)))
+        .to be_truthy
+      expect(subject.get('Ethernet1')[:trunk_groups].sort)
+        .to eq(%w(bang bar foo))
+      expect(subject.set_trunk_groups('Ethernet1', enable: false))
+        .to be_truthy
+      expect(subject.get('Ethernet1')[:trunk_groups]).to be_empty
+    end
+
+    it 'default switchport trunk group' do
+      node.config(['interface Ethernet1', 'switchport trunk group bang',
+                   'switchport trunk group baz'])
+      expect(subject.get('Ethernet1')[:trunk_groups]).to eq(%w(bang baz))
+      expect(subject.set_trunk_groups('Ethernet1', value: %w(foo bar bang)))
+        .to be_truthy
+      expect(subject.get('Ethernet1')[:trunk_groups].sort)
+        .to eq(%w(bang bar foo))
+      expect(subject.set_trunk_groups('Ethernet1', default: true))
+        .to be_truthy
+      expect(subject.get('Ethernet1')[:trunk_groups]).to be_empty
     end
   end
 end

@@ -35,7 +35,7 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Rbeapi::Api
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Ospf class is a global class that provides an instance for working
@@ -48,12 +48,14 @@ module Rbeapi
       #
       # @example
       #   {
-      #     "router_id": <string>
-      #     "areas": {
+      #     router_id: <string>
+      #     areas: {
       #       <string>: array<string>
       #     },
-      #     "redistribute"
+      #     redistribute: {}
       #   }
+      #
+      # @param [String] :inst The ospf instance name
       #
       # @return [Hash]  A Ruby hash object that provides the OSPF settings as
       #   key / value pairs.
@@ -90,9 +92,16 @@ module Rbeapi
       #
       # @example
       # {
-      #   <pid>: {...}
-      #   "interfaces": {...}
+      #   <pid>: {
+      #     router_id: <string>,
+      #     areas: {},
+      #     redistribute: {}
+      #   },
+      #   interfaces: {}
       # }
+      #
+      # @return [Hash]  A Ruby hash object that provides the OSPF settings as
+      #   key / value pairs.
       def getall
         instances = config.scan(/(?<=^router\sospf\s)\d+$/)
         response = instances.each_with_object({}) do |inst, hsh|
@@ -108,28 +117,91 @@ module Rbeapi
         @interfaces
       end
 
+      ##
+      # create will create a router ospf with the specified pid
+      #
+      # @param [String] :pid The router ospf to create
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def create(pid)
         configure "router ospf #{pid}"
       end
 
+      ##
+      # delete will remove the specified router ospf
+      #
+      # @param [String] :pid The router ospf to remove
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def delete(pid)
         configure "no router ospf #{pid}"
       end
 
+      ##
+      # set_router_id sets router ospf router-id with pid and options
+      #
+      # @param [String] :pid The router ospf name
+      #
+      # @param [hash] :opts Optional keyword arguments
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
+      # @option :opts [Boolean] :default Configure the router-id to default.
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_router_id(pid, opts = {})
         cmd = command_builder('router-id', opts)
         cmds = ["router ospf #{pid}", cmd]
         configure cmds
       end
 
+      ##
+      # add_network adds network settings for router ospf and network area.
+      #
+      # @param [String] :pid The pid for router ospf
+      #
+      # @param [String] :net The network name
+      #
+      # @param [String] :area The network area name
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def add_network(pid, net, area)
         configure ["router ospf #{pid}", "network #{net} area #{area}"]
       end
 
+      ##
+      # remove_network removes network settings for router ospf and network
+      #   area.
+      #
+      # @param [String] :pid The pid for router ospf
+      #
+      # @param [String] :net The network name
+      #
+      # @param [String] :area The network area name
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def remove_network(pid, net, area)
         configure ["router ospf #{pid}", "no network #{net} area #{area}"]
       end
 
+      ##
+      # set_redistribute sets router ospf router-id with pid and options
+      #
+      # @param [String] :pid The router ospf name
+      #
+      # @param [String] :proto The redistribute value
+      #
+      # @param [hash] :opts Optional keyword arguments
+      #
+      # @option :opts [String] :routemap The route-map value
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
+      # @option :opts [Boolean] :default Configure the router-id to default.
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_redistribute(pid, proto, opts = {})
         routemap = opts[:routemap]
         cmds = ["router ospf #{pid}", "redistribute #{proto}"]
@@ -147,8 +219,7 @@ module Rbeapi
       #
       # Example
       #   {
-      #     "name": <string>,
-      #     "network_type": <string>
+      #      network_type: <string>
       #   }
       #
       # @param [String] :name The interface name to return the configuration
@@ -174,8 +245,13 @@ module Rbeapi
       #
       # Example
       #   {
-      #     <name>: {...},
-      #     <name>: {...}
+      #     <name>: {
+      #       network_type: <string>
+      #     },
+      #     <name>: {
+      #       network_type: <string>
+      #     },
+      #     ...
       #   }
       #
       # @return [nil, Hash<String, String>] A Ruby hash that represents the
@@ -189,6 +265,22 @@ module Rbeapi
         end
       end
 
+      ##
+      # set_network_type sets network type with options
+      #
+      # @param [String] :name The name of the interface
+      #
+      # @param [hash] :opts Optional keyword arguments
+      #
+      # @option :opts [String] :value The point-to-point value
+      #
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      #
+      # @option :opts [Boolean] :default Configure the ip ospf network
+      #   to default.
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_network_type(name, opts = {})
         value = opts[:value]
         return false unless [nil, 'point-to-point'].include?(value)

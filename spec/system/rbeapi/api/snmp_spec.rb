@@ -23,6 +23,30 @@ describe Rbeapi::Api::Snmp do
     end
   end
 
+  describe '#set_notification' do
+    before { node.config(['default snmp-server']) }
+
+    it 'configures the snmp notification value to on' do
+      expect(subject.set_notification(state: 'on',
+                                      name: 'bgp')).to be_truthy
+      expect(subject.get[:notifications][0]).to eq(name: 'bgp',
+                                                   state: 'on')
+    end
+
+    it 'configures the snmp notification value to off' do
+      expect(subject.set_notification(state: 'off',
+                                      name: 'bgp')).to be_truthy
+      expect(subject.get[:notifications][0]).to eq(name: 'bgp',
+                                                   state: 'off')
+    end
+
+    it 'configures the snmp notification value to default' do
+      expect(subject.set_notification(state: 'default',
+                                      name: 'all')).to be_truthy
+      expect(subject.get).to include(:notifications)
+    end
+  end
+
   describe '#set_location' do
     before { node.config(['no snmp-server location']) }
 
@@ -116,6 +140,47 @@ describe Rbeapi::Api::Snmp do
       expect(subject.get[:source_interface]).to eq('Loopback0')
       expect(subject.set_source_interface(default: true)).to be_truthy
       expect(subject.get[:source_interface]).to be_empty
+    end
+  end
+
+  describe '#add_community' do
+    before { node.config('no snmp-server community foo') }
+
+    it 'adds the specified community' do
+      expect(subject.add_community('foo')).to be_truthy
+      expect(subject.get[:communities]['foo'][:access]).to eq('ro')
+    end
+
+    it 'adds the specified community ro' do
+      expect(subject.add_community('foo', 'ro')).to be_truthy
+      expect(subject.get[:communities]['foo'][:access]).to eq('ro')
+    end
+
+    it 'adds the specified community rw' do
+      expect(subject.add_community('foo', 'rw')).to be_truthy
+      expect(subject.get[:communities]['foo'][:access]).to eq('rw')
+    end
+  end
+
+  describe '#remove_community' do
+    before { node.config('default snmp-server community foo') }
+
+    it 'removes the specified community foo' do
+      expect(subject.remove_community('foo')).to be_truthy
+    end
+  end
+
+  describe '#set_community_access' do
+    before { node.config('default snmp-server community foo') }
+
+    it 'sets the community access to ro' do
+      expect(subject.set_community_access('foo', 'ro')).to be_truthy
+      expect(subject.get[:communities]['foo'][:access]).to eq('ro')
+    end
+
+    it 'sets the community access to rw' do
+      expect(subject.set_community_access('foo', 'rw')).to be_truthy
+      expect(subject.get[:communities]['foo'][:access]).to eq('rw')
     end
   end
 

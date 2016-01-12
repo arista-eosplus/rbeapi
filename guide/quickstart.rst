@@ -1,0 +1,4 @@
+Quick Start
+===========
+
+.. contents:: :local:
