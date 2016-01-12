@@ -35,7 +35,7 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Api is module namesapce for working with the EOS command API
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # Tacacs provides instance methods to retrieve and set tacacs configuration
@@ -63,15 +63,14 @@ module Rbeapi
       # This method is intended to be used by a provider's instances class
       # method.
       #
-      # The resource hash returned contains the following information:
-      #  * name: ('settings')
-      #  * enable: (true | false) if tacacs functionality is enabled.  This is
-      #    always true for EOS.
-      #  * key: (String) the key either in plain text or hashed format
-      #  * key_format: (Integer) e.g. 0 or 7
-      #  * timeout: (Integer) seconds before the timeout period ends
-      #
-      # @api public
+      # @example
+      #   {
+      #     name: <string>,
+      #     enable: <boolean>,
+      #     key: <string>,
+      #     key_format: <integer>,
+      #     timeout: <integer>
+      #   }
       #
       # @return [Array<Hash>] Single element Array of resource hashes
       def get

@@ -34,7 +34,7 @@
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Rbeapi::Api
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Stp class provides a base class instance for working with
@@ -48,12 +48,19 @@ module Rbeapi
       # @example
       #   {
       #     mode: <string>
-      #     instances: {...}
-      #     interfaces: {...}
+      #     instances: {
+      #       <string>: {
+      #         priority: <string>
+      #       }
+      #     }
+      #     interfaces: {
+      #       <name>: {
+      #         portfast: <boolean>,
+      #         portfast_type: <string>,
+      #         bpduguard: <boolean>
+      #       }
+      #     }
       #   }
-      #
-      # @see StpInstances instances get example
-      # @eee StpInterfaces interfaces get example
       #
       # @return [Hash] returns a Hash of attributes derived from eAPI
       def get
@@ -150,6 +157,8 @@ module Rbeapi
       #     priority: <string>
       #   }
       #
+      # @param [String] :inst The named stp instance to return
+      #
       # @return [nil, Hash<Symbol, Object] returns the stp instance config as
       #    a resource hash.  If the instances is not configured this method
       #    will return a nil object
@@ -167,10 +176,14 @@ module Rbeapi
       #
       # @example
       #   {
-      #     <inst>: {...}
+      #     <inst>: {
+      #       priority: <string>
+      #     },
+      #     <inst>: {
+      #       priority: <string>
+      #     },
+      #     ...
       #   }
-      #
-      # @see get Instance get example
       #
       # @return [Hash<Symbol, Object>] returns all configured stp instances
       #   found in the nodes running configuration
@@ -265,9 +278,13 @@ module Rbeapi
       #
       # @example
       #   {
-      #     portfast: [true, false]
-      #     bpduguard: [true, false]
+      #     portfast: <boolean>,
+      #     portfast_type: <string>,
+      #     bpduguard: <boolean>
       #   }
+      #
+      # @param [String] :name The interface name to return a resource for from
+      #   the nodes configuration
       #
       # @return [nil, Hash<Symbol, Object>] returns the stp interface as a
       #   resource hash
@@ -289,10 +306,18 @@ module Rbeapi
       #
       # @example
       #   {
-      #     <interface>: {...}
+      #     <name>: {
+      #       portfast: <boolean>,
+      #       portfast_type: <string>,
+      #       bpduguard: <boolean>
+      #     },
+      #     <name>: {
+      #       portfast: <boolean>,
+      #       portfast_type: <string>,
+      #       bpduguard: <boolean>
+      #     },
+      #     ...
       #   }
-      #
-      # @see get Interface example
       #
       # @return [Hash<Symbol, Object>] returns the stp interfaces config as a
       #   resource hash from the nodes running configuration

@@ -1,0 +1,3 @@
+aaa group server radius blah
+no aaa root
+aaa authentication policy local allow-nopassword-remote-login

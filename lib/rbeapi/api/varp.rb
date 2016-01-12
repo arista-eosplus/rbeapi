@@ -35,7 +35,7 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Rbeapi::Api
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Varp class provides an instance for working with the global
@@ -44,10 +44,18 @@ module Rbeapi
       ##
       # Returns the global VARP configuration from the node
       #
-      # Example
+      # @example
       #   {
-      #     "mac_address": <string>,
-      #     "interfaces": {...}
+      #     mac_address: <string>,
+      #     interfaces: {
+      #       <name>: {
+      #         addresses: <array>
+      #       },
+      #       <name>: {
+      #         addresses: <array>
+      #       },
+      #       ...
+      #     }
       #   }
       #
       # @return [Hash]  A Ruby hash object that provides the Varp settings as
@@ -59,6 +67,15 @@ module Rbeapi
         response
       end
 
+      ##
+      # parse_mac_address parses mac-address values from the provided config
+      #
+      # @api private
+      #
+      # @param [String] :config The configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_mac_address(config)
         # ip virtual-router mac-address value will always
         #   be stored in aa:bb:cc:dd:ee:ff format
@@ -97,7 +114,7 @@ module Rbeapi
       ##
       # Returns a single VARP interface configuration
       #
-      # Example
+      # @example
       #   {
       #     "addresses": array<string>
       #   }
@@ -119,10 +136,15 @@ module Rbeapi
       # Returns the collection of MLAG interfaces as a hash index by the
       # interface name
       #
-      # Example
+      # @example
       #   {
-      #     "name": {...},
-      #     "name": {...}
+      #     <name>: {
+      #       addresses: <array>
+      #     },
+      #     <name>: {
+      #       addresses: <array>
+      #     },
+      #     ...
       #   }
       #
       # @return [nil, Hash<String, String>] A Ruby hash that represents the
@@ -138,6 +160,16 @@ module Rbeapi
         end
       end
 
+      ##
+      # parse_addresses parses ip virtual-router address from the provided
+      #   config
+      #
+      # @api private
+      #
+      # @param [String] :config The configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_addresses(config)
         addrs = config.scan(/(?<=\s{3}ip\svirtual-router\saddress\s).+$/)
         { addresses: addrs }

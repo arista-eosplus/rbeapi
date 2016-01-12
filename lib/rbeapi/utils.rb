@@ -30,6 +30,8 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+require 'syslog'
+
 ##
 # Rbeapi toplevel namespace
 module Rbeapi
@@ -63,6 +65,14 @@ module Rbeapi
       name.split('::').inject(Object) do |mod, cls|
         mod.const_get(cls)
       end
+    end
+
+    ##
+    # Syslogs a warning message.
+    #
+    # @param [String] :message The message to log.
+    def self.syslog_warning(message)
+      Syslog.open('rbeapi', Syslog::LOG_PID) { |s| s.warning message }
     end
   end
 end

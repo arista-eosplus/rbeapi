@@ -35,7 +35,7 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Api is module namesapce for working with the EOS command API
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Users class provides configuration of local user resources for
@@ -76,7 +76,7 @@ module Rbeapi
       #     sshkey: <string>
       #   }
       #
-      # @param [String] name The user name to return a resource for from the
+      # @param [String] :name The user name to return a resource for from the
       #   nodes configuration
       #
       # @return [nil, Hash<Symbol, Object>] Returns the user resource as a
@@ -94,7 +94,7 @@ module Rbeapi
                               (username\s+#{name}\s+
                                sshkey\s+(?<sshkey>.*)$)?/x)
         user = config.scan(user_re)
-        return nil unless user
+        return nil unless user && user[0]
         parse_user_entry(user[0])
       end
 
@@ -105,6 +105,15 @@ module Rbeapi
       #
       # @example
       #   [
+      #     <username>: {
+      #       name: <string>,
+      #       privilege: <integer>,
+      #       role: <string>,
+      #       nopassword: <boolean>,
+      #       encryption: <'cleartext', 'md5', 'sha512'>
+      #       secret: <string>,
+      #       sshkey: <string>
+      #     },
       #     <username>: {
       #       name: <string>,
       #       privilege: <integer>,

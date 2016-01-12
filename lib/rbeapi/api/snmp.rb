@@ -35,7 +35,7 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Api is module namespace for working with eAPI abstractions
+  # Api is module namespace for working with the EOS command API
   module Api
     ##
     # The Snmp class provides a class implementation for working with the
@@ -57,9 +57,9 @@ module Rbeapi
       #
       # @example
       #   {
-      #     location: <string>
-      #     contact: <string>
-      #     chassis_id: <string>
+      #     location: <string>,
+      #     contact: <string>,
+      #     chassis_id: <string>,
       #     source_interface: <string>
       #   }
       #
@@ -403,6 +403,15 @@ module Rbeapi
         configure cmds
       end
 
+      ##
+      # set_community_access configures snmp-server community with designated
+      #   name and access values.
+      #
+      # @param [String] :name The snmp-server community name value
+      #
+      # @param [String] :access The snmp-server community access value
+      #
+      # @return [Boolean] returns true if the command completed successfully
       def set_community_access(name, access)
         configure "snmp-server community #{name} #{access}"
       end
