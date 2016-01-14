@@ -327,7 +327,10 @@ module Rbeapi
       # the empty hash from the response output before return the array
       # to the caller
       #
-      # @param [Array<String>] commands An ordered list of commands to execute
+      # @param [Array<String, Hash>] :commands An ordered list of commands to
+      #   execute. A string in the list is an eapi command. A Hash entry in the
+      #   array consists of the following key value pairs:
+      #     { cmd: 'eapi command', input: 'text passed into stdin for command' }
       # @option :opts [String] :encoding The encoding scheme to use for sending
       #   and receive eAPI messages.  Valid values are json and text.  The
       #   default value is json
@@ -361,7 +364,10 @@ module Rbeapi
       #
       # rubocop:disable Metrics/MethodLength
       #
-      # @param [Array<String>] commands An ordered list of commands to execute
+      # @param [Array<String, Hash>] :commands An ordered list of commands to
+      #   execute. A string in the list is an eapi command. A Hash entry in the
+      #   array consists of the following key value pairs:
+      #     { cmd: 'eapi command', input: 'text passed into stdin for command' }
       # @option :opts [String] :encoding The encoding scheme to use for sending
       #   and receive eAPI messages.  Valid values are json and text.  The
       #   default value is json
