@@ -32,10 +32,10 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Api is module namespace for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Prefixlists class provides a configuration instance for working
@@ -43,7 +43,7 @@ module Rbeapi
     #
     class Prefixlists < Entity
       ##
-      # Returns the static routes configured on the node
+      # Returns the static routes configured on the node.
       #
       # @example
       #   {
@@ -53,12 +53,12 @@ module Rbeapi
       #     }
       #   }
       #
-      # @param [String] :name The name of the prefix-list to return
+      # @param name [String] The name of the prefix-list to return.
       #
-      # @returns [Hash<String, String> The method will return all of the
-      #   configured static routes on the node as a Ruby hash object.  If
+      # @return [Hash<String, String> The method will return all of the
+      #   configured static routes on the node as a Ruby hash object. If
       #   there are no static routes configured, this method will return
-      #   an empty hash
+      #   an empty hash.
       def get(name)
         config = get_block("ip prefix-list #{name}")
         return nil unless config
@@ -71,7 +71,7 @@ module Rbeapi
       end
 
       ##
-      # Returns the static routes configured on the node
+      # Returns the static routes configured on the node.
       #
       # @example
       #   {
@@ -81,10 +81,10 @@ module Rbeapi
       #     }
       #   }
       #
-      # @returns [Hash<String, String> The method will return all of the
-      #   configured static routes on the node as a Ruby hash object.  If
+      # @return [Hash<String, String> The method will return all of the
+      #   configured static routes on the node as a Ruby hash object. If
       #   there are no static routes configured, this method will return
-      #   an empty hash
+      #   an empty hash.
       def getall
         lists = config.scan(/(?<=^ip\sprefix-list\s).+/)
         lists.each_with_object({}) do |name, hsh|
@@ -96,9 +96,9 @@ module Rbeapi
       ##
       # create will create a new ip prefix-list with designated name.
       #
-      # @param [String] :name The name of the ip prefix-list
+      # @param name [String] The name of the ip prefix-list.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def create(name)
         configure "ip prefix-list #{name}"
       end
@@ -107,15 +107,15 @@ module Rbeapi
       # add_rule will create an ip prefix-list with the designated name,
       #   seqno, action and prefix.
       #
-      # @param [String] :name The name of the ip prefix-list
+      # @param name [String] The name of the ip prefix-list.
       #
-      # @param [String] :seq The seq value
+      # @param seq [String] The seq value.
       #
-      # @param [String] :action The action value
+      # @param  action [String] The action value.
       #
-      # @param [String] :prefix The prefix value
+      # @param prefix [String] The prefix value.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def add_rule(name, action, prefix, seq = nil)
         cmd = "ip prefix-list #{name}"
         cmd << " seq #{seq}" if seq
@@ -124,13 +124,13 @@ module Rbeapi
       end
 
       ##
-      # delete will remove the designated prefix-list
+      # delete will remove the designated prefix-list.
       #
-      # @param [String] :name The name of the ip prefix-list
+      # @param name [String] The name of the ip prefix-list.
       #
-      # @param [String] :seq The seq value
+      # @param seq [String] The seq value.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def delete(name, seq = nil)
         cmd = "no ip prefix-list #{name}"
         cmd << " seq #{seq}" if seq

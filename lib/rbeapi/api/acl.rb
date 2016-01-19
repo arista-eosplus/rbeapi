@@ -33,10 +33,10 @@ require 'netaddr'
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Api is module namespace for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Acl class manages the set of standard ACLs.
@@ -75,7 +75,7 @@ module Rbeapi
       #     ...
       #   }
       #
-      # @param [String] :name The ACL name.
+      # @param name [String] The ACL name.
       #
       # @return [nil, Hash<Symbol, Object>] Returns the ACL resource as a
       #   Hash. Returns nil if name does not exist.
@@ -144,11 +144,11 @@ module Rbeapi
 
       ##
       # mask_to_prefixlen converts a subnet mask from dotted decimal to
-      # bit length
+      # bit length.
       #
-      # @param [String] :mask The dotted decimal subnet mask to convert
+      # @param mask [String] The dotted decimal subnet mask to convert.
       #
-      # @return [String] The subnet mask as a valid prefix length
+      # @return [String] The subnet mask as a valid prefix length.
       def mask_to_prefixlen(mask)
         mask = '255.255.255.255' unless mask
         NetAddr::CIDR.create('0.0.0.0/' + mask).netmask_ext
@@ -160,9 +160,9 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The switch config.
+      # @param config [String] The switch config.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
 
       def parse_entries(config)
         entries = {}
@@ -187,38 +187,38 @@ module Rbeapi
 
       ##
       # create will create a new ACL resource in the nodes current
-      # configuration with the specified name.  If the create method
+      # configuration with the specified name. If the create method
       # is called and the ACL already exists, this method will still
       # return true. The ACL will not have any entries. Use add_entry
       # to add entries to the ACL.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   ip access-list standard <name>
       #
-      # @param [String] :name The ACL name to create on the node. Must
+      # @param name [String] The ACL name to create on the node. Must
       #   begin with an alphabetic character. Cannot contain spaces or
       #   quotation marks.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def create(name)
         configure("ip access-list standard #{name}")
       end
 
       ##
       # delete will delete an existing ACL resource from the nodes current
-      # running configuration.  If the delete method is called and the ACL
+      # running configuration. If the delete method is called and the ACL
       # does not exist, this method will succeed.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   no ip access-list standard <name>
       #
-      # @param [String] :name The ACL name to delete on the node.
+      # @param name [String] The ACL name to delete on the node.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def delete(name)
         configure("no ip access-list standard #{name}")
       end
@@ -228,15 +228,15 @@ module Rbeapi
       # command has the same effect as deleting the ACL from the nodes
       # running configuration.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   default no ip access-list standard <name>
       #
-      # @param [String] :name The ACL name to set to the default value
+      # @param name [String] The ACL name to set to the default value
       #   on the node.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully
       def default(name)
         configure("default ip access-list standard #{name}")
       end
@@ -246,17 +246,22 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [Hash] :opts the options for the entry
-      # @option :opts  [String] :seqno The sequence number of the entry in
+      # @param entry [Hash] the options for the entry.
+      #
+      # @option entry seqno [String] The sequence number of the entry in
       #   the ACL to add. Default is nil, will be assigned.
-      # @option :opts  [String] :action The action triggered by the ACL. Valid
-      #   values are 'permit', 'deny', or 'remark'
-      # @option :opts  [String] :addr The IP address to permit or deny.
-      # @option :opts  [String] :prefixlen The prefixlen for the IP address.
-      # @option :opts  [Boolean] :log Triggers an informational log message
+      #
+      # @option entry action [String] The action triggered by the ACL. Valid
+      #   values are 'permit', 'deny', or 'remark'.
+      #
+      # @option entry addr [String] The IP address to permit or deny.
+      #
+      # @option entry prefixlen [String] The prefixlen for the IP address.
+      #
+      # @option entry log [Boolean] Triggers an informational log message
       #   to the console about the matching packet.
       #
-      # @return [String] returns commands to create an entry
+      # @return [String] Returns commands to create an entry.
       def build_entry(entry)
         cmds = "#{entry[:seqno]} " if entry[:seqno]
         cmds << "#{entry[:action]} #{entry[:srcaddr]}/#{entry[:srcprefixlen]}"
@@ -269,20 +274,26 @@ module Rbeapi
       # update_entry will update an entry, identified by the seqno
       # in the ACL specified by name, with the passed in parameters.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @param [String] :name The ACL name to update on the node.
-      # @param [Hash] :opts the options for the entry
-      # @option :opts  [String] :seqno The sequence number of the entry in
+      # @param name [String] The ACL name to update on the node.
+      #
+      # @param entry [Hash] the options for the entry.
+      #
+      # @option entry seqno [String] The sequence number of the entry in
       #   the ACL to update.
-      # @option :opts  [String] :action The action triggered by the ACL. Valid
-      #   values are 'permit', 'deny', or 'remark'
-      # @option :opts  [String] :addr The IP address to permit or deny.
-      # @option :opts  [String] :prefixlen The prefixlen for the IP address.
-      # @option :opts  [Boolean] :log Triggers an informational log message
+      #
+      # @option entry action [String] The action triggered by the ACL. Valid
+      #   values are 'permit', 'deny', or 'remark'.
+      #
+      # @option entry addr [String] The IP address to permit or deny.
+      #
+      # @option entry prefixlen [String] The prefixlen for the IP address.
+      #
+      # @option entry log [Boolean] Triggers an informational log message
       #   to the console about the matching packet.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def update_entry(name, entry)
         cmds = ["ip access-list standard #{name}"]
         cmds << "no #{entry[:seqno]}"
@@ -295,18 +306,23 @@ module Rbeapi
       # add_entry will add an entry to the specified ACL with the
       # passed in parameters.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @param [String] :name The ACL name to add an entry to on the node.
-      # @param [Hash] :opts the options for the entry
-      # @option :opts  [String] :action The action triggered by the ACL. Valid
-      #   values are 'permit', 'deny', or 'remark'
-      # @option :opts  [String] :addr The IP address to permit or deny.
-      # @option :opts  [String] :prefixlen The prefixlen for the IP address.
-      # @option :opts  [Boolean] :log Triggers an informational log message
+      # @param name [String] The ACL name to add an entry to on the node.
+      #
+      # @param entry [Hash] the options for the entry.
+      #
+      # @option entry action [String] The action triggered by the ACL. Valid
+      #   values are 'permit', 'deny', or 'remark'.
+      #
+      # @option entry addr [String] The IP address to permit or deny.
+      #
+      # @option entry prefixlen [String] The prefixlen for the IP address.
+      #
+      # @option entry log [Boolean] Triggers an informational log message
       #   to the console about the matching packet.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def add_entry(name, entry)
         cmds = ["ip access-list standard #{name}"]
         cmds << build_entry(entry)
@@ -318,13 +334,14 @@ module Rbeapi
       # remove_entry will remove the entry specified by the seqno for
       # the ACL specified by name.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @param [String] :name The ACL name to update on the node.
-      # @param [String] :seqno The sequence number of the entry in
+      # @param name [String] The ACL name to update on the node.
+      #
+      # @param seqno [String] The sequence number of the entry in
       #   the ACL to remove.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def remove_entry(name, seqno)
         cmds = ["ip access-list standard #{name}", "no #{seqno}", 'exit']
         configure(cmds)

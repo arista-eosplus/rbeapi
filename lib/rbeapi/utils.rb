@@ -33,19 +33,19 @@
 require 'syslog'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Utils module
+  # Utils module.
   module Utils
     ##
     # Iterates through a hash structure and converts all of the keys
     # to symbols.
     #
-    # @param [Hash] :value The hash structure to convert the keys
+    # @param value [Hash] The hash structure to convert the keys.
     #
     # @return [Hash] An updated hash structure with all keys converted to
-    #   symboles
+    #   symboles.
     def self.transform_keys_to_symbols(value)
       return value unless value.is_a?(Hash)
       hash = value.each_with_object({}) do |(k, v), hsh|
@@ -56,11 +56,11 @@ module Rbeapi
     end
 
     ##
-    # Returns a class object from a string capable of being instatiated
+    # Returns a class object from a string capable of being instatiated.
     #
-    # @param [String] :name The name of the class to return a constant for
+    # @param name [String] The name of the class to return a constant for.
     #
-    # @return [Object] Returns a a class object that can be instatiated
+    # @return [Object] Returns a a class object that can be instatiated.
     def self.class_from_string(name)
       name.split('::').inject(Object) do |mod, cls|
         mod.const_get(cls)
@@ -70,7 +70,7 @@ module Rbeapi
     ##
     # Syslogs a warning message.
     #
-    # @param [String] :message The message to log.
+    # @param message [String] The message to log.
     def self.syslog_warning(message)
       Syslog.open('rbeapi', Syslog::LOG_PID) { |s| s.warning message }
     end
