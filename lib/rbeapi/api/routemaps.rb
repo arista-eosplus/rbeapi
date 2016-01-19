@@ -32,10 +32,10 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Api is module namespace for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Routemaps class manages routemaps. A route map is a list of rules
@@ -47,7 +47,7 @@ module Rbeapi
     #
     class Routemaps < Entity
       ##
-      # get returns a hash of routemap configurations for the given name
+      # get returns a hash of routemap configurations for the given name.
       #
       # @example
       #   {
@@ -81,12 +81,12 @@ module Rbeapi
       #     }
       #   }
       #
-      # @param [String] :name The routemap name to return a resource for from
-      #   the nodes configuration
+      # @param name [String] The routemap name to return a resource for from
+      #   the nodes configuration.
       #
       # @return [nil, Hash<Symbol, Object>] Returns the routemap resource as a
       #   Hash. If the specified name is not found in the nodes current
-      #   configuration a nil object is returned
+      #   configuration a nil object is returned.
       def get(name)
         parse_entries(name)
       end
@@ -160,8 +160,8 @@ module Rbeapi
       #     }
       #   }
       #
-      # @return [nil, Hash<Symbol, Object>] returns a hash that represents the
-      #   entire routemap collection from the nodes running configuration.  If
+      # @return [nil, Hash<Symbol, Object>] Returns a hash that represents the
+      #   entire routemap collection from the nodes running configuration. If
       #   there are no routemap names configured, this method will return nil.
       def getall
         routemaps = config.scan(/(?<=^route-map\s)[^\s]+/)
@@ -176,8 +176,10 @@ module Rbeapi
       #
       # @api private
       #
-      # @return [nil, Hash<Symbol, Object>] returns a hash that represents the
-      #   rules for routemaps from the nodes running configuration.  If
+      # @param name [String] The routemap name.
+      #
+      # @return [nil, Hash<Symbol, Object>] Returns a hash that represents the
+      #   rules for routemaps from the nodes running configuration. If
       #   there are no routemaps configured, this method will return nil.
       def parse_entries(name)
         entries = config.scan(/^route-map\s#{name}\s.+$/)
@@ -199,10 +201,20 @@ module Rbeapi
       #
       # @api private
       #
-      # @return [Hash<Symbol, Object>] returns a hash that represents the
-      #   rules for routemaps from the nodes running configuration.  If
+      # @param rules [Hash] Rules configuration options.
+      #
+      # @option rules match [Array] The match options.
+      #
+      # @option rules set [Array] The set options.
+      #
+      # @option rules continue [String] The continue value.
+      #
+      # @option rules description [String] The description value.
+      #
+      # @return [Hash<Symbol, Object>] Returns a hash that represents the
+      #   rules for routemaps from the nodes running configuration. If
       #   there are no routemaps configured, this method will return an empty
-      #    hash.
+      #   hash.
       def parse_rules(rules)
         rules.split("\n").each_with_object({}) do |rule, rule_hsh|
           mdata = /\s{3}(\w+)\s/.match(rule)
@@ -225,7 +237,21 @@ module Rbeapi
       private :parse_rules
 
       ##
-      # name_commands is utilized to initially prepare the routemap
+      # name_commands is utilized to initially prepare the routemap.
+      #
+      # @param name [String] The routemap name.
+      #
+      # @param action [String] The action value.
+      #
+      # @param seqno [String] The seqno value.
+      #
+      # @param opts [Hash] The configuration options.
+      #
+      # @option opts default [Boolean] The default value.
+      #
+      # @option opts enable [Boolean] The enable value.
+      #
+      # @return [Array] Returns the prepared eos command.
       def name_commands(name, action, seqno, opts = {})
         if opts[:default] == true
           cmd = "default route-map #{name}"
@@ -245,35 +271,35 @@ module Rbeapi
       #
       # rubocop:disable Metrics/MethodLength
       #
-      # @commands
+      # commands
       #   route-map <name> action <value> seqno <value> description <value>
       #   match <value> set <value> continue <value>
       #
-      # @param [String] :name The name of the routemap to create
+      # @param name [String] The name of the routemap to create.
       #
-      # @param [String] :action Either permit or deny
+      # @param action [String] Either permit or deny.
       #
-      # @param [Integer] :seqno The sequence number
+      # @param seqno [Integer] The sequence number value.
       #
-      # @param [hash] :opts Optional keyword arguments
+      # @param opts [hash] Optional keyword arguments.
       #
-      # @option :opts [Boolean] :default Set routemap to default
+      # @option opts default [Boolean] Set routemap to default.
       #
-      # @option :opts [String] :description A description for the routemap
+      # @option opts description [String] A description for the routemap.
       #
-      # @option :opts [Array] :match routemap match rule
+      # @option opts match [Array] routemap match rule.
       #
-      # @option :opts [String] :set Sets route attribute
+      # @option opts set [String] Sets route attribute.
       #
-      # @option :opts [String] :continue The routemap sequence number to
+      # @option opts continue [String] The routemap sequence number to
       #   continue on.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the routemap to default.
+      # @option opts default [Boolean] Configure the routemap to default.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def create(name, action, seqno, opts = {})
         if opts.empty?
           cmds = name_commands(name, action, seqno)
@@ -306,6 +332,16 @@ module Rbeapi
       ##
       # remove_match_statemements removes all match rules for the
       # specified routemap
+      #
+      # @param name [String] The routemap name.
+      #
+      # @param action [String] The action value.
+      #
+      # @param seqno [String] The seqno value.
+      #
+      # @param cmds [Array] Array of eos commands.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
       def remove_match_statements(name, action, seqno, cmds)
         entries = parse_entries(name)
         return nil unless entries
@@ -322,6 +358,16 @@ module Rbeapi
       ##
       # remove_set_statemements removes all set rules for the
       # specified routemap
+      #
+      # @param name [String] The routemap name.
+      #
+      # @param action [String] The action value.
+      #
+      # @param seqno [String] The seqno value.
+      #
+      # @param cmds [Array] Array of eos commands.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
       def remove_set_statements(name, action, seqno, cmds)
         entries = parse_entries(name)
         return nil unless entries
@@ -340,16 +386,16 @@ module Rbeapi
       # running configuration. If the delete method is called and the
       # routemap name does not exist, this method will succeed.
       #
-      # @commands
+      # commands
       #   no route-map <name> <action> <seqno>
       #
-      # @param [String] :name The routemap name to delete from the node.
+      # @param name [String] The routemap name to delete from the node.
       #
-      # @param [String] :action Either permit or deny
+      # @param action [String] Either permit or deny.
       #
-      # @param [Integer] :seqno The sequence number
+      # @param seqno [Integer] The sequence number.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def delete(name, action, seqno)
         configure(["no route-map #{name} #{action} #{seqno}"])
       end
@@ -358,20 +404,20 @@ module Rbeapi
       # This method will attempt to default the routemap from the nodes
       # operational config. Since routemaps do not exist by default,
       # the default action is essentially a negation and the result will
-      # be the removal of the routemap clause.
-      # If the routemap does not exist then this
-      # method will not perform any changes but still return True
+      # be the removal of the routemap clause. If the routemap does not
+      # exist then this method will not perform any changes but still
+      # return True.
       #
-      # @commands
+      # commands
       #   no route-map <name>
       #
-      # @param [String] :name The routemap name to set to default.
+      # @param name [String] The routemap name to set to default.
       #
-      # @param [String] :action Either permit or deny
+      # @param action [String] Either permit or deny.
       #
-      # @param [Integer] :seqno The sequence number
+      # @param seqno [Integer] The sequence number.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def default(name, action, seqno)
         configure(["default route-map #{name} #{action} #{seqno}"])
       end
@@ -380,18 +426,18 @@ module Rbeapi
       # set_match_statements will set the match values for a specified routemap.
       # If the specified routemap does not exist, it will be created.
       #
-      # @commands
+      # commands
       #   route-map <name> action <value> seqno <value> match <value>
       #
-      # @param [String] :name The name of the routemap to create
+      # @param name [String] The name of the routemap to create.
       #
-      # @param [String] :action Either permit or deny
+      # @param action [String] Either permit or deny.
       #
-      # @param [Integer] :seqno The sequence number
+      # @param seqno [Integer] The sequence number.
       #
-      # @param [Array] :value The routemap match rules
+      # @param value [Array] The routemap match rules.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_match_statements(name, action, seqno, value)
         cmds = ["route-map #{name} #{action} #{seqno}"]
         remove_match_statements(name, action, seqno, cmds)
@@ -405,18 +451,18 @@ module Rbeapi
       # set_set_statements will set the set values for a specified routemap.
       # If the specified routemap does not exist, it will be created.
       #
-      # @commands
+      # commands
       #   route-map <name> action <value> seqno <value> set <value>
       #
-      # @param [String] :name The name of the routemap to create
+      # @param name [String] The name of the routemap to create.
       #
-      # @param [String] :action Either permit or deny
+      # @param action [String] Either permit or deny.
       #
-      # @param [Integer] :seqno The sequence number
+      # @param seqno [Integer] The sequence number.
       #
-      # @param [Array] :value The routemap set rules
+      # @param value [Array] The routemap set rules.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_set_statements(name, action, seqno, value)
         cmds = ["route-map #{name} #{action} #{seqno}"]
         remove_set_statements(name, action, seqno, cmds)
@@ -430,18 +476,18 @@ module Rbeapi
       # set_continue will set the continue value for a specified routemap.
       # If the specified routemap does not exist, it will be created.
       #
-      # @commands
+      # commands
       #   route-map <name> action <value> seqno <value> continue <value>
       #
-      # @param [String] :name The name of the routemap to create
+      # @param name [String] The name of the routemap to create.
       #
-      # @param [String] :action Either permit or deny
+      # @param action [String] Either permit or deny.
       #
-      # @param [Integer] :seqno The sequence number
+      # @param seqno [Integer] The sequence number.
       #
-      # @param [Integer] :value The continue value
+      # @param value [Integer] The continue value.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_continue(name, action, seqno, value)
         cmds = ["route-map #{name} #{action} #{seqno}"]
         cmds << 'no continue'
@@ -453,18 +499,18 @@ module Rbeapi
       # set_description will set the description for a specified routemap.
       # If the specified routemap does not exist, it will be created.
       #
-      # @commands
+      # commands
       #   route-map <name> action <value> seqno <value> description <value>
       #
-      # @param [String] :name The name of the routemap to create
+      # @param name [String] The name of the routemap to create.
       #
-      # @param [String] :action Either permit or deny
+      # @param action [String] Either permit or deny.
       #
-      # @param [Integer] :seqno The sequence number
+      # @param seqno [Integer] The sequence number.
       #
-      # @param [String] :value The description value
+      # @param value [String] The description value.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_description(name, action, seqno, value)
         cmds = ["route-map #{name} #{action} #{seqno}"]
         cmds << 'no description'

@@ -31,14 +31,14 @@
 #
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Api is module namespace for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Stp class provides a base class instance for working with
-    # the EOS spanning-tree configuration
+    # the EOS spanning-tree configuration.
     #
     class Stp < Entity
       ##
@@ -62,7 +62,7 @@ module Rbeapi
       #     }
       #   }
       #
-      # @return [Hash] returns a Hash of attributes derived from eAPI
+      # @return [Hash] returns a Hash of attributes derived from eAPI.
       def get
         response = {}
         response.merge!(parse_mode)
@@ -73,13 +73,13 @@ module Rbeapi
 
       ##
       # parse_mode scans the nodes running configuration and extracts the
-      # value of the spanning-tree mode.  The spanning tree mode is
-      # expected to be always be available in the running config.  The return
-      # value is intended to be merged into the stp resource hash
+      # value of the spanning-tree mode. The spanning tree mode is
+      # expected to be always be available in the running config. The return
+      # value is intended to be merged into the stp resource hash.
       #
       # @api private
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Resource hash attribute.
       def parse_mode
         mdata = /(?<=spanning-tree\smode\s)(\w+)$/.match(config)
         { mode: mdata[1] }
@@ -89,7 +89,7 @@ module Rbeapi
       # instances returns a memoized instance of StpInstances for configuring
       # individual stp instances.
       #
-      # @return [StpInstances] an instance of StpInstances class
+      # @return [StpInstances] an instance of StpInstances class.
       def instances
         return @instances if @instances
         @instances = StpInstances.new(node)
@@ -98,9 +98,9 @@ module Rbeapi
 
       ##
       # interfaces returns a memoized instance of StpInterfaces for
-      # configuring individual stp interfaces
+      # configuring individual stp interfaces.
       #
-      # @return [StpInterfaces] an instance of StpInterfaces class
+      # @return [StpInterfaces] an instance of StpInterfaces class.
       def interfaces
         return @interfaces if @interfaces
         @interfaces = StpInterfaces.new(node)
@@ -113,27 +113,27 @@ module Rbeapi
       # mode is configured with the no keyword argument.  If the default option
       # is specified then the mode is configured with the default keyword
       # argument.  The default keyword argument takes precedence over the enable
-      # option if both are provided
+      # option if both are provided.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   spanning-tree mode <value>
       #   no spanning-tree mode
       #   default spanning-tree mode
       #
-      # @param [Hash] :opts Optional keyword arguments
+      # @param opts [Hash] Optional keyword arguments.
       #
-      # @option :opts [String] :value The value to configure the stp mode to
-      #   in the nodes current running configuration
+      # @option opts value [String] The value to configure the stp mode to
+      #   in the nodes current running configuration.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the stp mode value using
-      #   the default keyword
+      # @option opts default [Boolean] Configure the stp mode value using
+      #   the default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] returns true if the command completed successfully.
       #
       def set_mode(opts = {})
         cmd = command_builder('spanning-tree mode', opts)
@@ -157,11 +157,11 @@ module Rbeapi
       #     priority: <string>
       #   }
       #
-      # @param [String] :inst The named stp instance to return
+      # @param inst [String] The named stp instance to return.
       #
-      # @return [nil, Hash<Symbol, Object] returns the stp instance config as
-      #    a resource hash.  If the instances is not configured this method
-      #    will return a nil object
+      # @return [nil, Hash<Symbol, Object] Returns the stp instance config as
+      #    a resource hash. If the instances is not configured this method
+      #    will return a nil object.
       def get(inst)
         return nil unless parse_instances.include?(inst.to_s)
         response = {}
@@ -171,8 +171,8 @@ module Rbeapi
 
       ##
       # getall returns all configured stp instances parsed from the nodes
-      # running configuration.  The return hash is keyed by the instance
-      # identifier value
+      # running configuration. The return hash is keyed by the instance
+      # identifier value.
       #
       # @example
       #   {
@@ -185,8 +185,8 @@ module Rbeapi
       #     ...
       #   }
       #
-      # @return [Hash<Symbol, Object>] returns all configured stp instances
-      #   found in the nodes running configuration
+      # @return [Hash<Symbol, Object>] Returns all configured stp instances
+      #   found in the nodes running configuration.
       def getall
         parse_instances.each_with_object({}) do |inst, hsh|
           values = get(inst)
@@ -196,12 +196,12 @@ module Rbeapi
 
       ##
       # parse_instances will scan the nodes current configuration and extract
-      # the list of configured mst instances.  If no instances are configured
-      # then this method will return an empty array
+      # the list of configured mst instances. If no instances are configured
+      # then this method will return an empty array.
       #
       # @api private
       #
-      # @return [Array<String>] returns an Array of configured stp instances
+      # @return [Array<String>] Returns an Array of configured stp instances.
       def parse_instances
         config = get_block('spanning-tree mst configuration')
         config.scan(/(?<=^\s{3}instance\s)\d+/)
@@ -210,14 +210,14 @@ module Rbeapi
 
       ##
       # parse_priority will scan the nodes current configuration and extract
-      # the stp priority value for the given stp instance.  If the stp
+      # the stp priority value for the given stp instance. If the stp
       # instance priority is not configured, the priority value will be set
-      # using DEFAULT_STP_PRIORITY.  The returned hash is intended to be merged
-      # into the resource hash
+      # using DEFAULT_STP_PRIORITY. The returned hash is intended to be merged
+      # into the resource hash.
       #
       # @api private
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Resource hash attribute.
       def parse_priority(inst)
         priority_re = /(?<=^spanning-tree\smst\s#{inst}\spriority\s)(.+$)/x
         mdata = priority_re.match(config)
@@ -226,27 +226,31 @@ module Rbeapi
       private :parse_priority
 
       ##
-      # Deletes a configured MST instance
+      # Deletes a configured MST instance.
       #
-      # @param [String] inst The MST instance to delete
+      # @param inst [String] The MST instance to delete.
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @return [Boolean] True if the commands succeed otherwise False.
       def delete(inst)
         configure ['spanning-tree mst configuration', "no instance #{inst}",
                    'exit']
       end
 
       ##
-      # Configures the spanning-tree MST priority
+      # Configures the spanning-tree MST priority.
       #
-      # @param [String] inst The MST instance to configure
-      # @param [Hash] opts The configuration parameters for the priority
-      # @option opts [string] :value The value to set the priority to
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param inst [String] The MST instance to configure.
+      #
+      # @param opts [Hash] The configuration parameters for the priority.
+      #
+      # @option opts value [string] The value to set the priority to.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option opts [Boolean] :default The value should be set to default
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @option opts default [Boolean] The value should be set to default.
+      #
+      # @return [Boolean] True if the commands succeed otherwise False.
       def set_priority(inst, opts = {})
         value = opts[:value]
         enable = opts.fetch(:enable, true)
@@ -268,13 +272,13 @@ module Rbeapi
 
     ##
     # The StpInterfaces class provides a class instance for working with
-    # spanning-tree interfaces in EOS
+    # spanning-tree interfaces in EOS.
     #
     class StpInterfaces < Entity
       ##
       # get returns the configured stp interfaces from the nodes running
-      # configuration as a resource hash.  If the specified interface is not
-      # configured as a switchport then this method will return nil
+      # configuration as a resource hash. If the specified interface is not
+      # configured as a switchport then this method will return nil.
       #
       # @example
       #   {
@@ -283,11 +287,11 @@ module Rbeapi
       #     bpduguard: <boolean>
       #   }
       #
-      # @param [String] :name The interface name to return a resource for from
-      #   the nodes configuration
+      # @param name [String] The interface name to return a resource for from
+      #   the nodes configuration.
       #
-      # @return [nil, Hash<Symbol, Object>] returns the stp interface as a
-      #   resource hash
+      # @return [nil, Hash<Symbol, Object>] Returns the stp interface as a
+      #   resource hash.
       def get(name)
         config = get_block("interface #{name}")
         return nil unless config
@@ -301,8 +305,8 @@ module Rbeapi
 
       ##
       # getall returns all of the configured stp interfaces parsed from the
-      # nodes current running configuration.  The returned hash is keyed by the
-      # interface name
+      # nodes current running configuration. The returned hash is keyed by the
+      # interface name.
       #
       # @example
       #   {
@@ -319,8 +323,8 @@ module Rbeapi
       #     ...
       #   }
       #
-      # @return [Hash<Symbol, Object>] returns the stp interfaces config as a
-      #   resource hash from the nodes running configuration
+      # @return [Hash<Symbol, Object>] Returns the stp interfaces config as a
+      #   resource hash from the nodes running configuration.
       def getall
         interfaces = config.scan(/(?<=^interface\s)[Et|Po].+/)
         resp = interfaces.each_with_object({}) do |name, hsh|
@@ -332,12 +336,12 @@ module Rbeapi
 
       ##
       # parse_portfast scans the supplied interface configuration block and
-      # parses the value stp portfast.  The value of portfast is either enabled
-      # (true) or disabled (false)
+      # parses the value stp portfast. The value of portfast is either enabled
+      # (true) or disabled (false).
       #
       # @api private
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Resource hash attribute.
       def parse_portfast(config)
         val = /no spanning-tree portfast/ =~ config
         { portfast: val.nil? }
@@ -346,12 +350,12 @@ module Rbeapi
 
       ##
       # parse_portfast_type scans the supplied interface configuration block
-      # and parses the value stp portfast type.  The value of portfast type
+      # and parses the value stp portfast type. The value of portfast type
       # is either not set which implies normal (default), edge, or network.
       #
       # @api private
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Resource hash attribute.
       def parse_portfast_type(config)
         if /spanning-tree portfast network/ =~ config
           value = 'network'
@@ -366,12 +370,12 @@ module Rbeapi
 
       ##
       # parse_bpduguard scans the supplied interface configuration block and
-      # parses the value of stp bpduguard.  The value of bpduguard is either
-      # disabled (false) or enabled (true)
+      # parses the value of stp bpduguard. The value of bpduguard is either
+      # disabled (false) or enabled (true).
       #
       # @api private
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Resource hash attribute.
       def parse_bpduguard(config)
         val = /spanning-tree bpduguard enable/ =~ config
         { bpduguard: !val.nil? }
@@ -379,16 +383,20 @@ module Rbeapi
       private :parse_bpduguard
 
       ##
-      # Configures the interface portfast value
+      # Configures the interface portfast value.
       #
-      # @param [String] name The name of the interface to configure
-      # @param [Hash] opts The configuration parameters for portfast
-      # @option opts [Boolean] :value The value to set portfast
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param name [String] The name of the interface to configure.
+      #
+      # @param opts [Hash] The configuration parameters for portfast.
+      #
+      # @option opts value [Boolean] The value to set portfast.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option opts [Boolean] :default The value should be set to default
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @option opts default [Boolean] The value should be set to default.
+      #
+      # @return [Boolean] True if the commands succeed otherwise False.
       def set_portfast(name, opts = {})
         cmd = command_builder('spanning-tree portfast', opts)
         configure_interface(name, cmd)
@@ -397,15 +405,19 @@ module Rbeapi
       ##
       # Configures the interface portfast type value
       #
-      # @param [String] name The name of the interface to configure
-      # @param [Hash] opts The configuration parameters for portfast type
-      # @option opts [String] :value The value to set portfast type to.
-      #   The value must be set for calls to this method.
-      # @option opts [Boolean] :enable If false then the command is
-      #   negated. Default is true.
-      # @option opts [Boolean] :default The value should be set to default
+      # @param name [String] The name of the interface to configure.
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @param opts [Hash] The configuration parameters for portfast type.
+      #
+      # @option opts value [String] The value to set portfast type to.
+      #   The value must be set for calls to this method.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] The value should be set to default.
+      #
+      # @return [Boolean] True if the commands succeed otherwise False.
       def set_portfast_type(name, opts = {})
         value = opts[:value]
         fail ArgumentError, 'value must be set' unless value
@@ -428,14 +440,18 @@ module Rbeapi
       ##
       # Configures the interface bpdu guard value
       #
-      # @param [String] name The name of the interface to configure
-      # @param [Hash] opts The configuration parameters for bpduguard
-      # @option opts [Boolean] :value The value to set bpduguard
-      # @option opts [Boolean] :enable If false then the bpduguard is
-      #   disabled. If true then the bpduguard is enabled. Default is true.
-      # @option opts [Boolean] :default The value should be set to default
+      # @param name [String] The name of the interface to configure.
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @param opts [Hash] The configuration parameters for bpduguard.
+      #
+      # @option opts value [Boolean] The value to set bpduguard.
+      #
+      # @option opts enable [Boolean] If false then the bpduguard is
+      #   disabled. If true then the bpduguard is enabled. Default is true.
+      #
+      # @option opts default [Boolean] The value should be set to default.
+      #
+      # @return [Boolean] True if the commands succeed otherwise False.
       def set_bpduguard(name, opts = {})
         enable = opts.fetch(:enable, true)
         default = opts[:default] || false

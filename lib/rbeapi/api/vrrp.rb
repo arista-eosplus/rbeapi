@@ -32,10 +32,10 @@
 require 'rbeapi/api'
 
 ##
-# Eos is the toplevel namespace for working with Arista EOS nodes
+# Eos is the toplevel namespace for working with Arista EOS nodes.
 module Rbeapi
   ##
-  # Api is module namespace for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Vrrp class manages the set of virtual routers.
@@ -74,7 +74,7 @@ module Rbeapi
       #        }
       #   }
       #
-      # @param [String] :name The layer 3 interface name.
+      # @param name [String] The layer 3 interface name.
       #
       # @return [nil, Hash<Symbol, Object>] Returns the VRRP resource as a
       #   Hash with the virtual router ID as the key. If the interface name
@@ -128,7 +128,7 @@ module Rbeapi
       #
       # @return [nil, Hash<Symbol, Object>] Returns a hash that represents
       #   the entire virtual router IPs collection for all the layer 3
-      #   interfaces from the nodes running configuration.  If there are no
+      #   interfaces from the nodes running configuration. If there are no
       #   virtual routers configured, this method will return an empty hash.
       def getall
         interfaces = config.scan(/(?<=^interface\s).+$/)
@@ -144,8 +144,9 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
+      #
+      # @param vrid [String] The virtual router id.
       #
       # @return [Hash<'primary_ip', String>] Where string is the IPv4
       #   address or nil if the value is not set.
@@ -166,8 +167,9 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
+      #
+      # @param vrid [String] The virtual router id.
       #
       # @return [Hash<'priority', Integer>] The priority is between
       #   <1-255> or nil if the value is not set.
@@ -188,8 +190,9 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
+      #
+      # @param vrid [String] The virtual router id.
       #
       # @return [nil, Hash<'timers_advertise', Integer>] The timers_advertise
       #   is between <1-255> or nil if the value is not set.
@@ -210,8 +213,9 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
+      #
+      # @param vrid [String] The virtual router id.
       #
       # @return [nil, Hash<'preempt', Integer>] The preempt is
       #   between <1-255> or nil if the value is not set.
@@ -232,8 +236,9 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
+      #
+      # @param vrid [String] The virtual router id.
       #
       # @return [Hash<'enable', Boolean>]
       def parse_enable(config, vrid)
@@ -253,8 +258,9 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
+      #
+      # @param vrid [String] The virtual router id.
       #
       # @return [nil, Hash<'secondary_ip', Array<Strings>>] Returns an empty
       #   array if the value is not set.
@@ -275,8 +281,9 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
+      #
+      # @param vrid [String] The virtual router id.
       #
       # @return [nil, Hash<'secondary_ip', String>] Returns nil if the
       #   value is not set.
@@ -297,8 +304,9 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
+      #
+      # @param vrid [String] The virtual router id.
       #
       # @return [Hash<'track', Array<Hashes>] Returns an empty array if the
       #   value is not set. An example array of hashes follows:
@@ -325,8 +333,9 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
+      #
+      # @param vrid [String] The virtual router id.
       #
       # @return [Hash<'ip_version', Integer>] Returns nil if the
       #   value is not set.
@@ -348,8 +357,9 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
+      #
+      # @param vrid [String] The virtual router id.
       #
       # @return [Hash<'mac_addr_adv_interval', Integer>] Returns nil if the
       #   value is not set.
@@ -368,12 +378,13 @@ module Rbeapi
 
       ##
       # parse_preempt_delay_min scans the nodes configurations for the given
-      # virtual router id and extracts the preempt delay minimum value..
+      # virtual router id and extracts the preempt delay minimum value.
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
+      #
+      # @param vrid [String] The virtual router id.
       #
       # @return [Hash<'preempt_delay_min', Integer>] Returns nil if the
       #   value is not set.
@@ -394,8 +405,9 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
+      #
+      # @param vrid [String] The virtual router id.
       #
       # @return [Hash<'preempt_delay_reload', Integer>] Returns nil if the
       #   value is not set.
@@ -416,10 +428,11 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The interface config.
-      # @param [String] :vrid The virtual router id.
+      # @param config [String] The interface config.
       #
-      # @return [Hash<'delay_reload', Integer>] Returns empty hash  if the
+      # @param vrid [String] The virtual router id.
+      #
+      # @return [Hash<'delay_reload', Integer>] Returns empty hash if the
       #   value is not set.
       def parse_delay_reload(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} delay reload (\d+)$/)
@@ -434,69 +447,69 @@ module Rbeapi
 
       ##
       # create will create a new virtual router ID resource for the interface
-      # in the nodes current.  If the create method is called and the virtual
+      # in the nodes current. If the create method is called and the virtual
       # router ID already exists for the interface, this method will still
-      # return true.  Create takes optional parameters, but at least one
+      # return true. Create takes optional parameters, but at least one
       # parameter needs to be set or the command will fail.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   interface <name>
       #     vrrp <vrid> ...
       #
-      # @param [String] :name The layer 3 interface name.
+      # @param name [String] The layer 3 interface name.
       #
-      # @param [String] :vrid The virtual router id.
+      # @param vrid [String] The virtual router id.
       #
-      # @param [hash] :opts Optional keyword arguments
+      # @param opts [hash] Optional keyword arguments.
       #
-      # @option :opts [Boolean] :enable  Enable the virtual router.
+      # @option opts enable [Boolean] Enable the virtual router.
       #
-      # @option :opts [String] :primary_ip  The primary IPv4 address.
+      # @option opts primary_ip [String] The primary IPv4 address.
       #
-      # @option :opts [Integer] :priority  The priority setting for a virtual
+      # @option opts priority [Integer] The priority setting for a virtual
       #   router.
       #
-      # @option :opts [String] :description  Associates a text string to a
+      # @option opts description [String] Associates a text string to a
       #   virtual router.
       #
-      # @option :opts [Array<String>] :secondary_ip  The secondary IPv4
+      # @option opts secondary_ip [Array<String>] The secondary IPv4
       #   address to the specified virtual router.
       #
-      # @option :opts [Integer] :ip_version  Configures the VRRP version for
+      # @option opts ip_version [Integer] Configures the VRRP version for
       #   the VRRP router.
       #
-      # @option :opts [Integer] :timers_advertise  The interval between
+      # @option opts timers_advertise [Integer] The interval between
       #   successive advertisement messages that the switch sends to routers
       #   in the specified virtual router ID.
       #
-      # @option :opts [Integer] :mac_addr_adv_interval  Specifies interval in
+      # @option opts mac_addr_adv_interval [Integer] Specifies interval in
       #   seconds between advertisement packets sent to VRRP group members.
       #
-      # @option :opts [Boolean] :preempt  A virtual router preempt mode
+      # @option opts preempt [Boolean] A virtual router preempt mode
       #   setting. When preempt mode is enabled, if the switch has a higher
       #   priority it will preempt the current master virtual router. When
       #   preempt mode is disabled, the switch can become the master virtual
       #   router only when a master virtual router is not present on the
       #   subnet, regardless of priority settings.
       #
-      # @option :opts [Integer] :preempt_delay_min  Interval in seconds between
+      # @option opts preempt_delay_min [Integer] Interval in seconds between
       #   VRRP preempt event and takeover. Minimum delays takeover when VRRP
       #   is fully implemented.
       #
-      # @option :opts [Integer] :preempt_delay_reload  Interval in seconds
+      # @option opts preempt_delay_reload [Integer] Interval in seconds
       #   between VRRP preempt event and takeover. Reload delays takeover
       #   after initialization following a switch reload.
       #
-      # @option :opts [Integer] :delay_reload  Delay between system reboot and
+      # @option opts delay_reload [Integer] Delay between system reboot and
       #   VRRP initialization.
       #
-      # @option :opts [Array<Hash>] :track  The track hash contains the
+      # @option opts track [Array<Hash>] The track hash contains the
       #   name of an interface to track, the action to take on state-change
       #   of the tracked interface, and the amount to decrement the priority.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def create(name, vrid, opts = {})
         fail ArgumentError, 'create has no options set' if opts.empty?
         cmds = []
@@ -555,16 +568,17 @@ module Rbeapi
       # and the virtual router id does not exist on the interface, this
       # method will succeed.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   interface <name>
       #     no vrrp <vrid>
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
+      # @param name [String] The layer 3 interface name.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @param vrid [Integer] The virtual router ID.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
       def delete(name, vrid)
         configure_interface(name, "no vrrp #{vrid}")
       end
@@ -577,16 +591,17 @@ module Rbeapi
       # virtual router id does not exist on the interface, this method will
       # succeed.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   interface <name>
       #     default vrrp <vrid>
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
+      # @param name [String] The layer 3 interface name.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @param vrid [Integer] The virtual router ID.
+      #
+      # @return [Boolean] Returns true if the command complete successfully.
       def default(name, vrid)
         configure_interface(name, "default vrrp #{vrid}")
       end
@@ -594,26 +609,28 @@ module Rbeapi
       ##
       # set_shutdown enables and disables the virtual router.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no | default} vrrp <vrid> shutdown
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
-      # @param [hash] :opts Optional keyword arguments
+      # @param name [String] The layer 3 interface name.
       #
-      # @option :opts [Boolean] :enable If enable is true then the virtual
+      # @param vrid [Integer] The virtual router ID.
+      #
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts enable [Boolean] If enable is true then the virtual
       #   router is administratively enabled for the interface and if enable
       #   is false then the virtual router is administratively disabled
       #   for the interface. Default is true.
       #
-      # @option :opts [Boolean] :default Configure shutdown using
+      # @option opts default [Boolean] Configure shutdown using
       #   the default keyword.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_shutdown(name, vrid, opts = {})
         fail 'set_shutdown has the value option set' if opts[:value]
-        # Shutdown semantics are opposite of enable semantics so invert enable
+        # Shutdown semantics are opposite of enable semantics so invert enable.
         enable = opts.fetch(:enable, true)
         opts.merge!(enable: !enable)
         cmd = "vrrp #{vrid} shutdown"
@@ -623,23 +640,25 @@ module Rbeapi
       ##
       # set_primary_ip sets the primary IP address for the virtual router.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no | default} vrrp <vrid> ip <A.B.C.D>
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
-      # @param [hash] :opts Optional keyword arguments
+      # @param name [String] The layer 3 interface name.
       #
-      # @option :opts [String] :value The primary IPv4 address.
+      # @param vrid [Integer] The virtual router ID.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts value [String] The primary IPv4 address.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the primary IP address using
+      # @option opts default [Boolean] Configure the primary IP address using
       #   the default keyword.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_primary_ip(name, vrid, opts = {})
         cmd = "vrrp #{vrid} ip"
         configure_interface(name, command_builder(cmd, opts))
@@ -648,23 +667,25 @@ module Rbeapi
       ##
       # set_priority sets the priority for a virtual router.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no | default} vrrp <vrid> priority <priority>
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
-      # @param [hash] :opts Optional keyword arguments
+      # @param name [String] The layer 3 interface name.
       #
-      # @option :opts [String] :value The priority value.
+      # @param vrid [Integer] The virtual router ID.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts value [String] The priority value.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the priority using
+      # @option opts default [Boolean] Configure the priority using
       #   the default keyword.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_priority(name, vrid, opts = {})
         cmd = "vrrp #{vrid} priority"
         configure_interface(name, command_builder(cmd, opts))
@@ -673,23 +694,25 @@ module Rbeapi
       ##
       # set_description sets the description for a virtual router.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no | default} vrrp <vrid> description <description>
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
-      # @param [hash] :opts Optional keyword arguments
+      # @param name [String] The layer 3 interface name.
       #
-      # @option :opts [String] :value The description value.
+      # @param vrid [Integer] The virtual router ID.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts value [String] The description value.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the description using
+      # @option opts default [Boolean] Configure the description using
       #   the default keyword.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_description(name, vrid, opts = {})
         cmd = "vrrp #{vrid} description"
         configure_interface(name, command_builder(cmd, opts))
@@ -702,11 +725,11 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :name The layer 3 interface name.
+      # @param name [String] The layer 3 interface name.
       #
-      # @param [Integer] :vrid The virtual router ID.
+      # @param vrid [Integer] The virtual router ID.
       #
-      # @param [Array<String>] :ip_addrs Array of secondary IPv4 address.
+      # @param ip_addrs [Array<String>] Array of secondary IPv4 address.
       #   An empty array will remove all secondary IPv4 addresses set for
       #   the virtual router on the specified layer 3 interface.
       #
@@ -744,27 +767,27 @@ module Rbeapi
       private :build_secondary_ip_cmd
 
       # set_secondary_ips configures the set of secondary IP addresses
-      # associated with the virtual router.  The ip_addrs value passed
-      # should be an array of IP Addresses.  This method will remove
+      # associated with the virtual router. The ip_addrs value passed
+      # should be an array of IP Addresses. This method will remove
       # secondary IP addresses that are currently set for the virtual
       # router but not included in the ip_addrs array value passed in.
       # The method will then add secondary IP addresses that are not
       # currently set for the virtual router but are included in the
       # ip_addrs array value passed in.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no} vrrp <vrid> ip <A.B.C.D> secondary
       #
-      # @param [String] :name The layer 3 interface name.
+      # @param name [String] The layer 3 interface name.
       #
-      # @param [Integer] :vrid The virtual router ID.
+      # @param vrid [Integer] The virtual router ID.
       #
-      # @param [Array<String>] :ip_addrs Array of secondary IPv4 address.
+      # @param ip_addrs [Array<String>] Array of secondary IPv4 address.
       #   An empty array will remove all secondary IPv4 addresses set for
       #   the virtual router on the specified layer 3 interface.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_secondary_ip(name, vrid, ip_addrs)
         cmds = build_secondary_ip_cmd(name, vrid, ip_addrs)
         return true if cmds.empty?
@@ -774,23 +797,25 @@ module Rbeapi
       ##
       # set_ip_version sets the VRRP version for a virtual router.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no | default} vrrp <vrid> ip version <version>
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
-      # @param [hash] :opts Optional keyword arguments
+      # @param name [String] The layer 3 interface name.
       #
-      # @option :opts [String] :value The VRRP version.
+      # @param vrid [Integer] The virtual router ID.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts value [String] The VRRP version.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the VRRP version using
+      # @option opts default [Boolean] Configure the VRRP version using
       #   the default keyword.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_ip_version(name, vrid, opts = {})
         cmd = "vrrp #{vrid} ip version"
         configure_interface(name, command_builder(cmd, opts))
@@ -801,23 +826,25 @@ module Rbeapi
       # advertisement messages that the switch sends to routers in the
       # specified virtual router ID.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no | default} vrrp <vrid> timers advertise <secs>
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
-      # @param [hash] :opts Optional keyword arguments
+      # @param name [String] The layer 3 interface name.
       #
-      # @option :opts [String] :value The timer value in seconds.
+      # @param vrid [Integer] The virtual router ID.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts value [String] The timer value in seconds.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the timer advertise value
+      # @option opts default [Boolean] Configure the timer advertise value
       #   using the default keyword.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_timers_advertise(name, vrid, opts = {})
         cmd = "vrrp #{vrid} timers advertise"
         configure_interface(name, command_builder(cmd, opts))
@@ -828,24 +855,26 @@ module Rbeapi
       # advertisement packets sent to VRRP group members for the
       # specified virtual router ID.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no | default} vrrp <vrid> mac-address advertisement-interval <secs>
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
-      # @param [hash] :opts Optional keyword arguments
+      # @param name [String] The layer 3 interface name.
       #
-      # @option :opts [String] :value The mac address advertisement interval
+      # @param vrid [Integer] The virtual router ID.
+      #
+      # @param opts [hash] Optional keyword arguments
+      #
+      # @option opts value [String] The mac address advertisement interval
       #   value in seconds.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the timer advertise value
+      # @option opts default [Boolean] Configure the timer advertise value
       #   using the default keyword.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_mac_addr_adv_interval(name, vrid, opts = {})
         cmd = "vrrp #{vrid} mac-address advertisement-interval"
         configure_interface(name, command_builder(cmd, opts))
@@ -859,23 +888,25 @@ module Rbeapi
       # when a master virtual router is not present on the subnet,
       # regardless of priority settings.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no | default} vrrp <vrid> preempt
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
-      # @param [hash] :opts Optional keyword arguments
+      # @param name [String] The layer 3 interface name.
       #
-      # @option :opts [Boolean] :enable If enable is true then the virtual
+      # @param vrid [Integer] The virtual router ID.
+      #
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts enable [Boolean] If enable is true then the virtual
       #   router preempt mode is administratively enabled for the interface
       #   and if enable is false then the virtual router preempt mode is
       #   administratively disabled for the interface. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the timer advertise value
+      # @option opts default [Boolean] Configure the timer advertise value
       #   using the default keyword.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_preempt(name, vrid, opts = {})
         fail 'set_preempt has the value option set' if opts[:value]
         cmd = "vrrp #{vrid} preempt"
@@ -886,23 +917,25 @@ module Rbeapi
       # set_preempt_delay_min sets the minimum time in seconds for the
       # virtual router to wait before taking over the active role.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no | default} vrrp <vrid> preempt delay minimum <secs>
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
-      # @param [hash] :opts Optional keyword arguments
+      # @param name [String] The layer 3 interface name.
       #
-      # @option :opts [String] :value The preempt delay minimum value.
+      # @param vrid [Integer] The virtual router ID.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts value [String] The preempt delay minimum value.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the preempt delay minimum
+      # @option opts default [Boolean] Configure the preempt delay minimum
       #   value using the default keyword.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_preempt_delay_min(name, vrid, opts = {})
         cmd = "vrrp #{vrid} preempt delay minimum"
         configure_interface(name, command_builder(cmd, opts))
@@ -913,23 +946,25 @@ module Rbeapi
       # only. This delay period applies only to the first interface-up
       # event after the virtual router has reloaded.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no | default} vrrp <vrid> preempt delay reload <secs>
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
-      # @param [hash] :opts Optional keyword arguments
+      # @param name [String] The layer 3 interface name.
       #
-      # @option :opts [String] :value The preempt delay reload value.
+      # @param vrid [Integer] The virtual router ID.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts value [String] The preempt delay reload value.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the preempt delay reload
-      #   value using the default keyword.
+      # @option opts default [Boolean] :default Configure the preempt delay
+      #   reload value using the default keyword.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_preempt_delay_reload(name, vrid, opts = {})
         cmd = "vrrp #{vrid} preempt delay reload"
         configure_interface(name, command_builder(cmd, opts))
@@ -939,23 +974,25 @@ module Rbeapi
       # set_delay_reload sets the delay between system reboot and VRRP
       # initialization for the virtual router.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no | default} vrrp <vrid> delay reload <secs>
       #
-      # @param [String] :name The layer 3 interface name.
-      # @param [Integer] :vrid The virtual router ID.
-      # @param [hash] :opts Optional keyword arguments
+      # @param name [String] The layer 3 interface name.
       #
-      # @option :opts [String] :value The delay reload value.
+      # @param vrid [Integer] The virtual router ID.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param opts [hash] Optional keyword arguments
+      #
+      # @option opts value [String] The delay reload value.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the delay reload
+      # @option opts default [Boolean] Configure the delay reload
       #   value using the default keyword.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_delay_reload(name, vrid, opts = {})
         cmd = "vrrp #{vrid} delay reload"
         configure_interface(name, command_builder(cmd, opts))
@@ -968,11 +1005,11 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :name The layer 3 interface name.
+      # @param name [String] The layer 3 interface name.
       #
-      # @param [Integer] :vrid The virtual router ID.
+      # @param vrid [Integer] The virtual router ID.
       #
-      # @param [Array<Hash>] :tracks Array of a hash of track information.
+      # @param tracks [Array<Hash>] Array of a hash of track information.
       #   Hash format: { name: 'Eth2', action: 'decrement', amount: 33 },
       #   The name and action key are required. The amount key should only
       #   be specified if the action is shutdown. The valid actions are
@@ -1010,7 +1047,7 @@ module Rbeapi
 
         tracks = Set.new tracks
 
-        # Get the current tracks set for the virtual router
+        # Get the current tracks set for the virtual router.
         # A return of nil means that nothing has been configured for
         # the virtual router.
         vrrp = get(name)
@@ -1041,27 +1078,27 @@ module Rbeapi
       private :build_tracks_cmd
 
       # set_tracks configures the set of track settings associated with
-      # the virtual router.  The tracks value passed should be an array of
-      # hashes, each hash containing a track entry.  This method will remove
+      # the virtual router. The tracks value passed should be an array of
+      # hashes, each hash containing a track entry. This method will remove
       # tracks that are currently set for the virtual router but not included
-      # in the tracks array value passed in.  The method will then add
+      # in the tracks array value passed in. The method will then add
       # tracks that are not currently set for the virtual router but are
       # included in the tracks array value passed in.
       #
-      # @commands
+      # commands
       #   interface <name>
       #     {no} vrrp <vrid> track <name> <action> [<amount>]
       #
-      # @param [String] :name The layer 3 interface name.
+      # @param name [String] The layer 3 interface name.
       #
-      # @param [Integer] :vrid The virtual router ID.
+      # @param vrid [Integer] The virtual router ID.
       #
-      # @param [Array<Hash>] :tracks Array of a hash of track information.
+      # @param tracks [Array<Hash>] Array of a hash of track information.
       #   Hash format: { name: 'Eth2', action: 'decrement', amount: 33 },
       #   An empty array will remove all tracks set for
       #   the virtual router on the specified layer 3 interface.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def set_tracks(name, vrid, tracks)
         cmds = build_tracks_cmd(name, vrid, tracks)
         return true if cmds.empty?

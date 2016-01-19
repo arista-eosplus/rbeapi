@@ -61,11 +61,11 @@ copyright = u'2016, Arista Networks - EOS+ Consulting Services'
 # built documents.
 #
 import re
-p = re.compile("version\": \"(.*)\"")
-with open("../metadata.json") as f:
-    data = f.read()
-    ver = p.search(data)
-    if ver:
+p = re.compile("VERSION\s=\s'(.*)'")
+with open("../lib/rbeapi/version.rb") as f:
+     data = f.read()
+     ver = p.search(data)
+     if ver:
         version = ver.group(1)
 
 #print "Version: {}".format(version)

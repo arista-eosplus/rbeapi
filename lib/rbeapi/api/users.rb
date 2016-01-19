@@ -32,10 +32,10 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Api is module namespace for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Users class provides configuration of local user resources for
@@ -63,7 +63,7 @@ module Rbeapi
       end
 
       ##
-      # get returns the local user configuration
+      # get returns the local user configuration.
       #
       # @example
       #   {
@@ -76,12 +76,12 @@ module Rbeapi
       #     sshkey: <string>
       #   }
       #
-      # @param [String] :name The user name to return a resource for from the
+      # @param name [String] The user name to return a resource for from the
       #   nodes configuration
       #
       # @return [nil, Hash<Symbol, Object>] Returns the user resource as a
       #   Hash. If the specified user name is not found in the nodes current
-      #   configuration a nil object is returned
+      #   configuration a nil object is returned.
       def get(name)
         # The regex used here parses the running configuration to find one
         # username entry.
@@ -100,7 +100,7 @@ module Rbeapi
 
       ##
       # getall returns a collection of user resource hashes from the nodes
-      # running configuration.  The user resource collection hash is keyed
+      # running configuration. The user resource collection hash is keyed
       # by the unique user name.
       #
       # @example
@@ -126,7 +126,7 @@ module Rbeapi
       #     ...
       #   ]
       #
-      # @return [Hash<Symbol, Object>] returns a hash that represents the
+      # @return [Hash<Symbol, Object>] Returns a hash that represents the
       #   entire user collection from the nodes running configuration.  If
       #   there are no user names configured, this method will return an empty
       #    hash.
@@ -144,10 +144,10 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [Array] :user An array of values returned from the regular
+      # @param user [Array] An array of values returned from the regular
       #   expression scan of the nodes configuration.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_user_entry(user)
         hsh = {}
         hsh[:name] = user[0]
@@ -178,34 +178,34 @@ module Rbeapi
       # Optional parameters can be passed in to initialize user name specific
       # settings.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   username <name> nopassword privilege <value> role <value>
       #   username <name> secret [0,5,sha512] <secret> ...
       #
-      # @param [String] :name The name of the user to create
+      # @param name [String] The name of the user to create.
       #
-      # @param [hash] :opts Optional keyword arguments
+      # @param opts [hash] Optional keyword arguments.
       #
-      # @option :opts [Boolean] :nopassword Configures the user to be able to
-      #   authenticate without a password challenge
+      # @option opts nopassword [Boolean] Configures the user to be able to
+      #   authenticate without a password challenge.
       #
-      # @option :opts [String] :secret The secret (password) to assign to this
-      #   user
+      # @option opts secret [String] The secret (password) to assign to this
+      #   user.
       #
-      # @option :opts [String] :encryption Specifies how the secret is encoded.
+      # @option opts encryption [String] Specifies how the secret is encoded.
       #   Valid values are "cleartext", "md5", "sha512".  The default is
-      #   "cleartext"
+      #   "cleartext".
       #
-      # @option :opts [String] :privilege The privilege value to assign to
-      #   the user
+      # @option opts privilege [String] The privilege value to assign to
+      #   the user.
       #
-      # @option :opts [String] :role The role value to assign to the user
+      # @option opts role [String] The role value to assign to the user.
       #
-      # @option :opts [String] :sshkey The sshkey value to assign to the user
+      # @option opts sshkey [String] The sshkey value to assign to the user.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def create(name, opts = {})
         cmd = "username #{name}"
         cmd << " privilege #{opts[:privilege]}" if opts[:privilege]
@@ -234,134 +234,134 @@ module Rbeapi
 
       ##
       # delete will delete an existing user name  from the nodes current
-      # running configuration.  If the delete method is called and the user
+      # running configuration. If the delete method is called and the user
       # name does not exist, this method will succeed.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   no username <name>
       #
-      # @param [String] :name The user name to delete from the node.
+      # @param name [String] The user name to delete from the node.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def delete(name)
         configure("no username #{name}")
       end
 
       ##
-      # default will configure the user name using the default keyword.  This
+      # default will configure the user name using the default keyword. This
       # command has the same effect as deleting the user name from the nodes
       # running configuration.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   default username <name>
       #
-      # @param [String] :name The user name to default in the nodes
+      # @param name [String] The user name to default in the nodes
       #   configuration.
       #
-      # @return [Boolean] returns true if the command complete successfully
+      # @return [Boolean] Returns true if the command complete successfully.
       def default(name)
         configure("default username #{name}")
       end
 
       ##
       # set_privilege configures the user privilege value for the specified user
-      # name in the nodes running configuration.  If enable is false in the
+      # name in the nodes running configuration. If enable is false in the
       # opts keyword Hash then the name value is negated using the no
       # keyword. If the default keyword is set to true, then the privilege value
-      # is defaulted using the default keyword.  The default keyword takes
+      # is defaulted using the default keyword. The default keyword takes
       # precedence over the enable keyword
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   username <name> privilege <value>
       #   no username <name> privilege <value>
       #   default username <name> privilege <value>
       #
-      # @param [String] :name The user name to default in the nodes
+      # @param name [String] The user name to default in the nodes
       #   configuration.
       #
-      # @param [Hash] :opts Optional keyword arguments
+      # @param opts [Hash] Optional keyword arguments.
       #
-      # @option :opts [String] :value The privilege value to assign to the user
+      # @option opts value [String] The privilege value to assign to the user.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the user privilege value
-      #   using the default keyword
+      # @option opts default [Boolean] Configure the user privilege value
+      #   using the default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_privilege(name, opts = {})
         configure(command_builder("username #{name} privilege", opts))
       end
 
       ##
       # set_role configures the user role value for the specified user
-      # name in the nodes running configuration.  If enable is false in the
+      # name in the nodes running configuration. If enable is false in the
       # opts keyword Hash then the name value is negated using the no
       # keyword. If the default keyword is set to true, then the role value
-      # is defaulted using the default keyword.  The default keyword takes
+      # is defaulted using the default keyword. The default keyword takes
       # precedence over the enable keyword
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   username <name> role <value>
       #   no username <name> role <value>
       #   default username <name> role <value>
       #
-      # @param [String] :name The user name to default in the nodes
+      # @param name [String] The user name to default in the nodes
       #   configuration.
       #
-      # @param [Hash] :opts Optional keyword arguments
+      # @param opts [Hash] Optional keyword arguments.
       #
-      # @option :opts [String] :value The role value to assign to the user
+      # @option opts value [String] The role value to assign to the user.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the user role value
-      #   using the default keyword
+      # @option opts default [Boolean] Configure the user role value
+      #   using the default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_role(name, opts = {})
         configure(command_builder("username #{name} role", opts))
       end
 
       ##
       # set_sshkey configures the user sshkey value for the specified user
-      # name in the nodes running configuration.  If enable is false in the
+      # name in the nodes running configuration. If enable is false in the
       # opts keyword Hash then the name value is negated using the no
       # keyword. If the default keyword is set to true, then the sshkey value
-      # is defaulted using the default keyword.  The default keyword takes
-      # precedence over the enable keyword
+      # is defaulted using the default keyword. The default keyword takes
+      # precedence over the enable keyword.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   username <name> sshkey <value>
       #   no username <name> sshkey <value>
       #   default username <name> sshkey <value>
       #
-      # @param [String] :name The user name to default in the nodes
+      # @param name [String] The user name to default in the nodes
       #   configuration.
       #
-      # @param [Hash] :opts Optional keyword arguments
+      # @param opts [Hash] Optional keyword arguments
       #
-      # @option :opts [String] :value The sshkey value to assign to the user
+      # @option opts value [String] The sshkey value to assign to the user
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the user sshkey value
-      #   using the default keyword
+      # @option opts default [Boolean] Configure the user sshkey value
+      #   using the default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_sshkey(name, opts = {})
         configure(command_builder("username #{name} sshkey", opts))
       end

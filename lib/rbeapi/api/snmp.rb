@@ -32,17 +32,17 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Api is module namespace for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Snmp class provides a class implementation for working with the
-    # nodes SNMP configuration entity.  This class presents an abstraction
+    # nodes SNMP configuration entity. This class presents an abstraction
     # of the node's snmp configuration from the running config.
     #
-    # @eos_version 4.13.7M
+    # @since eos_version 4.13.7M
     class Snmp < Entity
       DEFAULT_SNMP_LOCATION = ''
       DEFAULT_SNMP_CONTACT = ''
@@ -63,7 +63,7 @@ module Rbeapi
       #     source_interface: <string>
       #   }
       #
-      # @return[Hash<Symbol, Object>] Returns the snmp resource as a Hash
+      # @return[Hash<Symbol, Object>] Returns the snmp resource as a Hash.
       def get
         response = {}
         response.merge!(parse_location)
@@ -77,14 +77,14 @@ module Rbeapi
 
       ##
       # parse_location scans the running config from the node and parses
-      # the snmp location value if it exists in the configuration.  If the
+      # the snmp location value if it exists in the configuration. If the
       # snmp location is not configure, then the DEFAULT_SNMP_LOCATION string
-      # is returned.  The Hash returned by this method is merged into the
+      # is returned. The Hash returned by this method is merged into the
       # snmp resource Hash returned by the get method.
       #
       # @api private
       #
-      # @return [Hash<Symbol,Object>] resource Hash attribute
+      # @return [Hash<Symbol,Object>] Returns the resource Hash attribute.
       def parse_location
         mdata = /snmp-server location (.+)$/.match(config)
         { location: mdata.nil? ? DEFAULT_SNMP_LOCATION : mdata[1] }
@@ -93,14 +93,14 @@ module Rbeapi
 
       ##
       # parse_contact scans the running config form the node and parses
-      # the snmp contact value if it exists in the configuration.  If the
+      # the snmp contact value if it exists in the configuration. If the
       # snmp contact is not configured, then the DEFAULT_SNMP_CONTACT value
-      # is returned.  The Hash returned by this method is merged into the
+      # is returned. The Hash returned by this method is merged into the
       # snmp resource Hash returned by the get method.
       #
       # @api private
       #
-      # @return [Hash<Symbol,Object] resource Hash attribute
+      # @return [Hash<Symbol,Object] Returns the resource Hash attribute.
       def parse_contact
         mdata = /snmp-server contact (.+)$/.match(config)
         { contact: mdata.nil? ? DEFAULT_SNMP_CONTACT : mdata[1] }
@@ -109,14 +109,14 @@ module Rbeapi
 
       ##
       # parse_chassis_id scans the running config from the node and parses
-      # the snmp chassis id value if it exists in the configuration.  If the
+      # the snmp chassis id value if it exists in the configuration. If the
       # snmp chassis id is not configured, then the DEFAULT_SNMP_CHASSIS_ID
-      # value is returned.  The Hash returned by this method is intended to
-      # be merged into the snmp resource Hash
+      # value is returned. The Hash returned by this method is intended to
+      # be merged into the snmp resource Hash.
       #
       # @api private
       #
-      # @return [Hash<Symbol,Object>] resource Hash attribute
+      # @return [Hash<Symbol,Object>] Returns the resource Hash attribute.
       def parse_chassis_id
         mdata = /snmp-server chassis-id (.+)$/.match(config)
         { chassis_id: mdata.nil? ? DEFAULT_SNMP_CHASSIS_ID : mdata[1] }
@@ -126,14 +126,14 @@ module Rbeapi
       ##
       # parse_source_interface scans the running config from the node and
       # parses the snmp source interface value if it exists in the
-      # configuration.  If the snmp source interface is not configured, then
-      # the DEFAULT_SNMP_SOURCE_INTERFACE value is returned.  The Hash
+      # configuration. If the snmp source interface is not configured, then
+      # the DEFAULT_SNMP_SOURCE_INTERFACE value is returned. The Hash
       # returned by this method is intended to be merged into the snmmp
-      # resource Hash
+      # resource Hash.
       #
       # @api private
       #
-      # @return [Hash<Symbol, Object>] resource Hash attribute
+      # @return [Hash<Symbol, Object>] Returns the resource Hash attribute.
       def parse_source_interface
         mdata = /snmp-server source-interface (.+)$/.match(config)
         { source_interface: mdata.nil? ? '' : mdata[1] }
@@ -142,14 +142,14 @@ module Rbeapi
 
       ##
       # parse_communities scans the running config from the node and parses all
-      # of the configure snmp community strings.  If there are no configured
+      # of the configure snmp community strings. If there are no configured
       # snmp community strings, the community value is set to an empty array.
       # The returned hash is intended to be merged into the global snmp
-      # resource hash
+      # resource hash.
       #
       # @api private
       #
-      # @return [Hash<Hash>] resource hash attribute
+      # @return [Hash<Hash>] Returns the resource hash attribute.
       def parse_communities
         values = config.scan(/snmp-server community (\w+) (ro|rw)[ ]?(.+)?$/)
         communities = values.each_with_object({}) do |value, hsh|
@@ -162,9 +162,9 @@ module Rbeapi
 
       ##
       # parse_notifications scans the running configuration and parses all of
-      # the snmp trap notifications configuration.  It is expected the trap
-      # configuration is in the running config.  The returned hash is intended
-      # to be merged into the resource hash
+      # the snmp trap notifications configuration. It is expected the trap
+      # configuration is in the running config. The returned hash is intended
+      # to be merged into the resource hash.
       def parse_notifications
         traps = config.scan(/(default|no)?[ ]?snmp-server enable traps (.+)$/)
         all = config.scan(/(default|no)?[ ]?snmp-server enable traps$/).first
@@ -180,24 +180,26 @@ module Rbeapi
 
       ##
       # set_notification configures the snmp trap notification for the
-      # specified trap.  The name option accepts the snmp trap name to
+      # specified trap. The name option accepts the snmp trap name to
       # configure or the keyword all to globally enable or disable
-      # notifications.  If the optional state argument is not provided then the
+      # notifications. If the optional state argument is not provided then the
       # default state is default.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   snmp-server enable traps <name>
       #   no snmp-server enable traps <name>
       #   default snmp-server enable traps <name>
       #
-      # @param [String] :name The name of the trap to configure or the keyword
-      #   all.  If this option is not specified, then the value of 'all' is
-      #   used as the default.
+      # @param opts [Hash] The configuration parameters.
       #
-      # @param [String] :state The state to configure the trap notification.
-      #   Valid values include 'on', 'off' or 'default'
+      # @option opts name [String] The name of the trap to configure or the
+      #   keyword all. If this option is not specified, then the value of
+      #   'all' is used as the default.
+      #
+      # @option opts state [String] The state to configure the trap
+      #   notification. Valid values include 'on', 'off' or 'default'.
       def set_notification(opts = {})
         name = opts[:name]
         name = nil if name == 'all'
@@ -208,29 +210,29 @@ module Rbeapi
 
       ##
       # set_location updates the snmp location value in the nodes running
-      # configuration.  If enable is false, then the snmp location value is
-      # negated using the no keyword.  If the default keyword is set to true,
+      # configuration. If enable is false, then the snmp location value is
+      # negated using the no keyword. If the default keyword is set to true,
       # then the snmp location value is defaulted using the default keyword.
       # The default parameter takes precedence over the enable keyword.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   snmp-server location <value>
       #   no snmp-server location
       #   default snmp-server location
       #
-      # @param [Hash] opts The configuration parameters
+      # @param opts [Hash] The configuration parameters.
       #
-      # @option opts [string] :value The snmp location value to configure
+      # @option opts value [string] The snmp location value to configure.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option opts [Boolean] :default Configure the snmp location value
-      #   using the default keyword
+      # @option opts default [Boolean] Configure the snmp location value
+      #   using the default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_location(opts = {})
         cmd = command_builder('snmp-server location', opts)
         configure(cmd)
@@ -238,30 +240,30 @@ module Rbeapi
 
       ##
       # set_contact updates the snmp contact value in the nodes running
-      # configuration.  If enable is false in the opts Hash then
-      # the snmp contact value is negated using the no keyword.  If the
+      # configuration. If enable is false in the opts Hash then
+      # the snmp contact value is negated using the no keyword. If the
       # default keyword is set to true, then the snmp contact value is
-      # defaulted using the default keyword.  The default parameter takes
+      # defaulted using the default keyword. The default parameter takes
       # precedence over the enable keyword.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   snmp-server contact <value>
       #   no snmp-server contact
       #   default snmp-server contact
       #
-      # @param [Hash] opts The configuration parameters
+      # @param opts [Hash] The configuration parameters.
       #
-      # @option opts [string] :value The snmp contact value to configure
+      # @option opts value [string] The snmp contact value to configure.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option opts [Boolean] :default Configures the snmp contact value
-      #   using the default keyword
+      # @option opts default [Boolean] Configures the snmp contact value
+      #   using the default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_contact(opts = {})
         cmd = command_builder('snmp-server contact', opts)
         configure(cmd)
@@ -269,30 +271,30 @@ module Rbeapi
 
       ##
       # set_chassis_id updates the snmp chassis id value in the nodes
-      # running configuration.  If enable is false in the opts
+      # running configuration. If enable is false in the opts
       # Hash then the snmp chassis id value is negated using the no
-      # keyword.  If the default keyword is set to true, then the snmp
-      # chassis id value is defaulted using the default keyword.  The default
+      # keyword. If the default keyword is set to true, then the snmp
+      # chassis id value is defaulted using the default keyword. The default
       # keyword takes precedence over the enable keyword.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   snmp-server chassis-id <value>
       #   no snmp-server chassis-id
       #   default snmp-server chassis-id
       #
-      # @param [Hash] opts The configuration parameters
+      # @param opts [Hash] The configuration parameters
       #
-      # @option opts [string] :value The snmp chassis id value to configure
+      # @option opts value [string] The snmp chassis id value to configure
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option opts [Boolean] :default Configures the snmp chassis id value
-      #   using the default keyword
+      # @option opts default [Boolean] Configures the snmp chassis id value
+      #   using the default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_chassis_id(opts = {})
         cmd = command_builder('snmp-server chassis-id', opts)
         configure(cmd)
@@ -300,30 +302,30 @@ module Rbeapi
 
       ##
       # set_source_interface updates the snmp source interface value in the
-      # nodes running configuration.  If enable is false in the opts
+      # nodes running configuration. If enable is false in the opts
       # Hash then the snmp source interface is negated using the no keyword.
       # If the default keyword is set to true, then the snmp source interface
-      # value is defaulted using the default keyword.  The default keyword
+      # value is defaulted using the default keyword. The default keyword
       # takes precedence over the enable keyword.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   snmp-server source-interface <value>
       #   no snmp-server source-interface
       #   default snmp-server source-interface
       #
-      # @param [Hash] opts The configuration parameters
+      # @param opts [Hash] The configuration parameters.
       #
-      # @option opts [string] :value The snmp source interface value to
-      #   configure.  This method will not ensure the interface is present
-      #   in the configuration
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts value [string] The snmp source interface value to
+      #   configure. This method will not ensure the interface is present
+      #   in the configuration.
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option opts [Boolean] :default Configures the snmp source interface
-      #   value using the default keyword
+      # @option opts default [Boolean] Configures the snmp source interface
+      #   value using the default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_source_interface(opts = {})
         cmd = command_builder('snmp-server source-interface', opts)
         configure(cmd)
@@ -331,65 +333,67 @@ module Rbeapi
 
       ##
       # add_community adds a new snmp community to the nodes running
-      # configuration.  This function is a convenience function that passes the
+      # configuration. This function is a convenience function that passes the
       # message to set_community_access.
       #
       # @see set_community_access
       #
-      # @param [String] :name The name of the snmp community to add to the
+      # @param name [String] The name of the snmp community to add to the
       #   nodes running configuration.
       #
-      # @param [String] :access Specifies the access level to assign to the
-      #   new snmp community.  Valid values are 'rw' or 'ro'
+      # @param access [String] Specifies the access level to assign to the
+      #   new snmp community. Valid values are 'rw' or 'ro'.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def add_community(name, access = 'ro')
         set_community_access(name, access)
       end
 
       ##
       # remove_community removes the specified community from the nodes running
-      # configuration.  If the specified name is not configured, this method
+      # configuration. If the specified name is not configured, this method
       # will still return successfully.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   no snmp-server community <name>
       #
-      # @param [String] :name The name of the snmp community to add to the
+      # @param name [String] The name of the snmp community to add to the
       #   nodes running configuration.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def remove_community(name)
         configure "no snmp-server community #{name}"
       end
 
       ##
       # set_community_acl configures the acl to apply to the specified
-      # community name.  When enable is true, it will remove the
+      # community name. When enable is true, it will remove the
       # the named community and then add the new acl entry.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # commands
       #   no snmp-server <name> [ro|rw] <value>
       #   snmp-server <name> [ro|rw] <value>
       #
-      # @param [String] :name The name of the snmp community to add to the
+      # @param name [String] The name of the snmp community to add to the
       #   nodes running configuration.
       #
-      # @param [Hash] opts The configuration parameters
+      # @param opts [Hash] The configuration parameters.
       #
-      # @option opts [String] :value The name of the acl to apply to the snmp
+      # @option opts value [String] The name of the acl to apply to the snmp
       #   community in the nodes config. If nil, then the community name
       #   allows access to all objects.
-      # @option opts [Boolean] :enable If false then the command is
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option opts [Boolean] :default Configure the snmp community name
+      #
+      # @option opts default [Boolean] Configure the snmp community name
       #   using the default keyword. Default takes precedence over enable.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_community_acl(name, opts = {})
         value = opts[:value]
         enable = opts.fetch(:enable, true)
@@ -407,11 +411,11 @@ module Rbeapi
       # set_community_access configures snmp-server community with designated
       #   name and access values.
       #
-      # @param [String] :name The snmp-server community name value
+      # @param name [String] The snmp-server community name value.
       #
-      # @param [String] :access The snmp-server community access value
+      # @param access [String] The snmp-server community access value.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_community_access(name, access)
         configure "snmp-server community #{name} #{access}"
       end
