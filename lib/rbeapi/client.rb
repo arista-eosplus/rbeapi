@@ -50,12 +50,12 @@ module Rbeapi
                      'socket' => 'Rbeapi::Eapilib::SocketEapiConnection' }
 
       ##
-      # Returns the currently loaded config object.  This function will
+      # Returns the currently loaded config object. This function will
       # create a new instance of the config object if one doesn't already
-      # exist
+      # exist.
       #
       # @return [Config] Returns an instance of Config used for working
-      #   with the eapi.conf file
+      #   with the eapi.conf file.
       def config
         return @config if @config
         @config = Config.new
@@ -64,11 +64,11 @@ module Rbeapi
 
       ##
       # load_config overrides the default conf file loaded in the config
-      # instances using the supplied conf argument as the conf file.  This
+      # instances using the supplied conf argument as the conf file. This
       # method will clear out an previously loaded configuration and replace
       # all entries with the contents of the supplied file.
       #
-      # @param [String] :conf The full path to the conf file to load into
+      # @param conf [String] The full path to the conf file to load into
       #   the config instance.
       def load_config(conf)
         config.read(conf)
@@ -76,15 +76,15 @@ module Rbeapi
 
       ##
       # Returns the configuration options for the named connection from
-      # the loaded configuration.  The configuration name is specified as
+      # the loaded configuration. The configuration name is specified as
       # the string right of the colon in the section name.
       #
-      # @param [String] :name The connection name to return from the loaded
-      #   configuration
+      # @param name [String] The connection name to return from the loaded
+      #   configuration.
       #
       # @return [Hash, nil] This method will return the configuration hash for
-      #   the named configuration if found.  If the name is not found, then
-      #   nil is returned
+      #   the named configuration if found. If the name is not found, then
+      #   nil is returned.
       def config_for(name)
         config.get_connection(name)
       end
@@ -93,11 +93,11 @@ module Rbeapi
       # Retrieves the node config from the loaded configuration file and
       # returns a Rbeapi::Node instance for working with the remote node.
       #
-      # @param [String] :name The named configuration to use for creating the
-      #   connection to the remote node
+      # @param name [String] The named configuration to use for creating the
+      #   connection to the remote node.
       #
-      # @return [Rbeapi::Node, nil] Returns an instance of Rbeapi::Node.  If
-      #   the named configuration is not found then nil is returned
+      # @return [Rbeapi::Node, nil] Returns an instance of Rbeapi::Node. If
+      #   the named configuration is not found then nil is returned.
       def connect_to(name)
         config_entry = config_for(name)
         return nil unless config_entry
@@ -114,26 +114,32 @@ module Rbeapi
 
       ##
       # Builds a connection object to a remote node using the specified
-      # options and return an instance of Rbeapi::Connection.  All
+      # options and return an instance of Rbeapi::Connection. All
       # configuration options can be passed via the :opts param.
       #
-      # @param [Hash] :opts the options to create a message with
-      # @option :opts [String] :host The IP address or hostname of the remote
-      #   eAPI endpoint
-      # @option :opts [String] :username The username to use to authenticate
-      #   the eAPI connection with
-      # @option :opts [String] :password The password to use to authenticate
-      #   the eAPI connection with
-      # @option :opts [String] :enablepwd The enable password (if defined) to
-      #   pass to the remote node to enter privilege mode
-      # @option :opts [String] :use_ssl Specifies whether or not to use the
-      #   HTTP or HTTPS protocol
-      # @option :opts [String] :port The port to connect to.  If not specified
+      # @param opts [Hash] the options to create a message with.
+      #
+      # @option opts host [String] The IP address or hostname of the remote
+      #   eAPI endpoint.
+      #
+      # @option opts username [String] The username to use to authenticate
+      #   the eAPI connection with.
+      #
+      # @option opts password [String] The password to use to authenticate
+      #   the eAPI connection with.
+      #
+      # @option opts enablepwd [String] The enable password (if defined) to
+      #   pass to the remote node to enter privilege mode.
+      #
+      # @option opts use_ssl [String] Specifies whether or not to use the
+      #   HTTP or HTTPS protocol.
+      #
+      # @option opts port [String] The port to connect to. If not specified
       #   The port is automatically determined based on the protocol used
-      #   (443 for https, 80 for http)
+      #   (443 for https, 80 for http).
       #
       # @return [Rbeapi::Connection] Returns an instance of Rbeapi::Connection
-      #   using the specified configuration options
+      #   using the specified configuration options.
       def connect(opts = {})
         transport = opts.fetch(:transport, DEFAULT_TRANSPORT)
         make_connection(transport, opts)
@@ -143,10 +149,11 @@ module Rbeapi
       # Creates a connection instance that can either be used directly or
       # passed to a Node instance.
       #
-      # @params [String] :transport The name of the transport to create.
-      # @params [Hash] :opts The options used to create the transport
+      # @param transport [String] The name of the transport to create.
       #
-      # @return [Rbeapi::EapiConnection] A instance of a connection object
+      # @param opts [Hash] The options used to create the transport.
+      #
+      # @return [Rbeapi::EapiConnection] A instance of a connection object.
       def make_connection(transport, opts = {})
         klass = TRANSPORTS.fetch(transport)
         cls = Rbeapi::Utils.class_from_string(klass)
@@ -155,7 +162,7 @@ module Rbeapi
     end
 
     ##
-    # The Config class holds the loaded configuration file data.  It is a
+    # The Config class holds the loaded configuration file data. It is a
     # subclass of IniFile.
     class Config < IniFile
       CONFIG_SEARCH_PATH = ['/mnt/flash/eapi.conf']
@@ -164,7 +171,9 @@ module Rbeapi
       # The Config class will automatically search for a filename to load
       # (if none provided) and load the data when the object is instantiated.
       #
-      # @param [String] :filename The full path to the filename to load.  If
+      # @param opts [Hash] The initialization parameters.
+      #
+      # @option opts filename [String] The full path to the filename to load. If
       #   the filename is not provided, then this class will attempt to find
       #   a valid conf file using the CONFIG_SEARCH_PATH.
       def initialize(opts = {})
@@ -175,13 +184,14 @@ module Rbeapi
 
       ##
       # This private method automatically finds and loads the conf file
-      # into the instance using the class variable CONFIG_SEARCH_PATH.  The
-      # connections should be retrieved using the get_connection method
+      # into the instance using the class variable CONFIG_SEARCH_PATH. The
+      # connections should be retrieved using the get_connection method.
       #
-      # @param [Hash] :opts The options for specifying the message
-      # @option :opts [String] :filename The full path to the filename
-      #   to load.  Using this option eliminates the use of the
-      #   search path
+      # @param opts [Hash] The options for specifying the message.
+      #
+      # @option opts filename [String] The full path to the filename
+      #   to load. Using this option eliminates the use of the
+      #   search path.
       def autoload(opts = {})
         search_path = CONFIG_SEARCH_PATH.dup
         # Add the home directory path if the HOME environement var is defined.
@@ -202,10 +212,10 @@ module Rbeapi
 
       ##
       # This method will read the specified filename and load its contents
-      # into the instance.  It will also add the default localhost entry
-      # if it doesn't exist in the conf file
+      # into the instance. It will also add the default localhost entry
+      # if it doesn't exist in the conf file.
       #
-      # @param [String] :filename The full path to the filename to load
+      # @param filename [String] The full path to the filename to load.
       def read(filename)
         begin
           super(filename: filename)
@@ -215,7 +225,7 @@ module Rbeapi
         end
 
         # For each section, if the host parameter is omitted then the
-        # connection name is used
+        # connection name is used.
         sections.each do |name|
           if name.start_with?('connection:')
             conn = self["#{name}"]
@@ -228,13 +238,14 @@ module Rbeapi
       end
 
       ##
-      # This method will cause the config to be loaded.  The process of
+      # This method will cause the config to be loaded. The process of
       # finding the configuration will be repeated so it is possible a
       # different conf file could be chosen if the original file was
-      # removed or a new file added higher on the search priority list
+      # removed or a new file added higher on the search priority list.
       #
-      # @param [Hash] :opts The options for specifying the message
-      # @opton :opts [String] :filename The full path to the file to load
+      # @param opts [Hash] The options for specifying the message.
+      #
+      # @option opts filename [String] The full path to the file to load.
       def reload(opts = {})
         autoload opts
       end
@@ -244,12 +255,12 @@ module Rbeapi
       # connection is not found matching the name and if a default
       # connection has been specified then return the default connection.
       #
-      # @param [String] :name The name of the connection to return from
-      #   the configuration.  This should be the string right of the :
-      #   in the config section header
+      # @param name [String] The name of the connection to return from
+      #   the configuration. This should be the string right of the :
+      #   in the config section header.
       #
       # @return [nil, Hash<String, String> Returns a hash of the connection
-      #   properties from the loaded config.  This method will return nil
+      #   properties from the loaded config. This method will return nil
       #   if the connection name is not found.
       def get_connection(name)
         return self["connection:#{name}"] \
@@ -259,11 +270,12 @@ module Rbeapi
       end
 
       ##
-      # Adds a new connection section to the current configuration
+      # Adds a new connection section to the current configuration.
       #
-      # @param [String] :name The name of the connection to add to the
+      # @param name [String] The name of the connection to add to the
       #   configuration.
-      # @param [Hash] :values The properties for the connection
+      #
+      # @param values [Hash] The properties for the connection.
       def add_connection(name, values)
         self["connection:#{name}"] = values
         nil
@@ -273,7 +285,7 @@ module Rbeapi
     ##
     # The Node object provides an instance for sending and receiving messages
     # with a specific EOS device. The methods provided in this class allow
-    # for handling both enable mode and config mode commands
+    # for handling both enable mode and config mode commands.
     class Node
       attr_reader :connection
       attr_accessor :dry_run
@@ -281,7 +293,7 @@ module Rbeapi
       ##
       # Save the connection and set autorefresh to true.
       #
-      # @param [Rbeapi::Eapilib::EapiConnection] :connection An instance of
+      # @param connection [Rbeapi::Eapilib::EapiConnection] An instance of
       #   EapiConnection used to send and receive eAPI formatted messages
       def initialize(connection)
         @connection = connection
@@ -291,55 +303,58 @@ module Rbeapi
 
       ##
       # Provides access the nodes running-configuration. This is a lazily
-      # loaded memoized property for working with the node configuration
+      # loaded memoized property for working with the node configuration.
       #
-      # @return [String] The node's running-config as a string
+      # @return [String] The node's running-config as a string.
       def running_config
         return @running_config if @running_config
         @running_config = get_config(params: 'all', as_string: true)
       end
 
       ##
-      # Provides access to the nodes startup-configuration.  This is a lazily
-      # loaded memoized property for working with the nodes startup config
+      # Provides access to the nodes startup-configuration. This is a lazily
+      # loaded memoized property for working with the nodes startup config.
       #
-      # @return [String] The node's startup-config as a string
+      # @return [String] The node's startup-config as a string.
       def startup_config
         return @startup_config if @startup_config
         @startup_config = get_config(config: 'startup-config', as_string: true)
       end
 
       ##
-      # Configures the node instance to use an enable password.  EOS can be
+      # Configures the node instance to use an enable password. EOS can be
       # configured to require a second layer of authentication when putting
-      # the session into enable mode.  The password supplied will be used to
+      # the session into enable mode. The password supplied will be used to
       # authenticate the session to enable mode if necessary.
       #
-      # @param [String] :password The value of the enable password
+      # @param password [String] The value of the enable password.
       def enable_authentication(password)
         @enablepwd = password
       end
 
       ##
       # The config method is a convenience method that will handling putting
-      # the switch into config mode prior to executing commands.  The method
+      # the switch into config mode prior to executing commands. The method
       # will insert 'config' at the top of the command stack and then pop
       # the empty hash from the response output before return the array
-      # to the caller
+      # to the caller.
       #
-      # @param [Array<String, Hash>] :commands An ordered list of commands to
+      # @param commands [Array<String, Hash>] An ordered list of commands to
       #   execute. A string in the list is an eapi command. A Hash entry in the
       #   array consists of the following key value pairs:
       #     { cmd: 'eapi command', input: 'text passed into stdin for command' }
-      # @option :opts [String] :encoding The encoding scheme to use for sending
-      #   and receive eAPI messages.  Valid values are json and text.  The
-      #   default value is json
-      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #
+      # @option opts encoding [String] The encoding scheme to use for sending
+      #   and receive eAPI messages. Valid values are json and text. The
+      #   default value is json.
+      #
+      # @option opts open_timeout [Float] Number of seconds to wait for the
       #   eAPI connection to open.
-      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #
+      # @option opts read_timeout [Float] Number of seconds to wait for one
       #   block of eAPI results to be read (via one read(2) call).
       #
-      # @return [Array<Hash>] ordered list of output from commands
+      # @return [Array<Hash>] Ordered list of output from commands.
       def config(commands, opts = {})
         commands = [*commands] unless commands.respond_to?('each')
 
@@ -364,19 +379,22 @@ module Rbeapi
       #
       # rubocop:disable Metrics/MethodLength
       #
-      # @param [Array<String, Hash>] :commands An ordered list of commands to
+      # @param commands [Array<String, Hash>] An ordered list of commands to
       #   execute. A string in the list is an eapi command. A Hash entry in the
       #   array consists of the following key value pairs:
       #     { cmd: 'eapi command', input: 'text passed into stdin for command' }
-      # @option :opts [String] :encoding The encoding scheme to use for sending
-      #   and receive eAPI messages.  Valid values are json and text.  The
-      #   default value is json
-      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #
+      # @option opts encoding [String] The encoding scheme to use for sending
+      #   and receive eAPI messages. Valid values are json and text. The
+      #   default value is json.
+      #
+      # @option opts open_timeout [Float] Number of seconds to wait for the
       #   eAPI connection to open.
-      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #
+      # @option opts read_timeout [Float] Number of seconds to wait for one
       #   block of eAPI results to be read (via one read(2) call).
       #
-      # @return [Array<Hash>] ordered list of output from commands
+      # @return [Array<Hash>] Ordered list of output from commands.
       def enable(commands, opts = {})
         commands = [*commands] unless commands.respond_to?('each')
 
@@ -407,16 +425,18 @@ module Rbeapi
       end
 
       ##
-      # Returns a response object from a call to the enable method.  This
+      # Returns a response object from a call to the enable method. This
       # private method is an internal method to ensure consistency in the
-      # return message format
+      # return message format.
       #
-      # @param [String] :command The command send to the node
-      # @param [Hash] :response The response returned from the eAPI call
-      # @param [String] :encoding The encoding scheme used in the response
-      #   which should be either json or text
+      # @param command [String] The command send to the node.
       #
-      # @return [Hash] A Ruby hash object
+      # @param result [Hash] The response returned from the eAPI call.
+      #
+      # @param encoding [String] The encoding scheme used in the response
+      #   which should be either json or text.
+      #
+      # @return [Hash] A Ruby hash object.
       def make_response(command, result, encoding)
         { command: command, result: result, encoding: encoding }
       end
@@ -424,17 +444,20 @@ module Rbeapi
 
       ##
       # This method will send the ordered list of commands to the destination
-      # node using the transport.  It is also response for inserting enable
-      # onto the command stack and popping the enable result on the response
+      # node using the transport. It is also response for inserting enable
+      # onto the command stack and popping the enable result on the response.
       #
-      # @param [Array] :commands The ordered list of commands to send to the
+      # @param commands [Array] The ordered list of commands to send to the
       #   destination node.
-      # @option :opts [String] :encoding The encoding scheme to use for
-      #   sending and receive eAPI requests.  This argument is optional.
-      #   Valid values include json or text.  The default is json
-      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #
+      # @option opts encoding [String] The encoding scheme to use for
+      #   sending and receive eAPI requests. This argument is optional.
+      #   Valid values include json or text. The default is json.
+      #
+      # @option opts open_timeout [Float] Number of seconds to wait for the
       #   eAPI connection to open.
-      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #
+      # @option opts read_timeout [Float] Number of seconds to wait for one
       #   block of eAPI results to be read (via one read(2) call).
       def run_commands(commands, opts = {})
         encoding = opts.fetch(:encoding, 'json')
@@ -458,12 +481,14 @@ module Rbeapi
       # and return it in full text.
       #
       # @param [Hash] opts the options to create a message with
-      # @option :opts [String] :config The configuration instance to return from
-      #   the node.  Valid values are 'running-config' and 'startup-config'. If
-      #   no value is specified, then 'running-config' is used
-      # @ :opts [String] :param Additional parameters to append to the
-      #   retrieving the configuration.  Valid values depend on the config
-      #   file requested
+      #
+      # @option opts config [String] The configuration instance to return from
+      #   the node. Valid values are 'running-config' and 'startup-config'. If
+      #   no value is specified, then 'running-config' is used.
+      #
+      # @option opts param [String] Additional parameters to append to the
+      #   retrieving the configuration. Valid values depend on the config
+      #   file requested.
       #
       #   running-config params
       #     all         Configuration with defaults
@@ -478,7 +503,7 @@ module Rbeapi
       #     interfaces  Filter config to include only the given interfaces
       #     section     Display sections containing matching commands
       #
-      # @return [String] the specified configuration as text
+      # @return [String] The specified configuration as text.
       def get_config(opts = {})
         config = opts.fetch(:config, 'running-config')
         params = opts.fetch(:params, '')
@@ -490,7 +515,7 @@ module Rbeapi
 
       ##
       # Returns an API module for working with the active configuration
-      # of the node
+      # of the node.
       def api(name, opts = {})
         path = opts.fetch(:path, 'rbeapi/api')
         namespace = opts.fetch(:namespace, 'Rbeapi::Api')
