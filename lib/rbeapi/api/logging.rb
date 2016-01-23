@@ -100,7 +100,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   logging on
       #   no logging on
       #   default logging on
@@ -126,7 +126,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   logging host <name>
       #
       # @param name [String] The host name or ip address of the destination
@@ -144,7 +144,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   no logging host <name>
       #
       # @param name [String] The host name or ip address of the destination

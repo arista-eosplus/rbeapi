@@ -194,7 +194,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   ip access-list standard <name>
       #
       # @param name [String] The ACL name to create on the node. Must
@@ -213,7 +213,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   no ip access-list standard <name>
       #
       # @param name [String] The ACL name to delete on the node.
@@ -230,7 +230,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   default no ip access-list standard <name>
       #
       # @param name [String] The ACL name to set to the default value

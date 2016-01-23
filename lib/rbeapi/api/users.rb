@@ -180,7 +180,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   username <name> nopassword privilege <value> role <value>
       #   username <name> secret [0,5,sha512] <secret> ...
       #
@@ -239,7 +239,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   no username <name>
       #
       # @param name [String] The user name to delete from the node.
@@ -256,7 +256,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   default username <name>
       #
       # @param name [String] The user name to default in the nodes
@@ -277,7 +277,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   username <name> privilege <value>
       #   no username <name> privilege <value>
       #   default username <name> privilege <value>
@@ -310,7 +310,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   username <name> role <value>
       #   no username <name> role <value>
       #   default username <name> role <value>
@@ -343,7 +343,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   username <name> sshkey <value>
       #   no username <name> sshkey <value>
       #   default username <name> sshkey <value>

@@ -195,7 +195,7 @@ module Rbeapi
       # Optional parameters can be passed in to initialize BGP specific
       # settings.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #
       # @param bgp_as [String] The BGP autonomous system number to be
@@ -247,7 +247,7 @@ module Rbeapi
       ##
       # delete will delete the BGP routing instance from the node.
       #
-      # commands
+      # ===Commands
       #   no router bgp <bgp_as>
       #
       # @return [Boolean] Returns true if the command completed successfully.
@@ -262,7 +262,7 @@ module Rbeapi
       # keyword.  This command has the same effect as deleting the BGP
       # routine instance from the nodes running configuration.
       #
-      # commands
+      # ===Commands
       #   default router bgp <bgp_as>
       #
       # @return [Boolean] returns true if the command complete successfully
@@ -294,7 +294,7 @@ module Rbeapi
       ##
       # set_router_id sets the router_id for the BGP routing instance.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     {no | default} router-id <router_id>
       #
@@ -325,7 +325,7 @@ module Rbeapi
       # set_shutdown configures the administrative state for the global
       # BGP routing process. The value option is not used by this method.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     {no | default} shutdown
       #
@@ -352,7 +352,7 @@ module Rbeapi
       # set_maximum_paths sets the maximum number of equal cost paths and
       # the maximum number of installed ECMP routes.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     {no | default}
       #       maximum-paths <maximum_paths> [ecmp <maximum_ecmp_paths>]
@@ -391,7 +391,7 @@ module Rbeapi
       ##
       # add_network creates a new instance of a BGP network on the node.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     network <prefix>/<masklen>
       #     route-map <route_map>
@@ -415,7 +415,7 @@ module Rbeapi
       ##
       # remove_network removes the instance of a BGP network on the node.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     {no} shutdown
       #
@@ -720,7 +720,7 @@ module Rbeapi
       ##
       # delete will delete the BGP neighbor from the node.
       #
-      # commands
+      # ===Commands
       #   no neighbor <name>
       #     or
       #   no neighbor <name> peer-group
@@ -765,7 +765,7 @@ module Rbeapi
       ##
       # set_peer_group creates a BGP static peer group name.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     {no | default} neighbor <name> peer-group <group-name>
       #
@@ -790,7 +790,7 @@ module Rbeapi
       # set_remote_as configures the expected AS number for a neighbor
       # (peer).
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     {no | default} neighbor <name> remote-as <as-id>
       #
@@ -815,7 +815,7 @@ module Rbeapi
       # set_shutdown disables the specified neighbor. The value option is
       # not used by this method.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     {no | default} neighbor <name> shutdown
       #
@@ -843,7 +843,7 @@ module Rbeapi
       # attributes to the specified BGP neighbor. The value option is
       # not used by this method.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     {no | default} neighbor <name> send-community
       #
@@ -869,7 +869,7 @@ module Rbeapi
       # BGP-speaking neighbor or neighbors in the specified peer group.
       # The value option is not used by this method.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     {no | default} neighbor <name> next-hop-self
       #
@@ -893,7 +893,7 @@ module Rbeapi
       # set_route_map_in command applies a route map to inbound BGP
       # routes.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     {no | default} neighbor <name> route-map <name> in
       #
@@ -919,7 +919,7 @@ module Rbeapi
       # set_route_map_out command applies a route map to outbound BGP
       # routes.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     {no | default} neighbor <name> route-map <name> out
       #
@@ -945,7 +945,7 @@ module Rbeapi
       # set_description associates descriptive text with the specified
       # peer or peer group.
       #
-      # commands
+      # ===Commands
       #   router bgp <bgp_as>
       #     {no | default} neighbor <name> description <string>
       #

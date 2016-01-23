@@ -159,7 +159,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   vlan <value>
       #
       # @param id [String, Integer] The vlan id to create on the node. The
@@ -177,7 +177,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   no vlan <value>
       #
       # @param id [String, Integer] The vlan id to delete from the node. The
@@ -195,7 +195,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   default vlan <value>
       #
       # @param id [String, Integer] The vlan id to default in the nodes
@@ -217,7 +217,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   vlan <id>
       #     name <value>
       #     no name
@@ -255,7 +255,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   vlan <id>
       #     state [active, suspend]
       #     no state
@@ -298,7 +298,7 @@ module Rbeapi
       #
       # @since version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   vlan <id>
       #     trunk group <value>
       #
@@ -320,7 +320,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   vlan <id>
       #     no trunk group <value>
       #

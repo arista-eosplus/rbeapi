@@ -255,7 +255,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   switchport trunk allowed vlan add <value>
       #   no switchport trunk allowed vlan
       #   default switchport trunk allowed vlan

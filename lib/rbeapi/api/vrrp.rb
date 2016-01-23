@@ -454,7 +454,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     vrrp <vrid> ...
       #
@@ -570,7 +570,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     no vrrp <vrid>
       #
@@ -593,7 +593,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     default vrrp <vrid>
       #
@@ -609,7 +609,7 @@ module Rbeapi
       ##
       # set_shutdown enables and disables the virtual router.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no | default} vrrp <vrid> shutdown
       #
@@ -640,7 +640,7 @@ module Rbeapi
       ##
       # set_primary_ip sets the primary IP address for the virtual router.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no | default} vrrp <vrid> ip <A.B.C.D>
       #
@@ -667,7 +667,7 @@ module Rbeapi
       ##
       # set_priority sets the priority for a virtual router.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no | default} vrrp <vrid> priority <priority>
       #
@@ -694,7 +694,7 @@ module Rbeapi
       ##
       # set_description sets the description for a virtual router.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no | default} vrrp <vrid> description <description>
       #
@@ -775,7 +775,7 @@ module Rbeapi
       # currently set for the virtual router but are included in the
       # ip_addrs array value passed in.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no} vrrp <vrid> ip <A.B.C.D> secondary
       #
@@ -797,7 +797,7 @@ module Rbeapi
       ##
       # set_ip_version sets the VRRP version for a virtual router.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no | default} vrrp <vrid> ip version <version>
       #
@@ -826,7 +826,7 @@ module Rbeapi
       # advertisement messages that the switch sends to routers in the
       # specified virtual router ID.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no | default} vrrp <vrid> timers advertise <secs>
       #
@@ -855,7 +855,7 @@ module Rbeapi
       # advertisement packets sent to VRRP group members for the
       # specified virtual router ID.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no | default} vrrp <vrid> mac-address advertisement-interval <secs>
       #
@@ -888,7 +888,7 @@ module Rbeapi
       # when a master virtual router is not present on the subnet,
       # regardless of priority settings.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no | default} vrrp <vrid> preempt
       #
@@ -917,7 +917,7 @@ module Rbeapi
       # set_preempt_delay_min sets the minimum time in seconds for the
       # virtual router to wait before taking over the active role.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no | default} vrrp <vrid> preempt delay minimum <secs>
       #
@@ -946,7 +946,7 @@ module Rbeapi
       # only. This delay period applies only to the first interface-up
       # event after the virtual router has reloaded.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no | default} vrrp <vrid> preempt delay reload <secs>
       #
@@ -974,7 +974,7 @@ module Rbeapi
       # set_delay_reload sets the delay between system reboot and VRRP
       # initialization for the virtual router.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no | default} vrrp <vrid> delay reload <secs>
       #
@@ -1085,7 +1085,7 @@ module Rbeapi
       # tracks that are not currently set for the virtual router but are
       # included in the tracks array value passed in.
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     {no} vrrp <vrid> track <name> <action> [<amount>]
       #

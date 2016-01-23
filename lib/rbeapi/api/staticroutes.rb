@@ -88,7 +88,7 @@ module Rbeapi
       ##
       # Creates a static route in EOS. May add or overwrite an existing route.
       #
-      # commands
+      # ===Commands
       #   ip route <destination> <nexthop> [router_ip] [distance] [tag <tag>]
       #     [name <name>]
       #
@@ -123,7 +123,7 @@ module Rbeapi
       # Removes a given route from EOS. May remove multiple routes if nexthop
       # is not specified.
       #
-      # commands
+      # ===Commands
       #   no ip route <destination> [nexthop]
       #
       # @param destination [String] The destination and prefix matching the

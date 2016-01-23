@@ -187,7 +187,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   snmp-server enable traps <name>
       #   no snmp-server enable traps <name>
       #   default snmp-server enable traps <name>
@@ -217,7 +217,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   snmp-server location <value>
       #   no snmp-server location
       #   default snmp-server location
@@ -248,7 +248,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   snmp-server contact <value>
       #   no snmp-server contact
       #   default snmp-server contact
@@ -279,7 +279,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   snmp-server chassis-id <value>
       #   no snmp-server chassis-id
       #   default snmp-server chassis-id
@@ -310,7 +310,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   snmp-server source-interface <value>
       #   no snmp-server source-interface
       #   default snmp-server source-interface
@@ -356,7 +356,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   no snmp-server community <name>
       #
       # @param name [String] The name of the snmp community to add to the
@@ -374,7 +374,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   no snmp-server <name> [ro|rw] <value>
       #   snmp-server <name> [ro|rw] <value>
       #
