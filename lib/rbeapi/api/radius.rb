@@ -172,7 +172,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   radius-server key <format> <value>
       #   no radius-server key
       #   default radius-server key
@@ -219,7 +219,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   radius-server timeout <value>
       #   no radius-server timeout
       #   default radius-server timeout
@@ -250,7 +250,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   radius-server retransmit <value>
       #   no radius-server retransmit
       #   default radius-server retransmit

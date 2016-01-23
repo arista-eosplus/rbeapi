@@ -263,7 +263,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   aaa group server <type> <name>
       #
       # @param name [String] The name of the aaa group server to create in the
@@ -286,7 +286,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   no aaa group server [radius | tacacs+] <name>
       #
       # @param name [String] The name of the aaa group server to create in the
@@ -420,7 +420,7 @@ module Rbeapi
       #
       # eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   aaa group server [radius | tacacs+] <name>
       #   no server <server>
       #

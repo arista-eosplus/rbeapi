@@ -107,7 +107,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   ntp source <value>
       #   no ntp source
       #   default ntp source
@@ -168,7 +168,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   ntp server <srv> prefer
       #   no ntp server <srv> prefer
       #

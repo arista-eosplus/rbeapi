@@ -126,7 +126,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   ip name-server <value>
       #   no ip name-server
       #   default ip name-server
@@ -193,7 +193,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   ip domain-list <value>
       #   no ip domain-list
       #   default ip domain-list

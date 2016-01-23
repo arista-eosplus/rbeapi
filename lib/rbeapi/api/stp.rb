@@ -117,7 +117,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   spanning-tree mode <value>
       #   no spanning-tree mode
       #   default spanning-tree mode

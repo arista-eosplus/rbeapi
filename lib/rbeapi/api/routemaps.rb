@@ -271,7 +271,7 @@ module Rbeapi
       #
       # rubocop:disable Metrics/MethodLength
       #
-      # commands
+      # ===Commands
       #   route-map <name> action <value> seqno <value> description <value>
       #   match <value> set <value> continue <value>
       #
@@ -386,7 +386,7 @@ module Rbeapi
       # running configuration. If the delete method is called and the
       # routemap name does not exist, this method will succeed.
       #
-      # commands
+      # ===Commands
       #   no route-map <name> <action> <seqno>
       #
       # @param name [String] The routemap name to delete from the node.
@@ -408,7 +408,7 @@ module Rbeapi
       # exist then this method will not perform any changes but still
       # return True.
       #
-      # commands
+      # ===Commands
       #   no route-map <name>
       #
       # @param name [String] The routemap name to set to default.
@@ -426,7 +426,7 @@ module Rbeapi
       # set_match_statements will set the match values for a specified routemap.
       # If the specified routemap does not exist, it will be created.
       #
-      # commands
+      # ===Commands
       #   route-map <name> action <value> seqno <value> match <value>
       #
       # @param name [String] The name of the routemap to create.
@@ -451,7 +451,7 @@ module Rbeapi
       # set_set_statements will set the set values for a specified routemap.
       # If the specified routemap does not exist, it will be created.
       #
-      # commands
+      # ===Commands
       #   route-map <name> action <value> seqno <value> set <value>
       #
       # @param name [String] The name of the routemap to create.
@@ -476,7 +476,7 @@ module Rbeapi
       # set_continue will set the continue value for a specified routemap.
       # If the specified routemap does not exist, it will be created.
       #
-      # commands
+      # ===Commands
       #   route-map <name> action <value> seqno <value> continue <value>
       #
       # @param name [String] The name of the routemap to create.
@@ -499,7 +499,7 @@ module Rbeapi
       # set_description will set the description for a specified routemap.
       # If the specified routemap does not exist, it will be created.
       #
-      # commands
+      # ===Commands
       #   route-map <name> action <value> seqno <value> description <value>
       #
       # @param name [String] The name of the routemap to create.

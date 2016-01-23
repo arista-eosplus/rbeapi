@@ -170,7 +170,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     no switchport
       #
@@ -191,7 +191,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     no ip address
       #     switchport
@@ -215,7 +215,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     ip address <value>
       #     no ip address
@@ -252,7 +252,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     mtu <value>
       #     no mtu
@@ -289,7 +289,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     ip helper-address <value>
       #     no ip helper-address

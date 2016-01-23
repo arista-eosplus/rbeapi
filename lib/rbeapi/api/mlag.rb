@@ -211,7 +211,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   mlag configuration
       #     domain-id <value>
       #     no domain-id
@@ -245,7 +245,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   mlag configuration
       #     local-interface <value>
       #     no local-interface
@@ -280,7 +280,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   mlag configuration
       #     peer-link <value>
       #     no peer-link
@@ -315,7 +315,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   mlag configuration
       #     peer-address <value>
       #     no peer-address
@@ -350,7 +350,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   mlag configuration
       #     shutdown
       #     no shutdown
@@ -386,7 +386,7 @@ module Rbeapi
       #
       # @since eos_version 4.13.7M
       #
-      # commands
+      # ===Commands
       #   interface <name>
       #     mlag <value>
       #     no mlag
