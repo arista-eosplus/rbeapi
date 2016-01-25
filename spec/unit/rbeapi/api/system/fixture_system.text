@@ -1,2 +1,16 @@
 hostname localhost
 ip routing
+banner login
+Login Banner
+Second Line
+123456
+ EOF
+EOF
+!
+banner motd
+MOTD Banner
+Second Line
+EOF 
+*\v1?
+EOF
+!

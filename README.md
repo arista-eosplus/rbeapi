@@ -13,6 +13,11 @@
 6. [Testing] (#testing)
 7. [License] (#license)
 
+## Build status
+
+Style/package build: [![Start Build Status](https://revproxy.arista.com/eosplus/ci/buildStatus/icon?job=rbeapi_start&style=plastic)](https://revproxy.arista.com/eosplus/ci/job/rbeapi_start)
+
+Unit/System spec/coverage: [![Spec Build Status](https://revproxy.arista.com/eosplus/ci/buildStatus/icon?job=rbeapi_spec&style=plastic)](https://revproxy.arista.com/eosplus/ci/job/rbeapi_spec)
 
 # Overview
 

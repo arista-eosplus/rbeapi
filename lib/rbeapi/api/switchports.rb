@@ -52,7 +52,8 @@ module Rbeapi
       #     "mode": [access, trunk],
       #     "trunk_allowed_vlans": array<strings>
       #     "trunk_native_vlan": <Integer>,
-      #     "access_vlan": <Integer>
+      #     "access_vlan": <Integer>,
+      #     "trunk_groups": array<strings>
       #   }
       #
       # @param [String] :name The full name of the interface to get.  The

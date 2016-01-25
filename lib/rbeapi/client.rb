@@ -216,11 +216,14 @@ module Rbeapi
 
         # For each section, if the host parameter is omitted then the
         # connection name is used
+        has_default = self.has_section?('DEFAULT')
         sections.each do |name|
-          if name.start_with?('connection:')
-            conn = self["#{name}"]
-            conn['host'] = name.split(':')[1] unless conn['host']
-          end
+          next unless name.start_with?('connection:')
+          conn = self["#{name}"]
+          conn['host'] = name.split(':')[1] unless conn['host']
+
+          # Merge in the default values into the connections
+          conn.merge!(self['DEFAULT']) { |_key, v1, _v2| v1 } if has_default
         end
 
         return if get_connection 'localhost'
@@ -327,7 +330,10 @@ module Rbeapi
       # the empty hash from the response output before return the array
       # to the caller
       #
-      # @param [Array<String>] commands An ordered list of commands to execute
+      # @param [Array<String, Hash>] :commands An ordered list of commands to
+      #   execute. A string in the list is an eapi command. A Hash entry in the
+      #   array consists of the following key value pairs:
+      #     { cmd: 'eapi command', input: 'text passed into stdin for command' }
       # @option :opts [String] :encoding The encoding scheme to use for sending
       #   and receive eAPI messages.  Valid values are json and text.  The
       #   default value is json
@@ -361,7 +367,10 @@ module Rbeapi
       #
       # rubocop:disable Metrics/MethodLength
       #
-      # @param [Array<String>] commands An ordered list of commands to execute
+      # @param [Array<String, Hash>] :commands An ordered list of commands to
+      #   execute. A string in the list is an eapi command. A Hash entry in the
+      #   array consists of the following key value pairs:
+      #     { cmd: 'eapi command', input: 'text passed into stdin for command' }
       # @option :opts [String] :encoding The encoding scheme to use for sending
       #   and receive eAPI messages.  Valid values are json and text.  The
       #   default value is json

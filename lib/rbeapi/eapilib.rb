@@ -121,6 +121,8 @@ module Rbeapi
     # JSON-RPC.  This class should not need to be directly instantiated.
     class EapiConnection
       attr_reader :error
+      attr_reader :open_timeout
+      attr_reader :read_timeout
 
       ##
       # The connection contains the transport.
@@ -160,14 +162,6 @@ module Rbeapi
       def timeouts(opts = {})
         @open_timeout = opts.fetch(:open_timeout, DEFAULT_HTTP_OPEN_TIMEOUT)
         @read_timeout = opts.fetch(:read_timeout, DEFAULT_HTTP_READ_TIMEOUT)
-      end
-
-      ##
-      # Gets values for open_timeout and read_timeout
-      #
-      # @return [Hash] open_timeout and read_timeout
-      def get_timeouts
-        { open_timeout: @open_timeout, read_timeout: @read_timeout }
       end
 
       ##

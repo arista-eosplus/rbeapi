@@ -41,13 +41,20 @@ module Rbeapi
     # The System class configures the node system services such as
     # hostname and domain name
     class System < Entity
+      def initialize(node)
+        super(node)
+        @banners_re = Regexp.new(/^banner\s+(login|motd)\s?$\n(.*?)$\nEOF$\n/m)
+      end
+
       ##
-      # Returns the system settings for hostname and iprouting
+      # Returns the system settings for hostname, iprouting, and banners
       #
       # @example
       #   {
       #     hostname: <string>,
-      #     iprouting: <boolean>
+      #     iprouting: <boolean>,
+      #     banner_motd: <string>,
+      #     banner_login: <string>
       #   }
       #
       # @return [Hash]  A Ruby hash object that provides the system settings as
@@ -56,6 +63,7 @@ module Rbeapi
         response = {}
         response.merge!(parse_hostname(config))
         response.merge!(parse_iprouting(config))
+        response.merge!(parse_banners(config))
         response
       end
 
@@ -90,13 +98,39 @@ module Rbeapi
       private :parse_iprouting
 
       ##
+      # Parses the global config and returns the value for both motd
+      # and login banners.
+      #
+      # @api private
+      #
+      # @param [String] :config The configuration block returned
+      #   from the node's running configuration
+      #
+      # @return [Hash<Symbol, Object>] resource hash attribute. If the
+      #   banner is not set it will return a value of None for that key.
+      def parse_banners(config)
+        motd_value = login_value = ''
+        entries = config.scan(@banners_re)
+        entries.each do |type, value|
+          if type == 'motd'
+            motd_value = value
+          elsif type == 'login'
+            login_value = value
+          end
+        end
+        { banner_motd: motd_value, banner_login: login_value }
+      end
+      private :parse_banners
+
+      ##
       # Configures the system hostname value in the running-config
       #
       # @param [Hash] opts The configuration parameters
       # @option opts [string] :value The value to set the hostname to
       # @option :opts [Boolean] :enable If false then the command is
       #   negated. Default is true.
-      # @option opts [Boolean] :default The value should be set to default
+      # @option :opts [Boolean] :default If true configure the command using
+      #   the default keyword. Default is false.
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_hostname(opts = {})
@@ -110,12 +144,37 @@ module Rbeapi
       # @param [Hash] opts The configuration parameters
       # @option :opts [Boolean] :enable True if ip routing should be enabled
       #  or False if ip routing should be disabled. Default is true.
-      # @option opts [Boolean] :default Controls the use of the default
-      #  keyword. Default is false.
+      # @option :opts [Boolean] :default If true configure the command using
+      #   the default keyword. Default is false.
       #
       # @return [Boolean] returns true if the command completed successfully
       def set_iprouting(opts = {})
         cmd = command_builder('ip routing', opts)
+        configure(cmd)
+      end
+
+      ##
+      # Configures system banners
+      #
+      # @param [String] :banner_type banner to be changed (likely either
+      #   login or motd)
+      # @param [Hash] opts The configuration parameters
+      # @option opts [string] :value The value to set for the banner.
+      # @option :opts [Boolean] :enable If false then the command is
+      #   negated. Default is true.
+      # @option :opts [Boolean] :default If true configure the command using
+      #   the default keyword. Default is false.
+      #
+      # @return [Boolean] returns true if the command completed successfully
+      def set_banner(banner_type, opts = {})
+        value = opts[:value]
+        cmd_string = "banner #{banner_type}"
+        if value
+          value += "\n" if value[-1, 1] != "\n"
+          cmd = [{ cmd: cmd_string, input: value }]
+        else
+          cmd = command_builder(cmd_string, opts)
+        end
         configure(cmd)
       end
     end
