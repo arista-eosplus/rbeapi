@@ -35,11 +35,11 @@ require 'rbeapi/api'
 # Rbeapi toplevel namespace
 module Rbeapi
   ##
-  # Api is module namespace for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The System class configures the node system services such as
-    # hostname and domain name
+    # hostname and domain name.
     class System < Entity
       def initialize(node)
         super(node)
@@ -47,7 +47,7 @@ module Rbeapi
       end
 
       ##
-      # Returns the system settings for hostname, iprouting, and banners
+      # Returns the system settings for hostname, iprouting, and banners.
       #
       # @example
       #   {
@@ -57,7 +57,7 @@ module Rbeapi
       #     banner_login: <string>
       #   }
       #
-      # @return [Hash]  A Ruby hash object that provides the system settings as
+      # @return [Hash] A Ruby hash object that provides the system settings as
       #   key/value pairs.
       def get
         response = {}
@@ -68,14 +68,14 @@ module Rbeapi
       end
 
       ##
-      # parse_hostname parses hostname values from the provided config
+      # parse_hostname parses hostname values from the provided config.
       #
       # @api private
       #
-      # @param [String] :config The configuration block returned
-      #   from the node's running configuration
+      # @param config [String] The configuration block returned
+      #   from the node's running configuration.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] The resource hash attribute.
       def parse_hostname(config)
         mdata = /(?<=^hostname\s)(.+)$/.match(config)
         { hostname: mdata.nil? ? '' : mdata[1] }
@@ -83,14 +83,14 @@ module Rbeapi
       private :parse_hostname
 
       ##
-      # parse_iprouting parses ip routing from the provided config
+      # parse_iprouting parses ip routing from the provided config.
       #
       # @api private
       #
-      # @param [String] :config The configuration block returned
-      #   from the node's running configuration
+      # @param config [String] The configuration block returned
+      #   from the node's running configuration.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] The resource hash attribute.
       def parse_iprouting(config)
         mdata = /no\sip\srouting/.match(config)
         { iprouting: mdata.nil? ? true : false }
@@ -103,10 +103,10 @@ module Rbeapi
       #
       # @api private
       #
-      # @param [String] :config The configuration block returned
-      #   from the node's running configuration
+      # @param config [String] The configuration block returned
+      #   from the node's running configuration.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute. If the
+      # @return [Hash<Symbol, Object>] The resource hash attribute. If the
       #   banner is not set it will return a value of None for that key.
       def parse_banners(config)
         motd_value = login_value = ''
@@ -123,49 +123,58 @@ module Rbeapi
       private :parse_banners
 
       ##
-      # Configures the system hostname value in the running-config
+      # Configures the system hostname value in the running-config.
       #
-      # @param [Hash] opts The configuration parameters
-      # @option opts [string] :value The value to set the hostname to
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param opts [Hash] The configuration parameters.
+      #
+      # @option opts value [string] The value to set the hostname to.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option :opts [Boolean] :default If true configure the command using
+      #
+      # @option opts default [Boolean] If true configure the command using
       #   the default keyword. Default is false.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_hostname(opts = {})
         cmd = command_builder('hostname', opts)
         configure(cmd)
       end
 
       ##
-      # Configures the state of global ip routing
+      # Configures the state of global ip routing.
       #
-      # @param [Hash] opts The configuration parameters
-      # @option :opts [Boolean] :enable True if ip routing should be enabled
+      # @param opts [Hash] The configuration parameters.
+      #
+      # @option opts enable [Boolean] True if ip routing should be enabled
       #  or False if ip routing should be disabled. Default is true.
-      # @option :opts [Boolean] :default If true configure the command using
+      #
+      # @option opts default [Boolean] If true configure the command using
       #   the default keyword. Default is false.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_iprouting(opts = {})
         cmd = command_builder('ip routing', opts)
         configure(cmd)
       end
 
       ##
-      # Configures system banners
+      # Configures system banners.
       #
-      # @param [String] :banner_type banner to be changed (likely either
-      #   login or motd)
-      # @param [Hash] opts The configuration parameters
-      # @option opts [string] :value The value to set for the banner.
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param banner_type [String] Banner to be changed (likely either
+      #   login or motd).
+      #
+      # @param opts [Hash] The configuration parameters.
+      #
+      # @option opts value [string] The value to set for the banner.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option :opts [Boolean] :default If true configure the command using
+      #
+      # @option opts default [Boolean] If true configure the command using
       #   the default keyword. Default is false.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_banner(banner_type, opts = {})
         value = opts[:value]
         cmd_string = "banner #{banner_type}"

@@ -32,14 +32,14 @@
 require 'rbeapi/eapilib'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
   # Rbeapi::Api
   module Api
     ##
     # The Entity class provides a base class implementation for building
-    # API modules.  The Entity class is typically not instantiated directly
+    # API modules. The Entity class is typically not instantiated directly
     # but serves as a super class with convenience methods used to
     # work with the node.
     class Entity
@@ -50,56 +50,56 @@ module Rbeapi
       ##
       # Construct the node.
       #
-      # @param [Node] :node An instance of Rbeapi::Client::Node used to
-      #   send and receive eAPI messages
+      # @param node [Node] An instance of Rbeapi::Client::Node used to
+      #   send and receive eAPI messages.
       def self.instance(node)
         new(node)
       end
 
       ##
       # The Entity class provides a base class implementation for building
-      # API modules.  The Entity class is typically not instantiated directly
+      # API modules. The Entity class is typically not instantiated directly
       # but serves as a super class with convenience methods used to
       # work with the node.
       #
-      # @param [Node] :node This should be an instance of Rbeapi::Client::Node
-      #   that is used to send and receive eAPI messages
+      # @param node [Node] This should be an instance of Rbeapi::Client::Node
+      #   that is used to send and receive eAPI messages.
       #
       def initialize(node)
         @node = node
       end
 
       ##
-      # Returns the running configuration from the node instance.  This is
+      # Returns the running configuration from the node instance. This is
       # a convenience method to easily access the current running config
-      # from an API module
+      # from an API module.
       #
-      # @return [String] The current running-config from the node
+      # @return [String] The current running-config from the node.
       def config
         @node.running_config
       end
 
       ##
       # Provides a convenience method for access the connection error (if
-      # one exists) of the node's connection instance
+      # one exists) of the node's connection instance.
       #
       # @return [Rbeapi::Eapilib::CommandError] An instance of CommandError
-      #   that can be used to further evaluate the root cause of an error
+      #   that can be used to further evaluate the root cause of an error.
       def error
         @node.connection.error
       end
 
       ##
       # Returns a block of configuration from the current running config
-      # as a string.  The argument is used to search the config and return
+      # as a string. The argument is used to search the config and return
       # the text along with any child configuration statements.
       #
-      # @param [String] :text The text to be used to find the parent line
+      # @param text [String] The text to be used to find the parent line
       #   in the nodes configuration.
       #
-      # @returns [nil, String] Returns the block of configuration based on
-      #   the supplied argument.  If the argument is not found in the
-      #   configuration, nil is returned
+      # @return [nil, String] Returns the block of configuration based on
+      #   the supplied argument. If the argument is not found in the
+      #   configuration, nil is returned.
       def get_block(text)
         mdata = /^#{text}$/.match(config)
         return nil unless mdata
@@ -115,16 +115,16 @@ module Rbeapi
       end
 
       ##
-      # Method called to send configuration commands to the node.  This method
+      # Method called to send configuration commands to the node. This method
       # will send the commands to the node and rescue from CommandError or
       # ConnectionError.
       #
-      # @param [String, Array] :commands The commands to send to the node over
-      #   the API connection to configure the system
+      # @param commands [String, Array] The commands to send to the node over
+      #   the API connection to configure the system.
       #
       # @return [Boolean] Returns True if the commands were successful or
       #   returns False if there was an error issuing the commands on the
-      #   node.  Use error to further investigate the cause of any errors
+      #   node.  Use error to further investigate the cause of any errors.
       def configure(commands)
         @node.config(commands)
         return true
@@ -134,26 +134,27 @@ module Rbeapi
 
       ##
       # Method called to build the correct version of a command based on
-      # the modifier options.  If value option is set then it is appended
+      # the modifier options. If value option is set then it is appended
       # to the command. If the enable option is false then the 'no'
-      # keyword is prefixed to the command.  If the default value is
-      # provided and set to true, then the default keyword is used.  If
+      # keyword is prefixed to the command. If the default value is
+      # provided and set to true, then the default keyword is used. If
       # both options are provided, then default option takes precedence.
       #
-      # @param [String, Array] :commands The commands to send to the node
-      #   over the API connection to configure the system
-      # @param [Hash] :opts the options for the command
+      # @param cmd [String, Array] The commands to send to the node
+      #   over the API connection to configure the system.
       #
-      # @option :opts  [String] :value Optional value that is
+      # @param opts [Hash] The options for the command.
+      #
+      # @option opts value [String] Optional value that is
       #   appended to the command if set.
       #
-      # @option :opts  [Boolean] :enable Prefix the command with 'no'.
+      # @option opts enable [Boolean] Prefix the command with 'no'.
       #   Default is true.
       #
-      # @option :opts  [Boolean] :default Configure the command using
+      # @option opts default [Boolean] Configure the command using
       #   the default keyword. Default is false.
       #
-      # @return [String] Returns built command string
+      # @return [String] Returns built command string.
       def command_builder(cmd, opts = {})
         enable = opts.fetch(:enable, true)
         default = opts.fetch(:default, false)
@@ -167,13 +168,13 @@ module Rbeapi
       # configure_interface sends the commands over eAPI to the destination
       # node to configure a specific interface.
       #
-      # @param [String] :name The interface name to apply the configuration
-      #   to.  The name value must be the full interface identifier
+      # @param name [String] The interface name to apply the configuration
+      #   to. The name value must be the full interface identifier.
       #
-      # @param [Array] :commands The list of commands to configure the
-      #   interface
+      # @param commands [Array] The list of commands to configure the
+      #   interface.
       #
-      # @return [Boolean] Returns true if the commands complete successfully
+      # @return [Boolean] Returns true if the commands complete successfully.
       def configure_interface(name, commands)
         commands = [*commands]
         commands.insert(0, "interface #{name}")
