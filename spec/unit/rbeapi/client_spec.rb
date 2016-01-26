@@ -121,6 +121,7 @@ describe Rbeapi::Client do
     it 'returns the configuration options for the connection' do
       expect(subject.load_config(test_conf)).to eq(nil)
       expect(subject.config_for('veos01')).to eq(veos01)
+      expect(subject.config_for('veos05')).to eq(veos05)
     end
   end
 
