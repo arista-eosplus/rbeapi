@@ -13,10 +13,14 @@ describe Rbeapi::Api::System do
 
   describe '#get' do
     let(:entity) do
-      { hostname: 'localhost', iprouting: true }
+      { hostname: 'localhost', iprouting: true, banner_motd: '',
+        banner_login: '' }
     end
 
-    before { node.config(['hostname localhost', 'ip routing']) }
+    before do
+      node.config(['hostname localhost', 'ip routing', 'no banner motd',
+                   'no banner login'])
+    end
 
     it 'returns the snmp resource' do
       expect(subject.get).to eq(entity)
@@ -86,6 +90,46 @@ describe Rbeapi::Api::System do
         expect(subject.set_iprouting(default: false)).to be_truthy
         expect(subject.get[:iprouting]).to eq(true)
       end
+    end
+  end
+
+  describe '#set_banner' do
+    before { node.config(['no banner login', 'no banner motd']) }
+
+    it 'configures the login value' do
+      expect(subject.get[:banner_login]).to eq('')
+      expect(subject.set_banner('login', value: 'foo')).to be_truthy
+      expect(subject.get[:banner_login]).to eq('foo')
+    end
+
+    it 'negates the login value' do
+      expect(subject.get[:banner_login]).to eq('')
+      expect(subject.set_banner('login', enable: false)).to be_truthy
+      expect(subject.get[:banner_login]).to eq('')
+    end
+
+    it 'defaults the login value' do
+      expect(subject.get[:banner_login]).to eq('')
+      expect(subject.set_banner('login', default: true)).to be_truthy
+      expect(subject.get[:banner_login]).to eq('')
+    end
+
+    it 'configures the motd value' do
+      expect(subject.get[:banner_motd]).to eq('')
+      expect(subject.set_banner('motd', value: 'foo')).to be_truthy
+      expect(subject.get[:banner_motd]).to eq('foo')
+    end
+
+    it 'negates the motd value' do
+      expect(subject.get[:banner_motd]).to eq('')
+      expect(subject.set_banner('motd', enable: false)).to be_truthy
+      expect(subject.get[:banner_motd]).to eq('')
+    end
+
+    it 'defaults the motd value' do
+      expect(subject.get[:banner_motd]).to eq('')
+      expect(subject.set_banner('motd', default: true)).to be_truthy
+      expect(subject.get[:banner_motd]).to eq('')
     end
   end
 end

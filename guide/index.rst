@@ -12,12 +12,10 @@ Contents:
    :maxdepth: 2
 
    overview
-   quickstart
+   getting-started
    installation
-   cookbook
-   troubleshooting
-   developing
+   upgrading
    testing
-   faq
+   contributing
    release-notes
    license

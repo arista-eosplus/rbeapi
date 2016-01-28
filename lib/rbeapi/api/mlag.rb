@@ -32,14 +32,14 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Api is module namespace for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Mlag class provides a configuration instance for working with
-    # the global MLAG configuration of the node
+    # the global MLAG configuration of the node.
     class Mlag < Entity
       DEFAULT_DOMAIN_ID = ''
       DEFAULT_LOCAL_INTF = ''
@@ -73,8 +73,8 @@ module Rbeapi
       # @see parse_interfaces
       #
       # @return [nil, Hash<Symbol, Object] returns the nodes current running
-      #   configuration as a Hash.  If mlag is not configured on the node this
-      #   method will return nil
+      #   configuration as a Hash. If mlag is not configured on the node this
+      #   method will return nil.
       def get
         config = get_block('mlag configuration')
 
@@ -90,16 +90,16 @@ module Rbeapi
 
       ##
       # parse_domain_id scans the current nodes running configuration and
-      # extracts the mlag domain-id value.  If the mlag domain-id has not been
-      # configured, then this method will return DEFAULT_DOMAIN_ID.  The return
-      # value is intended to be merged into the resource hash
+      # extracts the mlag domain-id value. If the mlag domain-id has not been
+      # configured, then this method will return DEFAULT_DOMAIN_ID. The return
+      # value is intended to be merged into the resource hash.
       #
       # @api private
       #
-      # @param [String] :config The mlag configuration block retrieved from the
+      # @param config [String] The mlag configuration block retrieved from the
       #   nodes current running configuration.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_domain_id(config)
         mdata = /(?<=\s{3}domain-id\s)(.+)$/.match(config)
         { domain_id: mdata.nil? ? DEFAULT_DOMAIN_ID : mdata[1] }
@@ -108,16 +108,16 @@ module Rbeapi
 
       ##
       # parse_local_interface scans the current nodes running configuration and
-      # extracts the mlag local-interface value.  If the mlag local-interface
+      # extracts the mlag local-interface value. If the mlag local-interface
       # has not been configured, this method will return DEFAULT_LOCAL_INTF.
-      # The return value is intended to be merged into the resource hash
+      # The return value is intended to be merged into the resource hash.
       #
       # @api private
       #
-      # @param [String] :config The mlag configuration block retrieved from the
+      # @param config [String] The mlag configuration block retrieved from the
       #   nodes current running configuration.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_local_interface(config)
         mdata = /(?<=\s{3}local-interface\s)(.+)$/.match(config)
         { local_interface: mdata.nil? ? DEFAULT_LOCAL_INTF : mdata[1] }
@@ -126,16 +126,16 @@ module Rbeapi
 
       ##
       # parse_peer_address scans the current nodes running configuration and
-      # extracts the mlag peer-address value.  If the mlag peer-address has not
-      # been configured, this method will return DEFAULT_PEER_ADDR.  The return
+      # extracts the mlag peer-address value. If the mlag peer-address has not
+      # been configured, this method will return DEFAULT_PEER_ADDR. The return
       # value is intended to be merged into the resource hash.
       #
       # @api private
       #
-      # @param [String] :config The mlag configuration block retrieved from the
+      # @param config [String] The mlag configuration block retrieved from the
       #   nodes current running configuration.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_peer_address(config)
         mdata = /(?<=\s{3}peer-address\s)(.+)$/.match(config)
         { peer_address: mdata.nil? ? DEFAULT_PEER_ADDR : mdata[1] }
@@ -144,16 +144,16 @@ module Rbeapi
 
       ##
       # parse_peer_link scans the current nodes running configuration and
-      # extracts the mlag peer-link value.  If the mlag peer-link hash not been
-      # configure, this method will return DEFAULT_PEER_LINK.  The return value
+      # extracts the mlag peer-link value. If the mlag peer-link hash not been
+      # configure, this method will return DEFAULT_PEER_LINK. The return value
       # is intended to be merged into the resource hash.
       #
       # @api private
       #
-      # @param [String] :config The mlag configuration block retrieved from the
+      # @param config [String] The mlag configuration block retrieved from the
       #   nodes current running configuration.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute
       def parse_peer_link(config)
         mdata = /(?<=\s{3}peer-link\s)(.+)$/.match(config)
         { peer_link: mdata.nil? ? DEFAULT_PEER_LINK : mdata[1] }
@@ -162,16 +162,16 @@ module Rbeapi
 
       ##
       # parse_shutdown scans the current nodes mlag configuration and extracts
-      # the mlag shutdown value.  The mlag configuration should always return
-      # the value of shutdown from the configuration block.  Ths return value
+      # the mlag shutdown value. The mlag configuration should always return
+      # the value of shutdown from the configuration block. The return value
       # is intended to be merged into the resource hash.
       #
       # @api private
       #
-      # @param [String] :config The mlag configuration block retrieved from the
+      # @param config [String] The mlag configuration block retrieved from the
       #   nodes current running configuration.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_shutdown(config)
         value = /\s{3}no shutdown/ !~ config
         { shutdown: value }
@@ -180,16 +180,16 @@ module Rbeapi
 
       ##
       # parse_interfaces scans the global configuration and returns all of the
-      # configured MLAG interfaces.  Each interface returns the configured MLAG
-      # identifier for establishing a MLAG peer.  The return value is intended
-      # to be merged into the resource Hash
+      # configured MLAG interfaces. Each interface returns the configured MLAG
+      # identifier for establishing a MLAG peer. The return value is intended
+      # to be merged into the resource Hash.
       #
       # The resource Hash attribute returned contains:
-      #   * mlag_id: (Fixnum) The configured MLAG identifier
+      #   * mlag_id: (Fixnum) The configured MLAG identifier.
       #
       # @api private
       #
-      # @return [Hash<Symbol, Object>] resource Hash attribute
+      # @return [Hash<Symbol, Object>] Returns the resource Hash attribute.
       def parse_interfaces
         names = config.scan(/(?<=^interface\s)Po.+/)
         names.each_with_object({}) do |name, hsh|
@@ -204,31 +204,31 @@ module Rbeapi
       ##
       # set_domain_id configures the mlag domain-id value in the current nodes
       # running configuration. If the enable keyword is false, the the
-      # domain-id is configured with the no keyword.  If the default keyword
+      # domain-id is configured with the no keyword. If the default keyword
       # is provided, the configuration is defaulted using the default keyword.
       # The default keyword takes precedence over the enable keyword if both
-      # options are specified
+      # options are specified.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   mlag configuration
       #     domain-id <value>
       #     no domain-id
       #     default domain-id
       #
-      # @param [Hash] :opts Optional keyword arguments
+      # @param opts [Hash] Optional keyword arguments
       #
-      # @option :opts [String] :value The value to configure the mlag
+      # @option opts value [String] The value to configure the mlag
       #   domain-id to.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the domain-id value using
-      #   the default keyword
+      # @option opts default [Boolean] Configure the domain-id value using
+      #   the default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_domain_id(opts = {})
         cmd = command_builder('domain-id', opts)
         cmds = ['mlag configuration', cmd]
@@ -238,32 +238,32 @@ module Rbeapi
       ##
       # set_local_interface configures the mlag local-interface value in the
       # current nodes running configuration. If the enable keyword is false,
-      # the local-interface is configured with the no keyword.  If
+      # the local-interface is configured with the no keyword. If
       # the default keyword is provided, the configuration is defaulted using
-      # the default keyword.  The default keyword takes precedence over the
+      # the default keyword. The default keyword takes precedence over the
       # enable keyword if both options are specified
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   mlag configuration
       #     local-interface <value>
       #     no local-interface
       #     default local-interface
       #
-      # @param [Hash] :opts Optional keyword arguments
+      # @param opts [Hash] Optional keyword arguments
       #
-      # @option :opts [String] :value The value to configure the mlag
-      #   local-interface to.  The local-interface accepts full interface
+      # @option opts value [String] The value to configure the mlag
+      #   local-interface to. The local-interface accepts full interface
       #   identifiers and expects a Vlan interface
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the local-interface value
-      #   using the default keyword
+      # @option opts default [Boolean] Configure the local-interface value
+      #   using the default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_local_interface(opts = {})
         cmd = command_builder('local-interface', opts)
         cmds = ['mlag configuration', cmd]
@@ -273,32 +273,32 @@ module Rbeapi
       ##
       # set_peer_link configures the mlag peer-link value in the current nodes
       # running configuration. If enable keyword is false, then the
-      # peer-link is configured with the no keyword.  If the default keyword
+      # peer-link is configured with the no keyword. If the default keyword
       # is provided, the configuration is defaulted using the default keyword.
       # The default keyword takes precedence over the enable keyword if both
-      # options are specified
+      # options are specified.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   mlag configuration
       #     peer-link <value>
       #     no peer-link
       #     default peer-link
       #
-      # @param [Hash] :opts Optional keyword arguments
+      # @param opts [Hash] Optional keyword arguments.
       #
-      # @option :opts [String] :value The value to configure the mlag
-      #   peer-link to.  The peer-link accepts full interface identifiers
-      #   and expects an Ethernet or Port-Channel interface
+      # @option opts value [String] The value to configure the mlag
+      #   peer-link to. The peer-link accepts full interface identifiers
+      #   and expects an Ethernet or Port-Channel interface.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the peer-link using the
-      #   default keyword
+      # @option opts default [Boolean] Configure the peer-link using the
+      #   default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_peer_link(opts = {})
         cmd = command_builder('peer-link', opts)
         cmds = ['mlag configuration', cmd]
@@ -308,32 +308,32 @@ module Rbeapi
       ##
       # set_peer_address configures the mlag peer-address value in the current
       # nodes running configuration. If the enable keyword is false, then the
-      # peer-address is configured with the no keyword.  If the default keyword
+      # peer-address is configured with the no keyword. If the default keyword
       # is provided, the configuration is defaulted using the default keyword.
       # The default keyword takes precedence over the enable keyword if both
       # options are specified
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   mlag configuration
       #     peer-address <value>
       #     no peer-address
       #     default peer-address
       #
-      # @param [Hash] :opts Optional keyword arguments
+      # @param opts [Hash] Optional keyword arguments.
       #
-      # @option :opts [String] :value The value to configure the mlag
-      #   peer-address to.  The peer-address accepts an IP address in the form
-      #   of A.B.C.D/E
+      # @option opts value [String] The value to configure the mlag
+      #   peer-address to. The peer-address accepts an IP address in the form
+      #   of A.B.C.D/E.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the peer-address using the
-      #   default keyword
+      # @option opts default [Boolean] Configure the peer-address using the
+      #   default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_peer_address(opts = {})
         cmd = command_builder('peer-address', opts)
         cmds = ['mlag configuration', cmd]
@@ -342,30 +342,30 @@ module Rbeapi
 
       ##
       # set_shutdown configures the administrative state of the mlag process on
-      # the current node.  If the enable keyword is true, then mlag is enabled
+      # the current node. If the enable keyword is true, then mlag is enabled
       # and if the enable keyword is false, then mlag is disabled. If the
       # default keyword is provided, the configuration is defaulted using
       # the default keyword. The default keyword takes precedence over the
       # enable keyword if both options are specified
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   mlag configuration
       #     shutdown
       #     no shutdown
       #     default shutdown
       #
-      # @param [Hash] :opts Optional keyword arguments
+      # @param opts [Hash] Optional keyword arguments.
       #
-      # @option :opts [Boolean] :enable True if the interface should be
+      # @option opts enable [Boolean] True if the interface should be
       #   administratively enabled or false if the interface should be
       #   administratively disabled.
       #
-      # @option :opts [Boolean] :default Configure the shutdown value using the
-      #   default keyword
+      # @option opts default [Boolean] Configure the shutdown value using the
+      #   default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_shutdown(opts = {})
         fail 'set_shutdown has the value option set' if opts[:value]
         # Shutdown semantics are opposite of enable semantics so invert enable
@@ -378,36 +378,36 @@ module Rbeapi
 
       ##
       # set_mlag_id configures the mlag id on the interface in the nodes
-      # current running configuration.  If the enable keyword is false, then the
-      # interface mlag id is configured using the no keyword.  If the default
+      # current running configuration. If the enable keyword is false, then the
+      # interface mlag id is configured using the no keyword. If the default
       # keyword is provided and set to true, the interface mlag id is
-      # configured using the default keyword.  The default keyword takes
+      # configured using the default keyword. The default keyword takes
       # precedence over the enable keyword if both options are specified
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   interface <name>
       #     mlag <value>
       #     no mlag
       #     default mlag
       #
-      # @param [String] :name The full interface identifier of the interface
+      # @param name [String] The full interface identifier of the interface
       #   to configure th mlag id for.
       #
-      # @param [Hash] :opts Optional keyword arguments
+      # @param opts [Hash] Optional keyword arguments.
       #
-      # @option :opts [String, Integer] :value The value to configure the
-      #   interface mlag to.  The mlag id should be in the valid range of 1 to
-      #   2000
+      # @option opts value [String, Integer] The value to configure the
+      #   interface mlag to. The mlag id should be in the valid range of 1 to
+      #   2000.
       #
-      # @option :opts [Boolean] :enable If false then the command is
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option :opts [Boolean] :default Configure the mlag value using the
-      #   default keyword
+      # @option opts default [Boolean] Configure the mlag value using the
+      #   default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_mlag_id(name, opts = {})
         cmd = command_builder('mlag', opts)
         configure_interface(name, cmd)

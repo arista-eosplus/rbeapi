@@ -41,7 +41,9 @@ describe Rbeapi::Api::System do
   let(:node) { double('node') }
 
   let(:test) do
-    { hostname: 'localhost', iprouting: true }
+    { hostname: 'localhost', iprouting: true,
+      banner_motd: "MOTD Banner\nSecond Line\nEOF \n*\\v1?",
+      banner_login: "Login Banner\nSecond Line\n123456\n EOF" }
   end
 
   def system
@@ -56,15 +58,15 @@ describe Rbeapi::Api::System do
 
   describe '#get' do
     it 'returns the username collection' do
-      expect(subject.get).to include(test)
+      expect(subject.get).to eq(test)
     end
 
     it 'returns a hash collection' do
       expect(subject.get).to be_a_kind_of(Hash)
     end
 
-    it 'has two entries' do
-      expect(subject.get.size).to eq(2)
+    it 'has four entries' do
+      expect(subject.get.size).to eq(4)
     end
   end
 
@@ -97,6 +99,40 @@ describe Rbeapi::Api::System do
     it 'sets ip routing enable false' do
       expect(node).to receive(:config).with('no ip routing')
       expect(subject.set_iprouting(enable: false)).to be_truthy
+    end
+  end
+
+  describe '#set_banner' do
+    it 'sets the login banner' do
+      expect(node).to receive(:config).with([{ cmd: 'banner login',
+                                               input: "login banner\n" }])
+      expect(subject.set_banner('login', value: 'login banner')).to be_truthy
+    end
+
+    it 'negates the login banner' do
+      expect(node).to receive(:config).with('no banner login')
+      expect(subject.set_banner('login', enable: false)).to be_truthy
+    end
+
+    it 'defaults the login banner' do
+      expect(node).to receive(:config).with('default banner login')
+      expect(subject.set_banner('login', default: true)).to be_truthy
+    end
+
+    it 'sets the motd banner' do
+      expect(node).to receive(:config).with([{ cmd: 'banner motd',
+                                               input: "motd banner\n" }])
+      expect(subject.set_banner('motd', value: 'motd banner')).to be_truthy
+    end
+
+    it 'negates the motd banner' do
+      expect(node).to receive(:config).with('no banner motd')
+      expect(subject.set_banner('motd', enable: false)).to be_truthy
+    end
+
+    it 'defaults the motd banner' do
+      expect(node).to receive(:config).with('default banner motd')
+      expect(subject.set_banner('motd', default: true)).to be_truthy
     end
   end
 end

@@ -1,4 +1,0 @@
-Cookbook
-============
-
-.. contents:: :local:

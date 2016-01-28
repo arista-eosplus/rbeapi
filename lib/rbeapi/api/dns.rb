@@ -32,16 +32,16 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Api is module namespace for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Dns class manages DNS settings on an EOS node.
     class Dns < Entity
       ##
-      # get returns the DNS resource
+      # get returns the DNS resource.
       #
       # @example
       #   {
@@ -50,7 +50,7 @@ module Rbeapi
       #     "domain_list": array<strings>
       #   }
       #
-      # @return [Hash]  A Ruby hash object that provides the SNMP settings as
+      # @return [Hash] A Ruby hash object that provides the SNMP settings as
       #   key / value pairs.
       def get
         response = {}
@@ -61,11 +61,11 @@ module Rbeapi
       end
 
       ##
-      # parse_domain_name parses the domain-name from config
+      # parse_domain_name parses the domain-name from config.
       #
       # @api private
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_domain_name
         mdata = /ip domain-name ([\w.]+)/.match(config)
         { domain_name: mdata.nil? ? '' : mdata[1] }
@@ -74,11 +74,11 @@ module Rbeapi
 
       ##
       # parse_name_servers parses the name-server values from
-      #   config
+      #   config.
       #
       # @api private
       #
-      # @return [Hash<Symbol, Array>] resource hash attribute
+      # @return [Hash<Symbol, Array>] Returns the resource hash attribute.
       def parse_name_servers
         servers = config.scan(/(?:ip name-server vrf )(?:\w+)\s(.+)/)
         values = servers.each_with_object([]) { |srv, arry| arry << srv.first }
@@ -87,11 +87,11 @@ module Rbeapi
       private :parse_name_servers
 
       ##
-      # parse_domain_list parses the domain-list from config
+      # parse_domain_list parses the domain-list from config.
       #
       # @api private
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_domain_list
         search = config.scan(/(?<=^ip\sdomain-list\s).+$/)
         { domain_list: search }
@@ -99,15 +99,18 @@ module Rbeapi
       private :parse_domain_list
 
       ##
-      # Configure the domain-name value in the running-config
+      # Configure the domain-name value in the running-config.
       #
-      # @param [Hash] opts The configuration parameters
-      # @option opts [string] :value The value to set the domain-name to
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param opts [Hash] The configuration parameters.
+      #
+      # @option opts value [string] The value to set the domain-name to.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option opts [Boolean] :default The value should be set to default
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @option opts default [Boolean] The value should be set to default.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_domain_name(opts = {})
         cmds = command_builder('ip domain-name', opts)
         configure(cmds)
@@ -118,26 +121,29 @@ module Rbeapi
       # to resolve dns queries. If the enable option is false, then the
       # name-server list will be configured using the no keyword.  If the
       # default option is specified, then the name server list will be
-      # configured using the default keyword.  If both options are provided the
-      # keyword option will take precedence
+      # configured using the default keyword. If both options are provided the
+      # keyword option will take precedence.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   ip name-server <value>
       #   no ip name-server
       #   default ip name-server
       #
-      # @param [Hash] opts The configuration parameters
-      # @option opts [string] :value The set of name servers to configure on the
-      #   node.  The list of name servers will be replace in the nodes running
-      #   configuration by the list provided in value
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param [Hash] opts The configuration parameters.
+      #
+      # @option opts value [string] The set of name servers to configure on the
+      #   node. The list of name servers will be replace in the nodes running
+      #   configuration by the list provided in value.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option [Boolean] :default Configures the ip name-servers using the
+      #
+      # @option default [Boolean] Configures the ip name-servers using the
       #   default keyword argument. Default takes precedence over enable.
       #
-      # @return [Boolean] returns true if the commands completed successfully
+      # @return [Boolean] Returns true if the commands completed successfully.
       def set_name_servers(opts = {})
         value = opts[:value]
         enable = opts.fetch(:enable, true)
@@ -160,9 +166,9 @@ module Rbeapi
       ##
       # add_name_server adds an ip name-server.
       #
-      # @param [String] :server The name of the ip name-server to create
+      # @param server [String] The name of the ip name-server to create.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def add_name_server(server)
         configure "ip name-server #{server}"
       end
@@ -170,36 +176,36 @@ module Rbeapi
       ##
       # remove_name_server removes the specified ip name-server.
       #
-      # @param [String] :server The name of the ip name-server to remove
+      # @param server [String] The name of the ip name-server to remove.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def remove_name_server(server)
         configure "no ip name-server #{server}"
       end
 
       ##
       # set_domain_list configures the set of domain names to search when
-      # making dns queries for the FQDN.  If the enable option is set to false,
+      # making dns queries for the FQDN. If the enable option is set to false,
       # then the domain-list will be configured using the no keyword.  If the
       # default option is specified, then the domain list will be configured
-      # using the default keyword.  If both options are provided the default
+      # using the default keyword. If both options are provided the default
       # keyword option will take precedence.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   ip domain-list <value>
       #   no ip domain-list
       #   default ip domain-list
       #
-      # @option [Array] :value The set of domain names to configure on the
-      #   node.  The list of domain names will be replace in the nodes running
-      #   configuration by the list provided in value
+      # @option value [Array] The set of domain names to configure on the
+      #   node. The list of domain names will be replace in the nodes running
+      #   configuration by the list provided in value.
       #
-      # @option [Boolean] :default Configures the ip domain-list using the
-      #   default keyword argument
+      # @option default [Boolean] Configures the ip domain-list using the
+      #   default keyword argument.
       #
-      # @return [Boolean] returns true if the commands completed successfully
+      # @return [Boolean] Returns true if the commands completed successfully.
       def set_domain_list(opts = {})
         value = opts[:value]
         enable = opts.fetch(:enable, true)
@@ -227,9 +233,9 @@ module Rbeapi
       ##
       # add_domain_list adds an ip domain-list.
       #
-      # @param [String] :name The name of the ip domain-list to add
+      # @param name [String] The name of the ip domain-list to add.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def add_domain_list(name)
         configure "ip domain-list #{name}"
       end
@@ -237,9 +243,9 @@ module Rbeapi
       ##
       # remove_domain_list removes a specified ip domain-list.
       #
-      # @param [String] :name The name of the ip domain-list to remove
+      # @param name [String] The name of the ip domain-list to remove.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def remove_domain_list(name)
         configure "no ip domain-list #{name}"
       end

@@ -32,10 +32,10 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Api is module namespace for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Staticroutes class provides a configuration instance for working
@@ -43,7 +43,7 @@ module Rbeapi
     #
     class Staticroutes < Entity
       ##
-      # Returns the static routes configured on the node
+      # Returns the static routes configured on the node.
       #
       # @example
       #   {
@@ -59,9 +59,9 @@ module Rbeapi
       #     ]
       #   }
       #
-      # @returns [Array<Hash, Hash>] The method will return all of the
+      # @return [Array<Hash, Hash>] The method will return all of the
       #   configured static routes on the node as a Ruby array object
-      #   containing a list of hashes with each hash describing a route.  If
+      #   containing a list of hashes with each hash describing a route. If
       #   there are no static routes configured, this method will return
       #   an empty array.
       def getall
@@ -88,22 +88,28 @@ module Rbeapi
       ##
       # Creates a static route in EOS. May add or overwrite an existing route.
       #
-      # @commands
+      # ===Commands
       #   ip route <destination> <nexthop> [router_ip] [distance] [tag <tag>]
       #     [name <name>]
       #
-      # @param [String] :destination The destination and prefix matching the
+      # @param destination [String] The destination and prefix matching the
       #   route(s). Ex '192.168.0.2/24'.
-      # @param [String] :nexthop The nexthop for this entry, which may an IP
-      #   address or interface name.
-      # @param [Hash] :opts Additional options for the route entry.
-      # @option :opts [String] :router_ip If nexthop is an egress interface,
-      #   router_ip specifies the router to which traffic will be forwarded
-      # @option :opts [String] :distance The administrative distance (metric)
-      # @option :opts [String] :tag The route tag
-      # @option :opts [String] :name A route name
       #
-      # @return [Boolean] returns true on success
+      # @param nexthop [String] The nexthop for this entry, which may an IP
+      #   address or interface name.
+      #
+      # @param opts [Hash] Additional options for the route entry.
+      #
+      # @option opts router_ip [String] If nexthop is an egress interface,
+      #   router_ip specifies the router to which traffic will be forwarded.
+      #
+      # @option opts distance [String] The administrative distance (metric).
+      #
+      # @option opts tag [String] The route tag.
+      #
+      # @option opts name [String] A route name.
+      #
+      # @return [Boolean] Returns True on success, otherwise False.
       def create(destination, nexthop, opts = {})
         cmd = "ip route #{destination} #{nexthop}"
         cmd << " #{opts[:router_ip]}" if opts[:router_ip]
@@ -114,18 +120,19 @@ module Rbeapi
       end
 
       ##
-      # Removes a given route from EOS.  May remove multiple routes if nexthop
+      # Removes a given route from EOS. May remove multiple routes if nexthop
       # is not specified.
       #
-      # @commands
+      # ===Commands
       #   no ip route <destination> [nexthop]
       #
-      # @param [String] :destination The destination and prefix matching the
+      # @param destination [String] The destination and prefix matching the
       #   route(s). Ex '192.168.0.2/24'.
-      # @param [String] :nexthop The nexthop for this entry, which may an IP
+      #
+      # @param nexthop [String] The nexthop for this entry, which may an IP
       #   address or interface name.
       #
-      # @return [Boolean] returns true on success
+      # @return [Boolean] Returns True on success, otherwise False.
       def delete(destination, nexthop = nil)
         cmd = "no ip route #{destination}"
         cmd << " #{nexthop}" if nexthop
