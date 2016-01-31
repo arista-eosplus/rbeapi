@@ -2,4 +2,6 @@ vlan 1
    name default
    state active
    no private-vlan
+   trunk group mlag_ctl
+   trunk group test
 !
