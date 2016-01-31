@@ -145,7 +145,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_trunk_groups(config)
-        values = config.scan(/trunk group (.+)$/).first
+        values = config.scan(/trunk group (.+)$/).flatten
         values = [] unless values
         { trunk_groups: values }
       end

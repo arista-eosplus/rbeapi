@@ -21,7 +21,7 @@ describe Rbeapi::Api::Vlans do
 
   describe '#get' do
     let(:entity) do
-      { name: 'default', state: 'active', trunk_groups: [] }
+      { name: 'default', state: 'active', trunk_groups: %w(mlag_ctl test) }
     end
 
     it 'returns the vlan resource' do
