@@ -14,10 +14,13 @@ describe Rbeapi::Api::Vlans do
   context '#get' do
     describe 'with defaults' do
       let(:entity) do
-        { name: 'default', state: 'active', trunk_groups: [] }
+        { name: 'default', state: 'active', trunk_groups: %w(mlag test) }
       end
 
-      before { node.config(['no vlan 1-4094', 'vlan 1']) }
+      before do
+        node.config(['no vlan 1-4094', 'vlan 1', 'trunk group mlag',
+                     'trunk group test'])
+      end
 
       it 'returns the vlan resource' do
         expect(subject.get('1')).to eq(entity)
