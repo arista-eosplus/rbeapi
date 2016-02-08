@@ -1,6 +1,10 @@
 Ruby Client for eAPI
 ====================
 
+## v0.5.1, February, 2016
+
+- Fix issue where vlans API was not returning all configured vlan trunk_groups.
+
 ## v0.5.0, January, 2016
 
 - Add optional ‘mode’ parameter to set_members() method in port-channel
