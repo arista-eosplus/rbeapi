@@ -235,21 +235,21 @@ Copy the RPMs to an EOS device then run the 'swix create' command.
   Examples: 
     Puppet Open Source: 
       cd /mnt/flash; \
-      swix create rbeapi-0.5.0-1.swix \
-      rubygem-rbeapi-0.5.0-1.eos4.noarch.rpm \
+      swix create rbeapi-0.5.1-1.swix \
+      rubygem-rbeapi-0.5.1-1.eos4.noarch.rpm \
       rubygem-inifile-3.0.0-3.eos4.noarch.rpm \
       rubygem-netaddr-1.5.0-2.eos4.noarch.rpm \
       rubygem-net_http_unix-0.2.1-3.eos4.noarch.rpm
     Puppet-enterprise agent (3.x): 
       cd/mnt/flash; \
-      swix create rbeapi-puppet3-0.5.0-1.swix \
-      rubygem-rbeapi-puppet3-0.5.0-1.eos4.noarch.rpm \
+      swix create rbeapi-puppet3-0.5.1-1.swix \
+      rubygem-rbeapi-puppet3-0.5.1-1.eos4.noarch.rpm \
       rubygem-inifile-puppet3-3.0.0-3.eos4.noarch.rpm \
       rubygem-netaddr-puppet3-1.5.0-2.eos4.noarch.rpm
     Puppet-All-in-one agent (2015.x/4.x): 
       cd/mnt/flash; \
-      swix create rbeapi-puppet-aio-0.5.0-1.swix \
-      rubygem-rbeapi-puppet-aio-0.5.0-1.eos4.noarch.rpm \
+      swix create rbeapi-puppet-aio-0.5.1-1.swix \
+      rubygem-rbeapi-puppet-aio-0.5.1-1.eos4.noarch.rpm \
       rubygem-inifile-puppet-aio-3.0.0-3.eos4.noarch.rpm \
       rubygem-netaddr-puppet-aio-1.5.0-2.eos4.noarch.rpm \
       rubygem-net_http_unix-puppet-aio-0.2.1-3.eos4.noarch.rpm
@@ -260,13 +260,13 @@ Copy the RPMs to an EOS device then run the 'swix create' command.
   Arista# copy <URI-to-RPMs> flash:
   Arista# bash
   -bash-4.1# cd /mnt/flash/
-  -bash-4.1# swix create rbeapi-puppet3-0.5.0-1.swix \
-             rubygem-rbeapi-puppet3-0.5.0-1.eos4.noarch.rpm \
+  -bash-4.1# swix create rbeapi-puppet3-0.5.1-1.swix \
+             rubygem-rbeapi-puppet3-0.5.1-1.eos4.noarch.rpm \
              rubygem-inifile-puppet3-3.0.0-1.eos4.noarch.rpm \
              rubygem-netaddr-puppet3-1.5.0-1.eos4.noarch.rpm
   -bash-4.1# exit
-  Arista# copy flash:rbeapi-puppet3-0.5.0-1.swix extension:
-  Arista# extension rbeapi-puppet3-0.5.0-1.swix
+  Arista# copy flash:rbeapi-puppet3-0.5.1-1.swix extension:
+  Arista# extension rbeapi-puppet3-0.5.1-1.swix
   Arista# copy installed-extensions boot-extensions
   ```
 
@@ -275,7 +275,7 @@ Copy the RPMs to an EOS device then run the 'swix create' command.
   On EOS:
   ```
   Arista# no extension pe-rbeapi-0.3.0-1.swix
-  Arista# extension rbeapi-puppet3-0.5.0-1.swix
+  Arista# extension rbeapi-puppet3-0.5.1-1.swix
   Arista# copy installed-extensions boot-extensions
   ```
 
