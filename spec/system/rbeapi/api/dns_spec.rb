@@ -114,10 +114,26 @@ describe Rbeapi::Api::Dns do
       expect(subject.get[:domain_list]).to be_empty
     end
 
-    it 'default the name servers list' do
+    it 'default true the name servers list' do
       expect(subject.get[:domain_list]).to be_empty
+      expect(subject.set_domain_list(value: servers)).to be_truthy
       expect(subject.set_domain_list(default: true)).to be_truthy
       expect(subject.get[:domain_list]).to be_empty
+    end
+
+    it 'default false the name servers list' do
+      expect(subject.get[:domain_list]).to be_empty
+      expect(subject.set_domain_list(default: false,
+                                     value: servers)).to be_truthy
+      expect(subject.get[:domain_list]).to eq(servers)
+    end
+
+    it 'default the name servers list with previous values' do
+      expect(subject.get[:domain_list]).to be_empty
+      expect(subject.set_domain_list(value: %w(foob bat))).to be_truthy
+      expect(subject.set_domain_list(default: false,
+                                     value: servers)).to be_truthy
+      expect(subject.get[:domain_list]).to eq(servers)
     end
   end
 

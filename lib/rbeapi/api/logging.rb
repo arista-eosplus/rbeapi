@@ -32,10 +32,10 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Rbeapi::Api
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Logging class manages logging settings on an EOS node.
@@ -46,12 +46,12 @@ module Rbeapi
       #
       # @example
       #   {
-      #     enable: [true, false]
+      #     enable: [true, false],
       #     hosts: array<strings>
       #   }
       #
-      # @return [Hash<Symbol, Object>] returns the logging resource as a hash
-      #   object from the nodes current configuration
+      # @return [Hash<Symbol, Object>] Returns the logging resource as a hash
+      #   object from the nodes current configuration.
       def get
         response = {}
         response.merge!(parse_enable)
@@ -61,10 +61,14 @@ module Rbeapi
 
       ##
       # parse_enable scans the nodes current running configuration and extracts
-      # the current enabled state of the logging facility.  The logging enable
-      # command is expected to always be in the node's configuration.  This
+      # the current enabled state of the logging facility. The logging enable
+      # command is expected to always be in the node's configuration. This
       # methods return value is intended to be merged into the logging resource
       # hash.
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_enable
         value = /no logging on/ !~ config
         { enable: value }
@@ -72,39 +76,44 @@ module Rbeapi
 
       ##
       # parse_hosts scans the nodes current running configuration and extracts
-      # the configured logging host destinations if any are configured.  If no
+      # the configured logging host destinations if any are configured. If no
       # logging hosts are configured, then the value for hosts will be an empty
-      # array.  The return value is intended to be merged into the logging
+      # array. The return value is intended to be merged into the logging
       # resource hash
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_hosts
         hosts = config.scan(/(?<=^logging\shost\s)[^\s]+/)
         { hosts: hosts }
       end
+      private :parse_hosts
 
       ##
       # set_enable configures the global logging instance on the node as either
-      # enabled or disabled.  If the enable keyword is set to true then logging
-      # is globally enabled and if set to false, it is globally disabled.  If
+      # enabled or disabled. If the enable keyword is set to true then logging
+      # is globally enabled and if set to false, it is globally disabled. If
       # the default keyword is specified and set to true, then the configuration
-      # is defaulted using the default keyword.  The default keyword option
+      # is defaulted using the default keyword. The default keyword option
       # takes precedence over the enable keyword if both options are specified.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   logging on
       #   no logging on
       #   default logging on
       #
-      # @param [Hash] :opts Optional keyword arguments
+      # @param opts [Hash] Optional keyword arguments
       #
-      # @option :opts [Boolean] :enable Enables logging globally if value is
-      #   true or disabled logging globally if value is false
+      # @option opts enable [Boolean] Enables logging globally if value is
+      #   true or disabled logging globally if value is false.
       #
-      # @option :opts [Boolean] :default Configure the ip address value using
-      #   the default keyword
+      # @option opts default [Boolean] Configure the ip address value using
+      #   the default keyword.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_enable(opts = {})
         cmd = command_builder('logging on', opts)
         configure cmd
@@ -112,36 +121,36 @@ module Rbeapi
 
       ##
       # add_host configures a new logging destination host address or hostname
-      # to the list of logging destinations.  If the host is already configured
+      # to the list of logging destinations. If the host is already configured
       # in the list of destinations, this method will return successfully.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   logging host <name>
       #
-      # @param [String] :name The host name or ip address of the destination
+      # @param name [String] The host name or ip address of the destination
       #   node to send logging information to.
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @return [Boolean] Returns true if the command completed successfully.
       def add_host(name)
         configure "logging host #{name}"
       end
 
       ##
       # remove_host deletes a logging destination host name or address form the
-      # list of logging destinations.   If the host is not in the list of
+      # list of logging destinations.  If the host is not in the list of
       # configured hosts, this method will still return successfully.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   no logging host <name>
       #
-      # @param [String] :name The host name or ip address of the destination
-      #   host to remove from the nodes current configuration
+      # @param name [String] The host name or ip address of the destination
+      #   host to remove from the nodes current configuration.
       #
-      # @return [Boolean] returns true if the commands completed successfully
+      # @return [Boolean] Returns true if the commands completed successfully.
       def remove_host(name)
         configure "no logging host #{name}"
       end

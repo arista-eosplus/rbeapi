@@ -96,7 +96,7 @@ describe Rbeapi::Api::Users do
       expect(subject.getall).to be_a_kind_of(Hash)
     end
 
-    it 'has two entries' do
+    it 'has three entries' do
       expect(subject.getall.size).to eq(3)
     end
   end

@@ -32,10 +32,10 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Api is module namesapce for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # Tacacs provides instance methods to retrieve and set tacacs configuration
@@ -45,7 +45,7 @@ module Rbeapi
       DEFAULT_KEY = nil
 
       # Regular expression to extract a tacacs server's attributes from the
-      # running-configuration text.  The explicit [ ] spaces enable line
+      # running-configuration text. The explicit [ ] spaces enable line
       # wrapping and indentation with the /x flag.
       SERVER_REGEXP = /tacacs-server[ ]host[ ]([^\s]+)
                        (?:[ ](single-connection))?
@@ -63,17 +63,16 @@ module Rbeapi
       # This method is intended to be used by a provider's instances class
       # method.
       #
-      # The resource hash returned contains the following information:
-      #  * name: ('settings')
-      #  * enable: (true | false) if tacacs functionality is enabled.  This is
-      #    always true for EOS.
-      #  * key: (String) the key either in plain text or hashed format
-      #  * key_format: (Integer) e.g. 0 or 7
-      #  * timeout: (Integer) seconds before the timeout period ends
+      # @example
+      #   {
+      #     name: <string>,
+      #     enable: <boolean>,
+      #     key: <string>,
+      #     key_format: <integer>,
+      #     timeout: <integer>
+      #   }
       #
-      # @api public
-      #
-      # @return [Array<Hash>] Single element Array of resource hashes
+      # @return [Array<Hash>] Single element Array of resource hashes.
       def get
         global = {}
         global.merge!(parse_global_timeout)
@@ -85,15 +84,13 @@ module Rbeapi
       ##
       # parse_global_key takes a running configuration as a string and
       # parses out the radius global key and global key format if it exists in
-      # the configuration.  An empty Hash is returned if there is no global key
-      # configured.  The intent of the Hash is to be merged into a property
+      # the configuration. An empty Hash is returned if there is no global key
+      # configured. The intent of the Hash is to be merged into a property
       # hash.
-      #
-      # @param [String] config The running configuration as a single string.
       #
       # @api private
       #
-      # @return [Hash<Symbol,Object>] resource hash attributes
+      # @return [Hash<Symbol,Object>] Returns the resource hash attributes.
       def parse_global_key
         rsrc_hsh = {}
         (key_format, key) = config.scan(/tacacs-server key (\d+) (\w+)/).first
@@ -106,15 +103,13 @@ module Rbeapi
       ##
       # parse_global_timeout takes a running configuration as a string
       # and parses out the tacacs global timeout if it exists in the
-      # configuration.  An empty Hash is returned if there is no global timeout
-      # value configured.  The intent of the Hash is to be merged into a
+      # configuration. An empty Hash is returned if there is no global timeout
+      # value configured. The intent of the Hash is to be merged into a
       # property hash.
-      #
-      # @param [String] config The running configuration as a single string.
       #
       # @api private
       #
-      # @return [Hash<Symbol,Object>] resource hash attributes
+      # @return [Hash<Symbol,Object>] Returns the resource hash attributes.
       def parse_global_timeout
         timeout = config.scan(/tacacs-server timeout (\d+)/).first
         { timeout: timeout.first.to_i }
@@ -128,17 +123,17 @@ module Rbeapi
       #
       # The resource hash returned contains the following information:
       #
-      #  * hostname: hostname or ip address, part of the identifier
-      #  * port: (Fixnum) TCP port of the server, part of the identifier
-      #  * key: (String) the key either in plain text or hashed format
-      #  * key_format: (Fixnum) e.g. 0 or 7
-      #  * timeout: (Fixnum) seconds before the timeout period ends
+      #  * hostname: hostname or ip address, part of the identifier.
+      #  * port: (Fixnum) TCP port of the server, part of the identifier.
+      #  * key: (String) the key either in plain text or hashed format.
+      #  * key_format: (Fixnum) e.g. 0 or 7.
+      #  * timeout: (Fixnum) seconds before the timeout period ends.
       #  * multiplex: (Boolean) true when configured to make requests through a
-      #    single connection
+      #    single connection.
       #
       # @api public
       #
-      # @return [Array<Hash<Symbol,Object>>] Array of resource hashes
+      # @return [Array<Hash<Symbol,Object>>] Array of resource hashes.
       def servers
         tuples = config.scan(SERVER_REGEXP)
         tuples.map do |(host, mplex, vrf, port, tout, keyfm, key)|
@@ -155,19 +150,19 @@ module Rbeapi
       end
 
       ##
-      # set_global_key configures the tacacs default key.  This method maps to
+      # set_global_key configures the tacacs default key. This method maps to
       # the `tacacs-server key` EOS configuration command, e.g. `tacacs-server
       # key 7 070E234F1F5B4A`.
       #
-      # @option opts [String] :key ('070E234F1F5B4A') The key value
+      # @option opts key [String] ('070E234F1F5B4A') The key value.
       #
-      # @option opts [Fixnum] :key_format (7) The key format, 0 for plain text
-      #   and 7 for a hashed value.  7 will be assumed if this option is not
+      # @option opts key_format [Fixnum] (7) The key format, 0 for plain text
+      #   and 7 for a hashed value. 7 will be assumed if this option is not
       #   provided.
       #
       # @api public
       #
-      # @return [Boolean] true if no errors
+      # @return [Boolean] Returns true if no errors.
       def set_global_key(opts = {})
         format = opts[:key_format]
         key = opts[:key]
@@ -177,18 +172,21 @@ module Rbeapi
       end
 
       ##
-      # set_timeout configures the tacacs default timeout.  This method maps to
+      # set_timeout configures the tacacs default timeout. This method maps to
       # the `tacacs-server timeout` setting.
       #
-      # @param [Hash] opts The configuration parameters
-      # @option opts [string] :value The value to set the timeout to
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param opts [Hash] The configuration parameters.
+      #
+      # @option opts value [string] The value to set the timeout to.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option opts [Boolean] :default The value should be set to default
+      #
+      # @option opts default [Boolean] The value should be set to default.
       #
       # @api public
       #
-      # @return [Boolean] true if no errors
+      # @return [Boolean] Returns true if no errors.
       def set_global_timeout(opts = {})
         cmd = command_builder('tacacs-server timeout', opts)
         configure cmd
@@ -198,11 +196,25 @@ module Rbeapi
       # update_server configures a tacacs server resource on the target device.
       # This API method maps to the `tacacs server host` command, e.g.
       # `tacacs-server host 1.2.3.4 single-connection port 4949 timeout 6 key 7
-      # 06070D221D1C5A`
+      # 06070D221D1C5A`.
       #
       # @api public
       #
-      # @return [Boolean] true if there are no errors
+      # @param opts [Hash] The configuration parameters.
+      #
+      # @option opts key_format [Integer] The format for the key.
+      #
+      # @option opts hostname [String] The host value.
+      #
+      # @option opts multiplex [String] Defines single-connection.
+      #
+      # @option opts port [String] The port value.
+      #
+      # @option opts timeout [String] The timeout value.
+      #
+      # @option opts key [String] The key value.
+      #
+      # @return [Boolean] Returns true if there are no errors.
       def update_server(opts = {})
         key_format = opts[:key_format] || 7
         cmd = "tacacs-server host #{opts[:hostname]}"
@@ -219,7 +231,13 @@ module Rbeapi
       #
       # @api public
       #
-      # @return [Boolean] true if no errors
+      # @param opts [Hash] The configuration parameters.
+      #
+      # @option hostname [String] The host value.
+      #
+      # @option port [String] The port value.
+      #
+      # @return [Boolean] Returns true if there are no errors.
       def remove_server(opts = {})
         cmd = "no tacacs-server host #{opts[:hostname]}"
         cmd << " port #{opts[:port]}" if opts[:port]

@@ -32,25 +32,33 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Rbeapi::Api
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Varp class provides an instance for working with the global
-    # VARP configuration of the node
+    # VARP configuration of the node.
     class Varp < Entity
       ##
-      # Returns the global VARP configuration from the node
+      # Returns the global VARP configuration from the node.
       #
-      # Example
+      # @example
       #   {
-      #     "mac_address": <string>,
-      #     "interfaces": {...}
+      #     mac_address: <string>,
+      #     interfaces: {
+      #       <name>: {
+      #         addresses: <array>
+      #       },
+      #       <name>: {
+      #         addresses: <array>
+      #       },
+      #       ...
+      #     }
       #   }
       #
-      # @return [Hash]  A Ruby hash object that provides the Varp settings as
+      # @return [Hash] A Ruby hash object that provides the Varp settings as
       #   key / value pairs.
       def get
         response = {}
@@ -59,9 +67,18 @@ module Rbeapi
         response
       end
 
+      ##
+      # parse_mac_address parses mac-address values from the provided config.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block returned
+      #   from the node's running configuration.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_mac_address(config)
         # ip virtual-router mac-address value will always
-        #   be stored in aa:bb:cc:dd:ee:ff format
+        #   be stored in aa:bb:cc:dd:ee:ff format.
         regex = /mac-address ((?:[a-f0-9]{2}:){5}[a-f0-9]{2})$/
         mdata = regex.match(config)
         { mac_address: mdata.nil? ? '' : mdata[1] }
@@ -75,15 +92,18 @@ module Rbeapi
       end
 
       ##
-      # Configure the VARP virtual-router mac-address value
+      # Configure the VARP virtual-router mac-address value.
       #
-      # @param [Hash] opts The configuration parameters
-      # @option opts [string] :value The value to set the mac-address to
-      # @option opts [Boolean] :enable If false then the command is
+      # @param opts [Hash] The configuration parameters.
+      #
+      # @option opts value [string] The value to set the mac-address to.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option opts [Boolean] :default The value should be set to default
       #
-      # @return [Boolean] returns true if the command completed successfully
+      # @option opts default [Boolean] The value should be set to default.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
       def set_mac_address(opts = {})
         cmd = command_builder('ip virtual-router mac-address', opts)
         configure(cmd)
@@ -92,21 +112,21 @@ module Rbeapi
 
     ##
     # The VarpInterfaces class provides an instance for working with the global
-    # VARP interface configuration of the node
+    # VARP interface configuration of the node.
     class VarpInterfaces < Entity
       ##
-      # Returns a single VARP interface configuration
+      # Returns a single VARP interface configuration.
       #
-      # Example
+      # @example
       #   {
       #     "addresses": array<string>
       #   }
       #
-      # @param [String] :name The interface name to return the configuration
-      #   values for.  This must be the full interface identifier.
+      # @param name [String] The interface name to return the configuration
+      #   values for. This must be the full interface identifier.
       #
       # @return [nil, Hash<String, String>] A Ruby hash that represents the
-      #   VARP interface configuration.  A nil object is returned if the
+      #   VARP interface configuration. A nil object is returned if the
       #   specified interface is not configured
       def get(name)
         config = get_block("^interface #{name}")
@@ -117,16 +137,21 @@ module Rbeapi
 
       ##
       # Returns the collection of MLAG interfaces as a hash index by the
-      # interface name
+      # interface name.
       #
-      # Example
+      # @example
       #   {
-      #     "name": {...},
-      #     "name": {...}
+      #     <name>: {
+      #       addresses: <array>
+      #     },
+      #     <name>: {
+      #       addresses: <array>
+      #     },
+      #     ...
       #   }
       #
       # @return [nil, Hash<String, String>] A Ruby hash that represents the
-      #   MLAG interface configuration.  A nil object is returned if no
+      #   MLAG interface configuration. A nil object is returned if no
       #   interfaces are configured.
       def getall
         interfaces = config.scan(/(?<=^interface\s)(Vl.+)$/)
@@ -138,6 +163,16 @@ module Rbeapi
         end
       end
 
+      ##
+      # parse_addresses parses ip virtual-router address from the provided
+      #   config.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block returned
+      #   from the node's running configuration.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_addresses(config)
         addrs = config.scan(/(?<=\s{3}ip\svirtual-router\saddress\s).+$/)
         { addresses: addrs }
@@ -149,17 +184,21 @@ module Rbeapi
       # to the specified VLAN interface. All existing addresses are
       # removed before the ones in value are added.
       #
-      # @param [String] :name The name of the interface.  The
-      #   name argument must be the full interface name.  Valid interfaces
-      #   are restricted to VLAN interfaces
-      # @param [Hash] opts The configuration parameters
-      # @option opts [Array] :value Array of IPv4 addresses to add to
-      #   the virtual router.
-      # @option opts [Boolean] :enable If false then the command is
-      #   negated. Default is true.
-      # @option opts [Boolean] :default The value should be set to default
+      # @param name [String] The name of the interface. The
+      #   name argument must be the full interface name. Valid interfaces
+      #   are restricted to VLAN interfaces.
       #
-      # @return [Boolean] True if the commands succeeds otherwise False
+      # @param opts [Hash] The configuration parameters.
+      #
+      # @option opts value [Array] Array of IPv4 addresses to add to
+      #   the virtual router.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] The value should be set to default.
+      #
+      # @return [Boolean] True if the commands succeeds otherwise False.
       def set_addresses(name, opts = {})
         value = opts[:value]
         enable = opts.fetch(:enable, true)
@@ -183,27 +222,29 @@ module Rbeapi
       end
 
       ##
-      # The add_address method assigns one virtual IPv4 address
+      # The add_address method assigns one virtual IPv4 address.
       #
-      # @param [String] :name The name of the interface.  The
-      #   name argument must be the full interface name.  Valid interfaces
-      #   are restricted to VLAN interfaces
-      # @param [string] :address The virtual router address to add
+      # @param name [String] The name of the interface. The
+      #   name argument must be the full interface name. Valid interfaces
+      #   are restricted to VLAN interfaces.
       #
-      # @return [Boolean] True if the commands succeeds otherwise False
+      # @param value [string] The virtual router address to add.
+      #
+      # @return [Boolean] True if the commands succeeds otherwise False.
       def add_address(name, value)
         configure(["interface #{name}", "ip virtual-router address #{value}"])
       end
 
       ##
-      # The remove_address method removes one virtual IPv4 address
+      # The remove_address method removes one virtual IPv4 address.
       #
-      # @param [String] :name The name of the interface.  The
-      #   name argument must be the full interface name.  Valid interfaces
-      #   are restricted to VLAN interfaces
-      # @param [string] :address The virtual router address to remove
+      # @param name [String] The name of the interface. The
+      #   name argument must be the full interface name. Valid interfaces
+      #   are restricted to VLAN interfaces.
       #
-      # @return [Boolean] True if the commands succeeds otherwise False
+      # @param value [string] The virtual router address to remove.
+      #
+      # @return [Boolean] True if the commands succeeds otherwise False.
       def remove_address(name, value)
         configure(["interface #{name}",
                    "no ip virtual-router address #{value}"])

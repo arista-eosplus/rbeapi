@@ -89,6 +89,13 @@ describe Rbeapi::Api::StpInterfaces do
   end
 
   describe '#set_bpduguard' do
+    it 'sets the bpduguard value to default true' do
+      node.config(['interface Ethernet1', 'no spanning-tree bpduguard'])
+      expect(subject.get('Ethernet1')[:bpduguard]).to be_falsy
+      expect(subject.set_bpduguard('Ethernet1', default: true)).to be_truthy
+      expect(subject.get('Ethernet1')[:bpduguard]).to be_falsey
+    end
+
     it 'sets the bpduguard value to true' do
       node.config(['interface Ethernet1', 'no spanning-tree bpduguard'])
       expect(subject.get('Ethernet1')[:bpduguard]).to be_falsy

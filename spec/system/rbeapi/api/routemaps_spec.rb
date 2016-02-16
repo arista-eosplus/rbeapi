@@ -15,8 +15,7 @@ describe Rbeapi::Api::Routemaps do
     let(:resource) { subject.get }
 
     before do
-      node.config(['no route-map test', 'no route-map test1',
-                   'no route-map test2', 'no route-map test3',
+      node.config(['no route-map test',
                    'route-map test permit 10',
                    'route-map test permit 20', 'description descript',
                    'match ip address prefix-list MYLOOPBACK',
@@ -90,8 +89,8 @@ describe Rbeapi::Api::Routemaps do
       expect(subject.getall).to be_a_kind_of(Hash)
     end
 
-    it 'has a key for description' do
-      expect(subject.getall.count).to eq(2)
+    it 'has at least two entries' do
+      expect(subject.getall.count).to be >= 2
     end
 
     it 'returns the routemap collection' do

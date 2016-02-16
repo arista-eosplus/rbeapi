@@ -1,6 +1,30 @@
 Ruby Client for eAPI
 ====================
 
+## v0.5.1, February, 2016
+
+- Fix issue where vlans API was not returning all configured vlan trunk_groups.
+
+## v0.5.0, January, 2016
+
+- Add optional ‘mode’ parameter to set_members() method in port-channel
+  interfaces API
+- Add support for trunk groups
+- Ensure multiple connections based on the wildcard settings do not clobber
+  each other.
+- Add ‘terminal’ to the ‘configure’ command to workaround AAA issue
+- Fix issue where ‘enablepw’ in the eapi.conf was not properly used
+- Catch errors and syslog them when parsing eapi conf file.
+  In the event of an unparsable eapi.conf, a syslog warning will be generated
+  but the app will continue to attempt to utilize the default localhost conn.
+- Ensure that nil is returned when getting nonexistent username
+- Ensure all parse methods are private
+- Add tests for timeout values
+- Update framework tests
+- Add unit tests for switchports
+- Address code coverage gaps
+
+
 ## v0.4.0, November, 2015
 
 - New users API

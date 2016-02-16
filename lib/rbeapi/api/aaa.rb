@@ -32,21 +32,42 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Rbeapi::Api
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Aaa class manages Authorization, Authentication and Accounting (AAA)
     # on an EOS node.
     class Aaa < Entity
+      ##
+      # get returns a hash of all Aaa resources.
+      #
+      # @example
+      #   {
+      #     <groups>: {
+      #       <name>: {
+      #         type: <string>,
+      #         servers: <array>
+      #       },
+      #       <name>: {
+      #         type: <string>,
+      #         servers: <array>
+      #       }
+      #     }
+      #   }
+      #
+      # @return [Hash<Symbol, Object>] Returns the Aaa resources as a
+      #   Hash. If no Aaa resources are found, an empty hash is returned.
       def get
         response = {}
         response[:groups] = groups.getall
         response
       end
 
+      ##
+      # Returns an object node for working with AaaGroups class.
       def groups
         return @groups if @groups
         @groups = AaaGroups.new node
@@ -55,20 +76,20 @@ module Rbeapi
     end
 
     ##
-    # The AaaGroups class manages the server groups on a EOS node.
+    # The AaaGroups class manages the server groups on an EOS node.
     class AaaGroups < Entity
       DEFAULT_RADIUS_AUTH_PORT = 1812
       DEFAULT_RADIUS_ACCT_PORT = 1813
 
-      # Regular express that parses the radius servers from the aaa group
-      # server radius configuration block
+      # Regular expression that parses the radius servers from the aaa group
+      # server radius configuration block.
       RADIUS_GROUP_SERVER = /\s{3}server
                              [ ]([^\s]+)
                              [ ]auth-port[ ](\d+)
                              [ ]acct-port[ ](\d+)/x
 
-      # Regular expression that parse the tacacs servers from the aaa group
-      # server tacacs+ configuration block
+      # Regular expression that parses the tacacs servers from the aaa group
+      # server tacacs+ configuration block.
       TACACS_GROUP_SERVER = /\s{3}server
                              [ ]([^\s]+)
                              (?:[ ]vrf[ ](\w+))?
@@ -76,20 +97,20 @@ module Rbeapi
 
       ##
       # get returns the aaa server group resource hash that describes the
-      # current configuration for the specified server group name
+      # current configuration for the specified server group name.
       #
-      # The resource hash returned contains the following:
-      #   * type: (String) The server group type.  Valid values are either
-      #   'tacacs' or 'radius'
-      #   * servers: (Array) The set of servers associated with the group.
-      #   Servers are returned as either IP address or host name
+      # @example
+      #   {
+      #     type: <string>,
+      #     servers: <array>
+      #   }
       #
-      # @param [String] :name The server group name to return f:rom the nodes
-      #   current running configuration.  If the name is not configured a nil
+      # @param name [String] The server group name to return from the nodes
+      #   current running configuration. If the name is not configured a nil
       #   object is returned.
       #
-      # @return [nil, Hash<Symbol, Object>] returns the resource hash for the
-      #   specified name.  If the name does not exist, a nil object is returned
+      # @return [nil, Hash<Symbol, Object>] Returns the resource hash for the
+      #   specified name. If the name does not exist, a nil object is returned.
       def get(name)
         block = get_block("aaa group server ([^\s]+) #{name}")
         return nil unless block
@@ -99,6 +120,23 @@ module Rbeapi
         response
       end
 
+      ##
+      # getall returns a aaa server groups hash.
+      #
+      # @example
+      #   {
+      #     <name>: {
+      #       type: <string>,
+      #       servers: <array>
+      #     },
+      #     <name>: {
+      #       type: <string>,
+      #       servers: <array>
+      #     }
+      #   }
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hashes for
+      #   configured aaa groups. If none exist, a nil object is returned.
       def getall
         cfg = config.scan(/aaa group server (?:radius|tacacs\+) (.+)$/)
         cfg.each_with_object({}) do |name, hsh|
@@ -109,15 +147,15 @@ module Rbeapi
 
       ##
       # parse_type scans the specified configuration block and returns the
-      # server group type as either 'tacacs' or 'radius'  The type value is
+      # server group type as either 'tacacs' or 'radius'. The type value is
       # expected to always be present in the config.
       #
       # @api private
       #
-      # @param [String] :config The aaa server group block configuration for the
-      #   group name to parse
+      # @param config [String] The aaa server group block configuration for the
+      #   group name to parse.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Resource hash attribute.
       def parse_type(config)
         value = config.scan(/aaa group server ([^\s]+)/).first
         { type: value.first }
@@ -126,7 +164,7 @@ module Rbeapi
 
       ##
       # parse_servers scans the specified configuraiton block and returns the
-      # list of servers configured for the group.  If there are no servers
+      # list of servers configured for the group. If there are no servers
       # configured for the group the servers value will return an empty array.
       #
       # @api private
@@ -134,13 +172,13 @@ module Rbeapi
       # @see parse_radius_server
       # @see parse_tacacs_server
       #
-      # @param [String] :config The aaa server group block configuration for the
-      #   group name to parse
+      # @param config [String] The aaa server group block configuration for the
+      #   group name to parse.
       #
-      # @param [String] :type The aaa server block type.  Valid values are
+      # @param type [String] The aaa server block type. Valid values are
       #   either radius or tacacs+.
       #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Resource hash attribute
       def parse_servers(config, type)
         case type
         when 'radius' then parse_radius_server(config)
@@ -151,15 +189,14 @@ module Rbeapi
 
       ##
       # parse_radius_server scans the provide configuration block and returns
-      # the list of servers configured.  The configuration block is expected to
-      # be a radius configuration block.  If there are no servers configured
+      # the list of servers configured. The configuration block is expected to
+      # be a radius configuration block. If there are no servers configured
       # for the group the servers value will return an empty array.
       #
       # @api private
       #
-      # @param [String] :config The aaa server group block configuration for the
+      # @param config [String] The aaa server group block configuration for the
       #   group name to parse
-      #
       #
       # @return [Hash<Symbol, Object>] resource hash attribute
       def parse_radius_server(config)
@@ -175,18 +212,17 @@ module Rbeapi
       private :parse_radius_server
 
       ##
-      # parse_tacacs_server scans the provide configuration block and returns
-      # the list of servers configured.  The configuration block is expected to
-      # be a tacacs configuration block.  If there are no servers configured
+      # parse_tacacs_server scans the provided configuration block and returns
+      # the list of configured servers. The configuration block is expected to
+      # be a tacacs configuration block. If there are no servers configured
       # for the group the servers value will return an empty array.
       #
       # @api private
       #
-      # @param [String] :config The aaa server group block configuration for the
-      #   group name to parse
+      # @param config [String] The aaa server group block configuration for the
+      #   group name to parse.
       #
-      #
-      # @return [Hash<Symbol, Object>] resource hash attribute
+      # @return [Hash<Symbol, Object>] Resource hash attribute.
       def parse_tacacs_server(config)
         values = config.scan(TACACS_GROUP_SERVER).map do |(name, vrf, port)|
           {
@@ -201,17 +237,17 @@ module Rbeapi
 
       ##
       # find_type is a utility method to find the type of aaa server group for
-      # the specified name.  This method will scan the current running
+      # the specified name. This method will scan the current running
       # configuration on the node and return the server group type as either
-      # 'radius' or 'tacacs+'.  If the server group is not configured, then nil
+      # 'radius' or 'tacacs+'. If the server group is not configured, then nil
       # will be returned.
       #
       # @api private
       #
-      # @param [String] :name The aaa server group name to find in the config
-      #   and return the type value for
+      # @param name [String] The aaa server group name to find in the config
+      #   and return the type value for.
       #
-      # @return [nil, String] returns either the type name as 'radius' or
+      # @return [nil, String] Returns either the type name as 'radius' or
       #   'tacacs+' or nil if the server group is not configured.
       def find_type(name)
         mdata = /aaa group server ([^\s]+) #{name}/.match(config)
@@ -222,19 +258,19 @@ module Rbeapi
       ##
       # create adds a new aaa group server to the nodes current configuration.
       # If the specified name and type are already created then this method
-      # will return successfully.  If the name is configured but the type is
+      # will return successfully. If the name is configured but the type is
       # different, this method will not return successfully (returns false).
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   aaa group server <type> <name>
       #
-      # @param [String] :name The name of the aaa group server to create in the
+      # @param name [String] The name of the aaa group server to create in the
       #   nodes running configuration
       #
-      # @param [String] :type The type of aaa group server to create in the
-      #   nodes running configuration.  Valid values include 'radius' or
+      # @param type [String] The type of aaa group server to create in the
+      #   nodes running configuration. Valid values include 'radius' or
       #   'tacacs+'
       #
       # @return [Boolean] returns true if the commands complete successfully
@@ -244,19 +280,19 @@ module Rbeapi
 
       ##
       # delete removes a current aaa server group from the nodes current
-      # configuration.  This method will automatically determine the server
-      # group type based on the name.  If the name is not configured in the
+      # configuration. This method will automatically determine the server
+      # group type based on the name. If the name is not configured in the
       # nodes current configuration, this method will return successfully.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   no aaa group server [radius | tacacs+] <name>
       #
-      # @param [String] :name The name of the aaa group server to create in the
-      #   nodes running configuration
+      # @param name [String] The name of the aaa group server to create in the
+      #   nodes running configuration.
       #
-      # @return [Boolean] returns true if the commands complete successfully
+      # @return [Boolean] Returns true if the commands complete successfully.
       def delete(name)
         type = find_type(name)
         return true unless type
@@ -265,22 +301,20 @@ module Rbeapi
 
       ##
       # set_servers configures the set of servers for a specified aaa server
-      # group.  This is an atomic operation that first removes all current
-      # servers and then adds the new servers back.  If any of the servers
+      # group. This is an atomic operation that first removes all current
+      # servers and then adds the new servers back. If any of the servers
       # failes to be removed or added, this method will return unsuccessfully.
       #
       # @see remove_server
       # @see add_server
       #
-      # @param [String] :name The name of the aaa group server to add the new
+      # @param name [String] The name of the aaa group server to add the new
       #   server configuration to.
       #
-      # @param [String] :server The IP address or host name of the server to
+      # @param servers [String] The IP address or host name of the server to
       #   add to the configuration
       #
-      # @param [Hash] :opts Optional configuration parameters
-      #
-      # @return [Boolean] returns true if the commands complete successfully
+      # @return [Boolean] Returns true if the commands complete successfully
       def set_servers(name, servers)
         current = get(name)
         current[:servers].each do |srv|
@@ -294,22 +328,22 @@ module Rbeapi
       end
 
       ##
-      # add_server adds a new server to the specified aaa server group.  If
+      # add_server adds a new server to the specified aaa server group. If
       # the server is already configured in the list of servers, this method
       # will still return successfully.
       #
       # @see add_radius_server
       # @see add_tacacs_server
       #
-      # @param [String] :name The name of the aaa group server to add the new
+      # @param name [String] The name of the aaa group server to add the new
       #   server configuration to.
       #
-      # @param [String] :server The IP address or host name of the server to
-      #   add to the configuration
+      # @param server [String] The IP address or host name of the server to
+      #   add to the configuration.
       #
-      # @param [Hash] :opts Optional configuration parameters
+      # @param opts [Hash] Optional configuration parameters.
       #
-      # @return [Boolean] returns true if the commands complete successfully
+      # @return [Boolean] Returns true if the commands complete successfully.
       def add_server(name, server, opts = {})
         type = find_type(name)
         return false unless type
@@ -323,24 +357,24 @@ module Rbeapi
       ##
       # add_radius_server adds a new radius server to the nodes current
       # configuration.  If the server already exists in the specified group
-      # name this method will still return successfully
+      # name this method will still return successfully.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commmands
+      # commmands
       #   aaa group server radius <name>
       #   server <server> [acct-port <acct_port>] [auth-port <auth_port>]
       #                   [vrf <vrf>]
       #
-      # @param [String] :name The name of the aaa group server to add the new
+      # @param name [String] The name of the aaa group server to add the new
       #   server configuration to.
       #
-      # @param [String] :server The IP address or host name of the server to
-      #   add to the configuration
+      # @param server [String] The IP address or host name of the server to
+      #   add to the configuration.
       #
-      # @param [Hash] :opts Optional configuration parameters
+      # @param opts [Hash] Optional configuration parameters.
       #
-      # @return [Boolean] returns true if the commands complete successfully
+      # @return [Boolean] Returns true if the commands complete successfully.
       def add_radius_server(name, server, opts = {})
         # order of command options matter here!
         server = "server #{server} "
@@ -352,25 +386,25 @@ module Rbeapi
 
       ##
       # add_tacacs_server adds a new tacacs server to the nodes current
-      # configuration.  If the server already exists in the specified group
-      # name this method will still return successfully
+      # configuration. If the server already exists in the specified group
+      # name this method will still return successfully.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commmands
+      # commmands
       #   aaa group server tacacs+ <name>
       #   server <server> [acct-port <acct_port>] [auth-port <auth_port>]
       #                   [vrf <vrf>]
       #
-      # @param [String] :name The name of the aaa group server to add the new
+      # @param name [String] The name of the aaa group server to add the new
       #   server configuration to.
       #
-      # @param [String] :server The IP address or host name of the server to
-      #   add to the configuration
+      # @param server [String] The IP address or host name of the server to
+      #   add to the configuration.
       #
-      # @param [Hash] :opts Optional configuration parameters
+      # @param opts [Hash] Optional configuration parameters.
       #
-      # @return [Boolean] returns true if the commands complete successfully
+      # @return [Boolean] Returns true if the commands complete successfully.
       def add_tacacs_server(name, server, opts = {})
         # order of command options matter here!
         server = "server #{server} "
@@ -381,20 +415,22 @@ module Rbeapi
 
       ##
       # remove_server deletes an existing server from the specified aaa server
-      # group.  If the specified server is not configured in the specified
+      # group. If the specified server is not configured in the specified
       # server group, this method will still return true.
       #
-      # @eos_version 4.13.7M
+      # eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   aaa group server [radius | tacacs+] <name>
       #   no server <server>
       #
-      # @param [String] :name The name of the aaa group server to remove
+      # @param name [String] The name of the aaa group server to remove.
       #
-      # @param [String] :server The IP address or host name of the server
+      # @param server [String] The IP address or host name of the server.
       #
-      # @return [Boolean] returns true if the commands complete successfully
+      # @param opts [Hash] Optional configuration parameters.
+      #
+      # @return [Boolean] returns true if the commands complete successfully.
       def remove_server(name, server, opts = {})
         type = find_type(name)
         return false unless type

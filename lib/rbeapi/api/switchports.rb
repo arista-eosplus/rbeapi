@@ -32,10 +32,10 @@
 require 'rbeapi/api'
 
 ##
-# Rbeapi toplevel namespace
+# Rbeapi toplevel namespace.
 module Rbeapi
   ##
-  # Api is module namesapce for working with the EOS command API
+  # Api is module namespace for working with the EOS command API.
   module Api
     ##
     # The Switchport class provides a base class instance for working with
@@ -44,7 +44,7 @@ module Rbeapi
     class Switchports < Entity
       ##
       # Retrieves the properties for a logical switchport from the
-      # running-config using eAPI
+      # running-config using eAPI.
       #
       # Example
       #   {
@@ -52,13 +52,14 @@ module Rbeapi
       #     "mode": [access, trunk],
       #     "trunk_allowed_vlans": array<strings>
       #     "trunk_native_vlan": <Integer>,
-      #     "access_vlan": <Integer>
+      #     "access_vlan": <Integer>,
+      #     "trunk_groups": array<strings>
       #   }
       #
-      # @param [String] name The full name of the interface to get.  The
-      #   interface name must be the full interface (ie Ethernet, not Et)
+      # @param name [String] The full name of the interface to get.  The
+      #   interface name must be the full interface (ie Ethernet, not Et).
       #
-      # @return [Hash] a hash that includes the switchport properties
+      # @return [Hash] Returns a hash that includes the switchport properties.
       def get(name)
         config = get_block("interface #{name}")
         return nil unless config
@@ -69,24 +70,67 @@ module Rbeapi
         response.merge!(parse_access_vlan(config))
         response.merge!(parse_trunk_native_vlan(config))
         response.merge!(parse_trunk_allowed_vlans(config))
+        response.merge!(parse_trunk_groups(config))
         response
       end
 
+      ##
+      # parse_mode parses switchport mode from the provided config.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block returned
+      #   from the node's running configuration.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_mode(config)
         mdata = /(?<=\s{3}switchport\smode\s)(.+)$/.match(config)
         { mode: mdata[1] }
       end
+      private :parse_mode
 
+      ##
+      # parse_access_vlan parses access vlan from the provided
+      #   config.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block returned
+      #   from the node's running configuration.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_access_vlan(config)
         mdata = /(?<=access\svlan\s)(.+)$/.match(config)
         { access_vlan: mdata[1] }
       end
+      private :parse_access_vlan
 
+      ##
+      # parse_trunk_native_vlan parses trunk native vlan from
+      #   the provided config.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block returned
+      #   from the node's running configuration.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_trunk_native_vlan(config)
         mdata = /(?<=trunk\snative\svlan\s)(.+)$/.match(config)
         { trunk_native_vlan: mdata[1] }
       end
+      private :parse_trunk_native_vlan
 
+      ##
+      # parse_trunk_allowed_vlans parses trunk allowed vlan from
+      #   the provided config.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block returned
+      #   from the node's running configuration.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_trunk_allowed_vlans(config)
         mdata = /(?<=trunk\sallowed\svlan\s)(.+)$/.match(config)
         return { trunk_allowed_vlans: [] } unless mdata[1] != 'none'
@@ -101,11 +145,48 @@ module Rbeapi
         end
         { trunk_allowed_vlans: values }
       end
+      private :parse_trunk_allowed_vlans
 
       ##
-      # Retrieves all switchport interfaces from the running-config
+      # parse_trunk_groups parses trunk group values from the
+      #   provided config.
       #
-      # @return [Array] an array of switchport hashes
+      # @api private
+      #
+      # @param config [String] The configuration block returned
+      #   from the node's running configuration.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_trunk_groups(config)
+        mdata = config.scan(/(?<=trunk\sgroup\s)(.+)$/)
+        mdata = mdata.flatten if mdata.length > 0
+        { trunk_groups: mdata }
+      end
+      private :parse_trunk_groups
+
+      ##
+      # Retrieves all switchport interfaces from the running-config.
+      #
+      # @example
+      #   {
+      #     <name>: {
+      #       mode: <string>,
+      #       access_vlan: <string>,
+      #       trunk_native_vlan: <string>,
+      #       trunk_allowed_vlans: <array>,
+      #       trunk_groups: <array>
+      #     },
+      #     <name>: {
+      #       mode: <string>,
+      #       access_vlan: <string>,
+      #       trunk_native_vlan: <string>,
+      #       trunk_allowed_vlans: <array>,
+      #       trunk_groups: <array>
+      #     },
+      #     ...
+      #   }
+      #
+      # @return [Array] Returns an array of switchport hashes.
       def getall
         interfaces = config.scan(/(?<=^interface\s)([Et|Po].+)$/)
         interfaces.each_with_object({}) do |port, hsh|
@@ -115,31 +196,31 @@ module Rbeapi
       end
 
       ##
-      # Creates a new logical switchport interface in EOS
+      # Creates a new logical switchport interface in EOS.
       #
-      # @param [String] name The name of the logical interface
+      # @param name [String] The name of the logical interface.
       #
-      # @return [Boolean] True if it succeeds otherwise False
+      # @return [Boolean] Returns True if it succeeds otherwise False.
       def create(name)
         configure ["interface #{name}", 'no ip address', 'switchport']
       end
 
       ##
-      # Deletes a logical switchport interface from the running-config
+      # Deletes a logical switchport interface from the running-config.
       #
-      # @param [String] name The name of the logical interface
+      # @param name [String] The name of the logical interface.
       #
-      # @return [Boolean] True if it succeeds otherwise False
+      # @return [Boolean] Returns True if it succeeds otherwise False.
       def delete(name)
         configure ["interface #{name}", 'no switchport']
       end
 
       ##
-      # Defaults a logical switchport interface in the running-config
+      # Defaults a logical switchport interface in the running-config.
       #
-      # @param [String] name The name of the logical interface
+      # @param name [String] The name of the logical interface.
       #
-      # @return [Boolean] True if it succeeds otherwise False
+      # @return [Boolean] Returns True if it succeeds otherwise False.
       def default(name)
         configure ["interface #{name}", 'default switchport']
       end
@@ -147,14 +228,18 @@ module Rbeapi
       ##
       # Configures the switchport mode for the specified interface.
       #
-      # @param [String] name The name of the interface to configure
-      # @param [Hash] opts The configuration parameters for the interface
-      # @option opts [string] :value The value to set the mode to
-      # @option opts [Boolean] :enable If false then the command is
-      #   negated. Default is true.
-      # @option opts [Boolean] :default The value should be set to default
+      # @param name [String] The name of the interface to configure.
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @param opts [Hash] The configuration parameters for the interface.
+      #
+      # @option opts value [string] The value to set the mode to.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] The value should be set to default.
+      #
+      # @return [Boolean] Returns True if the commands succeed otherwise False.
       def set_mode(name, opts = {})
         cmd = command_builder('switchport mode', opts)
         configure_interface(name, cmd)
@@ -162,31 +247,35 @@ module Rbeapi
 
       ##
       # set_trunk_allowed_vlans configures the list of vlan ids that are
-      # allowed on the specified trunk port.  If the enable option is set to
+      # allowed on the specified trunk port. If the enable option is set to
       # false, then the allowed trunks is configured using the no keyword.
       # If the default keyword is provided then the allowed trunks is configured
-      # using the default keyword  The default option takes precedence over the
-      # enable option if both are specified
+      # using the default keyword. The default option takes precedence over the
+      # enable option if both are specified.
       #
-      # @eos_version 4.13.7M
+      # @since eos_version 4.13.7M
       #
-      # @commands
+      # ===Commands
       #   switchport trunk allowed vlan add <value>
       #   no switchport trunk allowed vlan
       #   default switchport trunk allowed vlan
       #
-      # @param [String] name The name of the interface to configure
-      # @param [Hash] opts The configuration parameters for the interface
-      # @option pts [Array] :value The list of vlan ids to configure on the
-      #   switchport to be allowed.  This value must be an array of valid vlan
-      #   ids
-      # @option opts [Boolean] :enable If false then the command is
+      # @param name [String] The name of the interface to configure.
+      #
+      # @param opts [Hash] The configuration parameters for the interface.
+      #
+      # @option ots value [Array] The list of vlan ids to configure on the
+      #   switchport to be allowed. This value must be an array of valid vlan
+      #   ids.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option [Boolean] :default Configures the switchport trunk allowed
+      #
+      # @option default [Boolean] Configures the switchport trunk allowed
       #     vlans command using the default keyword. Default takes precedence
       #     over enable.
       #
-      # @return [Boolean] returns true if the commands complete successfully
+      # @return [Boolean] Returns true if the commands complete successfully.
       def set_trunk_allowed_vlans(name, opts = {})
         value = opts[:value]
         enable = opts.fetch(:enable, true)
@@ -216,15 +305,19 @@ module Rbeapi
       # This value is only valid if the switchport mode is configure as
       # trunk.
       #
-      # @param [String] name The name of the interface to configure
-      # @param [Hash] opts The configuration parameters for the interface
-      # @option opts [string] :value The value of the trunk native vlan
-      # @option :opts [Boolean] :enable If false then the command is
+      # @param name [String] The name of the interface to configure.
+      #
+      # @param opts [Hash] The configuration parameters for the interface.
+      #
+      # @option opts value [string] The value of the trunk native vlan.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option opts [Boolean] :default The value should be set to default.
+      #
+      # @option opts default [Boolean] The value should be set to default.
       #   Default takes precedence over enable.
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @return [Boolean] Returns True if the commands succeed otherwise False.
       def set_trunk_native_vlan(name, opts = {})
         cmd = command_builder('switchport trunk native vlan', opts)
         configure_interface(name, cmd)
@@ -235,18 +328,70 @@ module Rbeapi
       # This value is only valid if the switchport mode is configure
       # in access mode.
       #
-      # @param [String] name The name of the interface to configure
-      # @param [Hash] opts The configuration parameters for the interface
-      # @option opts [string] :value The value of the access vlan
-      # @option opts [Boolean] :enable If false then the command is
+      # @param name [String] The name of the interface to configure.
+      #
+      # @param opts [Hash] The configuration parameters for the interface.
+      #
+      # @option opts value [string] The value of the access vlan.
+      #
+      # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
-      # @option opts [Boolean] :default The value should be set to default
+      #
+      # @option opts default [Boolean] The value should be set to default
       #   Default takes precedence over enable.
       #
-      # @return [Boolean] True if the commands succeed otherwise False
+      # @return [Boolean] Returns True if the commands succeed otherwise False.
       def set_access_vlan(name, opts = {})
         cmd = command_builder('switchport access vlan', opts)
         configure_interface(name, cmd)
+      end
+
+      ##
+      # Configures the trunk group vlans for the specified interface.
+      # Trunk groups not currently set are added and trunk groups
+      # currently configured but not in the passed in value array are removed.
+      #
+      # @param name [String] The name of the interface to configure.
+      #
+      # @param opts [Hash] The configuration parameters for the interface.
+      #
+      # @option opts value [string] Set of values to configure the trunk group.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] The value should be set to default
+      #   Default takes precedence over enable.
+      #
+      # @return [Boolean] Returns True if the commands succeed otherwise False.
+      def set_trunk_groups(name, opts = {})
+        default = opts.fetch(:default, false)
+        if default
+          return configure_interface(name, 'default switchport trunk group')
+        end
+
+        enable = opts.fetch(:enable, true)
+        unless enable
+          return configure_interface(name, 'no switchport trunk group')
+        end
+
+        value = opts.fetch(:value, [])
+        fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+
+        value = Set.new value
+        current_value = Set.new get(name)[:trunk_groups]
+
+        cmds = []
+        # Add trunk groups that are not currently in the list.
+        value.difference(current_value).each do |group|
+          cmds << "switchport trunk group #{group}"
+        end
+
+        # Remove trunk groups that are not in the new list.
+        current_value.difference(value).each do |group|
+          cmds << "no switchport trunk group #{group}"
+        end
+        configure_interface(name, cmds) if cmds.length > 0
       end
     end
   end

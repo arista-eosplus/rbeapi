@@ -58,8 +58,8 @@ module Rbeapi
       # The EapiError class provides one property for holding the set of
       # commands issued when the error was generated.
       #
-      # @param [String] :message The error message to return from raising
-      #   the exception
+      # @param message [String] The error message to return from raising
+      #   the exception.
       def initalize(message)
         @message = message
         @commands = nil
@@ -77,12 +77,14 @@ module Rbeapi
       ##
       # The exception contains the eAPI error code and error text.
       #
-      # @param [String] :message The error message to return from raising
-      #   this exception
-      # @param [Integer] :code The error code associated with the error
-      #   message to be raised
-      # @param [Array] :commands The list of commands that were used  in the
-      #   eAPI request message
+      # @param message [String] The error message to return from raising
+      #   this exception.
+      #
+      # @param code [Integer] The error code associated with the error
+      #   message to be raised.
+      #
+      # @param commands [Array] The list of commands that were used  in the
+      #   eAPI request message.
       def initialize(message, code, commands = nil)
         @error_code = code
         @error_text = message
@@ -101,12 +103,14 @@ module Rbeapi
       ##
       # The exception contains the eAPI error code and error text.
       #
-      # @param [String] :message The error message to return from raising
-      #   this exception
-      # @param [String] :connection_type The optional connection_type of
-      #   the instance
-      # @param [Array] :commands The list of commands that were used  in the
-      #   eAPI request message
+      # @param message [String] The error message to return from raising
+      #   this exception.
+      #
+      # @param connection_type [String] The optional connection_type of
+      #   the instance.
+      #
+      # @param commands [Array] The list of commands that were used  in the
+      #   eAPI request message.
       def initialize(message, connection_type = nil, commands = nil)
         @connection_type = connection_type
         @commands = commands
@@ -117,16 +121,18 @@ module Rbeapi
     ##
     # The EapiConnection provides a base class for building eAPI connection
     # instances with a specific transport for connecting to Arista EOS
-    # devices.  This class handles sending and receiving eAPI calls using
-    # JSON-RPC.  This class should not need to be directly instantiated.
+    # devices. This class handles sending and receiving eAPI calls using
+    # JSON-RPC. This class should not need to be directly instantiated.
     class EapiConnection
       attr_reader :error
+      attr_reader :open_timeout
+      attr_reader :read_timeout
 
       ##
       # The connection contains the transport.
       #
-      # @param [Net::HTTP] :transport The HTTP transport to use for sending
-      #   and receive eAPI request and response messages
+      # @param transport [Net::HTTP] The HTTP transport to use for sending
+      #   and receive eAPI request and response messages.
       def initialize(transport)
         @transport = transport
         @error = nil
@@ -134,13 +140,16 @@ module Rbeapi
 
       ##
       # Configures the connection authentication values (username and
-      # password).  The authentication values are used to authenticate
-      # the eAPI connection.  Using authentication is only required for
-      # connections that use Http or Https transports
+      # password). The authentication values are used to authenticate
+      # the eAPI connection. Using authentication is only required for
+      # connections that use Http or Https transports.
       #
-      # @options :opts [String] :username The username to use to
+      # @param opts [Hash] The authentication parameters.
+      #
+      # @option opts username [String] The username to use to
       #   authenticate with eAPI. Default is 'admin'.
-      # @options :opts [String] :password The password to use to
+      #
+      # @option opts password [String] The password to use to
       #   authenticate with eAPI. Default is ''.
       def authentication(opts = {})
         @username = opts.fetch(:username, 'admin')
@@ -149,12 +158,13 @@ module Rbeapi
 
       ##
       # Configures the connection timeout values (open_timeout and
-      # read_timeout).  The timeout values are used for the eAPI
+      # read_timeout). The timeout values are used for the eAPI
       # connection.
       #
-      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      # @option opts open_timeout [Float] Number of seconds to wait for the
       #   eAPI connection to open. Default is DEFAULT_HTTP_OPEN_TIMEOUT.
-      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #
+      # @option opts read_timeout [Float] Number of seconds to wait for one
       #   block of eAPI results to be read (via one read(2) call). Default
       #   is DEFAULT_HTTP_READ_TIMEOUT.
       def timeouts(opts = {})
@@ -179,18 +189,21 @@ module Rbeapi
       #     "id": <reqid>
       #   }
       #
-      # @param [Array] :commands The ordered set of commands that should
-      #   be included in the eAPI request
-      # @param [Hash] :opts Optional keyword arguments
-      # @option :opts [String] :id The value to use for the eAPI request
-      #   id.  If not provided,the object_id for the connection instance
-      #   will be used
-      # @option :opts [String] :format The encoding formation to pass in
-      #   the eAPI request.  Valid values are json or text.  The default
-      #   value is json
+      # @param commands [Array] The ordered set of commands that should
+      #   be included in the eAPI request.
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts id [String] The value to use for the eAPI request
+      #   id. If not provided,the object_id for the connection instance
+      #   will be used.
+      #
+      # @option opts format [String] The encoding formation to pass in
+      #   the eAPI request. Valid values are json or text. The default
+      #   value is json.
       #
       # @return [Hash] Returns a Ruby hash of the request message that is
-      #   suitable to be JSON encoded and sent to the destination node
+      #   suitable to be JSON encoded and sent to the destination node.
       def request(commands, opts = {})
         id = opts.fetch(:reqid, object_id)
         format = opts.fetch(:format, 'json')
@@ -203,7 +216,7 @@ module Rbeapi
       ##
       # This method will send the request to the node over the specified
       # transport and return a response message with the contents from
-      # the eAPI response.  eAPI responds to request messages with either
+      # the eAPI response. eAPI responds to request messages with either
       # a success message or failure message.
       #
       # @example eAPI Response - success
@@ -240,16 +253,18 @@ module Rbeapi
       #     "id": <reqid>
       #   }
       #
-      # @param [Hash] :data A hash containing the body of the request
-      #   message.  This should be a valid eAPI request message.
-      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      # @param data [Hash] A hash containing the body of the request
+      #   message. This should be a valid eAPI request message.
+      #
+      # @option opts open_timeout [Float] Number of seconds to wait for the
       #   eAPI connection to open.
-      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #
+      # @option opts read_timeout [Float] Number of seconds to wait for one
       #   block of eAPI results to be read (via one read(2) call).
       #
-      # @return [Hash] returns the response message as a Ruby hash object
+      # @return [Hash] Returns the response message as a Ruby hash object.
       #
-      # @raises [CommandError] Raised if an eAPI failure response is return
+      # @raise [CommandError] Raised if an eAPI failure response is return
       #   from the destination node.
       def send(data, opts)
         request = Net::HTTP::Post.new('/command-api')
@@ -281,24 +296,28 @@ module Rbeapi
       # Executes the commands on the destination node and returns the
       # response from the node.
       #
-      # @param [Array] :commands The ordered list of commands to execute
+      # @param commands [Array] The ordered list of commands to execute
       #   on the destination node.
-      # @param [Hash] :opts Optional keyword arguments
-      # @option :opts [String] :encoding Used to specify the encoding to be
-      #   used for the response.  Valid encoding values are json or text
-      # @option :opts [Float] :open_timeout Number of seconds to wait for the
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts encoding [String] Used to specify the encoding to be
+      #   used for the response. Valid encoding values are json or text.
+      #
+      # @option opts open_timeout [Float] Number of seconds to wait for the
       #   eAPI connection to open.
-      # @option :opts [Float] :read_timeout Number of seconds to wait for one
+      #
+      # @option opts read_timeout [Float] Number of seconds to wait for one
       #   block of eAPI results to be read (via one read(2) call).
       #
-      # @returns [Array<Hash>] This method will return the array of responses
+      # @return [Array<Hash>] This method will return the array of responses
       #   for each command executed on the node.
       #
-      # @raises [CommandError] Raises a CommandError if rescued from the
-      #   send method and adds the list of commands to the exception message
+      # @raise [CommandError] Raises a CommandError if rescued from the
+      #   send method and adds the list of commands to the exception message.
       #
-      # @raises [ConnectionError] Raises a ConnectionError if rescued and
-      #   adds the list of commands to the exception message
+      # @raise [ConnectionError] Raises a ConnectionError if rescued and
+      #   adds the list of commands to the exception message.
       def execute(commands, opts = {})
         @error = nil
         request = request(commands, opts)
