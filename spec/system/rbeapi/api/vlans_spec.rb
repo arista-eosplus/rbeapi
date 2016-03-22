@@ -159,4 +159,50 @@ describe Rbeapi::Api::Vlans do
       expect(subject.get('1')[:trunk_groups]).not_to include('foo')
     end
   end
+
+  describe '#set_trunk_groups' do
+    before do
+      node.config(['vlan 1', 'default trunk group'])
+    end
+
+    it 'raises an ArgumentError if value is not an array' do
+      expect { subject.set_trunk_groups('1', value: 'foo') }
+        .to raise_error(ArgumentError)
+    end
+
+    it 'sets trunk group to foo bar bang' do
+      node.config(['vlan 1', 'trunk group bang', 'trunk group baz'])
+      expect(subject.get('1')[:trunk_groups]).to eq(%w(bang baz))
+      expect(subject.set_trunk_groups('1', value: %w(foo bar bang)))
+        .to be_truthy
+      expect(subject.get('1')[:trunk_groups].sort).to eq(%w(bang bar foo))
+    end
+
+    it 'clears trunk group if no value specified' do
+      node.config(['vlan 1', 'trunk group bang', 'trunk group baz'])
+      expect(subject.get('1')[:trunk_groups]).to eq(%w(bang baz))
+      expect(subject.set_trunk_groups('1')).to be_truthy
+      expect(subject.get('1')[:trunk_groups]).to be_empty
+    end
+
+    it 'negate trunk group' do
+      node.config(['vlan 1', 'trunk group bang', 'trunk group baz'])
+      expect(subject.get('1')[:trunk_groups]).to eq(%w(bang baz))
+      expect(subject.set_trunk_groups('1', value: %w(foo bar bang)))
+        .to be_truthy
+      expect(subject.get('1')[:trunk_groups].sort).to eq(%w(bang bar foo))
+      expect(subject.set_trunk_groups('1', enable: false)).to be_truthy
+      expect(subject.get('1')[:trunk_groups]).to be_empty
+    end
+
+    it 'default trunk group' do
+      node.config(['vlan 1', 'trunk group bang', 'trunk group baz'])
+      expect(subject.get('1')[:trunk_groups]).to eq(%w(bang baz))
+      expect(subject.set_trunk_groups('1', value: %w(foo bar bang)))
+        .to be_truthy
+      expect(subject.get('1')[:trunk_groups].sort).to eq(%w(bang bar foo))
+      expect(subject.set_trunk_groups('1', default: true)).to be_truthy
+      expect(subject.get('1')[:trunk_groups]).to be_empty
+    end
+  end
 end

@@ -132,4 +132,34 @@ describe Rbeapi::Api::Vlans do
       expect(subject.remove_trunk_group('1', 'foo')).to be_truthy
     end
   end
+
+  describe '#set_trunk_groups' do
+    it 'raises an ArgumentError if value is not an array' do
+      expect { subject.set_trunk_groups('vlan 1', value: 'foo') }
+        .to raise_error(ArgumentError)
+    end
+
+    it 'sets trunk group to foo bar bang' do
+      expect(node).to receive(:config)
+        .with(['vlan 1', 'trunk group foo',
+               'trunk group bar', 'trunk group bang', 'no trunk group mlag_ctl',
+               'no trunk group test'])
+      expect(subject.set_trunk_groups('1', value: %w(foo bar bang)))
+        .to be_truthy
+    end
+
+    it 'negate switchport trunk group' do
+      expect(node).to receive(:config)
+        .with(['vlan 1', 'no trunk group'])
+      expect(subject.set_trunk_groups('1', enable: false))
+        .to be_truthy
+    end
+
+    it 'default switchport trunk group' do
+      expect(node).to receive(:config)
+        .with(['vlan 1', 'default trunk group'])
+      expect(subject.set_trunk_groups('1', default: true))
+        .to be_truthy
+    end
+  end
 end
