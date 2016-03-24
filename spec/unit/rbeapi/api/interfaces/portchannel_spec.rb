@@ -31,7 +31,7 @@ describe Rbeapi::Api::PortchannelInterface do
     let(:resource) { subject.get('Port-Channel1') }
 
     let(:keys) do
-      [:type, :shutdown, :description, :name, :members, :lacp_mode,
+      [:type, :shutdown, :load_interval, :description, :name, :members, :lacp_mode,
        :minimum_links, :lacp_timeout, :lacp_fallback]
     end
 

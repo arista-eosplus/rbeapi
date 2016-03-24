@@ -14,7 +14,7 @@ describe Rbeapi::Api::Interfaces do
 
   describe '#get' do
     let(:entity) do
-      { name: 'Ethernet1', type: 'ethernet', description: '', shutdown: false,
+      { name: 'Ethernet1', type: 'ethernet', description: '', shutdown: false, load_interval: '',
         speed: 'auto', forced: false, sflow: true, flowcontrol_send: 'off',
         flowcontrol_receive: 'off' }
     end
@@ -148,6 +148,32 @@ describe Rbeapi::Api::Interfaces do
       expect(subject.set_flowcontrol_receive('Ethernet1', value: 'off'))
         .to be_truthy
       expect(subject.get('Ethernet1')[:flowcontrol_receive]).to eq('off')
+    end
+  end
+
+  describe '#set_load_interval' do
+    before do
+      node.config(['interface Ethernet1', 'default load-interval'])
+    end
+
+    it 'sets the load-interval value on the interface' do
+      expect(subject.get('Ethernet1')[:load_interval]).to eq('')
+      expect(subject.set_load_interval('Ethernet1', value: '10')).to be_truthy
+      expect(subject.get('Ethernet1')[:load_interval]).to eq('10')
+    end
+
+    it 'negates the load-interval' do
+      expect(subject.set_load_interval('Ethernet1', value: '20')).to be_truthy
+      expect(subject.get('Ethernet1')[:load_interval]).to eq('20')
+      expect(subject.set_load_interval('Ethernet1', enable: false)).to be_truthy
+      expect(subject.get('Ethernet1')[:load_interval]).to eq('')
+    end
+
+    it 'defaults the load-interval' do
+      expect(subject.set_load_interval('Ethernet1', value: '10')).to be_truthy
+      expect(subject.get('Ethernet1')[:load_interval]).to eq('10')
+      expect(subject.set_load_interval('Ethernet1', default: true)).to be_truthy
+      expect(subject.get('Ethernet1')[:load_interval]).to eq('')
     end
   end
 end

@@ -13,7 +13,7 @@ describe Rbeapi::Api::Interfaces do
 
   describe '#get' do
     let(:entity) do
-      { name: 'Vxlan1', type: 'vxlan', description: '', shutdown: false,
+      { name: 'Vxlan1', type: 'vxlan', description: '', shutdown: false, load_interval: '',
         source_interface: '', multicast_group: '', udp_port: 4789,
         flood_list: [], vlans: {} }
     end
@@ -88,6 +88,32 @@ describe Rbeapi::Api::Interfaces do
       expect(subject.get('Vxlan1')[:shutdown]).to be_truthy
       expect(subject.set_shutdown('Vxlan1', enable: true)).to be_truthy
       expect(subject.get('Vxlan1')[:shutdown]).to be_falsy
+    end
+  end
+
+  describe '#set_load_interval' do
+    before do
+      node.config(['interface Vxlan1', 'default load-interval'])
+    end
+
+    it 'sets the load-interval value on the interface' do
+      expect(subject.get('Vxlan1')[:load_interval]).to eq('')
+      expect(subject.set_load_interval('Vxlan1', value: '10')).to be_truthy
+      expect(subject.get('Vxlan1')[:load_interval]).to eq('10')
+    end
+
+    it 'negates the load-interval' do
+      expect(subject.set_load_interval('Vxlan1', value: '20')).to be_truthy
+      expect(subject.get('Vxlan1')[:load_interval]).to eq('20')
+      expect(subject.set_load_interval('Vxlan1', enable: false)).to be_truthy
+      expect(subject.get('Vxlan1')[:load_interval]).to eq('')
+    end
+
+    it 'defaults the load-interval' do
+      expect(subject.set_load_interval('Vxlan1', value: '10')).to be_truthy
+      expect(subject.get('Vxlan1')[:load_interval]).to eq('10')
+      expect(subject.set_load_interval('Vxlan1', default: true)).to be_truthy
+      expect(subject.get('Vxlan1')[:load_interval]).to eq('')
     end
   end
 
