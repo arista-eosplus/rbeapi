@@ -42,6 +42,7 @@ module Rbeapi
     # IP interfaces configured using eAPI.
     class Ipinterfaces < Entity
       DEFAULT_ADDRESS = ''
+      DEFAULT_LOAD_INTERVAL = ''
 
       ##
       # get returns a resource hash that represents the configuration of the IP
@@ -52,6 +53,7 @@ module Rbeapi
       #     address: <string>,
       #     mtu: <string>,
       #     helper_addresses: array<strings>
+      #     load_interval: <string>
       #   }
       #
       # @param name [String] The full interface identifier of the interface to
@@ -70,6 +72,7 @@ module Rbeapi
         response.merge!(parse_address(config))
         response.merge!(parse_mtu(config))
         response.merge!(parse_helper_addresses(config))
+        response.merge!(parse_load_interval(config))
         response
       end
 
@@ -83,11 +86,13 @@ module Rbeapi
       #       address: <string>,
       #       mtu: <string>,
       #       helper_addresses: array<strings>
+      #       load_interval: <string>
       #     },
       #     <name>: {
       #       address: <string>,
       #       mtu: <string>,
       #       helper_addresses: array<strings>
+      #       load_interval: <string>
       #     },
       #     ...
       #   }
@@ -161,6 +166,24 @@ module Rbeapi
         { helper_addresses: helpers }
       end
       private :parse_helper_addresses
+
+      ##
+      # parse_load_interval scans the provided configuration block and
+      # parse the load-interval value. If the interface load-interval
+      # value is not configured, then this method will return the value of
+      # DEFAULT_LOAD_INTERVAL. The hash returned is intended to be merged into
+      # the interface resource hash.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block to parse.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_load_interval(config)
+        mdata = /load-interval (\w+)$/.match(config)
+        { load_interval: mdata.nil? ? DEFAULT_LOAD_INTERVAL : mdata[1] }
+      end
+      private :parse_load_interval
 
       ##
       # create will create a new IP interface on the node. If the ip interface
@@ -323,6 +346,27 @@ module Rbeapi
           cmds = ['no ip helper-address']
           value.each { |addr| cmds << "ip helper-address #{addr}" } if enable
         end
+        configure_interface(name, cmds)
+      end
+
+      ##
+      # set_load_interval is a convenience function for configuring the
+      # value of interface load-interval
+      #
+      # @param name [String] The interface name to apply the configuration
+      # values to. The name must be the full interface identifier.
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts value [String] Specifies the value to configure the
+      # load-interval setting for. Valid values are between 5 and 600.
+      #
+      # @option opts default [Boolean] Configures the load-interval value on
+      # the interface using the default keyword.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_load_interval(name, opts = {})
+        cmds = command_builder("load-interval", opts)
         configure_interface(name, cmds)
       end
     end
