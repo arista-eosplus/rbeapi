@@ -68,6 +68,11 @@ describe Rbeapi::Api::System do
     it 'has four entries' do
       expect(subject.get.size).to eq(4)
     end
+
+    it 'retrieves only global ip routing' do
+      expect(subject.get.size).to eq(4)
+      expect(subject.get[:iprouting]).to eq(true)
+    end
   end
 
   describe '#set_hostname' do

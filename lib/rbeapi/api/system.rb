@@ -92,7 +92,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] The resource hash attribute.
       def parse_iprouting(config)
-        mdata = /no\sip\srouting/.match(config)
+        mdata = /no\sip\srouting$/.match(config)
         { iprouting: mdata.nil? ? true : false }
       end
       private :parse_iprouting
