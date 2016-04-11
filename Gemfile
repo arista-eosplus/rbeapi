@@ -6,7 +6,6 @@ gem 'net_http_unix'
 gem 'netaddr'
 
 group :development do
-  gem 'rubocop', '>=0.35.1'
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-rubocop'
@@ -28,6 +27,17 @@ group :development, :test do
   gem 'ci_reporter_rspec',       require: false
   gem 'simplecov-json',          require: false
   gem 'simplecov-rcov',          require: false
+end
+
+# Rubocop > 0.37 requires a gem that only works with ruby 2.x
+if RUBY_VERSION.to_f < 2.0
+  group :development, :test do
+    gem 'rubocop', '>=0.35.1', '< 0.38'
+  end
+else
+  group :development, :test do
+    gem 'rubocop', '>=0.35.1'
+  end
 end
 
 # vim:ft=ruby
