@@ -220,10 +220,14 @@ module Rbeapi
           mdata = /\s{3}(\w+)\s/.match(rule)
           case mdata.nil? ? nil : mdata[1]
           when 'match'
-            rule_hsh[:match] = [] unless rule_hsh.include?(:match)
+            unless rule_hsh.include?(:match) && rule_hsh[:match].is_a?(Array)
+              rule_hsh[:match] = []
+            end
             rule_hsh[:match] << rule.sub('match', '').strip
           when 'set'
-            rule_hsh[:set] = [] unless rule_hsh.include?(:set)
+            unless rule_hsh.include?(:set) && rule_hsh[:set].is_a?(Array)
+              rule_hsh[:set] = []
+            end
             rule_hsh[:set] << rule.sub('set', '').strip
           when 'continue'
             rule_hsh[:continue] = nil unless rule_hsh.include?(:continue)
@@ -304,6 +308,11 @@ module Rbeapi
         if opts.empty?
           cmds = name_commands(name, action, seqno)
         else
+          if opts[:match]
+            unless opts[:match].is_a?(Array)
+              fail ArgumentError, 'opts match must be an Array'
+            end
+          end
           cmds = name_commands(name, action, seqno, opts)
           if opts[:description]
             cmds << 'no description'
@@ -343,6 +352,8 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def remove_match_statements(name, action, seqno, cmds)
+        fail ArgumentError, 'cmds must be an Array' unless cmds.is_a?(Array)
+
         entries = parse_entries(name)
         return nil unless entries
         entries.each do |entry|
@@ -369,6 +380,8 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def remove_set_statements(name, action, seqno, cmds)
+        fail ArgumentError, 'cmds must be an Array' unless cmds.is_a?(Array)
+
         entries = parse_entries(name)
         return nil unless entries
         entries.each do |entry|
@@ -439,6 +452,8 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_match_statements(name, action, seqno, value)
+        fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+
         cmds = ["route-map #{name} #{action} #{seqno}"]
         remove_match_statements(name, action, seqno, cmds)
         Array(value).each do |options|
@@ -464,6 +479,8 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_set_statements(name, action, seqno, value)
+        fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+
         cmds = ["route-map #{name} #{action} #{seqno}"]
         remove_set_statements(name, action, seqno, cmds)
         Array(value).each do |options|

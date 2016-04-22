@@ -205,6 +205,10 @@ module Rbeapi
         default = opts[:default] || false
         cmds = ["interface #{name}"]
 
+        if value
+          fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+        end
+
         case default
         when true
           cmds << 'default ip virtual-router address'

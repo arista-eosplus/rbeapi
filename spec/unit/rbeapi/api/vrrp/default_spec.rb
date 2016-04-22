@@ -169,6 +169,16 @@ describe Rbeapi::Api::Vrrp do
       expect { subject.create('Vlan100', 9) }.to \
         raise_error ArgumentError
     end
+
+    it 'raises an ArgumentError if secondary_ip is not an array' do
+      expect { subject.create('Ethernet1', 9, secondary_ip: '123') }
+        .to raise_error(ArgumentError)
+    end
+
+    it 'raises an ArgumentError if track is not an array' do
+      expect { subject.create('Ethernet1', 9, track: '123') }
+        .to raise_error(ArgumentError)
+    end
   end
 
   describe '#delete' do
