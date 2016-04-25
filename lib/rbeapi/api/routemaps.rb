@@ -220,14 +220,10 @@ module Rbeapi
           mdata = /\s{3}(\w+)\s/.match(rule)
           case mdata.nil? ? nil : mdata[1]
           when 'match'
-            unless rule_hsh.include?(:match) && rule_hsh[:match].is_a?(Array)
-              rule_hsh[:match] = []
-            end
+            rule_hsh[:match] = [] unless rule_hsh.include?(:match)
             rule_hsh[:match] << rule.sub('match', '').strip
           when 'set'
-            unless rule_hsh.include?(:set) && rule_hsh[:set].is_a?(Array)
-              rule_hsh[:set] = []
-            end
+            rule_hsh[:set] = [] unless rule_hsh.include?(:set)
             rule_hsh[:set] << rule.sub('set', '').strip
           when 'continue'
             rule_hsh[:continue] = nil unless rule_hsh.include?(:continue)
@@ -308,10 +304,8 @@ module Rbeapi
         if opts.empty?
           cmds = name_commands(name, action, seqno)
         else
-          if opts[:match]
-            unless opts[:match].is_a?(Array)
-              fail ArgumentError, 'opts match must be an Array'
-            end
+          if opts[:match] && !opts[:match].is_a?(Array)
+            fail ArgumentError, 'opts match must be an Array'
           end
           cmds = name_commands(name, action, seqno, opts)
           if opts[:description]
