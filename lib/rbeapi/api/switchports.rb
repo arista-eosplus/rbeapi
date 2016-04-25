@@ -264,7 +264,7 @@ module Rbeapi
       #
       # @param opts [Hash] The configuration parameters for the interface.
       #
-      # @option ots value [Array] The list of vlan ids to configure on the
+      # @option opts value [Array] The list of vlan ids to configure on the
       #   switchport to be allowed. This value must be an array of valid vlan
       #   ids.
       #

@@ -150,5 +150,10 @@ describe Rbeapi::Api::Ipinterfaces do
         .to be_truthy
       expect(subject.get('Ethernet1')[:helper_addresses].sort).to be_empty
     end
+
+    it 'raises an ArgumentError if opts value is not an array' do
+      expect { subject.set_helper_addresses('Ethernet1', value: '123') }
+        .to raise_error(ArgumentError)
+    end
   end
 end

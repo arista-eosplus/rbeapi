@@ -141,4 +141,12 @@ describe Rbeapi::Api::PortchannelInterface do
       expect(subject.set_shutdown('Port-Channel1', opts)).to be_truthy
     end
   end
+
+  describe '#set_members' do
+    it 'raises an ArgumentError if members is not an array' do
+      expect { subject.set_members('Port-Channel1',
+                                   'Ethernet3') }
+        .to raise_error(ArgumentError)
+    end
+  end
 end

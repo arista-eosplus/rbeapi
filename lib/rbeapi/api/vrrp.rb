@@ -512,6 +512,15 @@ module Rbeapi
       # @return [Boolean] Returns true if the command completed successfully.
       def create(name, vrid, opts = {})
         fail ArgumentError, 'create has no options set' if opts.empty?
+
+        if opts[:secondary_ip] && !opts[:secondary_ip].is_a?(Array)
+          fail ArgumentError, 'opts secondary_ip must be an Array'
+        end
+
+        if opts[:track] && !opts[:track].is_a?(Array)
+          fail ArgumentError, 'opts track must be an Array'
+        end
+
         cmds = []
         if opts.key?(:enable)
           if opts[:enable]

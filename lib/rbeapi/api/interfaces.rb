@@ -843,6 +843,8 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_members(name, members, mode = nil)
+        fail ArgumentError, 'members must be an Array' unless members.is_a?(Array)
+
         current_members = Set.new parse_members(name)[:members]
         members = Set.new members
 
