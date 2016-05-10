@@ -13,7 +13,7 @@ describe Rbeapi::Api::Ipinterfaces do
 
   describe '#get' do
     let(:entity) do
-      { address: '77.99.99.99/24', mtu: '1500', helper_addresses: [] }
+      { address: '77.99.99.99/24', mtu: '1500', helper_addresses: [], load_interval: '' }
     end
 
     before do
@@ -154,6 +154,32 @@ describe Rbeapi::Api::Ipinterfaces do
     it 'raises an ArgumentError if opts value is not an array' do
       expect { subject.set_helper_addresses('Ethernet1', value: '123') }
         .to raise_error(ArgumentError)
+    end
+  end
+
+  describe '#set_load_interval' do
+    before do
+      node.config(['default interface Ethernet1', 'interface Ethernet1', 'no switchport'])
+    end
+
+    it 'sets the load-interval value on the interface' do
+      expect(subject.get('Ethernet1')[:load_interval]).to eq('')
+      expect(subject.set_load_interval('Ethernet1', value: '10')).to be_truthy
+      expect(subject.get('Ethernet1')[:load_interval]).to eq('10')
+    end
+
+    it 'negates the load-interval' do
+      expect(subject.set_load_interval('Ethernet1', value: '20')).to be_truthy
+      expect(subject.get('Ethernet1')[:load_interval]).to eq('20')
+      expect(subject.set_load_interval('Ethernet1', enable: false)).to be_truthy
+      expect(subject.get('Ethernet1')[:load_interval]).to eq('')
+    end
+
+    it 'defaults the load-interval' do
+      expect(subject.set_load_interval('Ethernet1', value: '10')).to be_truthy
+      expect(subject.get('Ethernet1')[:load_interval]).to eq('10')
+      expect(subject.set_load_interval('Ethernet1', default: true)).to be_truthy
+      expect(subject.get('Ethernet1')[:load_interval]).to eq('')
     end
   end
 end

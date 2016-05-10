@@ -144,6 +144,7 @@ module Rbeapi
     # that is common to all interfaces configured in EOS.
     class BaseInterface < Entity
       DEFAULT_INTF_DESCRIPTION = ''
+      DEFAULT_LOAD_INTERVAL = ''
 
       ##
       # get returns the specified interface resource hash that represents the
@@ -157,6 +158,7 @@ module Rbeapi
       #     type: 'generic'
       #     description: <string>
       #     shutdown: [true, false]
+      #     load_interval: <string>
       #   }
       #
       # @param name [String] The name of the interface to return from the
@@ -172,6 +174,7 @@ module Rbeapi
         response = { name: name, type: 'generic' }
         response.merge!(parse_description(config))
         response.merge!(parse_shutdown(config))
+        response.merge!(parse_load_interval(config))
         response
       end
 
@@ -212,6 +215,24 @@ module Rbeapi
         { shutdown: value.nil? }
       end
       private :parse_shutdown
+
+      ##
+      # parse_load_interval scans the provided configuration block and
+      # parse the load-interval value. If the interface load-interval
+      # value is not configured, then this method will return the value of
+      # DEFAULT_LOAD_INTERVAL. The hash returned is intended to be merged into
+      # the interface resource hash.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block to parse.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_load_interval(config)
+        mdata = /load-interval (\w+)$/.match(config)
+        { load_interval: mdata.nil? ? DEFAULT_LOAD_INTERVAL : mdata[1] }
+      end
+      private :parse_load_interval
 
       ##
       # create will create a new interface resource in the node's current
@@ -326,6 +347,27 @@ module Rbeapi
         commands = command_builder('shutdown', opts)
         configure_interface(name, commands)
       end
+
+      ##
+      # set_load_interval is a convenience function for configuring the
+      # value of interface load-interval
+      #
+      # @param name [String] The interface name to apply the configuration
+      # values to. The name must be the full interface identifier.
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts value [String] Specifies the value to configure the
+      # load-interval setting for. Valid values are between 5 and 600.
+      #
+      # @option opts default [Boolean] Configures the load-interval value on
+      # the interface using the default keyword.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_load_interval(name, opts = {})
+        commands = command_builder("load-interval", opts)
+        configure_interface(name, commands)
+      end
     end
 
     ##
@@ -347,6 +389,7 @@ module Rbeapi
       #     type: <string>,
       #     description: <string>,
       #     shutdown: <boolean>,
+      #     load_interval: <string>
       #     speed: <string>,
       #     forced: <boolean>,
       #     sflow: <boolean>,
@@ -654,6 +697,7 @@ module Rbeapi
       #     type: 'portchannel'
       #     description: <string>
       #     shutdown: [true, false]
+      #     load_interval: <string>
       #     members: array[<strings>]
       #     lacp_mode: [active, passive, on]
       #     minimum_links: <string>
@@ -1023,6 +1067,7 @@ module Rbeapi
       #     type: <string>,
       #     description: <string>,
       #     shutdown: <boolean>,
+      #     load_interval: <string>
       #     source_interface: <string>,
       #     multicast_group: <string>,
       #     udp_port: <fixnum>,

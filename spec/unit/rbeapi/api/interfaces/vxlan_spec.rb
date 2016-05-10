@@ -23,7 +23,7 @@ describe Rbeapi::Api::VxlanInterface do
     let(:resource) { subject.get('Vxlan1') }
 
     let(:keys) do
-      [:type, :shutdown, :description, :name, :source_interface,
+      [:type, :shutdown, :load_interval, :description, :name, :source_interface,
        :multicast_group, :udp_port, :flood_list, :vlans]
     end
 
