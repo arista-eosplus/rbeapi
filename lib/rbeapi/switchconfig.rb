@@ -312,6 +312,7 @@ module Rbeapi
           # XXX Fix parsing end
           next if line.start_with?('!') || line.start_with?('end')
           line.chomp!
+          next if line.empty?
           indent_level = line[/\A */].size / @indent
           if indent_level > prev_indent
             # New section
