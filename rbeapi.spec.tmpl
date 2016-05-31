@@ -35,6 +35,11 @@ Github iusses.
 Summary:	Arista eAPI Ruby Library for Chef clients
 Group:		Development/Languages
 Requires: chef
+Requires: chef-rubygem(net_http_unix)
+Requires: chef-rubygem(inifile)
+Requires: chef-rubygem(netaddr)
+Provides: chef-rubygem(%{gem_name}) = %{version}
+Provides: chef-rubygem-%{gem_name} = %{version}
 %description chef
 The Ruby eAPI Client for Chef clients
 

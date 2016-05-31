@@ -74,7 +74,7 @@ GEM_OPTS="--no-document --local"
 ${GEM} install ${GEM_OPTS} /%{gem_name}-%{version}.gem > /dev/null 2>&1
 
 %preun chef
-GEM=/opt/chef/ebmedded/bin/gem
+GEM=/opt/chef/embedded/bin/gem
 ${GEM} uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
 
 %post puppet3
