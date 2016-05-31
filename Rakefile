@@ -13,8 +13,7 @@ RPM_OPTS = '--define "_topdir %(pwd)/rpmbuild" --define "_builddir ' \
 desc 'Generate regular and puppet-enterprise rbeapi RPMs for EOS'
 task rpm: :build do
   system "sed -e 's/^Version:.*/Version: #{Rbeapi::VERSION}/g' " \
-    'rbeapi-chef.spec.tmpl > rbeapi.spec'
-  #  'rbeapi.spec.tmpl > rbeapi.spec'
+    'rbeapi.spec.tmpl > rbeapi.spec'
   system "rpmbuild #{RPM_OPTS} rbeapi.spec"
   RPMS = `find rpms/noarch -name "*rbeapi*rpm"`
   puts "\n################################################\n#"
@@ -89,7 +88,7 @@ task all_rpms: :build do
   puts "      rubygem-rbeapi-chef-#{Rbeapi::VERSION}-2.eos4.noarch.rpm \\"
   puts '      rubygem-inifile-chef-3.0.0-5.eos4.noarch.rpm \\'
   puts '      rubygem-netaddr-chef-1.5.1-4.eos4.noarch.rpm \\'
-  puts '      rubygem-net_http_unix-0.2.1-5.eos4.noarch.rpm'
+  puts '      rubygem-net_http_unix-chef-0.2.1-5.eos4.noarch.rpm'
   puts '    Puppet Open Source: '
   puts '      cd /mnt/flash; \\'
   puts "      swix create rbeapi-#{Rbeapi::VERSION}-1.swix \\"
