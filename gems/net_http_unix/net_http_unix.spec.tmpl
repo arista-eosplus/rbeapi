@@ -23,8 +23,8 @@ Wrapper around Net::HTTP with AF_UNIX support.
 Group:      Development/Languages
 Summary:   Net_http_unix rubygem packaged for Chef client
 Requires: chef
-Provides: chef(%{gem_name}) = %{version}
-Provides: chef%{gem_name} = %{version}
+Provides: chef-rubygem(%{gem_name}) = %{version}
+Provides: chef-rubygem-%{gem_name} = %{version}
 %description chef
 
 %package puppet3

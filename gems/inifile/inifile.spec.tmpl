@@ -53,8 +53,8 @@ var2 = shoodle.
 Summary: Inifile rubygem packaged for Chef
 Group:		Development/Languages
 Requires: chef
-Provides: cehf-rubygem(%{gem_name}) = %{version}
-Provides: cehf-rubygem-%{gem_name} = %{version}
+Provides: chef-rubygem(%{gem_name}) = %{version}
+Provides: chef-rubygem-%{gem_name} = %{version}
 %description chef
 The inifile rubygem packaged for Chef client on Arista EOS.
 
@@ -109,7 +109,7 @@ GEM_OPTS="--no-document --local"
 ${GEM} install ${GEM_OPTS} /%{gem_name}-%{version}.gem > /dev/null 2>&1
 
 %preun chef
-GEM=/opt/chef/enbedded/bin/gem
+GEM=/opt/chef/embedded/bin/gem
 ${GEM} uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
 
 %post puppet3
