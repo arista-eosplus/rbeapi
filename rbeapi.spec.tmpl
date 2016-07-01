@@ -73,7 +73,7 @@ install %{SOURCE0} %{buildroot}/
 /%{gem_name}-%{version}.gem
 
 %post
-GEM_OPTS="--no-document --local"
+GEM_OPTS="--no-rdoc --no-ri --local"
 gem install ${GEM_OPTS} /%{gem_name}-%{version}.gem > /dev/null 2>&1
 
 %preun
@@ -81,7 +81,7 @@ gem uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
 
 %post puppet3
 GEM=/opt/puppet/bin/gem
-GEM_OPTS="--no-document --local"
+GEM_OPTS="--no-rdoc --no-ri --local"
 ${GEM} install ${GEM_OPTS} /%{gem_name}-%{version}.gem > /dev/null 2>&1
 
 %preun puppet3
@@ -90,7 +90,7 @@ ${GEM} uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
 
 %post puppet-aio
 GEM=/opt/puppetlabs/puppet/bin/gem
-GEM_OPTS="--no-document --local"
+GEM_OPTS="--no-rdoc --no-ri --local"
 ${GEM} install ${GEM_OPTS} /%{gem_name}-%{version}.gem > /dev/null 2>&1
 
 %preun puppet-aio
