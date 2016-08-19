@@ -53,6 +53,7 @@ module Rbeapi
       #     address: <string>,
       #     mtu: <string>,
       #     helper_addresses: array<strings>
+      #     secondary_addresses: array<strings>
       #     load_interval: <string>
       #   }
       #
@@ -72,6 +73,7 @@ module Rbeapi
         response.merge!(parse_address(config))
         response.merge!(parse_mtu(config))
         response.merge!(parse_helper_addresses(config))
+        response.merge!(parse_secondary_addresses(config))
         response.merge!(parse_load_interval(config))
         response
       end
@@ -86,6 +88,7 @@ module Rbeapi
       #       address: <string>,
       #       mtu: <string>,
       #       helper_addresses: array<strings>
+      #       secondary_addresses: array<strings>
       #       load_interval: <string>
       #     },
       #     <name>: {
@@ -166,6 +169,30 @@ module Rbeapi
         { helper_addresses: helpers }
       end
       private :parse_helper_addresses
+
+      ##
+      # parse_secondary_addresses scans the provided configuration block and
+      # extracts any configured IP secondary address values. The interface could
+      # be configured with one or more secondary addresses. If no secondary
+      # addresses are configured, then an empty array is set in the return
+      # hash. The return value is intended to be merged into the ipaddress
+      # resource hash.
+      #
+      # @api private
+      #
+      # @param config [String] The IP interface configuration block returned
+      #   from the node's running configuration.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_secondary_addresses(config)
+        matches = config.scan(/(?<=^\s{3}ip\saddress\s)(.+)(\ssecondary)$/)
+        response = []
+        matches.each do |ip|
+          response << ip[0]
+        end
+	      { secondary_addresses: response }
+      end
+      private :parse_secondary_addresses
 
       ##
       # parse_load_interval scans the provided configuration block and
@@ -348,6 +375,58 @@ module Rbeapi
           cmds = ['no ip helper-address']
           value.each { |addr| cmds << "ip helper-address #{addr}" } if enable
         end
+        configure_interface(name, cmds)
+      end
+
+      ##
+      # set_secondary_addresses configures the list of secondary addresses on the ip
+      # interface. An IP interface can have one or more secondary addresses
+      # configured. If no value is provided, the secondary address configuration
+      # is set using the no keyword. If the default option is specified and
+      # set to true, then the secondary address values are defaulted using the
+      # default keyword.
+      #
+      # @since eos_version ?.??.?
+      #
+      # ===Commands
+      #   interface <name>
+      #     ip address <value> secondary
+      #     no ip address <value> secondary
+      #
+      # @param name [String] The name of the interface to configure the
+      #   address in the node. The name must be the full interface name.
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts value [Array] The list of IP addresses to configure as
+      #   secondary address on the interface. The secondary addresses must be valid
+      #   addresses in the main interface's subnet.
+      #
+      # @option opts default [Boolean] Configure the ip secondary address values
+      #    using the default keyword.
+      #
+      def set_secondary_addresses(name, opts = {})
+        value = opts[:value]
+        enable = opts.fetch(:enable, true)
+        default = opts[:default] || false
+
+        if value
+          fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+        end
+
+        case default
+        when true
+          cmds = [ ]
+        when false
+          cmds = [ ]
+          matches = config.scan(/(?<=^\s{3}ip\saddress\s)(.+)(\ssecondary)$/)
+          response = []
+          matches.each do |ip|
+            response << ip[0]
+          end
+          response.each { |addr| cmds << "no ip address #{addr} secondary" } if enable
+          value.each { |addr| cmds << "ip address #{addr} secondary" } if enable
+	end
         configure_interface(name, cmds)
       end
 
