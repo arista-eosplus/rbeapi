@@ -73,6 +73,8 @@ module Rbeapi
     # @param message [String] The message to log.
     def self.syslog_warning(message)
       Syslog.open('rbeapi', Syslog::LOG_PID) { |s| s.warning message }
+    ensure
+      Syslog.close
     end
   end
 end
