@@ -376,8 +376,7 @@ module Rbeapi
     class EthernetInterface < BaseInterface
       DEFAULT_ETH_FLOWC_TX = 'off'
       DEFAULT_ETH_FLOWC_RX = 'off'
-      DEFAULT_SPEED = 'auto'
-      DEFAULT_FORCED = false
+      DEFAULT_SPEED = 'default'
 
       ##
       # get returns the specified Ethernet interface resource hash that
@@ -391,7 +390,6 @@ module Rbeapi
       #     shutdown: <boolean>,
       #     load_interval: <string>
       #     speed: <string>,
-      #     forced: <boolean>,
       #     sflow: <boolean>,
       #     flowcontrol_send: <string>,
       #     flowcontrol_receive: <string>
@@ -429,10 +427,8 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_speed(config)
-        value = config.scan(/speed (forced)?[ ]?(\w+)/).first
-        return { speed: DEFAULT_SPEED, forced: DEFAULT_FORCED } unless value
-        (forced, value) = value.first
-        { speed: value, forced: !forced.nil? }
+        value = config.scan(/speed (.*)/).first
+        { speed: value.nil? ? DEFAULT_SPEED : value }
       end
       private :parse_speed
 
@@ -537,28 +533,19 @@ module Rbeapi
       # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option opts forced [Boolean] Specifies if auto negotiation should be
-      #   enabled (true) or disabled (false).
-      #
-      # @option opts default [Boolean] Configures the sflow value on the
-      #   interface using the default keyword.
-      #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_speed(name, opts = {})
         value = opts[:value]
-        forced = opts.fetch(:forced, false)
         enable = opts.fetch(:enable, true)
-        default = opts.fetch(:default, false)
-
-        forced = 'forced' if forced
-        forced = '' if value == 'auto'
+        default = (value == "default")
 
         cmds = ["interface #{name}"]
         case default
         when true
           cmds << 'default speed'
         when false
-          cmds << enable ? "speed #{forced} #{value}" : 'no speed'
+          cmd = enable ? "speed #{value}" : 'no speed'
+          cmds << cmd
         end
         configure cmds
       end

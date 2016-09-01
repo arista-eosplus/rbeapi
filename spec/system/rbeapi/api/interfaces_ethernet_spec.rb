@@ -14,9 +14,9 @@ describe Rbeapi::Api::Interfaces do
 
   describe '#get' do
     let(:entity) do
-      { name: 'Ethernet1', type: 'ethernet', description: '', shutdown: false, load_interval: '',
-        speed: 'auto', forced: false, sflow: true, flowcontrol_send: 'off',
-        flowcontrol_receive: 'off' }
+      { name: 'Ethernet1', type: 'ethernet', description: '', shutdown: false,
+        load_interval: '', speed: 'default', sflow: true,
+        flowcontrol_send: 'off', flowcontrol_receive: 'off' }
     end
 
     before { node.config(['default interface Ethernet1']) }
@@ -89,13 +89,8 @@ describe Rbeapi::Api::Interfaces do
   describe '#set_speed' do
     before { node.config(['default interface Ethernet1']) }
 
-    it 'sets default true' do
-      expect(subject.set_speed('Ethernet1', default: true)).to be_truthy
-    end
-
     it 'sets enable true' do
-      expect(subject.set_speed('Ethernet1', default: false,
-                                            enable: true)).to be_falsy
+      expect(subject.set_speed('Ethernet1', enable: true)).to be_falsy
     end
   end
 
