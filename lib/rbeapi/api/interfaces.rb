@@ -537,7 +537,7 @@ module Rbeapi
       def set_speed(name, opts = {})
         value = opts[:value]
         enable = opts.fetch(:enable, true)
-        default = (value == "default")
+        default = (value == :default)
 
         cmds = ["interface #{name}"]
         case default
@@ -547,6 +547,7 @@ module Rbeapi
           cmd = enable ? "speed #{value}" : 'no speed'
           cmds << cmd
         end
+
         configure cmds
       end
 
