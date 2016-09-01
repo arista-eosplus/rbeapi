@@ -428,7 +428,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_speed(config)
         value = config.scan(/speed (.*)/).first
-        { speed: value.nil? ? DEFAULT_SPEED : value }
+        { speed: value.nil? ? DEFAULT_SPEED : value.first }
       end
       private :parse_speed
 
