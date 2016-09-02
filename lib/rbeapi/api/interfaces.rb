@@ -377,6 +377,7 @@ module Rbeapi
       DEFAULT_ETH_FLOWC_TX = 'off'
       DEFAULT_ETH_FLOWC_RX = 'off'
       DEFAULT_SPEED = 'default'
+      DEFAULT_LACP_PORT_PRIO = 32768
 
       ##
       # get returns the specified Ethernet interface resource hash that
@@ -393,6 +394,7 @@ module Rbeapi
       #     sflow: <boolean>,
       #     flowcontrol_send: <string>,
       #     flowcontrol_receive: <string>
+      #     lacp_port_priority: <integer>
       #   }
       #
       # @param name [String] The interface name to return a resource hash
@@ -412,6 +414,7 @@ module Rbeapi
         response.merge!(parse_sflow(config))
         response.merge!(parse_flowcontrol_send(config))
         response.merge!(parse_flowcontrol_receive(config))
+        response.merge!(parse_lacp_port_priority(config))
         response
       end
 
@@ -484,6 +487,24 @@ module Rbeapi
         { flowcontrol_receive: mdata.nil? ? DEFAULT_ETH_FLOWC_RX : mdata[1] }
       end
       private :parse_flowcontrol_receive
+
+      ##
+      # parse_lacp_port_priority scans the provided configuration block and
+      # parse the lacp port-priority value. If the interface lacp port-priority
+      # value is not configured, then this method will return the value of
+      # DEFAULT_LACP_PORT_PRIO. The hash returned is intended to be merged into
+      # the interface resource hash.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block to parse.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_lacp_port_priority(config)
+        mdata = /lacp port-priority (\d+)$/.match(config)
+        { lacp_port_priority: mdata.nil? ? DEFAULT_LACP_PORT_PRIO : mdata[1] }
+      end
+      private :parse_lacp_port_priority
 
       ##
       # create overrides the create method from the BaseInterface and raises
@@ -663,6 +684,35 @@ module Rbeapi
       # @return [Boolean] Returns true if the command completed successfully.
       def set_flowcontrol_receive(name, opts = {})
         set_flowcontrol(name, 'receive', opts)
+      end
+
+      ##
+      # set_lacp_port_priority configures the lacp port-priority on the
+      # interface. Setting the enable keyword to true enables the lacp
+      # port-priority on the interface and setting enable to false disables
+      # the lacp port-priority on the interface.
+      # If the default keyword is set to true, then the lacp port-priority
+      # value is defaulted using the default keyword. The default keyword takes
+      # precedence over the enable keyword
+      #
+      # @since eos_version 4.13.7M
+      #
+      # @param name [String] The interface name to apply the configuration
+      #   values to. The name must be the full interface identifier.
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts enable [Boolean] Enables sflow if the value is true or
+      #   disables the lacp port-priority on the interface if false. Default is
+      #   true.
+      #
+      # @option opts default [Boolean] Configures the lacp port-priority value
+      #   on the interface using the default keyword.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_lacp_port_priority(name, opts = {})
+        commands = command_builder('lacp port-priority', opts)
+        configure_interface(name, commands)
       end
     end
 
