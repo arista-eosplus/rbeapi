@@ -17,7 +17,7 @@ describe Rbeapi::Api::Interfaces do
       { name: 'Ethernet1', type: 'ethernet', description: '', shutdown: false,
         load_interval: '', speed: 'default', sflow: true,
         flowcontrol_send: 'off', flowcontrol_receive: 'off',
-        lacp_port_priority: '32768' }
+        lacp_priority: '32768' }
     end
 
     before { node.config(['default interface Ethernet1']) }
@@ -173,34 +173,29 @@ describe Rbeapi::Api::Interfaces do
     end
   end
 
-  describe '#set_lacp_port_priority' do
+  describe '#set_lacp_priority' do
     before do
       node.config(['interface Ethernet1', 'default lacp port-priority'])
     end
 
     it 'sets the lacp port-priority value on the interface' do
-      expect(subject.get('Ethernet1')[:lacp_port_priority]).to eq('32768')
-      expect(subject.set_lacp_port_priority('Ethernet1', value: '0'))
-        .to be_truthy
-      expect(subject.get('Ethernet1')[:lacp_port_priority]).to eq('0')
+      expect(subject.get('Ethernet1')[:lacp_priority]).to eq('32768')
+      expect(subject.set_lacp_priority('Ethernet1', value: '0')).to be_truthy
+      expect(subject.get('Ethernet1')[:lacp_priority]).to eq('0')
     end
 
     it 'negates the lacp port-priority' do
-      expect(subject.set_lacp_port_priority('Ethernet1', value: '1'))
-        .to be_truthy
-      expect(subject.get('Ethernet1')[:lacp_port_priority]).to eq('1')
-      expect(subject.set_lacp_port_priority('Ethernet1', enable: false))
-        .to be_truthy
-      expect(subject.get('Ethernet1')[:lacp_port_priority]).to eq('32768')
+      expect(subject.set_lacp_priority('Ethernet1', value: '1')).to be_truthy
+      expect(subject.get('Ethernet1')[:lacp_priority]).to eq('1')
+      expect(subject.set_lacp_priority('Ethernet1', enable: false)).to be_truthy
+      expect(subject.get('Ethernet1')[:lacp_priority]).to eq('32768')
     end
 
     it 'defaults the lacp port-priority' do
-      expect(subject.set_lacp_port_priority('Ethernet1', value: '2'))
-        .to be_truthy
-      expect(subject.get('Ethernet1')[:lacp_port_priority]).to eq('2')
-      expect(subject.set_lacp_port_priority('Ethernet1', default: true))
-        .to be_truthy
-      expect(subject.get('Ethernet1')[:lacp_port_priority]).to eq('32768')
+      expect(subject.set_lacp_priority('Ethernet1', value: '2')).to be_truthy
+      expect(subject.get('Ethernet1')[:lacp_priority]).to eq('2')
+      expect(subject.set_lacp_priority('Ethernet1', default: true)).to be_truthy
+      expect(subject.get('Ethernet1')[:lacp_priority]).to eq('32768')
     end
   end
 end
