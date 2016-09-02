@@ -14,12 +14,12 @@ describe Rbeapi::Api::System do
   describe '#get' do
     let(:entity) do
       { hostname: 'localhost', iprouting: true, banner_motd: '',
-        banner_login: '' }
+        banner_login: '', timezone: 'UTC' }
     end
 
     before do
       node.config(['hostname localhost', 'ip routing', 'no banner motd',
-                   'no banner login'])
+                   'no banner login', 'no clock timezone'])
     end
 
     it 'returns the snmp resource' do
@@ -130,6 +130,26 @@ describe Rbeapi::Api::System do
       expect(subject.get[:banner_motd]).to eq('')
       expect(subject.set_banner('motd', default: true)).to be_truthy
       expect(subject.get[:banner_motd]).to eq('')
+    end
+  end
+
+  describe '#set_timezone' do
+    before { node.config(['no clock timezone']) }
+
+    it 'configures the system timezone value' do
+      expect(subject.get[:timezone]).to eq('UTC')
+      expect(subject.set_timezone(value: 'Europe/London')).to be_truthy
+      expect(subject.get[:timezone]).to eq('Europe/London')
+    end
+
+    it 'negates the timezone' do
+      expect(subject.set_timezone(enable: false)).to be_truthy
+      expect(subject.get[:timezone]).to eq('UTC')
+    end
+
+    it 'defaults the timezone' do
+      expect(subject.set_timezone(default: true)).to be_truthy
+      expect(subject.get[:timezone]).to eq('UTC')
     end
   end
 end
