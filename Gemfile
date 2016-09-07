@@ -1,7 +1,6 @@
 source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
 gem 'inifile'
-gem 'json'
 gem 'net_http_unix'
 gem 'netaddr'
 
@@ -31,10 +30,12 @@ end
 
 # Rubocop > 0.37 requires a gem that only works with ruby 2.x
 if RUBY_VERSION.to_f < 2.0
+  gem 'json', '<2.0'
   group :development, :test do
     gem 'rubocop', '>=0.35.1', '< 0.38'
   end
 else
+  gem 'json'
   group :development, :test do
     gem 'rubocop', '>=0.35.1'
   end
