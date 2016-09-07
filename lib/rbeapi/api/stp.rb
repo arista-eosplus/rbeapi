@@ -196,15 +196,18 @@ module Rbeapi
 
       ##
       # parse_instances will scan the nodes current configuration and extract
-      # the list of configured mst instances. If no instances are configured
-      # then this method will return an empty array.
+      # the list of configured mst instances. Instances 0 and 1 are defined by
+      # default in the switch config and are always returned, even if not
+      # visible in the 'spanning-tree mst configuration' config section.
       #
       # @api private
       #
       # @return [Array<String>] Returns an Array of configured stp instances.
       def parse_instances
         config = get_block('spanning-tree mst configuration')
-        config.scan(/(?<=^\s{3}instance\s)\d+/)
+        response = config.scan(/(?<=^\s{3}instance\s)\d+/)
+        response.push("0", "1").uniq!
+        response
       end
       private :parse_instances
 
