@@ -61,6 +61,20 @@ describe Rbeapi::Api::Interfaces do
       it 'returns the interface resource' do
         expect(subject.get('Vxlan1')).to eq(entity)
       end
+
+      let(:entity) do
+        { name: 'Vxlan1', type: 'vxlan', description: '',
+          shutdown: false, load_interval: '', source_interface: '', multicast_group: '224.0.2.0',
+          udp_port: 4789, flood_list: [], vlans: {} }
+      end
+
+      before do
+        node.config(['no interface Vxlan1', 'interface Vxlan1', 'vxlan multicast-group 224.0.2.0'])
+      end
+
+      it 'returns the interface resource with multicast group set' do
+        expect(subject.get('Vxlan1')).to eq(entity)
+      end      
     end
   end
 

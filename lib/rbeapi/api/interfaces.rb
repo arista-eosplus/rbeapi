@@ -1122,11 +1122,13 @@ module Rbeapi
       # @api private
       #
       # @param config [String] The interface configuration block to extract
-      #   the vxlan multicast-group value from.
+      #   the vxlan multicast-group value from. Note the configuration line
+      #   'vxlan multicast-group decap' is excluded so the multicast group
+      #   value is correctly assigned '' when not defined.
       #
       # @return [Hash<Symbol, Object>]
       def parse_multicast_group(config)
-        mdata = /multicast-group ([^\s]+)$/.match(config)
+        mdata = /multicast-group (?!decap)([^\s]+)$/.match(config)
         { multicast_group: mdata ? mdata[1] : DEFAULT_MCAST_GRP }
       end
       private :parse_multicast_group
