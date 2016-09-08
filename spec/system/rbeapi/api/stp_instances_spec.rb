@@ -71,6 +71,7 @@ describe Rbeapi::Api::StpInstances do
   describe '#set_priority' do
     before do
       node.config(['default spanning-tree mst 10 priority',
+                   'no spanning-tree mst 1 priority',
                    'spanning-tree mode mstp',
                    'default spanning-tree mst configuration',
                    'spanning-tree mst configuration',
