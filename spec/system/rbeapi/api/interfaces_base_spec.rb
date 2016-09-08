@@ -60,7 +60,7 @@ describe Rbeapi::Api::Interfaces do
 
       it 'returns the interface resource' do
         expect(subject.get('Vxlan1')).to eq(entity)
-      end     
+      end
     end
   end
 
