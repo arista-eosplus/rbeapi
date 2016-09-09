@@ -54,7 +54,7 @@ EOS
            '   vrf cloud-mgmt'],
           ['      no shutdown']]
 
-  subject { described_class.new('test', test_config) }
+  subject { described_class.new(test_config) }
 
   # SwitchConfig class methods
   describe '#initialize' do
@@ -115,39 +115,11 @@ management api http-commands
    vrf cloud-mgmt
       shutdown
 EOS
-      swc_new = Rbeapi::SwitchConfig::SwitchConfig.new('', new_conf)
-      swc_org_new = Rbeapi::SwitchConfig::SwitchConfig.new('', org_new_diff)
-      swc_new_org = Rbeapi::SwitchConfig::SwitchConfig.new('', new_org_diff)
+      swc_new = Rbeapi::SwitchConfig::SwitchConfig.new(new_conf)
+      swc_org_new = Rbeapi::SwitchConfig::SwitchConfig.new(org_new_diff)
+      swc_new_org = Rbeapi::SwitchConfig::SwitchConfig.new(new_org_diff)
       expect(subject.compare(swc_new)[0]).to section_equal(swc_org_new.global)
       expect(subject.compare(swc_new)[1]).to section_equal(swc_new_org.global)
-    end
-  end
-
-  # Section class methods
-  describe 'Section Class' do
-    describe '#gen_commands' do
-      conf = <<-EOS
-no snmp-server enable traps bgp
-management api http-commands
-   no shutdown
-   vrf cloud-mgmt
-      no shutdown
-EOS
-      conf_array = conf.split("\n")
-      default_conf = <<-EOS
-default snmp-server enable traps bgp
-management api http-commands
-   default shutdown
-   vrf cloud-mgmt
-      default shutdown
-EOS
-      default_array = default_conf.split("\n")
-      it 'Verify command correctly generated' do
-        swc = Rbeapi::SwitchConfig::SwitchConfig.new('', conf)
-        sc = swc.global
-        expect(sc.gen_commands).to eq(conf_array)
-        expect(sc.gen_commands(add_default: true)).to eq(default_array)
-      end
     end
   end
 end

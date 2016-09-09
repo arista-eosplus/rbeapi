@@ -58,7 +58,7 @@ interface Ethernet 1
 !
 EOS
 
-  subject { described_class.new('test', test_config) }
+  subject { described_class.new(test_config) }
 
   # SwitchConfig class methods
   describe '#initialize' do
@@ -80,7 +80,7 @@ EOS
 
     it 'returns error for invalid indentation' do
       expect \
-        { Rbeapi::SwitchConfig::SwitchConfig.new('bad_indent', bad_indent) }.to\
+        { Rbeapi::SwitchConfig::SwitchConfig.new(bad_indent) }.to\
           raise_error ArgumentError
     end
   end
@@ -108,7 +108,7 @@ interface Ethernet 2
    switchport mode trunk
    switchport trunk allowed vlan 100,200
 EOS
-      sw_config = Rbeapi::SwitchConfig::SwitchConfig.new('', conf)
+      sw_config = Rbeapi::SwitchConfig::SwitchConfig.new(conf)
       expect(subject.compare(sw_config)[0].line).to eq('')
       expect(subject.compare(sw_config)[0].cmds).to eq([])
       expect(subject.compare(sw_config)[0].children).to eq([])
@@ -134,9 +134,9 @@ vlan 101
 interface Ethernet 2
    switchport trunk allowed vlan 101,200
 EOS
-      swc_new = Rbeapi::SwitchConfig::SwitchConfig.new('', new_conf)
-      swc_org_new = Rbeapi::SwitchConfig::SwitchConfig.new('', org_new_diff)
-      swc_new_org = Rbeapi::SwitchConfig::SwitchConfig.new('', new_org_diff)
+      swc_new = Rbeapi::SwitchConfig::SwitchConfig.new(new_conf)
+      swc_org_new = Rbeapi::SwitchConfig::SwitchConfig.new(org_new_diff)
+      swc_new_org = Rbeapi::SwitchConfig::SwitchConfig.new(new_org_diff)
       expect(subject.compare(swc_new)[0]).to section_equal(swc_org_new.global)
       expect(subject.compare(swc_new)[1]).to section_equal(swc_new_org.global)
     end
@@ -181,31 +181,6 @@ EOS
       it 'Verify child returned from section' do
         parent.add_child(child)
         expect(parent.get_child('child line')).to eq(child)
-      end
-    end
-
-    describe '#gen_commands' do
-      conf = <<-EOS
-vlan 101
-interface Ethernet 2
-   switchport mode trunk
-   switchport trunk allowed vlan 101,200
-vlan 102
-EOS
-      conf_array = conf.split("\n")
-      default_conf = <<-EOS
-default vlan 101
-interface Ethernet 2
-   default switchport mode trunk
-   default switchport trunk allowed vlan 101,200
-default vlan 102
-EOS
-      default_array = default_conf.split("\n")
-      it 'Verify command correctly generated' do
-        swc = Rbeapi::SwitchConfig::SwitchConfig.new('', conf)
-        sc = swc.global
-        expect(sc.gen_commands).to eq(conf_array)
-        expect(sc.gen_commands(add_default: true)).to eq(default_array)
       end
     end
   end

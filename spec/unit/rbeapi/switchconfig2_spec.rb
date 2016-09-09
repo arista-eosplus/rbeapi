@@ -49,7 +49,7 @@ EOS
            '   vrf cloud-mgmt'],
           ['      no shutdown']]
 
-  subject { described_class.new('test', test_config) }
+  subject { described_class.new(test_config) }
 
   # SwitchConfig class methods
   describe '#initialize' do
@@ -109,9 +109,9 @@ management api http-commands
    vrf cloud-mgmt
       shutdown
 EOS
-      swc_new = Rbeapi::SwitchConfig::SwitchConfig.new('', new_conf)
-      swc_org_new = Rbeapi::SwitchConfig::SwitchConfig.new('', org_new_diff)
-      swc_new_org = Rbeapi::SwitchConfig::SwitchConfig.new('', new_org_diff)
+      swc_new = Rbeapi::SwitchConfig::SwitchConfig.new(new_conf)
+      swc_org_new = Rbeapi::SwitchConfig::SwitchConfig.new(org_new_diff)
+      swc_new_org = Rbeapi::SwitchConfig::SwitchConfig.new(new_org_diff)
       expect(subject.compare(swc_new)[0]).to section_equal(swc_org_new.global)
       expect(subject.compare(swc_new)[1]).to section_equal(swc_new_org.global)
     end
