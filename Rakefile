@@ -84,8 +84,8 @@ task all_rpms: :build do
   puts '  Examples: '
   puts '    Chef client: '
   puts '      cd /mnt/flash; \\'
-  puts "      swix create rbeapi-chef-#{Rbeapi::VERSION}-2.swix \\"
-  puts "      rubygem-rbeapi-chef-#{Rbeapi::VERSION}-2.eos4.noarch.rpm \\"
+  puts "      swix create rbeapi-chef-#{Rbeapi::VERSION}-1.swix \\"
+  puts "      rubygem-rbeapi-chef-#{Rbeapi::VERSION}-1.eos4.noarch.rpm \\"
   puts '      rubygem-inifile-chef-3.0.0-5.eos4.noarch.rpm \\'
   puts '      rubygem-netaddr-chef-1.5.1-4.eos4.noarch.rpm \\'
   puts '      rubygem-net_http_unix-chef-0.2.2-5.eos4.noarch.rpm'
@@ -122,6 +122,12 @@ task swix: :all_rpms do
           rubygem-inifile-3.0.0-5.eos4.noarch.rpm \
           rubygem-netaddr-1.5.1-4.eos4.noarch.rpm \
           rubygem-net_http_unix-0.2.2-5.eos4.noarch.rpm)"
+  system "(cd rpms/noarch;
+          rm -f rbeapi-chef-#{Rbeapi::VERSION}-1.swix;
+          #{SWIX} create rbeapi-chef-#{Rbeapi::VERSION}-1.swix \
+          rubygem-rbeapi-chef-#{Rbeapi::VERSION}-1.eos4.noarch.rpm \
+          rubygem-inifile-chef-3.0.0-5.eos4.noarch.rpm \
+          rubygem-netaddr-chef-1.5.1-4.eos4.noarch.rpm)"
   system "(cd rpms/noarch;
           rm -f rbeapi-puppet3-#{Rbeapi::VERSION}-1.swix;
           #{SWIX} create rbeapi-puppet3-#{Rbeapi::VERSION}-1.swix \
