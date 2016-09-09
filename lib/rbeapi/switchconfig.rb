@@ -39,8 +39,6 @@ module Rbeapi
     ##
     # Section class
     #
-    # XXX: Is this the right doc format for a class and accessors?
-    #
     # A switch configuration section consists of the command line that
     # enters into the configuration mode, an array of command strings
     # that are executed in the current configuration mode, a reference
@@ -100,53 +98,6 @@ module Rbeapi
           return child if child.line == line
         end
         nil
-      end
-
-      ##
-      # Prepend the word 'default' to a cmd.
-      #
-      # @param cmd [String] A command string
-      #
-      # @return [String] Returns command string with word 'default' prepended.
-      def prepend_default(cmd)
-        # Return if the command is prepended by a default
-        return cmd unless cmd.scan(/^\s*default\s+/).empty?
-        # If the command is prepended by a no, then remove it.
-        new_cmd = cmd.sub(/^(\s*)(no\s+)/, '\1')
-        new_cmd.sub(/^(?<foo>\s*)/, '\k<foo>default ')
-      end
-
-      ##
-      # Generates an array of commands for the current section. If the
-      # add_default option is set then each command is prepended with the
-      # word 'default'. Commands that enter a mode are not prepended with
-      # the word 'default'. Performs recursive calls to process children.
-      #
-      # @param opts [Hash] the options to create a message with.
-      #
-      # @option opts add_default [Boolean] Set to true to have commands
-      #   prepended with the word 'default'. Default is false.
-      #
-      # @return [Array<Strings>] Returns an array of commands that can be
-      #   sent to a switch.
-      def gen_commands(opts = {})
-        add_default = opts.fetch(:add_default, false)
-
-        # Iterate over the commands, if the command has an associated
-        # child then process the child. This will preserve the order of
-        # the configuration.
-        ret_cmds = []
-        cmds.each do |cmd|
-          child = get_child(cmd)
-          cmd = prepend_default(cmd) if add_default && !child
-          ret_cmds.push(cmd)
-          next unless child
-          child_cmds = child.gen_commands(opts)
-          next unless child_cmds.length > 0
-          ret_cmds.push(child_cmds)
-          ret_cmds.flatten!
-        end
-        ret_cmds
       end
 
       ##
@@ -255,16 +206,13 @@ module Rbeapi
       # references to all sub-sections (children).
       #
       # {
-      #   name: <string>,
       #   global: <Section>,
       # }
       #
       # @param config [String] A string containing the switch configuration.
       #
       # @return [Section] Returns an instance of Section
-      # XXX Name is not really used - can delete
-      def initialize(name, config)
-        @name = name
+      def initialize(config)
         @indent = 3
         chk_format(config)
         parse(config)
