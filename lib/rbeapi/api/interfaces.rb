@@ -1164,7 +1164,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>]
       def parse_multicast_group(config)
-        mdata = /multicast-group ([^\s]+)$/.match(config)
+        mdata = /^\s*vxlan multicast-group ([^\s]+)$/.match(config)
         { multicast_group: mdata ? mdata[1] : DEFAULT_MCAST_GRP }
       end
       private :parse_multicast_group
