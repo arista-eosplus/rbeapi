@@ -1,0 +1,11 @@
+ip prefix-list test1
+   seq 10 permit 1.2.3.0/24
+   seq 20 permit 2.3.4.0/24 le 30
+   seq 30 permit 3.4.5.0/24 ge 26 le 30
+!
+ip prefix-list test2
+   seq 10 permit 10.11.0.0/16
+   seq 20 permit 10.12.0.0/16 le 24
+!
+ip prefix-list test3
+!

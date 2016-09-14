@@ -43,22 +43,29 @@ module Rbeapi
     #
     class Prefixlists < Entity
       ##
-      # Returns the static routes configured on the node.
+      # Returns the prefix list configured on the node.
       #
       # @example
-      #   {
-      #     <route>: {
-      #       next_hop: <string>,
-      #       name: <string, nil>
+      #   [
+      #     {
+      #       seq: <string>,
+      #       action: <string>,
+      #       prefix: <string>
+      #     },
+      #     ...,
+      #     {
+      #       seq: <string>,
+      #       action: <string>,
+      #       prefix: <string>
       #     }
-      #   }
+      #   ]
       #
       # @param name [String] The name of the prefix-list to return.
       #
-      # @return [Hash<String, String> The method will return all of the
-      #   configured static routes on the node as a Ruby hash object. If
-      #   there are no static routes configured, this method will return
-      #   an empty hash.
+      # @return [Array<Hash>] The method will return the configured
+      #   prefix list on the node with all its sequences as a Ruby
+      #   array of hashes, where each prefix is a hash object.
+      #   If the prefix list is not found, a nil object is returned.
       def get(name)
         config = get_block("ip prefix-list #{name}")
         return nil unless config
@@ -66,25 +73,48 @@ module Rbeapi
         entries = config.scan(/^\s{3}(?:seq\s)(\d+)\s(permit|deny)\s(.+)$/)
         entries.each_with_object([]) do |entry, arry|
           arry << { 'seq' => entry[0], 'action' => entry[1],
-                    'prefex' => entry[2] }
+                    'prefix' => entry[2] }
         end
       end
 
       ##
-      # Returns the static routes configured on the node.
+      # Returns all prefix lists configured on the node.
       #
       # @example
       #   {
-      #     <route>: {
-      #       next_hop: <string>,
-      #       name: <string, nil>
-      #     }
+      #     <name1>: [
+      #       {
+      #         seq: <string>,
+      #         action: <string>,
+      #         prefix: <string>
+      #       },
+      #       ...
+      #       {
+      #         seq: <string>,
+      #         action: <string>,
+      #         prefix: <string>
+      #       }
+      #     ],
+      #     ...,
+      #     <nameN>: [
+      #       {
+      #         seq: <string>,
+      #         action: <string>,
+      #         prefix: <string>
+      #       },
+      #       ...
+      #       {
+      #         seq: <string>,
+      #         action: <string>,
+      #         prefix: <string>
+      #       }
+      #     ]
       #   }
       #
-      # @return [Hash<String, String> The method will return all of the
-      #   configured static routes on the node as a Ruby hash object. If
-      #   there are no static routes configured, this method will return
-      #   an empty hash.
+      # @return [Hash<String, Array>] The method will return all the
+      #   prefix lists configured on the node as a Ruby hash object.
+      #   If there are no prefix lists configured, an empty hash will
+      #   be returned.
       def getall
         lists = config.scan(/(?<=^ip\sprefix-list\s).+/)
         lists.each_with_object({}) do |name, hsh|
@@ -100,7 +130,7 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def create(name)
-        configure "ip prefix-list #{name}"
+        configure("ip prefix-list #{name}")
       end
 
       ##
@@ -120,7 +150,7 @@ module Rbeapi
         cmd = "ip prefix-list #{name}"
         cmd << " seq #{seq}" if seq
         cmd << " #{action} #{prefix}"
-        configure cmd
+        configure(cmd)
       end
 
       ##
@@ -134,7 +164,7 @@ module Rbeapi
       def delete(name, seq = nil)
         cmd = "no ip prefix-list #{name}"
         cmd << " seq #{seq}" if seq
-        configure cmd
+        configure(cmd)
       end
     end
   end
