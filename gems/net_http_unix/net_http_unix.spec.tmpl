@@ -3,7 +3,7 @@
 
 Name:		%{?enterprise:pe-}rubygem-%{gem_name}
 Version:	0.2.1
-Release:	4.eos4
+Release:	5.eos4
 Summary:	Wrapper around Net::HTTP with AF_UNIX support
 
 Group:		Development/Languages
@@ -18,6 +18,14 @@ BuildArch: noarch
 
 %description
 Wrapper around Net::HTTP with AF_UNIX support.
+
+%package chef
+Group:      Development/Languages
+Summary:   Net_http_unix rubygem packaged for Chef client
+Requires: chef
+Provides: chef-rubygem(%{gem_name}) = %{version}
+Provides: chef-rubygem-%{gem_name} = %{version}
+%description chef
 
 %package puppet3
 Group:	Development/Languages
@@ -45,6 +53,9 @@ install %{SOURCE0} %{buildroot}/
 %files
 /%{gem_name}-%{version}.gem
 
+%files chef
+/%{gem_name}-%{version}.gem
+
 %files puppet3
 /%{gem_name}-%{version}.gem
 
@@ -57,6 +68,15 @@ gem install ${GEM_OPTS} /%{gem_name}-%{version}.gem > /dev/null 2>&1
 
 %preun
 gem uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
+
+%post chef
+GEM=/opt/chef/embedded/bin/gem
+GEM_OPTS="--no-document --local"
+${GEM} install ${GEM_OPTS} /%{gem_name}-%{version}.gem > /dev/null 2>&1
+
+%preun chef
+GEM=/opt/chef/embedded/bin/gem
+${GEM} uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
 
 %post puppet3
 GEM=/opt/puppet/bin/gem
@@ -77,6 +97,9 @@ GEM=/opt/puppetlabs/puppet/bin/gem
 ${GEM} uninstall %{gem_name} --version '= %{version}' > /dev/null 2>&1
 
 %changelog
+* Tue May 24 2016 Jere Julian - 0.2.1-5
+- Add Chef package
+
 * Wed Apr 6 2016 Jere Julian - 0.2.1-4
 - Disable install of gem docs
 
