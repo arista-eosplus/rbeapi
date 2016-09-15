@@ -228,7 +228,17 @@ module Rbeapi
       # @return [boolean] Returns true if format is good, otherwise raises
       #  an argument error.
       def chk_format(config)
+        skip = false
+        multiline_cmds = ['^banner']
         config.each_line do |line|
+          skip = true if multiline_cmds.any? { |cmd| line =~ /#{cmd}/ }
+          if skip
+            if line =~ /^EOF$/
+              skip = false
+            else
+              next
+            end
+          end
           ind = line[/\A */].size
           if ind % @indent != 0
             fail ArgumentError, 'SwitchConfig indentation must be multiple of '\
@@ -248,6 +258,7 @@ module Rbeapi
       # Lines starting with '!' (comments) are ignored
       #
       # @param config [String] A string containing the switch configuration.
+      # rubocop:disable Metrics/MethodLength
       def parse(config)
         # Setup global section
         section = Section.new('', nil)
@@ -255,7 +266,25 @@ module Rbeapi
 
         prev_indent = 0
         prev_line = ''
+        combine = false
+        longline = []
+        multiline_cmds = ['^banner']
+
         config.each_line do |line|
+          if multiline_cmds.any? { |cmd| line =~ /#{cmd}/ }
+            longline = []
+            combine = true
+          end
+          if combine
+            longline << line
+            if line =~ /^EOF$/
+              line = longline.join
+              combine = false
+            else
+              next
+            end
+          end
+
           # Ignore comment lines and the end statement if there
           # XXX Fix parsing end
           next if line.start_with?('!') || line.start_with?('end')
@@ -280,6 +309,7 @@ module Rbeapi
         end
       end
       private :parse
+      # rubocop:enable Metrics/MethodLength
 
       ##
       # Campare the current SwitchConfig class with another SwitchConfig class.
