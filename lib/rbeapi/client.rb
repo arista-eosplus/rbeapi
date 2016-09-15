@@ -511,7 +511,16 @@ module Rbeapi
         config = opts.fetch(:config, 'running-config')
         params = opts.fetch(:params, '')
         as_string = opts.fetch(:as_string, false)
-        result = run_commands("show #{config} #{params}", encoding: 'text')
+        begin
+          result = run_commands("show #{config} #{params}", encoding: 'text')
+        rescue Rbeapi::Eapilib::CommandError => error
+          if ( error.to_s =~ /show (running|startup)-config/ )
+            #result = [{"output"=>""}]
+            return nil
+          else
+            raise error
+          end
+        end
         return result.first['output'].strip.split("\n") unless as_string
         result.first['output'].strip
       end
