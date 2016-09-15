@@ -92,7 +92,7 @@ describe Rbeapi::Api::StpInstances do
 
     it 'set the instance priority to default' do
       expect(subject.set_priority('10', value: '16384',
-                                       default: true)).to be_truthy
+                                        default: true)).to be_truthy
       expect(subject.get('10')[:priority]).to eq('32768')
     end
 
@@ -104,8 +104,8 @@ describe Rbeapi::Api::StpInstances do
 
     it 'set the instance priority to enable false' do
       expect(subject.set_priority('10', value: '16384',
-                                       default: false,
-                                       enable: false)).to be_truthy
+                                        default: false,
+                                        enable: false)).to be_truthy
       expect(subject.get('10')[:priority]).to eq('32768')
     end
 
@@ -118,8 +118,8 @@ describe Rbeapi::Api::StpInstances do
 
     it 'set the instance priority to enable true' do
       expect(subject.set_priority('10', value: '16384',
-                                       default: false,
-                                       enable: true)).to be_truthy
+                                        default: false,
+                                        enable: true)).to be_truthy
       expect(subject.get('10')[:priority]).to eq('16384')
     end
 

@@ -31,8 +31,8 @@ describe Rbeapi::Api::PortchannelInterface do
     let(:resource) { subject.get('Port-Channel1') }
 
     let(:keys) do
-      [:type, :shutdown, :load_interval, :description, :name, :members, :lacp_mode,
-       :minimum_links, :lacp_timeout, :lacp_fallback]
+      [:type, :shutdown, :load_interval, :description, :name, :members,
+       :lacp_mode, :minimum_links, :lacp_timeout, :lacp_fallback]
     end
 
     it 'returns an ethernet resource as a hash' do
@@ -144,8 +144,9 @@ describe Rbeapi::Api::PortchannelInterface do
 
   describe '#set_members' do
     it 'raises an ArgumentError if members is not an array' do
-      expect { subject.set_members('Port-Channel1',
-                                   'Ethernet3') }
+      expect
+      subject.set_members('Port-Channel1',
+                          'Ethernet3')
         .to raise_error(ArgumentError)
     end
   end
