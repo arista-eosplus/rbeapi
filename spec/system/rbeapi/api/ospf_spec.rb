@@ -14,6 +14,11 @@ describe Rbeapi::Api::Ospf do
       node.config(['no router ospf 1',
                    'router ospf 1',
                    'router-id 1.1.1.1',
+                   'max-lsa 12000',
+                   'maximum-paths 16',
+                   'passive-interface default',
+                   'no passive-interface Ethernet1',
+                   'no passive-interface Ethernet2',
                    'redistribute static route-map word',
                    'network 192.168.10.10/24 area 0.0.0.0',
                    'network 192.168.11.10/24 area 0.0.0.0'])
@@ -21,6 +26,11 @@ describe Rbeapi::Api::Ospf do
 
     let(:entity) do
       { 'router_id' => '1.1.1.1',
+        'max_lsa' => 12000,
+        'maximum_paths' => 16,
+        'passive_interface_default' => true,
+        'active_interfaces' => ['Ethernet1', 'Ethernet2'],
+        'passive_interfaces' => [],
         'areas' => { '0.0.0.0' => ['192.168.10.0/24', '192.168.11.0/24'] },
         'redistribute' => { 'static' => { 'route_map' => 'word' } } }
     end
@@ -75,6 +85,166 @@ describe Rbeapi::Api::Ospf do
       expect(subject.get('1')['router_id']).to eq('1.1.1.1')
       expect(subject.set_router_id('1', default: true)).to be_truthy
       expect(subject.get('1')['router_id']).to be_empty
+    end
+  end
+
+  describe '#set_max_lsa' do
+    before { node.config(['no router ospf 1', 'router ospf 1']) }
+
+    it 'configures the ospf max-lsa to 24000' do
+      expect(subject.get('1')['max_lsa']).to eq(12000)
+      expect(subject.set_max_lsa('1', value: 24000)).to be_truthy
+      expect(subject.get('1')['max_lsa']).to eq(24000)
+    end
+
+    it 'negates the max-lsa' do
+      expect(subject.set_max_lsa('1', value: 24000)).to be_truthy
+      expect(subject.get('1')['max_lsa']).to eq(24000)
+      expect(subject.set_max_lsa('1', enable: false)).to be_truthy
+      expect(subject.get('1')['max_lsa']).to eq(12000)
+    end
+
+    it 'defaults the max-lsa' do
+      expect(subject.set_max_lsa('1', value: 24000)).to be_truthy
+      expect(subject.get('1')['max_lsa']).to eq(24000)
+      expect(subject.set_max_lsa('1', default: true)).to be_truthy
+      expect(subject.get('1')['max_lsa']).to eq(12000)
+    end
+  end
+
+  describe '#set_maximum_paths' do
+    before { node.config(['no router ospf 1', 'router ospf 1']) }
+
+    it 'configures the ospf maximum-paths to 16' do
+      expect(subject.get('1')['maximum_paths']).to eq(128)
+      expect(subject.set_maximum_paths('1', value: 16)).to be_truthy
+      expect(subject.get('1')['maximum_paths']).to eq(16)
+    end
+
+    it 'negates the maximum-paths' do
+      expect(subject.set_maximum_paths('1', value: 16)).to be_truthy
+      expect(subject.get('1')['maximum_paths']).to eq(16)
+      expect(subject.set_maximum_paths('1', enable: false)).to be_truthy
+      expect(subject.get('1')['maximum_paths']).to eq(128)
+    end
+
+    it 'defaults the maximum-paths' do
+      expect(subject.set_maximum_paths('1', value: 16)).to be_truthy
+      expect(subject.get('1')['maximum_paths']).to eq(16)
+      expect(subject.set_maximum_paths('1', default: true)).to be_truthy
+      expect(subject.get('1')['maximum_paths']).to eq(128)
+    end
+  end
+
+  describe '#passive_interface_default' do
+    before { node.config(['no router ospf 1', 'router ospf 1']) }
+
+    it 'configures the passive-interface default' do
+      expect(subject.get('1')['passive_interface_default']).to eq(false)
+      expect(subject.set_passive_interface_default('1', value: true))
+        .to be_truthy
+      expect(subject.get('1')['passive_interface_default']).to eq(true)
+    end
+
+    it 'negates the passive-interface default' do
+      expect(subject.set_passive_interface_default('1', value: true))
+        .to be_truthy
+      expect(subject.get('1')['passive_interface_default']).to eq(true)
+      expect(subject.set_passive_interface_default('1', enable: false))
+        .to be_truthy
+      expect(subject.get('1')['passive_interface_default']).to eq(false)
+    end
+
+    it 'defaults the passive-interface default' do
+      expect(subject.set_passive_interface_default('1', value: true))
+        .to be_truthy
+      expect(subject.get('1')['passive_interface_default']).to eq(true)
+      expect(subject.set_passive_interface_default('1', default: true))
+        .to be_truthy
+      expect(subject.get('1')['passive_interface_default']).to eq(false)
+    end
+  end
+
+  describe '#set_active_interfaces' do
+    before { node.config(['no router ospf 1', 'router ospf 1',
+      'passive-interface default']) }
+
+    it 'configures the ospf no passive-interface Ethernet1, 2, 3' do
+      expect(subject.get('1')['active_interfaces']).to be_empty
+      expect(subject.set_active_interfaces('1', value: ['Ethernet1',
+        'Ethernet2', 'Ethernet3'])).to be_truthy
+      expect(subject.get('1')['active_interfaces']).to eq(['Ethernet1',
+        'Ethernet2', 'Ethernet3'])
+    end
+
+    it 'configures the ospf no passive-interface Ethernet1, 2' do
+      expect(subject.set_active_interfaces('1', value: ['Ethernet1',
+        'Ethernet2', 'Ethernet3'])).to be_truthy
+      expect(subject.get('1')['active_interfaces']).to eq(['Ethernet1',
+        'Ethernet2', 'Ethernet3'])
+      expect(subject.set_active_interfaces('1', value: ['Ethernet1',
+        'Ethernet2'])).to be_truthy
+      expect(subject.get('1')['active_interfaces']).to eq(['Ethernet1',
+        'Ethernet2'])
+    end
+
+    it 'negates the no passive-interface' do
+      expect(subject.set_active_interfaces('1', value: ['Ethernet1', 
+        'Ethernet2'])).to be_truthy
+      expect(subject.get('1')['active_interfaces']).to eq(['Ethernet1',
+        'Ethernet2'])
+      expect(subject.set_active_interfaces('1', enable: false)).to be_truthy
+      expect(subject.get('1')['active_interfaces']).to be_empty
+    end
+
+    it 'defaults the no passive-interface' do
+      expect(subject.set_active_interfaces('1', value: ['Ethernet1',
+        'Ethernet2'])).to be_truthy
+      expect(subject.get('1')['active_interfaces']).to eq(['Ethernet1',
+        'Ethernet2'])
+      expect(subject.set_active_interfaces('1', default: true)).to be_truthy
+      expect(subject.get('1')['active_interfaces']).to be_empty
+    end
+  end
+
+  describe '#set_passive_interfaces' do
+    before { node.config(['no router ospf 1', 'router ospf 1']) }
+
+    it 'configures the ospf passive-interface Ethernet1, 2, 3' do
+      expect(subject.get('1')['passive_interfaces']).to be_empty
+      expect(subject.set_passive_interfaces('1', value: ['Ethernet1',
+        'Ethernet2', 'Ethernet3'])).to be_truthy
+      expect(subject.get('1')['passive_interfaces']).to eq(['Ethernet1',
+        'Ethernet2', 'Ethernet3'])
+    end
+
+    it 'configures the ospf passive-interface Ethernet1, 2' do
+      expect(subject.set_passive_interfaces('1', value: ['Ethernet1',
+        'Ethernet2', 'Ethernet3'])).to be_truthy
+      expect(subject.get('1')['passive_interfaces']).to eq(['Ethernet1',
+        'Ethernet2', 'Ethernet3'])
+      expect(subject.set_passive_interfaces('1', value: ['Ethernet1',
+        'Ethernet2'])).to be_truthy
+      expect(subject.get('1')['passive_interfaces']).to eq(['Ethernet1',
+        'Ethernet2'])
+    end
+
+    it 'negates the passive-interface' do
+      expect(subject.set_passive_interfaces('1', value: ['Ethernet1', 
+        'Ethernet2'])).to be_truthy
+      expect(subject.get('1')['passive_interfaces']).to eq(['Ethernet1',
+        'Ethernet2'])
+      expect(subject.set_passive_interfaces('1', enable: false)).to be_truthy
+      expect(subject.get('1')['passive_interfaces']).to be_empty
+    end
+
+    it 'defaults the passive-interface' do
+      expect(subject.set_passive_interfaces('1', value: ['Ethernet1',
+        'Ethernet2'])).to be_truthy
+      expect(subject.get('1')['passive_interfaces']).to eq(['Ethernet1',
+        'Ethernet2'])
+      expect(subject.set_passive_interfaces('1', default: true)).to be_truthy
+      expect(subject.get('1')['passive_interfaces']).to be_empty
     end
   end
 
