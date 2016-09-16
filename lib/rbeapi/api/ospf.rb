@@ -88,8 +88,6 @@ module Rbeapi
         response['active_interfaces'] =
           config.scan(/(?<=^\s{3}no passive-interface\s)(.*)$/).flatten!.to_a
 
-        # active interface regex: (?<=^\s{3}no passive-interface\s)(.*)$
-
         networks = config.scan(/^\s{3}network\s(.+)\sarea\s(.+)$/)
         areas = networks.each_with_object({}) do |cfg, hsh|
           net, area = cfg
