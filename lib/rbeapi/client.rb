@@ -515,7 +515,6 @@ module Rbeapi
           result = run_commands("show #{config} #{params}", encoding: 'text')
         rescue Rbeapi::Eapilib::CommandError => error
           if ( error.to_s =~ /show (running|startup)-config/ )
-            #result = [{"output"=>""}]
             return nil
           else
             raise error
