@@ -37,6 +37,7 @@ include FixtureHelpers
 include Rbeapi::SwitchConfig
 
 describe Rbeapi::SwitchConfig::SwitchConfig do
+  # rubocop:disable Style/TrailingWhitespace
   test_config = <<-EOS
 ! Config Description Comment
 vlan 100
@@ -45,8 +46,30 @@ interface Ethernet 2
    switchport mode trunk
    switchport trunk allowed vlan 100,200
 !
+banner motd
+This is my 
+ multiline
+   banner
+ends here
+
+EOF
+!
+router ospf 1
+   !! this 
+   !!  is a 
+   !! routing
+   !!     instance comment
+   !! that ends hereEOF
+   redistribute static
+   max-lsa 12000
+!
 EOS
-  test_config_global = ['vlan 100', 'interface Ethernet 2']
+  # rubocop:enable Style/TrailingWhitespace
+  test_config_global = [
+    'vlan 100',
+    'interface Ethernet 2',
+    "banner motd\nThis is my \n multiline\n   banner\nends here\n\nEOF",
+    'router ospf 1']
   cmds = ['   switchport mode trunk',
           '   switchport trunk allowed vlan 100,200']
 
@@ -57,6 +80,20 @@ interface Ethernet 1
     switchport access vlan 100
 !
 EOS
+  # rubocop:disable Style/TrailingWhitespace
+  awkward_indent = <<-EOS
+!
+banner motd
+This is my 
+ multiline
+   banner
+that ends here
+
+EOF
+!
+end
+EOS
+  # rubocop:enable Style/TrailingWhitespace
 
   subject { described_class.new(test_config) }
 
@@ -69,7 +106,7 @@ EOS
       expect(sc.line).to eq('')
       expect(sc.parent).to eq(nil)
       expect(sc.cmds).to eq(test_config_global)
-      expect(sc.children.length).to eq(1)
+      expect(sc.children.length).to eq(2)
 
       # Validate the children of global
       expect(sc.children[0].line).to eq(test_config_global[1])
@@ -82,6 +119,12 @@ EOS
       expect \
         { Rbeapi::SwitchConfig::SwitchConfig.new(bad_indent) }.to\
           raise_error ArgumentError
+    end
+
+    it 'does not return an error for tricky indentation' do
+      expect \
+        { Rbeapi::SwitchConfig::SwitchConfig.new(awkward_indent) }.not_to\
+          raise_error
     end
   end
 
@@ -102,12 +145,29 @@ EOS
     end
 
     it 'Verify compare of same switch configs without comment' do
+      # rubocop:disable Style/TrailingWhitespace
       conf = <<-EOS
 vlan 100
 interface Ethernet 2
    switchport mode trunk
    switchport trunk allowed vlan 100,200
+banner motd
+This is my 
+ multiline
+   banner
+ends here
+
+EOF
+router ospf 1
+   !! this 
+   !!  is a 
+   !! routing
+   !!     instance comment
+   !! that ends hereEOF
+   redistribute static
+   max-lsa 12000
 EOS
+      # rubocop:enable Style/TrailingWhitespace
       sw_config = Rbeapi::SwitchConfig::SwitchConfig.new(conf)
       expect(subject.compare(sw_config)[0].line).to eq('')
       expect(subject.compare(sw_config)[0].cmds).to eq([])
@@ -118,21 +178,44 @@ EOS
     end
 
     it 'Verify compare of different vlan id' do
+      # rubocop:disable Style/TrailingWhitespace
       new_conf = <<-EOS
 vlan 101
 interface Ethernet 2
    switchport mode trunk
    switchport trunk allowed vlan 101,200
+!
+banner motd
+This is my 
+ multiline
+   banner
+ends here
+
+EOF
+!
+router ospf 1
+   !! this 
+   !!  is a 
+   !! routing
+   !!     instance comment
+   !! that ends here
+   redistribute static
+   max-lsa 12000
 EOS
+      # rubocop:enable Style/TrailingWhitespace
       org_new_diff = <<-EOS
 vlan 100
 interface Ethernet 2
    switchport trunk allowed vlan 100,200
+router ospf 1
+   !! that ends hereEOF
 EOS
       new_org_diff = <<-EOS
 vlan 101
 interface Ethernet 2
    switchport trunk allowed vlan 101,200
+router ospf 1
+   !! that ends here
 EOS
       swc_new = Rbeapi::SwitchConfig::SwitchConfig.new(new_conf)
       swc_org_new = Rbeapi::SwitchConfig::SwitchConfig.new(org_new_diff)

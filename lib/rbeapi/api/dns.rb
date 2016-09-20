@@ -206,6 +206,7 @@ module Rbeapi
       #   default keyword argument.
       #
       # @return [Boolean] Returns true if the commands completed successfully.
+      # rubocop:disable Metrics/MethodLength
       def set_domain_list(opts = {})
         value = opts[:value]
         enable = opts.fetch(:enable, true)
@@ -233,6 +234,7 @@ module Rbeapi
         end
         configure cmds
       end
+      # rubocop:enable Metrics/MethodLength
 
       ##
       # add_domain_list adds an ip domain-list.

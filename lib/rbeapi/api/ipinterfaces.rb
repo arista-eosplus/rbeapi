@@ -366,7 +366,7 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_load_interval(name, opts = {})
-        cmds = command_builder("load-interval", opts)
+        cmds = command_builder('load-interval', opts)
         configure_interface(name, cmds)
       end
     end

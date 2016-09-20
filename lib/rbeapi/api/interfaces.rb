@@ -365,7 +365,7 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_load_interval(name, opts = {})
-        commands = command_builder("load-interval", opts)
+        commands = command_builder('load-interval', opts)
         configure_interface(name, commands)
       end
     end
@@ -377,7 +377,7 @@ module Rbeapi
       DEFAULT_ETH_FLOWC_TX = 'off'
       DEFAULT_ETH_FLOWC_RX = 'off'
       DEFAULT_SPEED = 'default'
-      DEFAULT_LACP_PRIORITY = 32768
+      DEFAULT_LACP_PRIORITY = 32_768
 
       ##
       # get returns the specified Ethernet interface resource hash that
@@ -925,7 +925,8 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_members(name, members, mode = nil)
-        fail ArgumentError, 'members must be an Array' unless members.is_a?(Array)
+        fail ArgumentError, 'members must be an Array' unless
+        members.is_a?(Array)
 
         current_members = Set.new parse_members(name)[:members]
         members = Set.new members

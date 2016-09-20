@@ -206,7 +206,7 @@ module Rbeapi
       def parse_instances
         config = get_block('spanning-tree mst configuration')
         response = config.scan(/(?<=^\s{3}instance\s)\d+/)
-        response.push("0", "1").uniq!
+        response.push('0', '1').uniq!
         response
       end
       private :parse_instances
