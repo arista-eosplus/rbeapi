@@ -506,12 +506,21 @@ module Rbeapi
       #     interfaces  Filter config to include only the given interfaces
       #     section     Display sections containing matching commands
       #
-      # @return [String] The specified configuration as text.
+      # @return [String] The specified configuration as text or nil if no
+      #                  config is found.
       def get_config(opts = {})
         config = opts.fetch(:config, 'running-config')
         params = opts.fetch(:params, '')
         as_string = opts.fetch(:as_string, false)
-        result = run_commands("show #{config} #{params}", encoding: 'text')
+        begin
+          result = run_commands("show #{config} #{params}", encoding: 'text')
+        rescue Rbeapi::Eapilib::CommandError => error
+          if ( error.to_s =~ /show (running|startup)-config/ )
+            return nil
+          else
+            raise error
+          end
+        end
         return result.first['output'].strip.split("\n") unless as_string
         result.first['output'].strip
       end
