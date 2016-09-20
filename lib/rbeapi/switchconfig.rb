@@ -214,6 +214,7 @@ module Rbeapi
       # @return [Section] Returns an instance of Section
       def initialize(config)
         @indent = 3
+        @multiline_cmds = ['^banner']
         chk_format(config)
         parse(config)
       end
@@ -229,9 +230,8 @@ module Rbeapi
       #  an argument error.
       def chk_format(config)
         skip = false
-        multiline_cmds = ['^banner']
         config.each_line do |line|
-          skip = true if multiline_cmds.any? { |cmd| line =~ /#{cmd}/ }
+          skip = true if @multiline_cmds.any? { |cmd| line =~ /#{cmd}/ }
           if skip
             if line =~ /^EOF$/
               skip = false
@@ -268,10 +268,9 @@ module Rbeapi
         prev_line = ''
         combine = false
         longline = []
-        multiline_cmds = ['^banner']
 
         config.each_line do |line|
-          if multiline_cmds.any? { |cmd| line =~ /#{cmd}/ }
+          if @multiline_cmds.any? { |cmd| line =~ /#{cmd}/ }
             longline = []
             combine = true
           end
