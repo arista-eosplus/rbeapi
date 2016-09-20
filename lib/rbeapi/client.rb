@@ -506,7 +506,8 @@ module Rbeapi
       #     interfaces  Filter config to include only the given interfaces
       #     section     Display sections containing matching commands
       #
-      # @return [String] The specified configuration as text.
+      # @return [String] The specified configuration as text or nil if no
+      #                  config is found.
       def get_config(opts = {})
         config = opts.fetch(:config, 'running-config')
         params = opts.fetch(:params, '')
