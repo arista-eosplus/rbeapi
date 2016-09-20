@@ -54,6 +54,9 @@ ends here
 
 EOF
 !
+username fred privilege 0 role network-operator secret 5 $1$u4TDdWKN$VC7cZmeGn/sgNM0RMNwhR.
+username fred sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDtrjGuhFeJz76Z5f3perh/R2s8XmnPcWF1uByHOqDDp53bggS9CZ7n67/QYVjbhyP70HMxY8R5Z4AevNtZTnSUQZmEgnuHvvAGNC63qrItE1i/sXKLvB1r8v0plcK35laNvJMYqGcGpjQ7T4Ufmn54zssiq1CBx6GfEX0+zKWD/5vnVDH9MMDolawILFb2a67VngzEZ0BCeRgLTg2ZEEEQt2hEKdglx87GBf7UIBFYM5xvywZRzHWta0dO1WDXCLD67kdqP52zucFXo7U3EUK/8X9Qltg5Pjr4mxf/U+hbO/K7xZJ+neAJDYA7bSXh8LkCuz00VxI5mAwo2PRMKaSp fred@localhost
+!
 router ospf 1
    !! this 
    !!  is a 
@@ -63,13 +66,34 @@ router ospf 1
    redistribute static
    max-lsa 12000
 !
+management cim-provider
+   ssl certificate
+   -----BEGIN CERTIFICATE-----
+   MIIENzCCAx+gAwIBAgIJAOYfYfw7NCOcMA0GCSqGSIb3DQEBBQUAMIGxMQswCQYD
+   r5p9FrBgavAw5bKO54C0oQKpN/5fta5l6Ws0
+   -----END CERTIFICATE-----
+   -----BEGIN PRIVATE KEY-----
+   MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCqE9TE9wEXp5LR
+   rdPUV9/uQkdx8VrShxlD8A==
+   -----END PRIVATE KEY-----
+   EOF
+   ssl key
+   -----BEGIN PRIVATE KEY-----
+   MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCqE9TE9wEXp5LR
+   rdPUV9/uQkdx8VrShxlD8A==
+   -----END PRIVATE KEY-----
+   EOF
+!
 EOS
   # rubocop:enable Style/TrailingWhitespace
   test_config_global = [
     'vlan 100',
     'interface Ethernet 2',
     "banner motd\nThis is my \n multiline\n   banner\nends here\n\nEOF",
-    'router ospf 1']
+    'username fred privilege 0 role network-operator secret 5 $1$u4TDdWKN$VC7cZmeGn/sgNM0RMNwhR.',
+    'username fred sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDtrjGuhFeJz76Z5f3perh/R2s8XmnPcWF1uByHOqDDp53bggS9CZ7n67/QYVjbhyP70HMxY8R5Z4AevNtZTnSUQZmEgnuHvvAGNC63qrItE1i/sXKLvB1r8v0plcK35laNvJMYqGcGpjQ7T4Ufmn54zssiq1CBx6GfEX0+zKWD/5vnVDH9MMDolawILFb2a67VngzEZ0BCeRgLTg2ZEEEQt2hEKdglx87GBf7UIBFYM5xvywZRzHWta0dO1WDXCLD67kdqP52zucFXo7U3EUK/8X9Qltg5Pjr4mxf/U+hbO/K7xZJ+neAJDYA7bSXh8LkCuz00VxI5mAwo2PRMKaSp fred@localhost',
+    'router ospf 1',
+    'management cim-provider']
   cmds = ['   switchport mode trunk',
           '   switchport trunk allowed vlan 100,200']
 
@@ -106,7 +130,7 @@ EOS
       expect(sc.line).to eq('')
       expect(sc.parent).to eq(nil)
       expect(sc.cmds).to eq(test_config_global)
-      expect(sc.children.length).to eq(2)
+      expect(sc.children.length).to eq(3)
 
       # Validate the children of global
       expect(sc.children[0].line).to eq(test_config_global[1])
@@ -158,6 +182,8 @@ This is my
 ends here
 
 EOF
+username fred privilege 0 role network-operator secret 5 $1$u4TDdWKN$VC7cZmeGn/sgNM0RMNwhR.
+username fred sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDtrjGuhFeJz76Z5f3perh/R2s8XmnPcWF1uByHOqDDp53bggS9CZ7n67/QYVjbhyP70HMxY8R5Z4AevNtZTnSUQZmEgnuHvvAGNC63qrItE1i/sXKLvB1r8v0plcK35laNvJMYqGcGpjQ7T4Ufmn54zssiq1CBx6GfEX0+zKWD/5vnVDH9MMDolawILFb2a67VngzEZ0BCeRgLTg2ZEEEQt2hEKdglx87GBf7UIBFYM5xvywZRzHWta0dO1WDXCLD67kdqP52zucFXo7U3EUK/8X9Qltg5Pjr4mxf/U+hbO/K7xZJ+neAJDYA7bSXh8LkCuz00VxI5mAwo2PRMKaSp fred@localhost
 router ospf 1
    !! this 
    !!  is a 
@@ -166,6 +192,24 @@ router ospf 1
    !! that ends hereEOF
    redistribute static
    max-lsa 12000
+!
+management cim-provider
+   ssl certificate
+   -----BEGIN CERTIFICATE-----
+   MIIENzCCAx+gAwIBAgIJAOYfYfw7NCOcMA0GCSqGSIb3DQEBBQUAMIGxMQswCQYD
+   r5p9FrBgavAw5bKO54C0oQKpN/5fta5l6Ws0
+   -----END CERTIFICATE-----
+   -----BEGIN PRIVATE KEY-----
+   MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCqE9TE9wEXp5LR
+   rdPUV9/uQkdx8VrShxlD8A==
+   -----END PRIVATE KEY-----
+   EOF
+   ssl key
+   -----BEGIN PRIVATE KEY-----
+   MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCqE9TE9wEXp5LR
+   rdPUV9/uQkdx8VrShxlD8A==
+   -----END PRIVATE KEY-----
+   EOF
 EOS
       # rubocop:enable Style/TrailingWhitespace
       sw_config = Rbeapi::SwitchConfig::SwitchConfig.new(conf)
@@ -193,6 +237,9 @@ ends here
 
 EOF
 !
+username fred privilege 0 role network-operator secret 5 $1$u4TDdWKN$VC7cZmeGn/sgNM0RMNwhR.
+username fred sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDtrjGuhFeJz76Z5f3perh/R2s8XmnPcWF1uByHOqDDp53bggS9CZ7n67/QYVjbhyP70HMxY8R5Z4AevNtZTnSUQZmEgnuHvvAGNC63qrItE1i/sXKLvB1r8v0plcK35laNvJMYqGcGpjQ7T4Ufmn54zssiq1CBx6GfEX0+zKWD/5vnVDH9MMDolawILFb2a67VngzEZ0BCeRgLTg2ZEEEQt2hEKdglx87GBf7UIBFYM5xvywZRzHWta0dO1WDXCLD67kdqP52zucFXo7U3EUK/8X9Qltg5Pjr4mxf/U+hbO/K7xZJ+neAJDYA7bSXh8LkCuz00VxI5mAwo2PRMKaSp fred@localhost
+!
 router ospf 1
    !! this 
    !!  is a 
@@ -201,6 +248,24 @@ router ospf 1
    !! that ends here
    redistribute static
    max-lsa 12000
+!
+management cim-provider
+   ssl certificate
+   -----BEGIN CERTIFICATE-----
+   MIIENzCCAx+gAwIBAgIJAOYfYfw7NCOcMA0GCSqGSIb3DQEBBQUAMIGxMQswCQYD
+   r5p9FrBgavAw5bKO54C0oQKpN/5fta5l6Ws0
+   -----END CERTIFICATE-----
+   -----BEGIN PRIVATE KEY-----
+   MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCqE9TE9wEXp5LR
+   rdPUV9/uQkdx8VrShxlD8A==
+   -----END PRIVATE KEY-----
+   EOF
+   ssl key
+   -----BEGIN PRIVATE KEY-----
+   MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCqE9TE9wEXp5LR
+   rdPUV9/uQkdx8VrShxlD8A==
+   -----END PRIVATE KEY-----
+   EOF
 EOS
       # rubocop:enable Style/TrailingWhitespace
       org_new_diff = <<-EOS
