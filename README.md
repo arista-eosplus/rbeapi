@@ -21,16 +21,28 @@ Unit/System spec/coverage: [![Spec Build Status](https://revproxy.arista.com/eos
 
 # Overview
 
-The Ruby Client for eAPI provides a native Ruby implementation for programming Arista EOS network devices using Ruby.  The Ruby client provides the ability to build native applications in Ruby that can communicate with EOS either locally via Unix domain sockets (on-box) or remotely over a HTTP/S transport (off-box).  It uses a standard INI-style configuration file to specifiy one or more connection profiles.
+The Ruby Client for eAPI provides a native Ruby implementation for programming
+Arista EOS network devices using Ruby.  The Ruby client provides the ability to
+build native applications in Ruby that can communicate with EOS either locally
+via Unix domain sockets (on-box) or remotely over a HTTP/S transport (off-box).
+It uses a standard INI-style configuration file to specifiy one or more
+connection profiles.
 
-The rbeapi implemenation also provides an API layer for building native Ruby objects that allow for configuration and state extraction of EOS nodes.  The API layer provides a consistent implementation for working with EOS configuration resources.  The implementation of the API layer is highly extensible and can be used as a foundation for building custom data models.
+The rbeapi implemenation also provides an API layer for building native Ruby
+objects that allow for configuration and state extraction of EOS nodes.  The
+API layer provides a consistent implementation for working with EOS
+configuration resources.  The implementation of the API layer is highly
+extensible and can be used as a foundation for building custom data models.
 
-The libray is freely provided to the open source community for building robust applications using Arista EOS eAPI.  Support is provided as best effort through Github iusses.
+The libray is freely provided to the open source community for building robust
+applications using Arista EOS eAPI.  Support is provided as best effort through
+Github iusses.
 
 ## Requirements
 
 * Arista EOS 4.12 or later
-* Arista eAPI enabled for at least one transport (see official EOS Config Guide at arista.com for details)
+* Arista eAPI enabled for at least one transport (see official EOS Config Guide
+  at arista.com for details)
 * Ruby 1.9.3 or later
 
 # Getting Started
@@ -152,7 +164,7 @@ node.config('hostname veos01')
 node.config(['interface Ethernet1', 'description foo'])
 => [{}, {}]
 
-# return the running or startup configuration from the node (output omitted for brevity)
+# return the running or startup configuration from the node as a string (output omitted for brevity)
 
 node.running_config
 
@@ -214,17 +226,18 @@ and uploaded to [RubyGems](https://rubygems.org/).
   ```
 
 * To create an RPM, run ``rake rpm``
-* To generate a SWIX file for EOS with necessary dependencies, run
-  ``rake all_rpms`` then follow the ``swix create`` instructions, provided
-  by the build.  NOTE: 
-  [PuppetLabs](https://puppetlabs.com/misc/pe-files) provides a puppet agent SWIX which includes Ruby 1.9.3 in
-  /opt/puppet/bin/ which is different from where you might otherwise install
-  Ruby.  If you have installed the puppet-enterprise 3.x SWIX, then you should
-  build and use the ``rbeapi-puppet3`` swix, below.   If you have installed
-  the puppet-enterprise 2015.x SWIX, then you should build and use the
-  ``rbeapi-puppet-aio`` swix, below.  Otherwise, if you have installed at least
-  Ruby 1.9.3 in the standard system location, then the ``rbeapi`` SWIX may be
-  used.
+* To generate a SWIX file for EOS with necessary dependencies, run ``rake
+  all_rpms`` then follow the ``swix create`` instructions, provided by the
+build.  NOTE: [Puppet](https://puppet.com/misc/pe-files) provides a puppet
+agent SWIX which includes Ruby in /opt/puppet/bin/, or /opt/puppetlabs/bin/,
+which is different from where you might otherwise install Ruby.  If you have
+installed the puppet-enterprise 3.x SWIX, then you should build and use the
+``rbeapi-puppet3`` swix, below.   If you have installed the puppet-enterprise
+2015.x SWIX, or higher, (the all-in-one agent) then you should build and use
+the ``rbeapi-puppet-aio`` swix, below. Chef includes its own Ruby in the
+omnibus installation package in /opt/chef/bin/.  For Chef, use the
+``rbeapi-chef`` SWIX package. Otherwise, if you have installed at least Ruby
+1.9.3 in the standard system location, then the ``rbeapi`` SWIX may be used.
 
   ```
   $ bundle install --path .bundle/gems/
@@ -235,21 +248,21 @@ Copy the RPMs to an EOS device then run the 'swix create' command.
   Examples: 
     Puppet Open Source: 
       cd /mnt/flash; \
-      swix create rbeapi-0.5.1-1.swix \
-      rubygem-rbeapi-0.5.1-1.eos4.noarch.rpm \
+      swix create rbeapi-1.0-1.swix \
+      rubygem-rbeapi-1.0-1.eos4.noarch.rpm \
       rubygem-inifile-3.0.0-3.eos4.noarch.rpm \
       rubygem-netaddr-1.5.0-2.eos4.noarch.rpm \
       rubygem-net_http_unix-0.2.1-3.eos4.noarch.rpm
     Puppet-enterprise agent (3.x): 
       cd/mnt/flash; \
-      swix create rbeapi-puppet3-0.5.1-1.swix \
-      rubygem-rbeapi-puppet3-0.5.1-1.eos4.noarch.rpm \
+      swix create rbeapi-puppet3-1.0-1.swix \
+      rubygem-rbeapi-puppet3-1.0-1.eos4.noarch.rpm \
       rubygem-inifile-puppet3-3.0.0-3.eos4.noarch.rpm \
       rubygem-netaddr-puppet3-1.5.0-2.eos4.noarch.rpm
     Puppet-All-in-one agent (2015.x/4.x): 
       cd/mnt/flash; \
-      swix create rbeapi-puppet-aio-0.5.1-1.swix \
-      rubygem-rbeapi-puppet-aio-0.5.1-1.eos4.noarch.rpm \
+      swix create rbeapi-puppet-aio-1.0-1.swix \
+      rubygem-rbeapi-puppet-aio-1.0-1.eos4.noarch.rpm \
       rubygem-inifile-puppet-aio-3.0.0-3.eos4.noarch.rpm \
       rubygem-netaddr-puppet-aio-1.5.0-2.eos4.noarch.rpm \
       rubygem-net_http_unix-puppet-aio-0.2.1-3.eos4.noarch.rpm
@@ -260,13 +273,13 @@ Copy the RPMs to an EOS device then run the 'swix create' command.
   Arista# copy <URI-to-RPMs> flash:
   Arista# bash
   -bash-4.1# cd /mnt/flash/
-  -bash-4.1# swix create rbeapi-puppet3-0.5.1-1.swix \
-             rubygem-rbeapi-puppet3-0.5.1-1.eos4.noarch.rpm \
+  -bash-4.1# swix create rbeapi-puppet3-1.0-1.swix \
+             rubygem-rbeapi-puppet3-1.0-1.eos4.noarch.rpm \
              rubygem-inifile-puppet3-3.0.0-1.eos4.noarch.rpm \
              rubygem-netaddr-puppet3-1.5.0-1.eos4.noarch.rpm
   -bash-4.1# exit
-  Arista# copy flash:rbeapi-puppet3-0.5.1-1.swix extension:
-  Arista# extension rbeapi-puppet3-0.5.1-1.swix
+  Arista# copy flash:rbeapi-puppet3-1.0-1.swix extension:
+  Arista# extension rbeapi-puppet3-1.0-1.swix
   Arista# copy installed-extensions boot-extensions
   ```
 
@@ -275,7 +288,7 @@ Copy the RPMs to an EOS device then run the 'swix create' command.
   On EOS:
   ```
   Arista# no extension pe-rbeapi-0.3.0-1.swix
-  Arista# extension rbeapi-puppet3-0.5.1-1.swix
+  Arista# extension rbeapi-puppet3-1.0-1.swix
   Arista# copy installed-extensions boot-extensions
   ```
 
@@ -298,12 +311,27 @@ corresponding test cases otherwise the pull request will be rejected.
 
 Copyright (c) 2016, Arista Networks, Inc. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
 
-Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or
+other materials provided with the distribution.
 
-Neither the name of Arista Networks nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+Neither the name of Arista Networks nor the names of its contributors may be
+used to endorse or promote products derived from this software without specific
+prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ARISTA NETWORKS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL ARISTA NETWORKS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
