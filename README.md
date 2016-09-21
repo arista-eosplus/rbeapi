@@ -266,6 +266,14 @@ Copy the RPMs to an EOS device then run the 'swix create' command.
       rubygem-inifile-puppet-aio-3.0.0-3.eos4.noarch.rpm \
       rubygem-netaddr-puppet-aio-1.5.0-2.eos4.noarch.rpm \
       rubygem-net_http_unix-puppet-aio-0.2.1-3.eos4.noarch.rpm
+
+    Chef client:
+      cd /mnt/flash; \
+      swix create rbeapi-chef-1.0-1.swix \
+      rubygem-rbeapi-chef-1.0-1.eos4.noarch.rpm \
+      rubygem-inifile-chef-3.0.0-5.eos4.noarch.rpm \
+      rubygem-netaddr-chef-1.5.1-4.eos4.noarch.rpm \
+      rubygem-net_http_unix-chef-0.2.2-5.eos4.noarch.rpm
   ```
 
   On EOS:
