@@ -511,9 +511,10 @@ module Rbeapi
       def get_config(opts = {})
         config = opts.fetch(:config, 'running-config')
         params = opts.fetch(:params, '')
+        encoding = opts.fetch(:encoding, 'text')
         as_string = opts.fetch(:as_string, false)
         begin
-          result = run_commands("show #{config} #{params}", encoding: 'text')
+          result = run_commands("show #{config} #{params}", encoding: encoding)
         rescue Rbeapi::Eapilib::CommandError => error
           if ( error.to_s =~ /show (running|startup)-config/ )
             return nil
@@ -521,8 +522,12 @@ module Rbeapi
             raise error
           end
         end
-        return result.first['output'].strip.split("\n") unless as_string
-        result.first['output'].strip
+        if encoding == 'json'
+          return result.first
+        else
+          return result.first['output'].strip.split("\n") unless as_string
+          result.first['output'].strip
+        end
       end
 
       ##
