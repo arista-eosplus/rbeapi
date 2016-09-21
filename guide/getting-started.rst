@@ -14,6 +14,7 @@ Below is an example of an eAPI conf file. The conf file can contain more than on
 
 The following configuration options are available for defining node entries:
 
+```
     host - The IP address or FQDN of the remote device. If the host parameter is omitted then the connection name is used
     username - The eAPI username to use for authentication (only required for http or https connections)
     password - The eAPI password to use for authentication (only required for http or https connections)
@@ -30,11 +31,13 @@ The following configuration options are available for defining node entries:
         transport: socket, default port: n/a
     open_timeout - The default number of seconds to wait for the eAPI connection to open. Any number may be used, including Floats for fractional seconds. Default value is 10 seconds.
     read_timeout - The default number of seconds to wait for one block of eAPI results to be read (via one read(2) call). Any number may be used, including Floats for fractional seconds. Default value is 10 seconds.
+```
 
 Note: See the EOS User Manual found at arista.com for more details on configuring eAPI values.
 
 All configuration values are optional.
 
+```
 [connection:veos01]
 username: eapi
 password: password
@@ -56,6 +59,7 @@ transport: https
 
 [connection:localhost]
 transport: http_local
+```
 
 The above example shows different ways to define EOS node connections. All configuration options will attempt to use default values if not explicitly defined. If the host parameter is not set for a given entry, then the connection name will be used as the host address.
 
@@ -74,6 +78,7 @@ Creating a connection and sending commands
 
 Once EOS is configured properly and the config file created, getting started with a connection to EOS is simple. Below demonstrates a basic connection using rbeapi. For more examples, please see the examples folder.
 
+```
 # start by importing the library
 require 'rbeapi/client'
 
@@ -99,12 +104,14 @@ node.config(['interface Ethernet1', 'description foo'])
 node.running_config
 
 node.startup_config
+```
 
 Using the API
 -------------
 
 The rbeapi library provides both a client for send and receiving commands over eAPI as well as an API for working directly with EOS resources. The API is designed to be easy and straightforward to use yet also extensible. Below is an example of working with the vlans API
 
+```
 # create a connection to the node
 require 'rbeapi/client'
 node = Rbeapi::Client.connect_to('veos01')
@@ -130,5 +137,6 @@ vlans.create(400)
 # set the new vlan name
 vlans.set_name(100, value: 'foo')
 => true
+```
 
 All API implementations developed by Arista EOS+ CS are found in the rbeapi/api folder. See the examples folder for additional examples.

@@ -5,17 +5,30 @@ Installation
 
 The source code for rbeapi is provided on Github at http://github.com/arista-eosplus/rbeapi. All current development is done in the develop branch. Stable released versions are tagged in the master branch and uploaded to RubyGems.
 
-    To install the latest stable version of rbeapi, simply run gem install rbeapi
+    To install the latest stable version of rbeapi, simply run `gem install rbeapi``
 
     To install the latest development version from Github, simply clone the develop branch and run
 
+    ```
     $ rake build
     $ rake install
+    ```
 
-    To create an RPM, run rake rpm
+    To create an RPM, run `rake rpm`
 
-    To generate a SWIX file for EOS with necessary dependencies, run rake all_rpms then follow the swix create instructions, provided by the build. NOTE: PuppetLabs provides a puppet agent SWIX which includes Ruby 1.9.3 in /opt/puppet/bin/ which is different from where you might otherwise install Ruby. If you have installed the puppet-enterprise 3.x SWIX, then you should build and use the rbeapi-puppet3 swix, below. If you have installed the puppet-enterprise 2015.x SWIX, then you should build and use the rbeapi-puppet-aio swix, below. Otherwise, if you have installed at least Ruby 1.9.3 in the standard system location, then the rbeapi SWIX may be used.
+    To generate a SWIX file for EOS with necessary dependencies, run `rake
+    all_rpms` then follow the swix create instructions, provided by the build.
+    NOTE: Puppet provides a puppet agent SWIX which includes Ruby 1.9.3 in
+    /opt/puppetlabs/bin/ which is different from where you might otherwise
+    install Ruby. If you have installed the puppet-enterprise 3.x SWIX, then
+    you should build and use the rbeapi-puppet3 swix, below. If you have
+    installed the puppet-enterprise 2015.x SWIX, then you should build and use
+    the rbeapi-puppet-aio swix, below. The Chef client omnibus install also
+    includes its own version of Ruby in /opt/chef/bin/, thus the rbeapi-chef
+    swix should be used.  Otherwise, if you have installed at least Ruby
+    1.9.3 in the standard system location, then the rbeapi SWIX may be used.
 
+    ```
     $ bundle install --path .bundle/gems/
     $ bundle exec rake all_rpms
     ...
@@ -42,9 +55,11 @@ The source code for rbeapi is provided on Github at http://github.com/arista-eos
         rubygem-inifile-puppet-aio-3.0.0-3.eos4.noarch.rpm \
         rubygem-netaddr-puppet-aio-1.5.0-2.eos4.noarch.rpm \
         rubygem-net_http_unix-puppet-aio-0.2.1-3.eos4.noarch.rpm
+    ```
 
     On EOS:
 
+    ```
     Arista# copy <URI-to-RPMs> flash:
     Arista# bash
     -bash-4.1# cd /mnt/flash/
@@ -56,4 +71,5 @@ The source code for rbeapi is provided on Github at http://github.com/arista-eos
     Arista# copy flash:rbeapi-puppet3-0.4.0-1.swix extension:
     Arista# extension rbeapi-puppet3-0.4.0-1.swix
     Arista# copy installed-extensions boot-extensions
+    ```
 
