@@ -1,6 +1,33 @@
 Ruby Client for eAPI
 ====================
 
+## [v1.0](https://github.com/arista-eosplus/rbeapi/releases/tag/v1.0), September, 2016
+
+[Full Changelog](https://github.com/arista-eosplus/rbeapi/compare/v0.5.1...v1.0)
+
+Changes to API:
+- Fix issues setting interface speeds. Speed is now returned as a string
+  instead of a list. ([rknaus](https://github.com/rknaus))
+
+Enhancements and Fixes:
+- Added set_trunk_group method to vlans API
+- Fix #118 SWIX package uninstall issue
+- Fix #123 which could return incorrect value for iprouting when VRFs are
+  enabled
+- Limit several rubygem deps when testing with Ruby 1.9
+- Add load-interval option in ipinterfaces
+  ([n1cn0c](https://github.com/n1cn0c))
+- Fix #142 parsing of VxLAN interface multicast group parsing
+  ([mrvinti](https://github.com/mrvinti))
+- Improve spanning-tree MST handling ([rknaus](https://github.com/rknaus))
+- Add rbeapi/switchconfig to do block-by-block comparisons of EOS configs. This
+  enables configuration management tools like Chef and Puppet to take a current
+  and proposed running-config as a text blob and easily determine if they
+  differ.
+- Add swix packaging of rbeapi rubygems for use with Chef-client on EOS
+- Ensure that get_config, node.running_config, and node_startup_config return
+  sane value even when a config does not exist.
+
 ## v0.5.1, February, 2016
 
 - Fix issue where vlans API was not returning all configured vlan trunk_groups.
