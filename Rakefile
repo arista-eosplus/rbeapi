@@ -170,6 +170,12 @@ task ci_spec: [:ci_prep, 'ci:setup:rspec', :spec]
 
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec)
+RSpec::Core::RakeTask.new(:unit) do |t|
+  t.pattern = './**/unit/**/*_spec.rb'
+end
+RSpec::Core::RakeTask.new(:system) do |t|
+  t.pattern = './**/system/**/*_spec.rb'
+end
 
 desc 'Generate typedoc.rst for the guide'
 task :typedoc do
