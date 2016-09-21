@@ -199,6 +199,7 @@ module Rbeapi
       # @option opts default [Boolean] The value should be set to default.
       #
       # @return [Boolean] True if the commands succeeds otherwise False.
+      # rubocop:disable Metrics/MethodLength
       def set_addresses(name, opts = {})
         value = opts[:value]
         enable = opts.fetch(:enable, true)
@@ -224,6 +225,7 @@ module Rbeapi
         end
         configure(cmds)
       end
+      # rubocop:enable Metrics/MethodLength
 
       ##
       # The add_address method assigns one virtual IPv4 address.

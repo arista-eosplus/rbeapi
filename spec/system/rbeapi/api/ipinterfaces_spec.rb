@@ -13,7 +13,8 @@ describe Rbeapi::Api::Ipinterfaces do
 
   describe '#get' do
     let(:entity) do
-      { address: '77.99.99.99/24', mtu: '1500', helper_addresses: [], load_interval: '' }
+      { address: '77.99.99.99/24', mtu: '1500', helper_addresses: [],
+        load_interval: '' }
     end
 
     before do
@@ -159,7 +160,8 @@ describe Rbeapi::Api::Ipinterfaces do
 
   describe '#set_load_interval' do
     before do
-      node.config(['default interface Ethernet1', 'interface Ethernet1', 'no switchport'])
+      node.config(['default interface Ethernet1', 'interface Ethernet1',
+                   'no switchport'])
     end
 
     it 'sets the load-interval value on the interface' do
