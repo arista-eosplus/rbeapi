@@ -507,7 +507,8 @@ module Rbeapi
       #     section     Display sections containing matching commands
       #
       # @return [String] The specified configuration as text or nil if no
-      #                  config is found.
+      #                  config is found.  When encoding is set to json, returns
+      #                  a hash.
       def get_config(opts = {})
         config = opts.fetch(:config, 'running-config')
         params = opts.fetch(:params, '')
