@@ -57,7 +57,9 @@ module Rbeapi
       #     areas: {
       #       <string>: array<string>
       #     },
-      #     redistribute: {}
+      #     redistribute: {
+      #       <string>: {route_map: <string>}
+      #     }
       #   }
       #
       # @param inst [String] The ospf instance name.
