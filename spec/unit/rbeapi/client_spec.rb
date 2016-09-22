@@ -242,5 +242,13 @@ describe Rbeapi::Client do
       allow(node).to receive(:run_commands).and_raise(Rbeapi::Eapilib::CommandError.new(msg, 1000))
       expect(node.get_config()).to be_nil
     end
+
+    it 'raises invalid command error' do
+      msg = "CLI command 2 of 2 'show startup-configurations' failed: invalid command"
+      allow(node).to receive(:run_commands).and_raise(Rbeapi::Eapilib::CommandError.new(msg, 1000))
+      expect { node.get_config(config: 'running-configurations') }
+        .to raise_error Rbeapi::Eapilib::CommandError
+    end
+
   end
 end
