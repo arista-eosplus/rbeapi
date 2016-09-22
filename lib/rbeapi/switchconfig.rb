@@ -214,7 +214,8 @@ module Rbeapi
       # @return [Section] Returns an instance of Section
       def initialize(config)
         @indent = 3
-        @multiline_cmds = ['^banner']
+        @multiline_cmds = ['^banner', '^\s*ssl key', '^\s*ssl certificate',
+                           '^\s*protocol https certificate']
         chk_format(config)
         parse(config)
       end
@@ -233,7 +234,7 @@ module Rbeapi
         config.each_line do |line|
           skip = true if @multiline_cmds.any? { |cmd| line =~ /#{cmd}/ }
           if skip
-            if line =~ /^EOF$/
+            if line =~ /^\s*EOF$/
               skip = false
             else
               next
@@ -276,7 +277,7 @@ module Rbeapi
           end
           if combine
             longline << line
-            if line =~ /^EOF$/
+            if line =~ /^\s*EOF$/
               line = longline.join
               combine = false
             else
