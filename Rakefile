@@ -1,4 +1,5 @@
 require 'bundler/gem_tasks'
+require 'github_changelog_generator/task'
 
 $LOAD_PATH.unshift File.expand_path('../lib', __FILE__)
 require 'rbeapi/version'
@@ -147,7 +148,11 @@ task swix: :all_rpms do
   puts "#\n################################################\n\n"
 end
 
-task release: :build do
+GitHubChangelogGenerator::RakeTask.new :changelog do |config|
+  config.future_release = Rbeapi::VERSION
+end
+
+task release: [:changelog, :build] do
   system "gem push rbeapi-#{Rbeapi::VERSION}.gem"
 end
 
