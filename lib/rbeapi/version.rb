@@ -33,5 +33,5 @@
 # #
 # Rbeapi toplevel namespace.
 module Rbeapi
-  VERSION = '0.5.1'
+  VERSION = '1.0'
 end
