@@ -136,12 +136,7 @@ module Rbeapi
         return { trunk_allowed_vlans: [] } unless mdata[1] != 'none'
         vlans = mdata[1].split(',')
         values = vlans.each_with_object([]) do |vlan, arry|
-          if /-/ !~ vlan
-            arry << vlan.to_i
-          else
-            range_start, range_end = vlan.split('-')
-            arry.push(*Array(range_start.to_i..range_end.to_i))
-          end
+          arry << vlan.to_s
         end
         { trunk_allowed_vlans: values }
       end
@@ -264,9 +259,9 @@ module Rbeapi
       #
       # @param opts [Hash] The configuration parameters for the interface.
       #
-      # @option ots value [Array] The list of vlan ids to configure on the
+      # @option opts value [Array] The list of vlan ids to configure on the
       #   switchport to be allowed. This value must be an array of valid vlan
-      #   ids.
+      #   ids or vlan ranges.
       #
       # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
@@ -283,7 +278,7 @@ module Rbeapi
 
         if value
           fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
-          value = value.map(&:inspect).join(',')
+          value = value.map(&:inspect).join(',').tr('"', '')
         end
 
         case default
@@ -293,8 +288,7 @@ module Rbeapi
           if !enable
             cmds = 'no switchport trunk allowed vlan'
           else
-            cmds = ['switchport trunk allowed vlan none',
-                    "switchport trunk allowed vlan #{value}"]
+            cmds = ["switchport trunk allowed vlan #{value}"]
           end
         end
         configure_interface(name, cmds)

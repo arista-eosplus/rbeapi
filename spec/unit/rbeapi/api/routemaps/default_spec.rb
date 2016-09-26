@@ -244,6 +244,11 @@ describe Rbeapi::Api::Routemaps do
       expect(subject.create('test', 'deny', 20,
                             default: true)).to be_truthy
     end
+
+    it 'raises an ArgumentError if opts match is not an array' do
+      expect { subject.create('test', 'permit', 10, match: '123') }
+        .to raise_error(ArgumentError)
+    end
   end
 
   describe '#delete' do

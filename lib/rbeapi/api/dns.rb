@@ -198,18 +198,23 @@ module Rbeapi
       #   no ip domain-list
       #   default ip domain-list
       #
-      # @option value [Array] The set of domain names to configure on the
+      # @option opts value [Array] The set of domain names to configure on the
       #   node. The list of domain names will be replace in the nodes running
       #   configuration by the list provided in value.
       #
-      # @option default [Boolean] Configures the ip domain-list using the
+      # @option opts default [Boolean] Configures the ip domain-list using the
       #   default keyword argument.
       #
       # @return [Boolean] Returns true if the commands completed successfully.
+      # rubocop:disable Metrics/MethodLength
       def set_domain_list(opts = {})
         value = opts[:value]
         enable = opts.fetch(:enable, true)
         default = opts[:default] || false
+
+        if value
+          fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+        end
 
         cmds = []
         case default
@@ -229,6 +234,7 @@ module Rbeapi
         end
         configure cmds
       end
+      # rubocop:enable Metrics/MethodLength
 
       ##
       # add_domain_list adds an ip domain-list.

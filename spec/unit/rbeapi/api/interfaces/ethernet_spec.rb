@@ -24,7 +24,7 @@ describe Rbeapi::Api::EthernetInterface do
 
     let(:keys) do
       [:type, :speed, :sflow, :flowcontrol_send, :flowcontrol_receive,
-       :forced, :shutdown, :description, :name]
+       :shutdown, :description, :name, :load_interval, :lacp_priority]
     end
 
     it 'returns an ethernet resource as a hash' do

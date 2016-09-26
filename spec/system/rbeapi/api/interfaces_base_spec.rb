@@ -20,7 +20,8 @@ describe Rbeapi::Api::Interfaces do
   describe '#get' do
     context 'with interface Loopback' do
       let(:entity) do
-        { name: 'Loopback0', type: 'generic', description: '', shutdown: false }
+        { name: 'Loopback0', type: 'generic', description: '', shutdown: false,
+          load_interval: '' }
       end
 
       before { node.config(['no interface Loopback0', 'interface Loopback0']) }
@@ -33,7 +34,8 @@ describe Rbeapi::Api::Interfaces do
     context 'with interface Port-Channel' do
       let(:entity) do
         { name: 'Port-Channel1', type: 'portchannel', description: '',
-          shutdown: false, members: [], lacp_mode: 'on', minimum_links: '0',
+          shutdown: false, load_interval: '', members: [], lacp_mode: 'on',
+          minimum_links: '0',
           lacp_fallback: 'disabled', lacp_timeout: '90' }
       end
 
@@ -50,7 +52,8 @@ describe Rbeapi::Api::Interfaces do
     context 'with interface Vxlan' do
       let(:entity) do
         { name: 'Vxlan1', type: 'vxlan', description: '',
-          shutdown: false, source_interface: '', multicast_group: '',
+          shutdown: false, load_interval: '', source_interface: '',
+          multicast_group: '',
           udp_port: 4789, flood_list: [], vlans: {} }
       end
 
@@ -129,6 +132,32 @@ describe Rbeapi::Api::Interfaces do
       expect(subject.get('Loopback0')[:shutdown]).to be_truthy
       expect(subject.set_shutdown('Loopback0', enable: true)).to be_truthy
       expect(subject.get('Loopback0')[:shutdown]).to be_falsy
+    end
+  end
+
+  describe '#set_load_interval' do
+    before do
+      node.config(['interface Loopback0', 'default load-interval'])
+    end
+
+    it 'sets the load-interval value on the interface' do
+      expect(subject.get('Loopback0')[:load_interval]).to eq('')
+      expect(subject.set_load_interval('Loopback0', value: '10')).to be_truthy
+      expect(subject.get('Loopback0')[:load_interval]).to eq('10')
+    end
+
+    it 'negates the load-interval' do
+      expect(subject.set_load_interval('Loopback0', value: '20')).to be_truthy
+      expect(subject.get('Loopback0')[:load_interval]).to eq('20')
+      expect(subject.set_load_interval('Loopback0', enable: false)).to be_truthy
+      expect(subject.get('Loopback0')[:load_interval]).to eq('')
+    end
+
+    it 'defaults the load-interval' do
+      expect(subject.set_load_interval('Loopback0', value: '10')).to be_truthy
+      expect(subject.get('Loopback0')[:load_interval]).to eq('10')
+      expect(subject.set_load_interval('Loopback0', default: true)).to be_truthy
+      expect(subject.get('Loopback0')[:load_interval]).to eq('')
     end
   end
 end

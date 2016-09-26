@@ -333,6 +333,50 @@ module Rbeapi
       def remove_trunk_group(id, value)
         configure(["vlan #{id}", "no trunk group #{value}"])
       end
+
+      ##
+      # Configures the trunk groups for the specified vlan.
+      # Trunk groups not currently set are added and trunk groups
+      # currently configured but not in the passed in value array are removed.
+      #
+      # @param name [String] The name of the vlan to configure.
+      #
+      # @param opts [Hash] The configuration parameters for the vlan.
+      #
+      # @option opts value [string] Set of values to configure the trunk group.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] The value should be set to default
+      #   Default takes precedence over enable.
+      #
+      # @return [Boolean] Returns True if the commands succeed otherwise False.
+      def set_trunk_groups(name, opts = {})
+        default = opts.fetch(:default, false)
+        return configure(["vlan #{name}", 'default trunk group']) if default
+
+        enable = opts.fetch(:enable, true)
+        return configure(["vlan #{name}", 'no trunk group']) unless enable
+
+        value = opts.fetch(:value, [])
+        fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+
+        value = Set.new value
+        current_value = Set.new get(name)[:trunk_groups]
+
+        cmds = ["vlan #{name}"]
+        # Add trunk groups that are not currently in the list.
+        value.difference(current_value).each do |group|
+          cmds << "trunk group #{group}"
+        end
+
+        # Remove trunk groups that are not in the new list.
+        current_value.difference(value).each do |group|
+          cmds << "no trunk group #{group}"
+        end
+        configure(cmds) if cmds.length > 1
+      end
     end
   end
 end

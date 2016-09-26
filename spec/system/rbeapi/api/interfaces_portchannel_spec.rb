@@ -14,7 +14,8 @@ describe Rbeapi::Api::Interfaces do
   describe '#get' do
     let(:entity) do
       { name: 'Port-Channel1', type: 'portchannel', description: '',
-        shutdown: false, members: [], lacp_mode: 'on', minimum_links: '0',
+        shutdown: false, load_interval: '', members: [], lacp_mode: 'on',
+        minimum_links: '0',
         lacp_timeout: '90', lacp_fallback: 'disabled' }
     end
 
@@ -268,6 +269,37 @@ describe Rbeapi::Api::Interfaces do
       expect(subject.set_lacp_timeout('Port-Channel1', value: '100'))
         .to be_truthy
       expect(subject.get('Port-Channel1')[:lacp_timeout]).to eq('100')
+    end
+  end
+
+  describe '#set_load_interval' do
+    before do
+      node.config(['interface Port-Channel1', 'default load-interval'])
+    end
+
+    it 'sets the load-interval value on the interface' do
+      expect(subject.get('Port-Channel1')[:load_interval]).to eq('')
+      expect(subject.set_load_interval('Port-Channel1',
+                                       value: '10')).to be_truthy
+      expect(subject.get('Port-Channel1')[:load_interval]).to eq('10')
+    end
+
+    it 'negates the load-interval' do
+      expect(subject.set_load_interval('Port-Channel1',
+                                       value: '20')).to be_truthy
+      expect(subject.get('Port-Channel1')[:load_interval]).to eq('20')
+      expect(subject.set_load_interval('Port-Channel1',
+                                       enable: false)).to be_truthy
+      expect(subject.get('Port-Channel1')[:load_interval]).to eq('')
+    end
+
+    it 'defaults the load-interval' do
+      expect(subject.set_load_interval('Port-Channel1',
+                                       value: '10')).to be_truthy
+      expect(subject.get('Port-Channel1')[:load_interval]).to eq('10')
+      expect(subject.set_load_interval('Port-Channel1',
+                                       default: true)).to be_truthy
+      expect(subject.get('Port-Channel1')[:load_interval]).to eq('')
     end
   end
 end

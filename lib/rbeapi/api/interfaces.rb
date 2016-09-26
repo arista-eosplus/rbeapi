@@ -144,6 +144,7 @@ module Rbeapi
     # that is common to all interfaces configured in EOS.
     class BaseInterface < Entity
       DEFAULT_INTF_DESCRIPTION = ''
+      DEFAULT_LOAD_INTERVAL = ''
 
       ##
       # get returns the specified interface resource hash that represents the
@@ -157,6 +158,7 @@ module Rbeapi
       #     type: 'generic'
       #     description: <string>
       #     shutdown: [true, false]
+      #     load_interval: <string>
       #   }
       #
       # @param name [String] The name of the interface to return from the
@@ -172,6 +174,7 @@ module Rbeapi
         response = { name: name, type: 'generic' }
         response.merge!(parse_description(config))
         response.merge!(parse_shutdown(config))
+        response.merge!(parse_load_interval(config))
         response
       end
 
@@ -212,6 +215,24 @@ module Rbeapi
         { shutdown: value.nil? }
       end
       private :parse_shutdown
+
+      ##
+      # parse_load_interval scans the provided configuration block and
+      # parse the load-interval value. If the interface load-interval
+      # value is not configured, then this method will return the value of
+      # DEFAULT_LOAD_INTERVAL. The hash returned is intended to be merged into
+      # the interface resource hash.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block to parse.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_load_interval(config)
+        mdata = /load-interval (\w+)$/.match(config)
+        { load_interval: mdata.nil? ? DEFAULT_LOAD_INTERVAL : mdata[1] }
+      end
+      private :parse_load_interval
 
       ##
       # create will create a new interface resource in the node's current
@@ -326,6 +347,27 @@ module Rbeapi
         commands = command_builder('shutdown', opts)
         configure_interface(name, commands)
       end
+
+      ##
+      # set_load_interval is a convenience function for configuring the
+      # value of interface load-interval
+      #
+      # @param name [String] The interface name to apply the configuration
+      # values to. The name must be the full interface identifier.
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts value [String] Specifies the value to configure the
+      # load-interval setting for. Valid values are between 5 and 600.
+      #
+      # @option opts default [Boolean] Configures the load-interval value on
+      # the interface using the default keyword.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_load_interval(name, opts = {})
+        commands = command_builder('load-interval', opts)
+        configure_interface(name, commands)
+      end
     end
 
     ##
@@ -334,8 +376,8 @@ module Rbeapi
     class EthernetInterface < BaseInterface
       DEFAULT_ETH_FLOWC_TX = 'off'
       DEFAULT_ETH_FLOWC_RX = 'off'
-      DEFAULT_SPEED = 'auto'
-      DEFAULT_FORCED = false
+      DEFAULT_SPEED = 'default'
+      DEFAULT_LACP_PRIORITY = 32_768
 
       ##
       # get returns the specified Ethernet interface resource hash that
@@ -347,11 +389,12 @@ module Rbeapi
       #     type: <string>,
       #     description: <string>,
       #     shutdown: <boolean>,
+      #     load_interval: <string>
       #     speed: <string>,
-      #     forced: <boolean>,
       #     sflow: <boolean>,
       #     flowcontrol_send: <string>,
       #     flowcontrol_receive: <string>
+      #     lacp_priority: <integer>
       #   }
       #
       # @param name [String] The interface name to return a resource hash
@@ -371,6 +414,7 @@ module Rbeapi
         response.merge!(parse_sflow(config))
         response.merge!(parse_flowcontrol_send(config))
         response.merge!(parse_flowcontrol_receive(config))
+        response.merge!(parse_lacp_priority(config))
         response
       end
 
@@ -386,10 +430,8 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_speed(config)
-        value = config.scan(/speed (forced)?[ ]?(\w+)/).first
-        return { speed: DEFAULT_SPEED, forced: DEFAULT_FORCED } unless value
-        (forced, value) = value.first
-        { speed: value, forced: !forced.nil? }
+        value = config.scan(/speed (.*)/).first
+        { speed: value.nil? ? DEFAULT_SPEED : value.first }
       end
       private :parse_speed
 
@@ -447,6 +489,24 @@ module Rbeapi
       private :parse_flowcontrol_receive
 
       ##
+      # parse_lacp_priority scans the provided configuration block and parse
+      # the lacp port-priority value. If the interface lacp port-priority value
+      # is not configured, then this method will return the value of
+      # DEFAULT_LACP_PRIORITY. The hash returned is intended to be merged into
+      # the interface resource hash.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block to parse.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_lacp_priority(config)
+        mdata = /lacp port-priority (\d+)$/.match(config)
+        { lacp_priority: mdata.nil? ? DEFAULT_LACP_PRIORITY : mdata[1] }
+      end
+      private :parse_lacp_priority
+
+      ##
       # create overrides the create method from the BaseInterface and raises
       # an exception because Ethernet interface creation is not supported.
       #
@@ -494,29 +554,21 @@ module Rbeapi
       # @option opts enable [Boolean] If false then the command is
       #   negated. Default is true.
       #
-      # @option opts forced [Boolean] Specifies if auto negotiation should be
-      #   enabled (true) or disabled (false).
-      #
-      # @option opts default [Boolean] Configures the sflow value on the
-      #   interface using the default keyword.
-      #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_speed(name, opts = {})
         value = opts[:value]
-        forced = opts.fetch(:forced, false)
         enable = opts.fetch(:enable, true)
-        default = opts.fetch(:default, false)
-
-        forced = 'forced' if forced
-        forced = '' if value == 'auto'
+        default = (value == :default)
 
         cmds = ["interface #{name}"]
         case default
         when true
           cmds << 'default speed'
         when false
-          cmds << enable ? "speed #{forced} #{value}" : 'no speed'
+          cmd = enable ? "speed #{value}" : 'no speed'
+          cmds << cmd
         end
+
         configure cmds
       end
 
@@ -633,6 +685,35 @@ module Rbeapi
       def set_flowcontrol_receive(name, opts = {})
         set_flowcontrol(name, 'receive', opts)
       end
+
+      ##
+      # set_lacp_priority configures the lacp port-priority on the interface.
+      # Setting the enable keyword to true enables the lacp port-priority on
+      # the interface and setting enable to false disables the lacp
+      # port-priority on the interface.
+      # If the default keyword is set to true, then the lacp port-priority
+      # value is defaulted using the default keyword. The default keyword takes
+      # precedence over the enable keyword
+      #
+      # @since eos_version 4.13.7M
+      #
+      # @param name [String] The interface name to apply the configuration
+      #   values to. The name must be the full interface identifier.
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts enable [Boolean] Enables sflow if the value is true or
+      #   disables the lacp port-priority on the interface if false. Default is
+      #   true.
+      #
+      # @option opts default [Boolean] Configures the lacp port-priority value
+      #   on the interface using the default keyword.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_lacp_priority(name, opts = {})
+        commands = command_builder('lacp port-priority', opts)
+        configure_interface(name, commands)
+      end
     end
 
     ##
@@ -654,6 +735,7 @@ module Rbeapi
       #     type: 'portchannel'
       #     description: <string>
       #     shutdown: [true, false]
+      #     load_interval: <string>
       #     members: array[<strings>]
       #     lacp_mode: [active, passive, on]
       #     minimum_links: <string>
@@ -700,7 +782,7 @@ module Rbeapi
         grpid = name.scan(/(?<=Port-Channel)\d+/)[0]
         command = "show port-channel #{grpid} all-ports"
         config = node.enable(command, encoding: 'text')
-        values = config.first[:result]['output'].scan(/\bEthernet[^\s]+/)
+        values = config.first[:result]['output'].scan(/\bEthernet[^\s]+/).sort
         { members: values }
       end
       private :parse_members
@@ -843,6 +925,9 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_members(name, members, mode = nil)
+        fail ArgumentError, 'members must be an Array' unless
+        members.is_a?(Array)
+
         current_members = Set.new parse_members(name)[:members]
         members = Set.new members
 
@@ -1021,6 +1106,7 @@ module Rbeapi
       #     type: <string>,
       #     description: <string>,
       #     shutdown: <boolean>,
+      #     load_interval: <string>
       #     source_interface: <string>,
       #     multicast_group: <string>,
       #     udp_port: <fixnum>,
@@ -1079,7 +1165,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>]
       def parse_multicast_group(config)
-        mdata = /multicast-group ([^\s]+)$/.match(config)
+        mdata = /^\s*vxlan multicast-group ([^\s]+)$/.match(config)
         { multicast_group: mdata ? mdata[1] : DEFAULT_MCAST_GRP }
       end
       private :parse_multicast_group

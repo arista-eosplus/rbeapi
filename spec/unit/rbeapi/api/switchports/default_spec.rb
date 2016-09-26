@@ -195,11 +195,11 @@ describe Rbeapi::Api::Switchports do
         .to raise_error(ArgumentError)
     end
 
-    it 'sets vlan 8 and 9 to the trunk allowed vlans' do
+    it 'sets vlan 8-10 and 100 to the trunk allowed vlans' do
       expect(node).to receive(:config)
-        .with(['interface Ethernet1', 'switchport trunk allowed vlan none',
-               'switchport trunk allowed vlan 8,9'])
-      expect(subject.set_trunk_allowed_vlans('Ethernet1', value: [8, 9]))
+        .with(['interface Ethernet1', 'switchport trunk allowed vlan 8-10,100'])
+      expect(subject.set_trunk_allowed_vlans('Ethernet1',
+                                             value: ['8-10', '100']))
         .to be_truthy
     end
 

@@ -149,6 +149,8 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_user_entry(user)
+        fail ArgumentError, 'user must be an Array' unless user.is_a?(Array)
+
         hsh = {}
         hsh[:name] = user[0]
         hsh[:privilege] = user[1].to_i

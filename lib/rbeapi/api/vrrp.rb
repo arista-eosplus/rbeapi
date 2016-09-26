@@ -510,8 +510,19 @@ module Rbeapi
       #   of the tracked interface, and the amount to decrement the priority.
       #
       # @return [Boolean] Returns true if the command completed successfully.
+      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/AbcSize,
+      # rubocop:disable Metrics/PerceivedComplexity
       def create(name, vrid, opts = {})
         fail ArgumentError, 'create has no options set' if opts.empty?
+
+        if opts[:secondary_ip] && !opts[:secondary_ip].is_a?(Array)
+          fail ArgumentError, 'opts secondary_ip must be an Array'
+        end
+
+        if opts[:track] && !opts[:track].is_a?(Array)
+          fail ArgumentError, 'opts track must be an Array'
+        end
+
         cmds = []
         if opts.key?(:enable)
           if opts[:enable]
@@ -561,6 +572,8 @@ module Rbeapi
         cmds += build_tracks_cmd(name, vrid, opts[:track]) if opts.key?(:track)
         configure_interface(name, cmds)
       end
+      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/AbcSize,
+      # rubocop:enable Metrics/PerceivedComplexity
 
       ##
       # delete will delete the virtual router ID on the interface from the

@@ -209,4 +209,46 @@ describe Rbeapi::Client do
                host: 'test2')
     end
   end
+
+  describe '#get_config' do
+    def startup_config
+      "! Command: show running-config\n! device: jere-debug-agent1 (vEOS, EOS-4.14.9.1M)\n!\n! boot system flash:/vEOS-4.14.9.1M.swi\n!\nip routing vrf MGMT\n!\nmanagement api http-commands\n   no protocol https\n   protocol unix-socket\n   no shutdown\n   vrf MGMT\n      no shutdown\n!\nmanagement ssh\n   vrf MGMT\n      no shutdown\n!\n!\nend\n"
+    end
+
+    def startup_config_response
+      [{"output"=>startup_config}]
+    end
+
+    let(:node) do
+      subject.config.read(fixture_file('dut.conf'))
+      subject.connect_to('dut')
+    end
+
+    before(:each) do
+      allow(node).to receive(:run_commands) { startup_config_response }
+    end
+
+    it 'with no arguments returns the startup-config' do
+      expect(node.get_config()).to eq(startup_config.strip.split("\n"))
+    end
+
+    it 'with no arguments and an empty startup-config returns the startup-config' do
+      allow(node).to receive(:run_commands) { [{"output"=>""}] }
+      expect(node.get_config()).to eq([])
+    end
+
+    it 'with no arguments and no startup-config returns nil' do
+      msg = "CLI command 2 of 2 'show startup-config' failed: could not run command"
+      allow(node).to receive(:run_commands).and_raise(Rbeapi::Eapilib::CommandError.new(msg, 1000))
+      expect(node.get_config()).to be_nil
+    end
+
+    it 'raises invalid command error' do
+      msg = "CLI command 2 of 2 'show startup-configurations' failed: invalid command"
+      allow(node).to receive(:run_commands).and_raise(Rbeapi::Eapilib::CommandError.new(msg, 1000))
+      expect { node.get_config(config: 'running-configurations') }
+        .to raise_error Rbeapi::Eapilib::CommandError
+    end
+
+  end
 end

@@ -82,50 +82,65 @@ task all_rpms: :build do
   puts 'RPMs are available in rpms/noarch/'
   puts "Copy the RPMs to an EOS device then run the 'swix create' command."
   puts '  Examples: '
+  puts '    Chef client: '
+  puts '      cd /mnt/flash; \\'
+  puts "      swix create rbeapi-chef-#{Rbeapi::VERSION}-1.swix \\"
+  puts "      rubygem-rbeapi-chef-#{Rbeapi::VERSION}-1.eos4.noarch.rpm \\"
+  puts '      rubygem-inifile-chef-3.0.0-5.eos4.noarch.rpm \\'
+  puts '      rubygem-netaddr-chef-1.5.1-4.eos4.noarch.rpm \\'
+  puts '      rubygem-net_http_unix-chef-0.2.2-5.eos4.noarch.rpm'
   puts '    Puppet Open Source: '
   puts '      cd /mnt/flash; \\'
   puts "      swix create rbeapi-#{Rbeapi::VERSION}-1.swix \\"
   puts "      rubygem-rbeapi-#{Rbeapi::VERSION}-1.eos4.noarch.rpm \\"
-  puts '      rubygem-inifile-3.0.0-3.eos4.noarch.rpm \\'
-  puts '      rubygem-netaddr-1.5.0-2.eos4.noarch.rpm \\'
-  puts '      rubygem-net_http_unix-0.2.1-3.eos4.noarch.rpm'
+  puts '      rubygem-inifile-3.0.0-5.eos4.noarch.rpm \\'
+  puts '      rubygem-netaddr-1.5.1-4.eos4.noarch.rpm \\'
+  puts '      rubygem-net_http_unix-0.2.2-5.eos4.noarch.rpm'
   puts '    Puppet-enterprise agent (3.x): '
   puts '      cd/mnt/flash; \\'
   puts "      swix create rbeapi-puppet3-#{Rbeapi::VERSION}-1.swix \\"
   puts "      rubygem-rbeapi-puppet3-#{Rbeapi::VERSION}-1.eos4.noarch.rpm \\"
-  puts '      rubygem-inifile-puppet3-3.0.0-3.eos4.noarch.rpm \\'
-  puts '      rubygem-netaddr-puppet3-1.5.0-2.eos4.noarch.rpm'
+  puts '      rubygem-inifile-puppet3-3.0.0-5.eos4.noarch.rpm \\'
+  puts '      rubygem-netaddr-puppet3-1.5.1-4.eos4.noarch.rpm'
   puts '    Puppet-All-in-one agent (2015.x/4.x): '
   puts '      cd/mnt/flash; \\'
   puts "      swix create rbeapi-puppet-aio-#{Rbeapi::VERSION}-1.swix \\"
   puts "      rubygem-rbeapi-puppet-aio-#{Rbeapi::VERSION}-1.eos4.noarch.rpm \\"
-  puts '      rubygem-inifile-puppet-aio-3.0.0-3.eos4.noarch.rpm \\'
-  puts '      rubygem-netaddr-puppet-aio-1.5.0-2.eos4.noarch.rpm \\'
-  puts '      rubygem-net_http_unix-puppet-aio-0.2.1-3.eos4.noarch.rpm'
+  puts '      rubygem-inifile-puppet-aio-3.0.0-5.eos4.noarch.rpm \\'
+  puts '      rubygem-netaddr-puppet-aio-1.5.1-4.eos4.noarch.rpm \\'
+  puts '      rubygem-net_http_unix-puppet-aio-0.2.2-5.eos4.noarch.rpm'
 end
 
 desc 'Generate SWIX files from RPMs'
 task swix: :all_rpms do
   SWIX = 'PYTHONPATH=${PYTHONPATH}:/nfs/misc/tools/swix \
           /nfs/misc/tools/swix/swix'
-  system "cd rpms/noarch;
+  system "(cd rpms/noarch;
           rm -f rbeapi-#{Rbeapi::VERSION}-1.swix;
           #{SWIX} create rbeapi-#{Rbeapi::VERSION}-1.swix \
           rubygem-rbeapi-#{Rbeapi::VERSION}-1.eos4.noarch.rpm \
-          rubygem-inifile-3.0.0-3.eos4.noarch.rpm \
-          rubygem-netaddr-1.5.0-2.eos4.noarch.rpm"
-  system "cd rpms/noarch;
+          rubygem-inifile-3.0.0-5.eos4.noarch.rpm \
+          rubygem-netaddr-1.5.1-4.eos4.noarch.rpm \
+          rubygem-net_http_unix-0.2.2-5.eos4.noarch.rpm)"
+  system "(cd rpms/noarch;
+          rm -f rbeapi-chef-#{Rbeapi::VERSION}-1.swix;
+          #{SWIX} create rbeapi-chef-#{Rbeapi::VERSION}-1.swix \
+          rubygem-rbeapi-chef-#{Rbeapi::VERSION}-1.eos4.noarch.rpm \
+          rubygem-inifile-chef-3.0.0-5.eos4.noarch.rpm \
+          rubygem-netaddr-chef-1.5.1-4.eos4.noarch.rpm)"
+  system "(cd rpms/noarch;
           rm -f rbeapi-puppet3-#{Rbeapi::VERSION}-1.swix;
           #{SWIX} create rbeapi-puppet3-#{Rbeapi::VERSION}-1.swix \
           rubygem-rbeapi-puppet3-#{Rbeapi::VERSION}-1.eos4.noarch.rpm \
-          rubygem-inifile-puppet3-3.0.0-3.eos4.noarch.rpm \
-          rubygem-netaddr-puppet3-1.5.0-2.eos4.noarch.rpm"
-  system "cd rpms/noarch;
+          rubygem-inifile-puppet3-3.0.0-5.eos4.noarch.rpm \
+          rubygem-netaddr-puppet3-1.5.1-4.eos4.noarch.rpm)"
+  system "(cd rpms/noarch;
           rm -f rbeapi-puppet-aio-#{Rbeapi::VERSION}-1.swix;
           #{SWIX} create rbeapi-puppet-aio-#{Rbeapi::VERSION}-1.swix \
           rubygem-rbeapi-puppet-aio-#{Rbeapi::VERSION}-1.eos4.noarch.rpm \
-          rubygem-inifile-puppet-aio-3.0.0-3.eos4.noarch.rpm \
-          rubygem-netaddr-puppet-aio-1.5.0-2.eos4.noarch.rpm"
+          rubygem-inifile-puppet-aio-3.0.0-5.eos4.noarch.rpm \
+          rubygem-netaddr-puppet-aio-1.5.1-4.eos4.noarch.rpm \
+          rubygem-net_http_unix-puppet-aio-0.2.2-5.eos4.noarch.rpm)"
   SWIXS = `find rpms/noarch -name "rbeapi*swix" -ls`
   puts "\n################################################\n#"
   puts "The following artifacts are in rpms/noarch/\n#{SWIXS}"
@@ -155,6 +170,12 @@ task ci_spec: [:ci_prep, 'ci:setup:rspec', :spec]
 
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec)
+RSpec::Core::RakeTask.new(:unit) do |t|
+  t.pattern = './**/unit/**/*_spec.rb'
+end
+RSpec::Core::RakeTask.new(:system) do |t|
+  t.pattern = './**/system/**/*_spec.rb'
+end
 
 desc 'Generate typedoc.rst for the guide'
 task :typedoc do
