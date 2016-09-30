@@ -9,3 +9,5 @@ ip prefix-list test2
 !
 ip prefix-list test3
 !
+ip prefix-list test4 seq 10 permit 10.14.0.0/16 le 20
+!

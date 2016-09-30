@@ -67,10 +67,16 @@ module Rbeapi
       #   array of hashes, where each prefix is a hash object.
       #   If the prefix list is not found, a nil object is returned.
       def get(name)
-        config = get_block("ip prefix-list #{name}")
-        return nil unless config
+        return nil unless config =~ /ip prefix-list #{name}/
+        # single-line prefix list
+        if config =~ /ip prefix-list #{name}\sseq/
+          entries = config.scan(/^(?:ip prefix-list #{name} seq\s)(\d+)\s(permit|deny)\s(.+)$/)
+        # or multi-line
+        else
+          prefix_list = get_block("ip prefix-list #{name}")
+          entries = prefix_list.scan(/^\s{3}(?:seq\s)(\d+)\s(permit|deny)\s(.+)$/)
+        end
 
-        entries = config.scan(/^\s{3}(?:seq\s)(\d+)\s(permit|deny)\s(.+)$/)
         entries.each_with_object([]) do |entry, arry|
           arry << { 'seq' => entry[0], 'action' => entry[1],
                     'prefix' => entry[2] }
@@ -116,8 +122,8 @@ module Rbeapi
       #   If there are no prefix lists configured, an empty hash will
       #   be returned.
       def getall
-        lists = config.scan(/(?<=^ip\sprefix-list\s).+/)
-        lists.each_with_object({}) do |name, hsh|
+        lists = config.scan(/(?<=^ip\sprefix-list\s)[^\s]+(?=\sseq.+)?/)
+        lists.uniq.each_with_object({}) do |name, hsh|
           values = get name
           hsh[name] = values if values
         end

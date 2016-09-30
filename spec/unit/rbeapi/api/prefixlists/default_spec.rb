@@ -131,7 +131,14 @@ describe Rbeapi::Api::Prefixlists do
             "prefix" => "10.12.0.0/16 le 24"
           }
         ],
-        "test3" => []
+        "test3" => [],
+        "test4" => [
+          {
+            "seq" => "10",
+            "action" => "permit",
+            "prefix" => "10.14.0.0/16 le 20"
+          }
+        ]
       }
     end
 
@@ -143,8 +150,8 @@ describe Rbeapi::Api::Prefixlists do
       expect(resource).to be_a_kind_of(Hash)
     end
 
-    it 'has three prefix lists' do
-      expect(resource.size).to eq(3)
+    it 'has four prefix lists' do
+      expect(resource.size).to eq(4)
     end
   end
 

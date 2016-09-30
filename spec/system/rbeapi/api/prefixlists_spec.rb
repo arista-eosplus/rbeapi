@@ -45,11 +45,10 @@ describe Rbeapi::Api::Prefixlists do
   describe '#get' do
     before do
       node.config(['no ip prefix-list test1',
-                   'ip prefix-list test1',
-                   'seq 10 permit 1.2.3.0/24',
-                   'seq 20 permit 2.3.4.0/24 le 30',
-                   'seq 30 deny 3.4.5.0/24 ge 26 le 30',
-                   'permit 5.6.7.16/28 eq 29'])
+                   'ip prefix-list test1 seq 10 permit 1.2.3.0/24',
+                   'ip prefix-list test1 seq 20 permit 2.3.4.0/24 le 30',
+                   'ip prefix-list test1 seq 30 deny 3.4.5.0/24 ge 26 le 30',
+                   'ip prefix-list test1 permit 5.6.7.16/28 eq 29'])
     end
 
     let(:prefixlist) { subject.get('test1') }
@@ -107,17 +106,14 @@ describe Rbeapi::Api::Prefixlists do
 
     before do
       node.config(del_pref_lists + 
-                  ['ip prefix-list test1',
-                  'seq 10 permit 1.2.3.0/24',
-                  'seq 20 permit 2.3.4.0/24 le 30',
-                  'seq 30 deny 3.4.5.0/24 ge 26 le 30',
-                  'permit 5.6.7.8/28',
-                  'ip prefix-list test2',
-                  'seq 10 permit 10.11.0.0/16',
-                  'seq 20 permit 10.12.0.0/16 le 24',
-                  'ip prefix-list test3'])
+                  ['ip prefix-list test1 seq 10 permit 1.2.3.0/24',
+                  'ip prefix-list test1 seq 20 permit 2.3.4.0/24 le 30',
+                  'ip prefix-list test1 seq 30 deny 3.4.5.0/24 ge 26 le 30',
+                  'ip prefix-list test1 permit 5.6.7.8/28',
+                  'ip prefix-list test2 seq 10 permit 10.11.0.0/16',
+                  'ip prefix-list test2 seq 20 permit 10.12.0.0/16 le 24',
+                  'ip prefix-list test3 permit 10.13.0.0/16'])
     end
-
     let(:prefixlists) { subject.getall }
 
     it 'returns the collection as hash' do
@@ -129,7 +125,7 @@ describe Rbeapi::Api::Prefixlists do
     end
 
     it 'has three prefix lists' do
-       expect(prefixlists.size).to eq(3)
+      expect(prefixlists.size).to eq(3)
     end
   end
 
