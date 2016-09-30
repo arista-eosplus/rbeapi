@@ -296,9 +296,38 @@ describe Rbeapi::Api::Ospf do
     before { node.config(['no router ospf 1', 'router ospf 1']) }
 
     it 'configures redistribution of static routes' do
-      expect(subject.get('1')[:redistribute]).not_to include('static')
+      expect(subject.get('1')[:redistribute]).to be_empty
       expect(subject.set_redistribute('1', 'static')).to be_truthy
-      expect(subject.get('1')[:redistribute]).to include('static')
+      expect(subject.get('1')[:redistribute])
+        .to eq('static' => {:route_map => nil})
+    end
+
+    it 'configures redistribution of static routes with routemap' do
+      expect(subject.set_redistribute('1', 'static')).to be_truthy
+      expect(subject.get('1')[:redistribute])
+        .to eq('static' => {:route_map => nil})
+      expect(subject.set_redistribute('1', 'static', route_map: 'test'))
+        .to be_truthy
+      expect(subject.get('1')[:redistribute])
+        .to eq('static' => {:route_map => 'test'})
+    end
+
+    it 'negates the redistribution' do
+      expect(subject.set_redistribute('1', 'static', route_map: 'test'))
+        .to be_truthy
+      expect(subject.get('1')[:redistribute])
+        .to eq('static' => {:route_map => 'test'})
+      expect(subject.set_redistribute('1', 'static', enable: false)).to be_truthy
+      expect(subject.get('1')[:redistribute]).to be_empty
+    end
+
+    it 'defaults the redistribution' do
+      expect(subject.set_redistribute('1', 'connected', route_map: 'foo'))
+        .to be_truthy
+      expect(subject.get('1')[:redistribute])
+        .to eq('connected' => {:route_map => 'foo'})
+      expect(subject.set_redistribute('1', 'connected', default: true)).to be_truthy
+      expect(subject.get('1')[:redistribute]).to be_empty
     end
   end
 end

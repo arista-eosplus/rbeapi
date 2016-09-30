@@ -354,9 +354,11 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_redistribute(pid, proto, opts = {})
-        routemap = opts[:routemap]
-        cmds = ["router ospf #{pid}", "redistribute #{proto}"]
-        cmds[1] << " route-map #{routemap}" if routemap
+        routemap = opts[:route_map]
+        redistribute = "redistribute #{proto}"
+        redistribute << " route-map #{routemap}" if routemap
+        cmd = command_builder(redistribute , opts)
+        cmds = ["router ospf #{pid}", cmd]
         configure cmds
       end
     end
