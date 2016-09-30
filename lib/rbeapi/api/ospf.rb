@@ -72,22 +72,22 @@ module Rbeapi
 
         response = {}
         mdata = /(?<=^\s{3}router-id\s)(.+)$/.match(config)
-        response['router_id'] = mdata.nil? ? '' : mdata[0]
+        response[:router_id] = mdata.nil? ? '' : mdata[0]
 
         mdata = /(?<=^\s{3}max-lsa\s)(\d+)(?=.*$)/.match(config)
-        response['max_lsa'] = mdata.nil? ? '' : mdata[0].to_i
+        response[:max_lsa] = mdata.nil? ? '' : mdata[0].to_i
 
         mdata = /(?<=^\s{3}maximum-paths\s)(\d+)$/.match(config)
-        response['maximum_paths'] = mdata.nil? ? '' : mdata[0].to_i
+        response[:maximum_paths] = mdata.nil? ? '' : mdata[0].to_i
 
         mdata = /^\s{3}passive-interface default$/ =~ config
-        response['passive_interface_default'] = !mdata.nil?
+        response[:passive_interface_default] = !mdata.nil?
 
-        response['passive_interfaces'] =
+        response[:passive_interfaces] =
           config.scan(/(?<=^\s{3}passive-interface\s)(?!default)(.*)$/)
           .flatten!.to_a
 
-        response['active_interfaces'] =
+        response[:active_interfaces] =
           config.scan(/(?<=^\s{3}no passive-interface\s)(.*)$/).flatten!.to_a
 
         networks = config.scan(/^\s{3}network\s(.+)\sarea\s(.+)$/)
@@ -99,13 +99,13 @@ module Rbeapi
             hsh[area] = [net]
           end
         end
-        response['areas'] = areas
+        response[:areas] = areas
 
         values = \
           config.scan(/(?<=^\s{3}redistribute\s)(\w+)[\s|$]*(route-map\s(.+))?/)
 
-        response['redistribute'] = values.each_with_object({}) do |value, hsh|
-          hsh[value[0]] = { 'route_map' => value[2] }
+        response[:redistribute] = values.each_with_object({}) do |value, hsh|
+          hsh[value[0]] = { route_map: value[2] }
         end
         response
       end
@@ -135,7 +135,7 @@ module Rbeapi
         response = instances.each_with_object({}) do |inst, hsh|
           hsh[inst] = get inst
         end
-        response['interfaces'] = interfaces.getall
+        response[:interfaces] = interfaces.getall
         response
       end
 
@@ -268,7 +268,7 @@ module Rbeapi
       # @return [Boolean] Returns true if the command completed successfully.
       def set_active_interfaces(pid, opts = {})
         values = opts[:value]
-        current = get(pid)['active_interfaces']
+        current = get(pid)[:active_interfaces]
         cmds = ["router ospf #{pid}"]
         current.each do |name|
           cmds << "passive-interface #{name}" unless Array(values).include?(name)
@@ -296,7 +296,7 @@ module Rbeapi
       # @return [Boolean] Returns true if the command completed successfully.
       def set_passive_interfaces(pid, opts = {})
         values = opts[:value]
-        current = get(pid)['passive_interfaces']
+        current = get(pid)[:passive_interfaces]
         cmds = ["router ospf #{pid}"]
         current.each do |name|
           cmds << "no passive-interface #{name}" unless Array(values).include?(name)
@@ -382,11 +382,11 @@ module Rbeapi
       def get(name)
         config = get_block("interface #{name}")
         return nil unless config
-        return nil unless /no switchport$/ =~ config
+        return nil unless /no switchport$/ =~ config || /^interface (Lo|Vl)/ =~ config
 
         response = {}
         nettype = /ip ospf network point-to-point/ =~ config
-        response['network_type'] = nettype.nil? ? 'broadcast' : 'point-to-point'
+        response[:network_type] = nettype.nil? ? 'broadcast' : 'point-to-point'
         response
       end
 
