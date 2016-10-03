@@ -45,10 +45,10 @@ describe Rbeapi::Api::Prefixlists do
   describe '#get' do
     before do
       node.config(['no ip prefix-list test1',
-                   'ip prefix-list test1 seq 10 permit 1.2.3.0/24',
-                   'ip prefix-list test1 seq 20 permit 2.3.4.0/24 le 30',
-                   'ip prefix-list test1 seq 30 deny 3.4.5.0/24 ge 26 le 30',
-                   'ip prefix-list test1 permit 5.6.7.16/28 eq 29'])
+                   'ip prefix-list test1 seq 10 permit 10.10.1.0/24',
+                   'ip prefix-list test1 seq 20 permit 10.20.1.0/24 le 30',
+                   'ip prefix-list test1 seq 30 deny 10.30.1.0/24 ge 26 le 30',
+                   'ip prefix-list test1 permit 10.40.1.16/28 eq 29'])
     end
 
     let(:prefixlist) { subject.get('test1') }
@@ -74,22 +74,22 @@ describe Rbeapi::Api::Prefixlists do
         {
           'seq' => '10',
           'action' => 'permit',
-          'prefix' => '1.2.3.0/24'
+          'prefix' => '10.10.1.0/24'
         },
         {
           'seq' => '20',
           'action' => 'permit',
-          'prefix' => '2.3.4.0/24 le 30'
+          'prefix' => '10.20.1.0/24 le 30'
         },
         {
           'seq' => '30',
           'action' => 'deny',
-          'prefix' => '3.4.5.0/24 ge 26 le 30'
+          'prefix' => '10.30.1.0/24 ge 26 le 30'
         },
         {
           'seq' => '40',
           'action' => 'permit',
-          'prefix' => '5.6.7.16/28 eq 29'
+          'prefix' => '10.40.1.16/28 eq 29'
         }
       ]
     end
@@ -106,10 +106,10 @@ describe Rbeapi::Api::Prefixlists do
 
     before do
       node.config(del_pref_lists + 
-                  ['ip prefix-list test1 seq 10 permit 1.2.3.0/24',
-                  'ip prefix-list test1 seq 20 permit 2.3.4.0/24 le 30',
-                  'ip prefix-list test1 seq 30 deny 3.4.5.0/24 ge 26 le 30',
-                  'ip prefix-list test1 permit 5.6.7.8/28',
+                  ['ip prefix-list test1 seq 10 permit 10.10.1.0/24',
+                  'ip prefix-list test1 seq 20 permit 10.20.1.0/24 le 30',
+                  'ip prefix-list test1 seq 30 deny 10.30.1.0/24 ge 26 le 30',
+                  'ip prefix-list test1 permit 10.40.1.8/28',
                   'ip prefix-list test2 seq 10 permit 10.11.0.0/16',
                   'ip prefix-list test2 seq 20 permit 10.12.0.0/16 le 24',
                   'ip prefix-list test3 permit 10.13.0.0/16'])
@@ -145,25 +145,26 @@ describe Rbeapi::Api::Prefixlists do
   describe '#add_rule' do
     before do
       node.config(['no ip prefix-list test5',
-                    'ip prefix-list test5'])
+                   'no ip prefix-list test6',
+                   'ip prefix-list test5'])
     end
 
     it 'adds rule to an existing prefix list' do
       expect(subject.get('test5')).to eq([])
-      expect(subject.add_rule('test5', 'permit', '1.1.1.0/24')).to be_truthy
+      expect(subject.add_rule('test5', 'permit', '10.50.1.0/24')).to be_truthy
       expect(subject.get('test5')).to eq([{
                                         "seq" => "10",
                                         "action" => "permit",
-                                        "prefix" => "1.1.1.0/24"}])
+                                        "prefix" => "10.50.1.0/24"}])
     end
 
     it 'adds rule to a non-existent prefix list' do
       expect(subject.get('test6')).to eq(nil)
-      expect(subject.add_rule('test6', 'deny', '2.2.2.0/24')).to be_truthy
+      expect(subject.add_rule('test6', 'deny', '10.60.1.0/24')).to be_truthy
       expect(subject.get('test6')).to eq([{
                                       "seq" => "10",
                                       "action" => "deny",
-                                      "prefix" => "2.2.2.0/24"}])
+                                      "prefix" => "10.60.1.0/24"}])
     end
   end
 
@@ -172,10 +173,10 @@ describe Rbeapi::Api::Prefixlists do
       node.config(['no ip prefix-list test7',
                   'no ip prefix-list test8',
                   'ip prefix-list test7',
-                  'seq 10 permit 7.7.0.0/16',
+                  'seq 10 permit 10.70.0.0/16',
                   'ip prefix-list test8',
-                  'seq 10 permit 8.8.0.0/16',
-                  'deny 9.9.0.0/16 le 24'])
+                  'seq 10 permit 10.80.0.0/16',
+                  'deny 10.82.0.0/16 le 24'])
     end
 
     it 'delets a prefix list' do
