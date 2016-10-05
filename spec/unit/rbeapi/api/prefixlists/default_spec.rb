@@ -51,43 +51,49 @@ describe Rbeapi::Api::Prefixlists do
   end
 
   describe '#get' do
-    let(:resource) { subject.get('test1') }
+    let(:keys) { %w(seq action prefix) }
 
-    let(:prefixlist) do
-        [{
-          'seq' => '10',
-          'action' => 'permit',
-          'prefix' => '10.10.1.0/24'
-        },
-        {
-          'seq' => '20',
-          'action' => 'permit',
-          'prefix' => '10.20.1.0/24 le 30'
-        },
-        {
-          'seq' => '30',
-          'action' => 'permit',
-          'prefix' => '10.30.1.0/24 ge 26 le 30'
-        }]
-    end
+    [
+      { title: 'single-line',
+        prefix_list: 'test5',
+        rules: [{ 'seq' => '10',
+                  'action' => 'permit',
+                  'prefix' => '10.50.1.0/24' },
+                { 'seq' => '20',
+                  'action' => 'permit',
+                  'prefix' => '10.50.2.0/24' }] },
+      { title: 'multi-line',
+        prefix_list: 'test1',
+        rules: [{ 'seq' => '10',
+                  'action' => 'permit',
+                  'prefix' => '10.10.1.0/24' },
+                { 'seq' => '20',
+                  'action' => 'permit',
+                  'prefix' => '10.20.1.0/24 le 30' },
+                { 'seq' => '30',
+                  'action' => 'permit',
+                  'prefix' => '10.30.1.0/24 ge 26 le 30' }] }
+    ].each do |context|
+      context "when prefix list is #{context[:title]}" do
+        let(:resource) { subject.get(context[:prefix_list]) }
 
-    let(:keys) { ['seq', 'action', 'prefix'] }
+        it 'returns the correct rules' do
+          expect(resource).to eq(context[:rules])
+        end
 
-    it 'returns the prefix list for an existing name' do
-      expect(resource).to eq(prefixlist)
-    end
+        it 'returns an array of rules' do
+          expect(resource).to be_a_kind_of(Array)
+        end
 
-    it 'returns an array of prefixes' do
-      expect(resource).to be_a_kind_of(Array)
-    end
+        it "has #{context[:rules].size} rules" do
+          expect(resource.size).to eq(context[:rules].size)
+        end
 
-    it 'has three prefixes' do
-      expect(resource.size).to eq(3)
-    end
-
-    it 'has all keys' do
-      resource.each do |prefix|
-        expect(prefix.keys).to match_array(keys)
+        it 'has all keys' do
+          resource.each do |rule|
+            expect(rule.keys).to match_array(keys)
+          end
+        end
       end
     end
 
@@ -101,43 +107,39 @@ describe Rbeapi::Api::Prefixlists do
     let(:resource) { subject.getall }
 
     let(:plists) do
-      { 
-        "test1" => [
-          {
-            "seq" => "10",
-            "action" => "permit",
-            "prefix" => "10.10.1.0/24"
-          },
-          {
-            "seq" => "20",
-            "action" => "permit",
-            "prefix" => "10.20.1.0/24 le 30"
-          },
-          {
-            "seq" => "30",
-            "action" => "permit",
-            "prefix" => "10.30.1.0/24 ge 26 le 30"
-          }
+      {
+        'test1' => [
+          { 'seq' => '10',
+            'action' => 'permit',
+            'prefix' => '10.10.1.0/24' },
+          { 'seq' => '20',
+            'action' => 'permit',
+            'prefix' => '10.20.1.0/24 le 30' },
+          { 'seq' => '30',
+            'action' => 'permit',
+            'prefix' => '10.30.1.0/24 ge 26 le 30' }
         ],
-        "test2" => [
-          {
-            "seq" => "10",
-            "action" => "permit",
-            "prefix" => "10.11.0.0/16"
-          },
-          {
-            "seq" => "20",
-            "action" => "permit",
-            "prefix" => "10.12.0.0/16 le 24"
-          }
+        'test2' => [
+          { 'seq' => '10',
+            'action' => 'permit',
+            'prefix' => '10.11.0.0/16' },
+          { 'seq' => '20',
+            'action' => 'permit',
+            'prefix' => '10.12.0.0/16 le 24' }
         ],
-        "test3" => [],
-        "test4" => [
-          {
-            "seq" => "10",
-            "action" => "permit",
-            "prefix" => "10.14.0.0/16 le 20"
-          }
+        'test3' => [],
+        'test4' => [
+          { 'seq' => '10',
+            'action' => 'permit',
+            'prefix' => '10.14.0.0/16 le 20' }
+        ],
+        'test5' => [
+          { 'seq' => '10',
+            'action' => 'permit',
+            'prefix' => '10.50.1.0/24' },
+          { 'seq' => '20',
+            'action' => 'permit',
+            'prefix' => '10.50.2.0/24' }
         ]
       }
     end
@@ -150,8 +152,8 @@ describe Rbeapi::Api::Prefixlists do
       expect(resource).to be_a_kind_of(Hash)
     end
 
-    it 'has four prefix lists' do
-      expect(resource.size).to eq(4)
+    it 'has five prefix lists' do
+      expect(resource.size).to eq(5)
     end
   end
 
@@ -169,28 +171,38 @@ describe Rbeapi::Api::Prefixlists do
 
   describe '#add_rule' do
     it 'adds rule to existing prefix list' do
-      expect(node).to receive(:config).with('ip prefix-list test1 seq 25 permit 10.25.1.0/24')
-      expect(subject.add_rule('test1', 'permit','10.25.1.0/24', '25')).to be_truthy
+      expect(node).to receive(:config)
+        .with('ip prefix-list test1 seq 25 permit 10.25.1.0/24')
+      expect(subject.add_rule('test1', 'permit', '10.25.1.0/24', '25'))
+        .to be_truthy
     end
 
     it 'adds rule to existing prefix list w/o seq' do
-      expect(node).to receive(:config).with('ip prefix-list test1 permit 10.25.2.0/24')
-      expect(subject.add_rule('test1', 'permit', '10.25.2.0/24')).to be_truthy
+      expect(node).to receive(:config)
+        .with('ip prefix-list test1 permit 10.25.2.0/24')
+      expect(subject.add_rule('test1', 'permit', '10.25.2.0/24'))
+        .to be_truthy
     end
 
     it 'adds rule to non-existing prefix list' do
-      expect(node).to receive(:config).with('ip prefix-list plist2 seq 10 permit 10.25.3.128/25')
-      expect(subject.add_rule('plist2', 'permit', '10.25.3.128/25', '10')).to be_truthy
+      expect(node).to receive(:config)
+        .with('ip prefix-list plist2 seq 10 permit 10.25.3.128/25')
+      expect(subject.add_rule('plist2', 'permit', '10.25.3.128/25', '10'))
+        .to be_truthy
     end
 
     it 'adds rule to non-existing prefix list w/o seq' do
-      expect(node).to receive(:config).with('ip prefix-list plist2 deny 10.25.10.0/25')
-      expect(subject.add_rule('plist2', 'deny', '10.25.10.0/25')).to be_truthy
+      expect(node).to receive(:config)
+        .with('ip prefix-list plist2 deny 10.25.10.0/25')
+      expect(subject.add_rule('plist2', 'deny', '10.25.10.0/25'))
+        .to be_truthy
     end
 
     it 'overwrites existing rule' do
-      expect(node).to receive(:config).with('ip prefix-list test1 seq 20 permit 10.25.20.0/24 le 28')
-      expect(subject.add_rule('test1', 'permit', '10.25.20.0/24 le 28', '20')).to be_truthy
+      expect(node).to receive(:config)
+        .with('ip prefix-list test1 seq 20 permit 10.25.20.0/24 le 28')
+      expect(subject.add_rule('test1', 'permit', '10.25.20.0/24 le 28', '20'))
+        .to be_truthy
     end
   end
 
@@ -205,5 +217,4 @@ describe Rbeapi::Api::Prefixlists do
       expect(subject.delete('test2', '10'))
     end
   end
-
 end

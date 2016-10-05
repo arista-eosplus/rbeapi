@@ -42,90 +42,111 @@ describe Rbeapi::Api::Prefixlists do
     Rbeapi::Client.connect_to('dut')
   end
 
-  describe '#get' do
-    before do
-      node.config(['no ip prefix-list test1',
-                   'ip prefix-list test1 seq 10 permit 10.10.1.0/24',
-                   'ip prefix-list test1 seq 20 permit 10.20.1.0/24 le 30',
-                   'ip prefix-list test1 seq 30 deny 10.30.1.0/24 ge 26 le 30',
-                   'ip prefix-list test1 permit 10.40.1.16/28 eq 29'])
+  let(:delete_prefix_lists) do
+    config = subject.node.running_config
+    config.scan(/(?<=^ip\sprefix-list\s)[^\s]+(?=\sseq.+)?/).uniq.map do |name|
+      "no ip prefix-list #{name}"
     end
+  end
 
+  describe '#get' do
     let(:prefixlist) { subject.get('test1') }
 
-    it 'returns the prefix list for an existing name' do
-      expect(prefixlist).to be_a_kind_of(Array)
-    end
-
-    it 'returns all rules as hash' do
-      expect(prefixlist).to all ( be_an(Hash) )
-    end
-
-    it 'has all keys for each rule' do
-      prefixlist.each do |rule|
-        expect(rule).to have_key('seq')
-        expect(rule).to have_key('prefix')
-        expect(rule).to have_key('action')
-      end
-    end
-
-    let(:values) do
+    let(:expected) do
       [
-        {
-          'seq' => '10',
+        { 'seq' => '10',
           'action' => 'permit',
-          'prefix' => '10.10.1.0/24'
-        },
-        {
-          'seq' => '20',
+          'prefix' => '10.10.1.0/24' },
+        { 'seq' => '20',
           'action' => 'permit',
-          'prefix' => '10.20.1.0/24 le 30'
-        },
-        {
-          'seq' => '30',
+          'prefix' => '10.20.1.0/24 le 30' },
+        { 'seq' => '30',
           'action' => 'deny',
-          'prefix' => '10.30.1.0/24 ge 26 le 30'
-        },
-        {
-          'seq' => '40',
+          'prefix' => '10.30.1.0/24 ge 26 le 30' },
+        { 'seq' => '40',
           'action' => 'permit',
-          'prefix' => '10.40.1.16/28 eq 29'
-        }
+          'prefix' => '10.40.1.16/28 eq 29' }
       ]
     end
 
-    it 'returns the correct values for all the keys' do
-      expect(prefixlist).to eq(values)
+    let(:keys) { %w(seq action prefix) }
+
+    [
+      { title: 'single-line',
+        cmds: ['ip prefix-list test1 seq 10 permit 10.10.1.0/24',
+               'ip prefix-list test1 seq 20 permit 10.20.1.0/24 le 30',
+               'ip prefix-list test1 seq 30 deny 10.30.1.0/24 ge 26 le 30',
+               'ip prefix-list test1 permit 10.40.1.16/28 eq 29'] },
+      { title: 'multi-line',
+        cmds: ['ip prefix-list test1',
+               'seq 10 permit 10.10.1.0/24',
+               'seq 20 permit 10.20.1.0/24 le 30',
+               'seq 30 deny 10.30.1.0/24 ge 26 le 30',
+               'permit 10.40.1.16/28 eq 29'] }
+    ].each do |context|
+      context "when prefix list is #{context[:title]}" do
+        before { node.config(delete_prefix_lists + context[:cmds]) }
+
+        it 'returns all rules in an array' do
+          expect(prefixlist).to be_a_kind_of(Array)
+        end
+
+        it 'returns each rule as hash' do
+          expect(prefixlist).to all be_an(Hash)
+        end
+
+        it 'has all keys for each rule' do
+          prefixlist.each do |rule|
+            expect(rule.keys).to match_array(keys)
+          end
+        end
+
+        it 'returns the correct values for all rules' do
+          expect(prefixlist).to eq(expected)
+        end
+      end
     end
   end
 
   describe '#getall' do
-    let(:del_pref_lists) {
-      subject.getall.keys.map { |k| "no ip prefix-list #{k}" } 
-    }
-
-    before do
-      node.config(del_pref_lists + 
-                  ['ip prefix-list test1 seq 10 permit 10.10.1.0/24',
-                  'ip prefix-list test1 seq 20 permit 10.20.1.0/24 le 30',
-                  'ip prefix-list test1 seq 30 deny 10.30.1.0/24 ge 26 le 30',
-                  'ip prefix-list test1 permit 10.40.1.8/28',
-                  'ip prefix-list test2 seq 10 permit 10.11.0.0/16',
-                  'ip prefix-list test2 seq 20 permit 10.12.0.0/16 le 24',
-                  'ip prefix-list test3 permit 10.13.0.0/16'])
-    end
     let(:prefixlists) { subject.getall }
 
-    it 'returns the collection as hash' do
-      expect(prefixlists).to be_a_kind_of(Hash)
-    end
+    [
+      { title: 'single-line',
+        cmds: ['ip prefix-list test1 seq 10 permit 10.10.1.0/24',
+               'ip prefix-list test1 seq 20 permit 10.20.1.0/24 le 30',
+               'ip prefix-list test1 seq 30 deny 10.30.1.0/24 ge 26 le 30',
+               'ip prefix-list test1 permit 10.40.1.8/28',
+               'ip prefix-list test2 seq 10 permit 10.11.0.0/16',
+               'ip prefix-list test2 seq 20 permit 10.12.0.0/16 le 24',
+               'ip prefix-list test3 permit 10.13.0.0/16'] },
+      { title: 'multi-line',
+        cmds: ['ip prefix-list test1',
+               'seq 10 permit 10.10.1.0/24',
+               'seq 20 permit 10.20.1.0/24 le 30',
+               'seq 30 deny 10.30.1.0/24 ge 26 le 30',
+               'permit 10.40.1.8/28',
+               'ip prefix-list test2',
+               'seq 10 permit 10.11.0.0/16',
+               'seq 20 permit 10.12.0.0/16 le 24',
+               'ip prefix-list test3',
+               'permit 10.13.0.0/16'] }
+    ].each do |context|
+      context "when prefix lists are #{context[:title]}" do
+        before { node.config(delete_prefix_lists + context[:cmds]) }
 
-    it 'returns all prefix lists as array' do
-      expect(prefixlists).to all ( be_an(Array) )
-    end
+        it 'returns the collection as hash' do
+          expect(prefixlists).to be_a_kind_of(Hash)
+        end
 
-    it 'has three prefix lists' do
-      expect(prefixlists.size).to eq(3)
+        it 'returns each prefix lists as an array' do
+          expect(prefixlists).to all be_an(Array)
+        end
+
+        it 'has three prefix lists' do
+          expect(prefixlists.size).to eq(3)
+        end
+      end
     end
   end
 
@@ -152,34 +173,32 @@ describe Rbeapi::Api::Prefixlists do
     it 'adds rule to an existing prefix list' do
       expect(subject.get('test5')).to eq([])
       expect(subject.add_rule('test5', 'permit', '10.50.1.0/24')).to be_truthy
-      expect(subject.get('test5')).to eq([{
-                                        "seq" => "10",
-                                        "action" => "permit",
-                                        "prefix" => "10.50.1.0/24"}])
+      expect(subject.get('test5')).to eq([{ 'seq' => '10',
+                                            'action' => 'permit',
+                                            'prefix' => '10.50.1.0/24' }])
     end
 
     it 'adds rule to a non-existent prefix list' do
       expect(subject.get('test6')).to eq(nil)
       expect(subject.add_rule('test6', 'deny', '10.60.1.0/24')).to be_truthy
-      expect(subject.get('test6')).to eq([{
-                                      "seq" => "10",
-                                      "action" => "deny",
-                                      "prefix" => "10.60.1.0/24"}])
+      expect(subject.get('test6')).to eq([{ 'seq' => '10',
+                                            'action' => 'deny',
+                                            'prefix' => '10.60.1.0/24' }])
     end
   end
 
   describe '#delete' do
     before do
       node.config(['no ip prefix-list test7',
-                  'no ip prefix-list test8',
-                  'ip prefix-list test7',
-                  'seq 10 permit 10.70.0.0/16',
-                  'ip prefix-list test8',
-                  'seq 10 permit 10.80.0.0/16',
-                  'deny 10.82.0.0/16 le 24'])
+                   'no ip prefix-list test8',
+                   'ip prefix-list test7',
+                   'seq 10 permit 10.70.0.0/16',
+                   'ip prefix-list test8',
+                   'seq 10 permit 10.80.0.0/16',
+                   'deny 10.82.0.0/16 le 24'])
     end
 
-    it 'delets a prefix list' do
+    it 'deletes a prefix list' do
       expect(subject.get('test7')).to be_truthy
       expect(subject.delete('test7')).to be_truthy
       expect(subject.get('test7')).to eq(nil)
