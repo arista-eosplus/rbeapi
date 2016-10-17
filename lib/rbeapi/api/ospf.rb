@@ -48,11 +48,18 @@ module Rbeapi
       #
       # @example
       #   {
-      #     router_id: <string>
+      #     router_id: <string>,
+      #     max_lsa: <integer>,
+      #     maximum_paths: <integer>,
+      #     passive_interface_default <boolean>,
+      #     passive_interfaces: array<string>,
+      #     active_interfaces: array<string>,
       #     areas: {
       #       <string>: array<string>
       #     },
-      #     redistribute: {}
+      #     redistribute: {
+      #       <string>: {route_map: <string>}
+      #     }
       #   }
       #
       # @param inst [String] The ospf instance name.
@@ -65,7 +72,23 @@ module Rbeapi
 
         response = {}
         mdata = /(?<=^\s{3}router-id\s)(.+)$/.match(config)
-        response['router_id'] = mdata.nil? ? '' : mdata[0]
+        response[:router_id] = mdata.nil? ? '' : mdata[0]
+
+        mdata = /(?<=^\s{3}max-lsa\s)(\d+)(?=.*$)/.match(config)
+        response[:max_lsa] = mdata.nil? ? '' : mdata[0].to_i
+
+        mdata = /(?<=^\s{3}maximum-paths\s)(\d+)$/.match(config)
+        response[:maximum_paths] = mdata.nil? ? '' : mdata[0].to_i
+
+        mdata = /^\s{3}passive-interface default$/ =~ config
+        response[:passive_interface_default] = !mdata.nil?
+
+        response[:passive_interfaces] =
+          config.scan(/(?<=^\s{3}passive-interface\s)(?!default)(.*)$/)
+          .flatten!.to_a
+
+        response[:active_interfaces] =
+          config.scan(/(?<=^\s{3}no passive-interface\s)(.*)$/).flatten!.to_a
 
         networks = config.scan(/^\s{3}network\s(.+)\sarea\s(.+)$/)
         areas = networks.each_with_object({}) do |cfg, hsh|
@@ -76,13 +99,13 @@ module Rbeapi
             hsh[area] = [net]
           end
         end
-        response['areas'] = areas
+        response[:areas] = areas
 
         values = \
           config.scan(/(?<=^\s{3}redistribute\s)(\w+)[\s|$]*(route-map\s(.+))?/)
 
-        response['redistribute'] = values.each_with_object({}) do |value, hsh|
-          hsh[value[0]] = { 'route_map' => value[2] }
+        response[:redistribute] = values.each_with_object({}) do |value, hsh|
+          hsh[value[0]] = { route_map: value[2] }
         end
         response
       end
@@ -94,6 +117,11 @@ module Rbeapi
       #   {
       #     <pid>: {
       #       router_id: <string>,
+      #       max_lsa: <integer>,
+      #       maximum_paths: <integer>,
+      #       passive_interface_default <boolean>,
+      #       passive_interfaces: array<string>,
+      #       active_interfaces: array<string>,
       #       areas: {},
       #       redistribute: {}
       #     },
@@ -107,7 +135,7 @@ module Rbeapi
         response = instances.each_with_object({}) do |inst, hsh|
           hsh[inst] = get inst
         end
-        response['interfaces'] = interfaces.getall
+        response[:interfaces] = interfaces.getall
         response
       end
 
@@ -153,6 +181,129 @@ module Rbeapi
       def set_router_id(pid, opts = {})
         cmd = command_builder('router-id', opts)
         cmds = ["router ospf #{pid}", cmd]
+        configure cmds
+      end
+
+      ##
+      # set_max_lsa sets router ospf max-lsa with pid and options.
+      #
+      # @param pid [String] The router ospf name.
+      #
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] Configure the max-lsa to default.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_max_lsa(pid, opts = {})
+        cmd = command_builder('max-lsa', opts)
+        cmds = ["router ospf #{pid}", cmd]
+        configure cmds
+      end
+
+      ##
+      # set_maximum_paths sets router ospf maximum-paths with pid and options.
+      #
+      # @param pid [String] The router ospf name.
+      #
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] Configure the maximum-paths to default.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_maximum_paths(pid, opts = {})
+        cmd = command_builder('maximum-paths', opts)
+        cmds = ["router ospf #{pid}", cmd]
+        configure cmds
+      end
+
+      ##
+      # set_passive_interface_default sets router ospf passive-interface
+      # default with pid and options. If the passive-interface default keyword
+      # is false, then the
+      # passive-interface default is disabled. If the enable keyword is true,
+      # then the passive-interface default is enabled. If the default keyword
+      # is set to true, then the passive-interface default is configured using
+      # the default keyword. The default keyword takes precedence ver the
+      # enable keyword if both are provided.
+      #
+      # @param pid [String] The router ospf name.
+      #
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] Configure the passive-interface default
+      # to default.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_passive_interface_default(pid, opts = {})
+        opts[:enable] = opts[:value] | false
+        opts[:value] = nil
+        cmd = command_builder('passive-interface default', opts)
+        cmds = ["router ospf #{pid}", cmd]
+        configure cmds
+      end
+
+      ##
+      # set_active_interfaces sets router ospf no passive interface with pid
+      # and options, when passive interfaces default is configured.
+      #
+      # @param pid [String] The router ospf name.
+      #
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] Configure the active interface to
+      # default.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_active_interfaces(pid, opts = {})
+        values = opts[:value]
+        current = get(pid)[:active_interfaces]
+        cmds = ["router ospf #{pid}"]
+        current.each do |name|
+          cmds << "passive-interface #{name}" unless Array(values).include?(name)
+        end
+        Array(values).each do |name|
+          cmds << "no passive-interface #{name}"
+        end
+        configure cmds
+      end
+
+      ##
+      # set_passive_interfaces sets router ospf passive interface with pid
+      # and options.
+      #
+      # @param pid [String] The router ospf name.
+      #
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] Configure the passive interface to
+      # default.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_passive_interfaces(pid, opts = {})
+        values = opts[:value]
+        current = get(pid)[:passive_interfaces]
+        cmds = ["router ospf #{pid}"]
+        current.each do |name|
+          cmds << "no passive-interface #{name}" unless Array(values).include?(name)
+        end
+        Array(values).each do |name|
+          cmds << "passive-interface #{name}"
+        end
         configure cmds
       end
 
@@ -203,9 +354,11 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_redistribute(pid, proto, opts = {})
-        routemap = opts[:routemap]
-        cmds = ["router ospf #{pid}", "redistribute #{proto}"]
-        cmds[1] << " route-map #{routemap}" if routemap
+        routemap = opts[:route_map]
+        redistribute = "redistribute #{proto}"
+        redistribute << " route-map #{routemap}" if routemap
+        cmd = command_builder(redistribute , opts)
+        cmds = ["router ospf #{pid}", cmd]
         configure cmds
       end
     end
@@ -231,11 +384,11 @@ module Rbeapi
       def get(name)
         config = get_block("interface #{name}")
         return nil unless config
-        return nil unless /no switchport$/ =~ config
+        return nil unless /no switchport$/ =~ config || /^interface (Lo|Vl)/ =~ config
 
         response = {}
         nettype = /ip ospf network point-to-point/ =~ config
-        response['network_type'] = nettype.nil? ? 'broadcast' : 'point-to-point'
+        response[:network_type] = nettype.nil? ? 'broadcast' : 'point-to-point'
         response
       end
 
