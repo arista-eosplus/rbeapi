@@ -67,12 +67,22 @@ module Rbeapi
       #   array of hashes, where each prefix is a hash object.
       #   If the prefix list is not found, a nil object is returned.
       def get(name)
-        config = get_block("ip prefix-list #{name}")
-        return nil unless config
+        return nil unless config =~ /ip prefix-list #{name}/
 
-        entries = config.scan(/^\s{3}(?:seq\s)(\d+)\s(permit|deny)\s(.+)$/)
+        # single-line prefix list
+        if config =~ /ip prefix-list #{name}\sseq/
+          entries = config.scan(/^(?:ip\sprefix-list\s#{name}\sseq\s)(\d+)\s
+                                (permit|deny)\s(.+)$/x)
+        # or multi-line
+        else
+          prefix_list = get_block("ip prefix-list #{name}")
+          entries = prefix_list.scan(/^\s+(?:seq\s)(\d+)\s
+                                     (permit|deny)\s(.+)$/x)
+        end
+
         entries.each_with_object([]) do |entry, arry|
-          arry << { 'seq' => entry[0], 'action' => entry[1],
+          arry << { 'seq' => entry[0],
+                    'action' => entry[1],
                     'prefix' => entry[2] }
         end
       end
@@ -116,15 +126,15 @@ module Rbeapi
       #   If there are no prefix lists configured, an empty hash will
       #   be returned.
       def getall
-        lists = config.scan(/(?<=^ip\sprefix-list\s).+/)
-        lists.each_with_object({}) do |name, hsh|
+        lists = config.scan(/(?<=^ip\sprefix-list\s)[^\s]+(?=\sseq.+)?/)
+        lists.uniq.each_with_object({}) do |name, hsh|
           values = get name
           hsh[name] = values if values
         end
       end
 
       ##
-      # create will create a new ip prefix-list with designated name.
+      # Creates a new ip prefix-list with the designated name.
       #
       # @param name [String] The name of the ip prefix-list.
       #
@@ -134,7 +144,7 @@ module Rbeapi
       end
 
       ##
-      # add_rule will create an ip prefix-list with the designated name,
+      # Creates an ip prefix-list with the designated name,
       #   seqno, action and prefix.
       #
       # @param name [String] The name of the ip prefix-list.
@@ -154,7 +164,7 @@ module Rbeapi
       end
 
       ##
-      # delete will remove the designated prefix-list.
+      # Removes the designated prefix-list.
       #
       # @param name [String] The name of the ip prefix-list.
       #
