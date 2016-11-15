@@ -117,6 +117,8 @@ module Rbeapi
           cls = 'Rbeapi::Api::PortchannelInterface'
         when 'VX'
           cls = 'Rbeapi::Api::VxlanInterface'
+        when 'VL'
+          cls = 'Rbeapi::Api::VlanInterface'
         else
           cls = 'Rbeapi::Api::BaseInterface'
         end
@@ -1373,6 +1375,89 @@ module Rbeapi
       def remove_vlan(name, vlan)
         configure_interface(name, "no vxlan vlan #{vlan} vni")
       end
+    end
+
+    ##
+    # The VlanInterface class manages all Vlan interfaces on an EOS node.
+    class VlanInterface < BaseInterface
+
+      ##
+      # Returns the Vlan interface configuration as a Ruby hash of key/value
+      # pairs from the nodes running configuration. This method extends the
+      # BaseInterface get method and adds the Vlan specific attributes to
+      # the hash.
+      #
+      # @example
+      #   {
+      #     name: <string>,
+      #     type: <string>,
+      #     description: <string>,
+      #     shutdown: <boolean>,
+      #     autostate: <boolean>
+      #   }
+      #
+      # @param name [String] The interface name to return from the nodes
+      #   configuration.
+      #
+      # @return [nil, Hash<String, String>] Returns the interface configuration
+      #   as a Ruby hash object. If the provided interface name is not found
+      #   then this method will return nil.
+      def get(name)
+        config = get_block("interface #{name}")
+        return nil unless config
+
+        response = super(name)
+        response[:type] = 'vlan'
+        response.merge!(parse_autostate(config))
+        response
+      end
+
+      ##
+      # parse_autostate scans the interface config block and returns the
+      # value of the vlan autostate. If the autostate is not
+      # configured then it's enabled, as by default. The hash
+      # returned is intended to be merged into the interface resource hash
+      #
+      # @api private
+      #
+      # @param config [String] The interface configuration block to extract
+      #   the vlan autostate value from.
+      #
+      # @return [Hash<Symbol, Object>]
+      def parse_autostate(config)
+        mdata = /^\s{3}no\sautostate$/.match(config)
+        { autostate: mdata.nil? ? :true : :false }
+      end
+      private :parse_autostate
+
+      ##
+      # set_autostate configures the autostate on a vlan interface.
+      # Default value is true, if set to false 'no autostate' is 
+      # configured on the interface.
+      #
+      # @since eos_version 4.13.7M
+      #
+      # @param name [String] The interface name to apply the configuration
+      #   values to. The name must be the full interface identifier.
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts value [Boolean] Enables or disables autotate for vlan
+      #   interfaces. Default is true.
+      #
+      # @option opts default [Boolean] Configures the autostate value
+      #   on the interface using the default value (true).
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_autostate(name, opts = {})
+	if opts[:value] == :false
+          commands = command_builder('no autostate')
+	else
+          commands = command_builder('autostate')
+	end
+        configure_interface(name, commands)
+      end
+      
     end
   end
 end
