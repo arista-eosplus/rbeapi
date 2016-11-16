@@ -13,9 +13,10 @@ describe Rbeapi::Api::Interfaces do
 
   describe '#get' do
     let(:entity) do
-      { name: 'Port-Channel1', type: 'portchannel', description: '', encapsulation: '',
-        shutdown: false, load_interval: '', members: [], lacp_mode: 'on', minimum_links: '0',
-        lacp_timeout: '90', lacp_fallback: 'disabled' }
+      { name: 'Port-Channel1', type: 'portchannel', description: '',
+        encapsulation: '', shutdown: false, load_interval: '', members: [],
+        lacp_mode: 'on', minimum_links: '0', lacp_timeout: '90',
+        lacp_fallback: 'disabled' }
     end
 
     before do

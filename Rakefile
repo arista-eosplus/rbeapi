@@ -9,7 +9,8 @@ end
 
 RPM_OPTS = '--define "_topdir %(pwd)/rpmbuild" --define "_builddir ' \
   '%{_topdir}" --define "_rpmdir %(pwd)/rpms" --define "_srcrpmdir ' \
-  '%{_rpmdir}" --define "_sourcedir  %(pwd)" --define "_specdir %(pwd)" -bb'.freeze
+  '%{_rpmdir}" --define "_sourcedir  %(pwd)" --define "_specdir %(pwd)" '\
+  '-bb'.freeze
 desc 'Generate regular and puppet-enterprise rbeapi RPMs for EOS'
 task rpm: :build do
   system "sed -e 's/^Version:.*/Version: #{Rbeapi::VERSION}/g' " \

@@ -31,8 +31,8 @@ describe Rbeapi::Api::PortchannelInterface do
     let(:resource) { subject.get('Port-Channel1') }
 
     let(:keys) do
-      [:type, :shutdown, :load_interval, :description, :encapsulation, :name, :members, :lacp_mode,
-       :minimum_links, :lacp_timeout, :lacp_fallback]
+      [:type, :shutdown, :load_interval, :description, :encapsulation, :name,
+       :members, :lacp_mode, :minimum_links, :lacp_timeout, :lacp_fallback]
     end
 
     it 'returns an ethernet resource as a hash' do

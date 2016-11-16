@@ -173,26 +173,34 @@ describe Rbeapi::Api::Ospf do
 
     it 'configures the ospf no passive-interface Ethernet1, 2, 3' do
       expect(subject.get('1')[:active_interfaces]).to be_empty
-      expect(subject.set_active_interfaces('1', value: %w(Ethernet1
-                                                          Ethernet2 Ethernet3))).to be_truthy
+      expect(subject.set_active_interfaces('1',
+                                           value: %w(Ethernet1
+                                                     Ethernet2
+                                                     Ethernet3))).to be_truthy
       expect(subject.get('1')[:active_interfaces]).to eq(%w(Ethernet1
-                                                            Ethernet2 Ethernet3))
+                                                            Ethernet2
+                                                            Ethernet3))
     end
 
     it 'configures the ospf no passive-interface Ethernet1, 2' do
-      expect(subject.set_active_interfaces('1', value: %w(Ethernet1
-                                                          Ethernet2 Ethernet3))).to be_truthy
+      expect(subject.set_active_interfaces('1',
+                                           value: %w(Ethernet1
+                                                     Ethernet2
+                                                     Ethernet3))).to be_truthy
       expect(subject.get('1')[:active_interfaces]).to eq(%w(Ethernet1
-                                                            Ethernet2 Ethernet3))
-      expect(subject.set_active_interfaces('1', value: %w(Ethernet1
-                                                          Ethernet2))).to be_truthy
+                                                            Ethernet2
+                                                            Ethernet3))
+      expect(subject.set_active_interfaces('1',
+                                           value: %w(Ethernet1
+                                                     Ethernet2))).to be_truthy
       expect(subject.get('1')[:active_interfaces]).to eq(%w(Ethernet1
                                                             Ethernet2))
     end
 
     it 'negates the no passive-interface' do
-      expect(subject.set_active_interfaces('1', value: %w(Ethernet1
-                                                          Ethernet2))).to be_truthy
+      expect(subject.set_active_interfaces('1',
+                                           value: %w(Ethernet1
+                                                     Ethernet2))).to be_truthy
       expect(subject.get('1')[:active_interfaces]).to eq(%w(Ethernet1
                                                             Ethernet2))
       expect(subject.set_active_interfaces('1', enable: false)).to be_truthy
@@ -200,8 +208,9 @@ describe Rbeapi::Api::Ospf do
     end
 
     it 'defaults the no passive-interface' do
-      expect(subject.set_active_interfaces('1', value: %w(Ethernet1
-                                                          Ethernet2))).to be_truthy
+      expect(subject.set_active_interfaces('1',
+                                           value: %w(Ethernet1
+                                                     Ethernet2))).to be_truthy
       expect(subject.get('1')[:active_interfaces]).to eq(%w(Ethernet1
                                                             Ethernet2))
       expect(subject.set_active_interfaces('1', default: true)).to be_truthy
@@ -214,26 +223,34 @@ describe Rbeapi::Api::Ospf do
 
     it 'configures the ospf passive-interface Ethernet1, 2, 3' do
       expect(subject.get('1')[:passive_interfaces]).to be_empty
-      expect(subject.set_passive_interfaces('1', value: %w(Ethernet1
-                                                           Ethernet2 Ethernet3))).to be_truthy
+      expect(subject.set_passive_interfaces('1',
+                                            value: %w(Ethernet1
+                                                      Ethernet2
+                                                      Ethernet3))).to be_truthy
       expect(subject.get('1')[:passive_interfaces]).to eq(%w(Ethernet1
-                                                             Ethernet2 Ethernet3))
+                                                             Ethernet2
+                                                             Ethernet3))
     end
 
     it 'configures the ospf passive-interface Ethernet1, 2' do
-      expect(subject.set_passive_interfaces('1', value: %w(Ethernet1
-                                                           Ethernet2 Ethernet3))).to be_truthy
+      expect(subject.set_passive_interfaces('1',
+                                            value: %w(Ethernet1
+                                                      Ethernet2
+                                                      Ethernet3))).to be_truthy
       expect(subject.get('1')[:passive_interfaces]).to eq(%w(Ethernet1
-                                                             Ethernet2 Ethernet3))
-      expect(subject.set_passive_interfaces('1', value: %w(Ethernet1
-                                                           Ethernet2))).to be_truthy
+                                                             Ethernet2
+                                                             Ethernet3))
+      expect(subject.set_passive_interfaces('1',
+                                            value: %w(Ethernet1
+                                                      Ethernet2))).to be_truthy
       expect(subject.get('1')[:passive_interfaces]).to eq(%w(Ethernet1
                                                              Ethernet2))
     end
 
     it 'negates the passive-interface' do
-      expect(subject.set_passive_interfaces('1', value: %w(Ethernet1
-                                                           Ethernet2))).to be_truthy
+      expect(subject.set_passive_interfaces('1',
+                                            value: %w(Ethernet1
+                                                      Ethernet2))).to be_truthy
       expect(subject.get('1')[:passive_interfaces]).to eq(%w(Ethernet1
                                                              Ethernet2))
       expect(subject.set_passive_interfaces('1', enable: false)).to be_truthy
@@ -241,8 +258,9 @@ describe Rbeapi::Api::Ospf do
     end
 
     it 'defaults the passive-interface' do
-      expect(subject.set_passive_interfaces('1', value: %w(Ethernet1
-                                                           Ethernet2))).to be_truthy
+      expect(subject.set_passive_interfaces('1',
+                                            value: %w(Ethernet1
+                                                      Ethernet2))).to be_truthy
       expect(subject.get('1')[:passive_interfaces]).to eq(%w(Ethernet1
                                                              Ethernet2))
       expect(subject.set_passive_interfaces('1', default: true)).to be_truthy
@@ -319,7 +337,9 @@ describe Rbeapi::Api::Ospf do
         .to be_truthy
       expect(subject.get('1')[:redistribute])
         .to eq('static' => { route_map: 'test' })
-      expect(subject.set_redistribute('1', 'static', enable: false)).to be_truthy
+      expect(subject.set_redistribute('1',
+                                      'static',
+                                      enable: false)).to be_truthy
       expect(subject.get('1')[:redistribute]).to be_empty
     end
 
@@ -328,7 +348,9 @@ describe Rbeapi::Api::Ospf do
         .to be_truthy
       expect(subject.get('1')[:redistribute])
         .to eq('connected' => { route_map: 'foo' })
-      expect(subject.set_redistribute('1', 'connected', default: true)).to be_truthy
+      expect(subject.set_redistribute('1',
+                                      'connected',
+                                      default: true)).to be_truthy
       expect(subject.get('1')[:redistribute]).to be_empty
     end
   end

@@ -47,7 +47,8 @@ module Rbeapi
       TRANSPORTS = { 'http' => 'Rbeapi::Eapilib::HttpEapiConnection',
                      'https' => 'Rbeapi::Eapilib::HttpsEapiConnection',
                      'http_local' => 'Rbeapi::Eapilib::HttpLocalEapiConenction',
-                     'socket' => 'Rbeapi::Eapilib::SocketEapiConnection' }.freeze
+                     'socket' => 'Rbeapi::Eapilib::SocketEapiConnection' }
+                   .freeze
 
       ##
       # Returns the currently loaded config object. This function will

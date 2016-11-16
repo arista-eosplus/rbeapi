@@ -242,8 +242,9 @@ module Rbeapi
           end
           ind = line[/\A */].size
           if ind % @indent != 0
-            raise ArgumentError, 'SwitchConfig indentation must be multiple of '\
-                                "#{@indent} improper indent #{ind}: #{line}"
+            raise ArgumentError, 'SwitchConfig indentation must be multiple '\
+                                 "of #{@indent} improper indent #{ind}: "\
+                                 "#{line}"
           end
         end
         true

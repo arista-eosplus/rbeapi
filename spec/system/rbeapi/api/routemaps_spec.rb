@@ -232,7 +232,8 @@ describe Rbeapi::Api::Routemaps do
       expect(subject
         .set_match_statements('test', 'permit', 10,
                               ['interface Vlan100',
-                               'ip address prefix-list MYLOOPBACK'])).to be_truthy
+                               'ip address prefix-list MYLOOPBACK']))
+        .to be_truthy
       expect(subject.get('test'))
         .to eq('permit' => { 10 => {
                  match: ['ip address prefix-list MYLOOPBACK',

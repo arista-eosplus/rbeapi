@@ -33,9 +33,10 @@ describe Rbeapi::Api::Interfaces do
 
     context 'with interface Port-Channel' do
       let(:entity) do
-        { name: 'Port-Channel1', type: 'portchannel', description: '', encapsulation: '',
-          shutdown: false, load_interval: '', members: [], lacp_mode: 'on', minimum_links: '0',
-          lacp_fallback: 'disabled', lacp_timeout: '90' }
+        { name: 'Port-Channel1', type: 'portchannel', description: '',
+          encapsulation: '', shutdown: false, load_interval: '', members: [],
+          lacp_mode: 'on', minimum_links: '0', lacp_fallback: 'disabled',
+          lacp_timeout: '90' }
       end
 
       before do
@@ -51,8 +52,8 @@ describe Rbeapi::Api::Interfaces do
     context 'with interface Vxlan' do
       let(:entity) do
         { name: 'Vxlan1', type: 'vxlan', description: '', encapsulation: '',
-          shutdown: false, load_interval: '', source_interface: '', multicast_group: '',
-          udp_port: 4789, flood_list: [], vlans: {} }
+          shutdown: false, load_interval: '', source_interface: '',
+          multicast_group: '', udp_port: 4789, flood_list: [], vlans: {} }
       end
 
       before do

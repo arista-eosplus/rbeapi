@@ -24,7 +24,8 @@ describe Rbeapi::Api::EthernetInterface do
 
     let(:keys) do
       [:type, :speed, :sflow, :flowcontrol_send, :flowcontrol_receive,
-       :shutdown, :description, :encapsulation, :name, :load_interval, :lacp_priority]
+       :shutdown, :description, :encapsulation, :name, :load_interval,
+       :lacp_priority]
     end
 
     it 'returns an ethernet resource as a hash' do
@@ -98,20 +99,25 @@ describe Rbeapi::Api::EthernetInterface do
     it 'negates the interface encapsulation' do
       expect(node).to receive(:config).with(['interface Ethernet1.1',
                                              'no encapsulation dot1q vlan'])
-      expect(subject.set_encapsulation('Ethernet1.1', enable: false)).to be_truthy
+      expect(subject.set_encapsulation('Ethernet1.1',
+                                       enable: false)).to be_truthy
     end
 
     it 'defaults the interface encapsulation' do
-      expect(node).to receive(:config).with(['interface Ethernet1.1',
-                                             'default encapsulation dot1q vlan'])
-      expect(subject.set_encapsulation('Ethernet1.1', default: true)).to be_truthy
+      expect(node).to receive(:config)
+        .with(['interface Ethernet1.1',
+               'default encapsulation dot1q vlan'])
+      expect(subject.set_encapsulation('Ethernet1.1',
+                                       default: true)).to be_truthy
     end
 
     it 'default is preferred over enable' do
-      expect(node).to receive(:config).with(['interface Ethernet1.1',
-                                             'default encapsulation dot1q vlan'])
-      expect(subject.set_encapsulation('Ethernet1.1', enable: false,
-                                                      default: true)).to be_truthy
+      expect(node).to receive(:config)
+        .with(['interface Ethernet1.1',
+               'default encapsulation dot1q vlan'])
+      expect(subject.set_encapsulation('Ethernet1.1',
+                                       enable: false,
+                                       default: true)).to be_truthy
     end
   end
 end

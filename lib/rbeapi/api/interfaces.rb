@@ -208,9 +208,10 @@ module Rbeapi
       ##
       # parse_encapsulation scans the provided configuration block and parses
       # the encapsulation value if it exists in the configuration.  If the
-      # encapsulation value is not configured, then the DEFALT_INTF_ENCAPSULATION
-      # value is returned.  The hash returned by this method is intended to be
-      # merged into the interface resource hash returned by the get method.
+      # encapsulation value is not configured, then the
+      # DEFALT_INTF_ENCAPSULATION value is returned.  The hash returned by this
+      # method is intended to be merged into the interface resource hash
+      # returned by the get method.
       #
       # @api private
       #
@@ -368,8 +369,14 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_encapsulation(name, opts = {})
-        raise ArgumentError, 'Parameter encapsulation can be set only on subinterfaces' unless /\./.match(name)
-        raise ArgumentError, 'Parameter encapsulation can be set only on Ethernet and PostChannel interfaces' unless /et|po/.match(name.downcase)
+        unless /\./.match(name)
+          raise ArgumentError, 'Parameter encapsulation can be set only on '\
+            'subinterfaces'
+        end
+        unless /et|po/.match(name.downcase)
+          raise ArgumentError, 'Parameter encapsulation can be set only on '\
+            'Ethernet and PostChannel interfaces'
+        end
         commands = command_builder('encapsulation dot1q vlan', opts)
         configure_interface(name, commands)
       end
