@@ -55,6 +55,7 @@ module Rbeapi
       #     name: <string>,
       #     type: <string>,
       #     description: <string>,
+      #     encapsulation: <integer>,
       #     shutdown: <boolean>
       #   }
       #
@@ -77,6 +78,7 @@ module Rbeapi
       #       name: <string>,
       #       type: <string>,
       #       description: <string>,
+      #       encapsulation: <integer>,
       #       shutdown: <boolean>,
       #       ...
       #     },
@@ -84,6 +86,7 @@ module Rbeapi
       #       name: <string>,
       #       type: <string>,
       #       description: <string>,
+      #       encapsulation: <integer>,
       #       shutdown: <boolean>,
       #       ...
       #     },
@@ -146,6 +149,7 @@ module Rbeapi
     # that is common to all interfaces configured in EOS.
     class BaseInterface < Entity
       DEFAULT_INTF_DESCRIPTION = ''
+      DEFAULT_INTF_ENCAPSULATION = ''
       DEFAULT_LOAD_INTERVAL = ''
 
       ##
@@ -159,6 +163,7 @@ module Rbeapi
       #     name: <string>
       #     type: 'generic'
       #     description: <string>
+      #     encapsulation: <integer>
       #     shutdown: [true, false]
       #     load_interval: <string>
       #   }
@@ -175,6 +180,7 @@ module Rbeapi
 
         response = { name: name, type: 'generic' }
         response.merge!(parse_description(config))
+        response.merge!(parse_encapsulation(config))
         response.merge!(parse_shutdown(config))
         response.merge!(parse_load_interval(config))
         response
@@ -198,6 +204,25 @@ module Rbeapi
         { description: mdata.nil? ? DEFAULT_INTF_DESCRIPTION : mdata[1] }
       end
       private :parse_description
+
+      ##
+      # parse_encapsulation scans the provided configuration block and parses
+      # the encapsulation value if it exists in the configuration.  If the
+      # encapsulation value is not configured, then the DEFALT_INTF_ENCAPSULATION
+      # value is returned.  The hash returned by this method is intended to be
+      # merged into the interface resource hash returned by the get method.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block retrieved from the
+      #   nodes current running configuration.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_encapsulation(config)
+        mdata = /^\s{3}encapsulation dot1q vlan\s(.+)$/.match(config)
+        { encapsulation: mdata.nil? ? DEFAULT_INTF_ENCAPSULATION : mdata[1] }
+      end
+      private :parse_encapsulation
 
       ##
       # parse_shutdown scans the provided configuration block and parses
@@ -318,6 +343,38 @@ module Rbeapi
       end
 
       ##
+      # set_encapsulation configures the VLAN ID value for the specified
+      # interface name in the nodes running configuration. If the enable
+      # keyword is false then the encapsulation value is negated using the no
+      # keyword. If the default keyword is set to true, then the encapsulation
+      # value is defaulted using the default keyword. The default keyword takes
+      # precedence over the enable keyword if both are provided.
+      #
+      # @since eos_version X.XX.XM
+      #
+      # @param name [String] The interface name to apply the configuration
+      #   to. The name value must be the full interface identifier.
+      #
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts value [String] The value to configure the VLAN ID to be
+      #   used in the encapsulation dot1q vlan setting for a subinterface.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] Configure the interface encapsulation
+      #   using the default keyword.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_encapsulation(name, opts = {})
+        fail ArgumentError, 'Parameter encapsulation can be set only on subinterfaces' unless /\./.match(name)
+        fail ArgumentError, 'Parameter encapsulation can be set only on Ethernet and PostChannel interfaces' unless /et|po/.match(name.downcase)
+	commands = command_builder('encapsulation dot1q vlan', opts)
+        configure_interface(name, commands)
+      end
+
+      ##
       # set_shutdown configures the administrative state of the specified
       # interface in the node. If the enable keyword is false, then the
       # interface is administratively disabled. If the enable keyword is
@@ -390,6 +447,7 @@ module Rbeapi
       #     name: <string>,
       #     type: <string>,
       #     description: <string>,
+      #     encapsulation: <integer>,
       #     shutdown: <boolean>,
       #     load_interval: <string>
       #     speed: <string>,
@@ -511,14 +569,19 @@ module Rbeapi
       ##
       # create overrides the create method from the BaseInterface and raises
       # an exception because Ethernet interface creation is not supported.
+      # This doesn't happen for Ethernet subinterfaces
       #
       # @param _name [String] The name of the interface.
       #
       # @raise [NotImplementedError] Creation of physical Ethernet interfaces
-      #   is not supported.
+      #   is not supported. Only subinterfaces are allowed.
       def create(_name)
-        fail NotImplementedError, 'creating Ethernet interfaces is '\
-              'not supported'
+        if _name !~ /\./
+          fail NotImplementedError, 'creating Ethernet interfaces is '\
+            'not supported'
+        else
+	  configure("interface #{_name}")
+	end
       end
 
       ##
@@ -531,8 +594,12 @@ module Rbeapi
       # @raise [NotImplementedError] Deletion of physical Ethernet interfaces
       #   is not supported.
       def delete(_name)
-        fail NotImplementedError, 'deleting Ethernet interfaces is '\
-              'not supported'
+        if _name !~ /\./
+          fail NotImplementedError, 'deleting Ethernet interfaces is '\
+            'not supported'
+        else
+	  configure("no interface #{_name}")
+	end
       end
 
       ##
@@ -736,6 +803,7 @@ module Rbeapi
       #   {
       #     type: 'portchannel'
       #     description: <string>
+      #     encapsulation: <integer>
       #     shutdown: [true, false]
       #     load_interval: <string>
       #     members: array[<strings>]
@@ -863,6 +931,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_lacp_timeout(config)
         mdata = /lacp fallback timeout (\d+)$/.match(config)
+        return { lacp_timeout: [] }  unless defined? mdata[1]
         { lacp_timeout: mdata[1] }
       end
       private :parse_lacp_timeout
@@ -1107,6 +1176,7 @@ module Rbeapi
       #     name: <string>,
       #     type: <string>,
       #     description: <string>,
+      #     encapsulation: <string>,
       #     shutdown: <boolean>,
       #     load_interval: <string>
       #     source_interface: <string>,

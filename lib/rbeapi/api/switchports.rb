@@ -85,6 +85,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_mode(config)
         mdata = /(?<=\s{3}switchport\smode\s)(.+)$/.match(config)
+        return { mode: [] }  unless defined? mdata[1]
         { mode: mdata[1] }
       end
       private :parse_mode
@@ -101,6 +102,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_access_vlan(config)
         mdata = /(?<=access\svlan\s)(.+)$/.match(config)
+        return { access_vlan: [] }  unless defined? mdata[1]
         { access_vlan: mdata[1] }
       end
       private :parse_access_vlan
@@ -117,6 +119,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_trunk_native_vlan(config)
         mdata = /(?<=trunk\snative\svlan\s)(.+)$/.match(config)
+        return { trunk_native_vlan: [] }  unless defined? mdata[1]
         { trunk_native_vlan: mdata[1] }
       end
       private :parse_trunk_native_vlan
@@ -154,6 +157,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_trunk_groups(config)
         mdata = config.scan(/(?<=trunk\sgroup\s)(.+)$/)
+        return { trunk_group: [] } unless defined? mdata[1]
         mdata = mdata.flatten if mdata.length > 0
         { trunk_groups: mdata }
       end
