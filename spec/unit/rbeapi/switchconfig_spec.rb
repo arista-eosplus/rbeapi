@@ -93,7 +93,8 @@ EOS
     'username fred privilege 0 role network-operator secret 5 $1$u4TDdWKN$VC7cZmeGn/sgNM0RMNwhR.',
     'username fred sshkey ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDtrjGuhFeJz76Z5f3perh/R2s8XmnPcWF1uByHOqDDp53bggS9CZ7n67/QYVjbhyP70HMxY8R5Z4AevNtZTnSUQZmEgnuHvvAGNC63qrItE1i/sXKLvB1r8v0plcK35laNvJMYqGcGpjQ7T4Ufmn54zssiq1CBx6GfEX0+zKWD/5vnVDH9MMDolawILFb2a67VngzEZ0BCeRgLTg2ZEEEQt2hEKdglx87GBf7UIBFYM5xvywZRzHWta0dO1WDXCLD67kdqP52zucFXo7U3EUK/8X9Qltg5Pjr4mxf/U+hbO/K7xZJ+neAJDYA7bSXh8LkCuz00VxI5mAwo2PRMKaSp fred@localhost',
     'router ospf 1',
-    'management cim-provider']
+    'management cim-provider'
+  ]
   cmds = ['   switchport mode trunk',
           '   switchport trunk allowed vlan 100,200']
 

@@ -125,7 +125,7 @@ describe Rbeapi::Api::PortchannelInterface do
         .with(['interface Port-Channel1.1', 'no encapsulation dot1q vlan'])
 
       expect(subject.set_encapsulation('Port-Channel1.1',
-                                     enable: false)).to be_truthy
+                                       enable: false)).to be_truthy
     end
 
     it 'defaults the interface encapsulation' do
@@ -178,8 +178,10 @@ describe Rbeapi::Api::PortchannelInterface do
 
   describe '#set_members' do
     it 'raises an ArgumentError if members is not an array' do
-      expect { subject.set_members('Port-Channel1',
-                                   'Ethernet3') }
+      expect do
+        subject.set_members('Port-Channel1',
+                            'Ethernet3')
+      end
         .to raise_error(ArgumentError)
     end
   end

@@ -42,12 +42,12 @@ module Rbeapi
   # Rbeapi::Client
   module Client
     class << self
-      DEFAULT_TRANSPORT = 'https'
+      DEFAULT_TRANSPORT = 'https'.freeze
 
       TRANSPORTS = { 'http' => 'Rbeapi::Eapilib::HttpEapiConnection',
                      'https' => 'Rbeapi::Eapilib::HttpsEapiConnection',
                      'http_local' => 'Rbeapi::Eapilib::HttpLocalEapiConenction',
-                     'socket' => 'Rbeapi::Eapilib::SocketEapiConnection' }
+                     'socket' => 'Rbeapi::Eapilib::SocketEapiConnection' }.freeze
 
       ##
       # Returns the currently loaded config object. This function will
@@ -165,7 +165,7 @@ module Rbeapi
     # The Config class holds the loaded configuration file data. It is a
     # subclass of IniFile.
     class Config < IniFile
-      CONFIG_SEARCH_PATH = ['/mnt/flash/eapi.conf']
+      CONFIG_SEARCH_PATH = ['/mnt/flash/eapi.conf'].freeze
 
       ##
       # The Config class will automatically search for a filename to load
@@ -226,10 +226,10 @@ module Rbeapi
 
         # For each section, if the host parameter is omitted then the
         # connection name is used.
-        has_default = self.has_section?('DEFAULT')
+        has_default = has_section?('DEFAULT')
         sections.each do |name|
           next unless name.start_with?('connection:')
-          conn = self["#{name}"]
+          conn = self[name.to_s]
           conn['host'] = name.split(':')[1] unless conn['host']
 
           # Merge in the default values into the connections
@@ -517,7 +517,7 @@ module Rbeapi
         begin
           result = run_commands("show #{config} #{params}", encoding: encoding)
         rescue Rbeapi::Eapilib::CommandError => error
-          if ( error.to_s =~ /'show (running|startup)-config'/ )
+          if error.to_s =~ /'show (running|startup)-config'/
             return nil
           else
             raise error

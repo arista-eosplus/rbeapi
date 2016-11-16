@@ -111,8 +111,7 @@ describe Rbeapi::Api::EthernetInterface do
       expect(node).to receive(:config).with(['interface Ethernet1.1',
                                              'default encapsulation dot1q vlan'])
       expect(subject.set_encapsulation('Ethernet1.1', enable: false,
-                                                  default: true)).to be_truthy
-      
+                                                      default: true)).to be_truthy
     end
   end
 end

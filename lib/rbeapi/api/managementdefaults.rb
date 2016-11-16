@@ -39,9 +39,9 @@ module Rbeapi
   module Api
     ##
     # The Managementdefaults class provides a configuration instance for
-     # configuring management defaults of the node.
+    # configuring management defaults of the node.
     class Managementdefaults < Entity
-      DEFAULT_SECRET_HASH = 'md5'
+      DEFAULT_SECRET_HASH = 'md5'.freeze
 
       ##
       # get scans the current nodes configuration and returns the values as
@@ -84,7 +84,7 @@ module Rbeapi
       ##
       # set_secret_hash configures the management defaults secret hash value
       # in the current nodes running configuration.
-      # If the default keyword is provided, the configuration is defaulted 
+      # If the default keyword is provided, the configuration is defaulted
       # using the default keyword.
       #
       # @since eos_version 4.13.7M
@@ -108,13 +108,12 @@ module Rbeapi
       # @return [Boolean] Returns true if the command completed successfully.
       def set_secret_hash(opts = {})
         unless ['md5', 'sha512', nil].include?(opts[:value])
-          fail ArgumentError, 'secret hash must be md5 or sha512'
+          raise ArgumentError, 'secret hash must be md5 or sha512'
         end
-      	cmd = command_builder("secret hash #{opts[:value]}")
+        cmd = command_builder("secret hash #{opts[:value]}")
         cmds = ['management defaults', cmd]
         configure(cmds)
       end
-
     end
   end
 end

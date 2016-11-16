@@ -262,7 +262,7 @@ module Rbeapi
         authentication: :auth,
         privacy: :privacy,
         group: :roles
-      }
+      }.freeze
 
       ##
       # snmp_user_set creates or updates an SNMP user account on the target
@@ -290,13 +290,15 @@ module Rbeapi
       #   hash which is idempotent.
       def snmp_user_set(opts = {})
         group = [*opts[:roles]].first
-        fail ArgumentError, 'at least one role is required' unless group
+        raise ArgumentError, 'at least one role is required' unless group
         version = opts[:version].to_s.sub('v2', 'v2c')
         cmd = user_cmd = "snmp-server user #{opts[:name]} #{group} #{version}"
         if opts[:password] && version == 'v3'
           privacy = opts[:privacy].to_s.scan(/aes|des/).first
-          fail ArgumentError,
-               'privacy is required when managing passwords' unless privacy
+          unless privacy
+            raise ArgumentError,
+                  'privacy is required when managing passwords'
+          end
           cmd += " auth #{opts[:auth] || 'sha'} #{opts[:password]} "\
             "priv #{privacy} #{opts[:password]}"
         end

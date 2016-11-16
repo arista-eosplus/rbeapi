@@ -76,7 +76,7 @@ describe Rbeapi::Api::Interfaces do
     before { node.config(['interface Port-Channel1.1']) }
 
     it 'deletes a switchport subinterface resource' do
-##      expect(subject.get('Port-Channel1.1')).not_to be_nil
+      ##      expect(subject.get('Port-Channel1.1')).not_to be_nil
       expect(subject.delete('Port-Channel1.1')).to be_truthy
       expect(subject.get('Port-Channel1.1')).to be_nil
     end

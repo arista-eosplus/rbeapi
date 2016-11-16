@@ -200,8 +200,7 @@ describe Rbeapi::Client do
                                            username: 'test2',
                                            password: 'test',
                                            transport: 'http',
-                                           host: 'test2'
-                                          )).to eq(nil)
+                                           host: 'test2')).to eq(nil)
       expect(subject.config.get_connection('test2'))
         .to eq(username: 'test2',
                password: 'test',
@@ -216,7 +215,7 @@ describe Rbeapi::Client do
     end
 
     def startup_config_response
-      [{"output"=>startup_config}]
+      [{ 'output' => startup_config }]
     end
 
     let(:node) do
@@ -229,18 +228,18 @@ describe Rbeapi::Client do
     end
 
     it 'with no arguments returns the startup-config' do
-      expect(node.get_config()).to eq(startup_config.strip.split("\n"))
+      expect(node.get_config).to eq(startup_config.strip.split("\n"))
     end
 
     it 'with no arguments and an empty startup-config returns the startup-config' do
-      allow(node).to receive(:run_commands) { [{"output"=>""}] }
-      expect(node.get_config()).to eq([])
+      allow(node).to receive(:run_commands) { [{ 'output' => '' }] }
+      expect(node.get_config).to eq([])
     end
 
     it 'with no arguments and no startup-config returns nil' do
       msg = "CLI command 2 of 2 'show startup-config' failed: could not run command"
       allow(node).to receive(:run_commands).and_raise(Rbeapi::Eapilib::CommandError.new(msg, 1000))
-      expect(node.get_config()).to be_nil
+      expect(node.get_config).to be_nil
     end
 
     it 'raises invalid command error' do
@@ -249,6 +248,5 @@ describe Rbeapi::Client do
       expect { node.get_config(config: 'running-configurations') }
         .to raise_error Rbeapi::Eapilib::CommandError
     end
-
   end
 end

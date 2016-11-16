@@ -68,8 +68,7 @@ describe Rbeapi::Api::Users do
       nopassword: false,
       encryption: 'md5',
       secret: md5_secret,
-      sshkey: sshkey
-    }
+      sshkey: sshkey }
   end
 
   describe '#getall' do
@@ -82,8 +81,7 @@ describe Rbeapi::Api::Users do
         'rbeapi' => { name: 'rbeapi', privilege: 1, role: nil,
                       nopassword: false, encryption: 'md5',
                       secret: md5_secret,
-                      sshkey: sshkey }
-      }
+                      sshkey: sshkey } }
     end
 
     before do
@@ -92,7 +90,7 @@ describe Rbeapi::Api::Users do
                    'username admin privilege 1 role network-admin nopassword',
                    "username rbeapi privilege 1 secret 5 #{md5_secret}",
                    "username rbeapi sshkey #{sshkey}",
-                   'management defaults','default secret hash'])
+                   'management defaults', 'default secret hash'])
     end
 
     it 'returns the username collection' do

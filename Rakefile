@@ -9,13 +9,13 @@ end
 
 RPM_OPTS = '--define "_topdir %(pwd)/rpmbuild" --define "_builddir ' \
   '%{_topdir}" --define "_rpmdir %(pwd)/rpms" --define "_srcrpmdir ' \
-  '%{_rpmdir}" --define "_sourcedir  %(pwd)" --define "_specdir %(pwd)" -bb'
+  '%{_rpmdir}" --define "_sourcedir  %(pwd)" --define "_specdir %(pwd)" -bb'.freeze
 desc 'Generate regular and puppet-enterprise rbeapi RPMs for EOS'
 task rpm: :build do
   system "sed -e 's/^Version:.*/Version: #{Rbeapi::VERSION}/g' " \
     'rbeapi.spec.tmpl > rbeapi.spec'
   system "rpmbuild #{RPM_OPTS} rbeapi.spec"
-  RPMS = `find rpms/noarch -name "*rbeapi*rpm"`
+  RPMS = `find rpms/noarch -name "*rbeapi*rpm"`.freeze
   puts "\n################################################\n#"
   puts "Created the following in rpms/noarch/\n#{RPMS}"
   puts "#\n################################################\n\n"
@@ -32,7 +32,7 @@ task :inifile do
   system "sed -e 's/^Version:.*/Version: #{INIFILE_VERSION}/g' " \
     'gems/inifile/inifile.spec.tmpl > gems/inifile/inifile.spec'
   system "rpmbuild #{RPM_OPTS} gems/inifile/inifile.spec"
-  RPMS = `find rpms/noarch -name "*inifile*rpm"`
+  RPMS = `find rpms/noarch -name "*inifile*rpm"`.freeze
   puts "\n################################################\n#"
   puts "Created the following in rpms/noarch/\n#{RPMS}"
   puts "#\n################################################\n\n"
@@ -50,7 +50,7 @@ task :net_http_unix do
     'gems/net_http_unix/net_http_unix.spec.tmpl > ' \
     'gems/net_http_unix/net_http_unix.spec'
   system "rpmbuild #{RPM_OPTS} gems/net_http_unix/net_http_unix.spec"
-  RPMS = `find rpms/noarch -name "*net_http_unix*rpm"`
+  RPMS = `find rpms/noarch -name "*net_http_unix*rpm"`.freeze
   puts "\n################################################\n#"
   puts "Created the following in rpms/noarch/\n#{RPMS}"
   puts "#\n################################################\n\n"
@@ -67,7 +67,7 @@ task :netaddr do
   system "sed -e 's/^Version:.*/Version: #{NETADDR_VERSION}/g' " \
     'gems/netaddr/netaddr.spec.tmpl > gems/netaddr/netaddr.spec'
   system "rpmbuild #{RPM_OPTS} gems/netaddr/netaddr.spec"
-  RPMS = `find rpms/noarch -name "*netaddr*rpm"`
+  RPMS = `find rpms/noarch -name "*netaddr*rpm"`.freeze
   puts "\n################################################\n#"
   puts "Created the following in rpms/noarch/\n#{RPMS}"
   puts "#\n################################################\n\n"
@@ -114,7 +114,7 @@ end
 desc 'Generate SWIX files from RPMs'
 task swix: :all_rpms do
   SWIX = 'PYTHONPATH=${PYTHONPATH}:/nfs/misc/tools/swix \
-          /nfs/misc/tools/swix/swix'
+          /nfs/misc/tools/swix/swix'.freeze
   system "(cd rpms/noarch;
           rm -f rbeapi-#{Rbeapi::VERSION}-1.swix;
           #{SWIX} create rbeapi-#{Rbeapi::VERSION}-1.swix \
@@ -141,7 +141,7 @@ task swix: :all_rpms do
           rubygem-inifile-puppet-aio-3.0.0-5.eos4.noarch.rpm \
           rubygem-netaddr-puppet-aio-1.5.1-4.eos4.noarch.rpm \
           rubygem-net_http_unix-puppet-aio-0.2.2-5.eos4.noarch.rpm)"
-  SWIXS = `find rpms/noarch -name "rbeapi*swix" -ls`
+  SWIXS = `find rpms/noarch -name "rbeapi*swix" -ls`.freeze
   puts "\n################################################\n#"
   puts "The following artifacts are in rpms/noarch/\n#{SWIXS}"
   puts "#\n################################################\n\n"

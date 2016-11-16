@@ -253,13 +253,13 @@ module Rbeapi
       #
       # @return [Array] Returns the prepared eos command.
       def name_commands(name, action, seqno, opts = {})
-        if opts[:default] == true
-          cmd = "default route-map #{name}"
-        elsif opts[:enable] == false
-          cmd = "no route-map #{name}"
-        else
-          cmd = "route-map #{name}"
-        end
+        cmd = if opts[:default] == true
+                "default route-map #{name}"
+              elsif opts[:enable] == false
+                "no route-map #{name}"
+              else
+                "route-map #{name}"
+              end
         cmd << " #{action}"
         cmd << " #{seqno}"
         [cmd]
@@ -305,7 +305,7 @@ module Rbeapi
           cmds = name_commands(name, action, seqno)
         else
           if opts[:match] && !opts[:match].is_a?(Array)
-            fail ArgumentError, 'opts match must be an Array'
+            raise ArgumentError, 'opts match must be an Array'
           end
           cmds = name_commands(name, action, seqno, opts)
           if opts[:description]
@@ -346,7 +346,7 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def remove_match_statements(name, action, seqno, cmds)
-        fail ArgumentError, 'cmds must be an Array' unless cmds.is_a?(Array)
+        raise ArgumentError, 'cmds must be an Array' unless cmds.is_a?(Array)
 
         entries = parse_entries(name)
         return nil unless entries
@@ -374,7 +374,7 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def remove_set_statements(name, action, seqno, cmds)
-        fail ArgumentError, 'cmds must be an Array' unless cmds.is_a?(Array)
+        raise ArgumentError, 'cmds must be an Array' unless cmds.is_a?(Array)
 
         entries = parse_entries(name)
         return nil unless entries
@@ -446,7 +446,7 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_match_statements(name, action, seqno, value)
-        fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+        raise ArgumentError, 'value must be an Array' unless value.is_a?(Array)
 
         cmds = ["route-map #{name} #{action} #{seqno}"]
         remove_match_statements(name, action, seqno, cmds)
@@ -473,7 +473,7 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_set_statements(name, action, seqno, value)
-        fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+        raise ArgumentError, 'value must be an Array' unless value.is_a?(Array)
 
         cmds = ["route-map #{name} #{action} #{seqno}"]
         remove_set_statements(name, action, seqno, cmds)

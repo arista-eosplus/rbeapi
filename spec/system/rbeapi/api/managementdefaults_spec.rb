@@ -12,8 +12,7 @@ describe Rbeapi::Api::Managementdefaults do
   end
 
   describe '#get' do
-
-    before { node.config(['management defaults','default secret hash']) }
+    before { node.config(['management defaults', 'default secret hash']) }
 
     it 'contains all required settings' do
       expect(subject.get).to include(:secret_hash)
@@ -21,13 +20,12 @@ describe Rbeapi::Api::Managementdefaults do
   end
 
   describe '#set_secret_hash' do
-    before { node.config(['management defaults','default secret hash']) }
+    before { node.config(['management defaults', 'default secret hash']) }
 
     it 'configures the management defaults secret hash value' do
       expect(subject.get[:secret_hash]).to eq('md5')
       expect(subject.set_secret_hash(value: 'sha512')).to be_truthy
       expect(subject.get[:secret_hash]).to eq('sha512')
     end
-
   end
 end

@@ -63,8 +63,7 @@ describe Rbeapi::Api::Acl do
         '50' => { seqno: '50', action: 'permit', srcaddr: '16.0.0.0',
                   srcprefixlen: '8', log: nil },
         '60' => { seqno: '60', action: 'permit', srcaddr: '9.10.11.0',
-                  srcprefixlen: '255.255.255.0', log: 'log' }
-      }
+                  srcprefixlen: '255.255.255.0', log: 'log' } }
     end
 
     it 'returns the ACL resource' do

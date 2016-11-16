@@ -15,7 +15,7 @@ describe Rbeapi::Api::Interfaces do
   describe '#get' do
     let(:entity) do
       { name: 'Ethernet1', type: 'ethernet', description: '', encapsulation: '',
-	shutdown: false, load_interval: '', speed: 'default', sflow: true,
+        shutdown: false, load_interval: '', speed: 'default', sflow: true,
         flowcontrol_send: 'off', flowcontrol_receive: 'off',
         lacp_priority: '32768' }
     end

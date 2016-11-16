@@ -207,7 +207,7 @@ module Rbeapi
         cmds = ["interface #{name}"]
 
         if value
-          fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+          raise ArgumentError, 'value must be an Array' unless value.is_a?(Array)
         end
 
         case default
@@ -216,8 +216,10 @@ module Rbeapi
         when false
           cmds << 'no ip virtual-router address'
           if enable
-            fail ArgumentError,
-                 'no values for addresses provided' unless value
+            unless value
+              raise ArgumentError,
+                    'no values for addresses provided'
+            end
             value.each do |addr|
               cmds << "ip virtual-router address #{addr}"
             end

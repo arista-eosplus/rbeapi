@@ -65,7 +65,6 @@ describe Rbeapi::Api::Interfaces do
   end
 
   describe '#set_autostate' do
-
     it 'sets the autostate value to true' do
       node.config(['interface Vlan1', 'no autostate'])
       expect(subject.get('Vlan1')[:autostate]).to eq(:false)

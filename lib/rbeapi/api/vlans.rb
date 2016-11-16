@@ -283,7 +283,7 @@ module Rbeapi
       def set_state(id, opts = {})
         value = opts[:value]
         unless ['active', 'suspend', nil].include?(value)
-          fail ArgumentError, 'state must be active, suspend or nil'
+          raise ArgumentError, 'state must be active, suspend or nil'
         end
 
         cmd = command_builder('state', opts)
@@ -360,7 +360,7 @@ module Rbeapi
         return configure(["vlan #{name}", 'no trunk group']) unless enable
 
         value = opts.fetch(:value, [])
-        fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+        raise ArgumentError, 'value must be an Array' unless value.is_a?(Array)
 
         value = Set.new value
         current_value = Set.new get(name)[:trunk_groups]

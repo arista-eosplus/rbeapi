@@ -46,11 +46,10 @@ describe Rbeapi::Api::Managementdefaults do
       expect(subject.set_secret_hash(default: true)).to be_truthy
     end
 
-#    it 'fails to set any value for secret_hash' do
-#      expect(node).to receive(:config).with(['management defaults',
-#                                             'secret hash any'])
-#      expect(subject.set_secret_hash(value: 'any')).to raise_error ArgumentError
-#    end
+    #    it 'fails to set any value for secret_hash' do
+    #      expect(node).to receive(:config).with(['management defaults',
+    #                                             'secret hash any'])
+    #      expect(subject.set_secret_hash(value: 'any')).to raise_error ArgumentError
+    #    end
   end
-
 end

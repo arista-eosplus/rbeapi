@@ -67,6 +67,5 @@ describe Rbeapi::Api::VlanInterface do
       expect(node).to receive(:config).with(commands)
       expect(subject.set_autostate('Vlan1', opts)).to be_truthy
     end
-
   end
 end

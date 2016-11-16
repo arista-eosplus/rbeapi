@@ -85,7 +85,7 @@ module Rbeapi
 
         response[:passive_interfaces] =
           config.scan(/(?<=^\s{3}passive-interface\s)(?!default)(.*)$/)
-          .flatten!.to_a
+                .flatten!.to_a
 
         response[:active_interfaces] =
           config.scan(/(?<=^\s{3}no passive-interface\s)(.*)$/).flatten!.to_a
@@ -357,7 +357,7 @@ module Rbeapi
         routemap = opts[:route_map]
         redistribute = "redistribute #{proto}"
         redistribute << " route-map #{routemap}" if routemap
-        cmd = command_builder(redistribute , opts)
+        cmd = command_builder(redistribute, opts)
         cmds = ["router ospf #{pid}", cmd]
         configure cmds
       end

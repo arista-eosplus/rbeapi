@@ -127,7 +127,7 @@ module Rbeapi
       # @return [Section] The Section object contains the portion of self
       #   that is not in section2.
       def compare_r(section2)
-        fail '@line must equal section2.line' if @line != section2.line
+        raise '@line must equal section2.line' if @line != section2.line
 
         # XXX Need to have a list of exceptions of mode commands that
         # support default. If all the commands have been removed from
@@ -181,7 +181,7 @@ module Rbeapi
       #   section2 that is not in self.
       def compare(section2)
         if @line != section2.line
-          fail 'XXX What if @line does not equal section2.line'
+          raise 'XXX What if @line does not equal section2.line'
         end
 
         results = []
@@ -242,7 +242,7 @@ module Rbeapi
           end
           ind = line[/\A */].size
           if ind % @indent != 0
-            fail ArgumentError, 'SwitchConfig indentation must be multiple of '\
+            raise ArgumentError, 'SwitchConfig indentation must be multiple of '\
                                 "#{@indent} improper indent #{ind}: #{line}"
           end
         end

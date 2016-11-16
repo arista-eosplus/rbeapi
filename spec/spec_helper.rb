@@ -27,5 +27,4 @@ RSpec.configure do |config|
   config.mock_with :rspec do |rspec_config|
     rspec_config.syntax = :expect
   end
-
 end

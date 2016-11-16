@@ -201,11 +201,11 @@ module Rbeapi
         when true
           cmds = 'default radius-server key'
         when false
-          if enable
-            cmds = "radius-server key #{key_format} #{value}"
-          else
-            cmds = 'no radius-server key'
-          end
+          cmds = if enable
+                   "radius-server key #{key_format} #{value}"
+                 else
+                   'no radius-server key'
+                 end
         end
         configure cmds
       end
