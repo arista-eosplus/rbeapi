@@ -13,7 +13,7 @@ describe Rbeapi::Api::Interfaces do
 
   describe '#get' do
     let(:entity) do
-      { name: 'Vlan1', type: 'vlan', description: '', shutdown: false, autostate: :true, load_interval: '' }
+      { name: 'Vlan1', type: 'vlan', description: '', shutdown: false, autostate: :true, load_interval: '', encapsulation: "" }
     end
 
     before { node.config(['no interface Vlan1', 'interface Vlan1']) }
