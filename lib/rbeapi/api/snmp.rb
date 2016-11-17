@@ -48,8 +48,10 @@ module Rbeapi
       DEFAULT_SNMP_CONTACT = ''.freeze
       DEFAULT_SNMP_CHASSIS_ID = ''.freeze
       DEFAULT_SNMP_SOURCE_INTERFACE = ''.freeze
-      CFG_TO_STATE = { 'default' => 'default', 'no' => 'off', nil => 'on' }.freeze
-      STATE_TO_CFG = { 'default' => 'default', 'on' => nil, 'off' => 'no' }.freeze
+      CFG_TO_STATE = { 'default' => 'default', 'no' => 'off', nil => 'on' }
+                     .freeze
+      STATE_TO_CFG = { 'default' => 'default', 'on' => nil, 'off' => 'no' }
+                     .freeze
 
       ##
       # get returns the snmp resource Hash that represents the nodes snmp

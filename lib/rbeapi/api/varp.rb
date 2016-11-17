@@ -207,7 +207,9 @@ module Rbeapi
         cmds = ["interface #{name}"]
 
         if value
-          raise ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+          unless value.is_a?(Array)
+            raise ArgumentError, 'value must be an Array'
+          end
         end
 
         case default

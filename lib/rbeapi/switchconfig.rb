@@ -234,14 +234,14 @@ module Rbeapi
         config.each_line do |line|
           skip = true if @multiline_cmds.any? { |cmd| line =~ /#{cmd}/ }
           if skip
-            if line =~ /^\s*EOF$/
+            if line =~ /^\s*EOF$/ # rubocop:disable Style/GuardClause
               skip = false
             else
               next
             end
           end
           ind = line[/\A */].size
-          if ind % @indent != 0
+          if ind % @indent.nonzero? # rubocop:disable Style/Next
             raise ArgumentError, 'SwitchConfig indentation must be multiple '\
                                  "of #{@indent} improper indent #{ind}: "\
                                  "#{line}"
@@ -278,7 +278,7 @@ module Rbeapi
           end
           if combine
             longline << line
-            if line =~ /^\s*EOF$/
+            if line =~ /^\s*EOF$/ # rubocop:disable Style/GuardClause
               line = longline.join
               combine = false
             else
@@ -288,7 +288,7 @@ module Rbeapi
 
           # Ignore comment lines and the end statement if there
           # XXX Fix parsing end
-          next if line.start_with?('!') || line.start_with?('end')
+          next if line.start_with?('!', 'end')
           line.chomp!
           next if line.empty?
           indent_level = line[/\A */].size / @indent

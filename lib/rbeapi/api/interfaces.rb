@@ -132,10 +132,12 @@ module Rbeapi
         instance
       end
 
+      # rubocop:disable Style/MethodMissing
       def method_missing(method_name, *args, &block)
         instance = get_instance(args[0])
         instance.send(method_name.to_sym, *args, &block)
       end
+      # rubocop:enable Style/MethodMissing
 
       def respond_to?(method_name, name = nil)
         return super unless name
@@ -369,11 +371,11 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_encapsulation(name, opts = {})
-        unless /\./.match(name)
+        unless name =~ /\./
           raise ArgumentError, 'Parameter encapsulation can be set only on '\
             'subinterfaces'
         end
-        unless /et|po/.match(name.downcase)
+        unless name.downcase =~ /et|po/
           raise ArgumentError, 'Parameter encapsulation can be set only on '\
             'Ethernet and PostChannel interfaces'
         end
@@ -582,13 +584,13 @@ module Rbeapi
       #
       # @raise [NotImplementedError] Creation of physical Ethernet interfaces
       #   is not supported. Only subinterfaces are allowed.
-      def create(_name)
-        if _name !~ /\./
+      def create(name)
+        if name !~ /\./
           raise NotImplementedError, 'creating Ethernet interfaces is '\
             'not supported'
         else
           configure("interface #{_name}")
-  end
+        end
       end
 
       ##
@@ -600,13 +602,13 @@ module Rbeapi
       #
       # @raise [NotImplementedError] Deletion of physical Ethernet interfaces
       #   is not supported.
-      def delete(_name)
-        if _name !~ /\./
+      def delete(name)
+        if name !~ /\./
           raise NotImplementedError, 'deleting Ethernet interfaces is '\
             'not supported'
         else
           configure("no interface #{_name}")
-  end
+        end
       end
 
       ##

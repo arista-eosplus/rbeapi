@@ -152,7 +152,7 @@ module Rbeapi
       #   address or nil if the value is not set.
       def parse_primary_ip(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} ip (\d+\.\d+\.\d+\.\d+)$/)
-        if match.empty?
+        if match.empty? # rubocop:disable Style/GuardClause
           raise 'Did not get a default value for primary_ip'
         else
           value = match[0][0]
@@ -175,7 +175,7 @@ module Rbeapi
       #   <1-255> or nil if the value is not set.
       def parse_priority(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} priority (\d+)$/)
-        if match.empty?
+        if match.empty? # rubocop:disable Style/GuardClause
           raise 'Did not get a default value for priority'
         else
           value = match[0][0].to_i
@@ -198,7 +198,7 @@ module Rbeapi
       #   is between <1-255> or nil if the value is not set.
       def parse_timers_advertise(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} timers advertise (\d+)$/)
-        if match.empty?
+        if match.empty? # rubocop:disable Style/GuardClause
           raise 'Did not get a default value for timers advertise'
         else
           value = match[0][0].to_i
@@ -341,7 +341,7 @@ module Rbeapi
       #   value is not set.
       def parse_ip_version(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} ip version (\d+)$/)
-        if match.empty?
+        if match.empty? # rubocop:disable Style/GuardClause
           raise 'Did not get a default value for ip version'
         else
           value = match[0][0].to_i
@@ -390,7 +390,7 @@ module Rbeapi
       #   value is not set.
       def parse_preempt_delay_min(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} preempt delay minimum (\d+)$/)
-        if match.empty?
+        if match.empty? # rubocop:disable Style/GuardClause
           raise 'Did not get a default value for preempt delay minimum'
         else
           value = match[0][0].to_i
@@ -413,7 +413,7 @@ module Rbeapi
       #   value is not set.
       def parse_preempt_delay_reload(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} preempt delay reload (\d+)$/)
-        if match.empty?
+        if match.empty? # rubocop:disable Style/GuardClause
           raise 'Did not get a default value for preempt delay reload'
         else
           value = match[0][0].to_i
@@ -436,7 +436,7 @@ module Rbeapi
       #   value is not set.
       def parse_delay_reload(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} delay reload (\d+)$/)
-        if match.empty?
+        if match.empty? # rubocop:disable Style/GuardClause
           raise 'Did not get a default value for delay reload'
         else
           value = match[0][0].to_i

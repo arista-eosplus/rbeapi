@@ -104,7 +104,7 @@ module Rbeapi
           resource_hash[:security] = sec_match[1] if sec_match
           ver_match = /^(v\d)/.match(auth) # first 2 characters
           resource_hash[:version] = ver_match[1] if ver_match
-          resource_hash[:type] = /trap/.match(type) ? :traps : :informs
+          resource_hash[:type] = type =~ /trap/ ? :traps : :informs
           resource_hash[:username] = username
           resource_hash
         end
@@ -243,7 +243,7 @@ module Rbeapi
           user_s.scan(/^(\w+).*?: (.*)/).each_with_object({}) do |(h, v), m|
             key = SNMP_USER_PARAM[h.downcase.intern] || h.downcase.intern
             m[key] = case key
-                     when :privacy  then /AES/.match(v) ? :aes128 : :des
+                     when :privacy  then v =~ /AES/ ? :aes128 : :des
                      when :version  then v.sub('v2c', 'v2').intern
                      when :auth     then v.downcase.intern
                      when :roles    then v.sub(/ \(.*?\)/, '')

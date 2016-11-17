@@ -518,13 +518,15 @@ module Rbeapi
         begin
           result = run_commands("show #{config} #{params}", encoding: encoding)
         rescue Rbeapi::Eapilib::CommandError => error
+          # rubocop:disable Style/GuardClause
           if error.to_s =~ /'show (running|startup)-config'/
             return nil
           else
             raise error
           end
+          # rubocop:enable Style/GuardClause
         end
-        if encoding == 'json'
+        if encoding == 'json' # rubocop:disable Style/GuardClause
           return result.first
         else
           return result.first['output'].strip.split("\n") unless as_string
