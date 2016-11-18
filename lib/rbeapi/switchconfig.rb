@@ -180,9 +180,7 @@ module Rbeapi
       #   in section2. The second Section object returned is the portion of
       #   section2 that is not in self.
       def compare(section2)
-        if @line != section2.line
-          raise 'XXX What if @line does not equal section2.line'
-        end
+        raise '@line does not equal section2.line' if @line != section2.line
 
         results = []
         # Compare self with section2
@@ -241,7 +239,7 @@ module Rbeapi
             end
           end
           ind = line[/\A */].size
-          if ind % @indent.nonzero? # rubocop:disable Style/Next
+          if (ind % @indent).nonzero? # rubocop:disable Style/Next
             raise ArgumentError, 'SwitchConfig indentation must be multiple '\
                                  "of #{@indent} improper indent #{ind}: "\
                                  "#{line}"
