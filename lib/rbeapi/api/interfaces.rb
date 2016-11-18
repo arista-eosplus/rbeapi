@@ -580,7 +580,7 @@ module Rbeapi
       # an exception because Ethernet interface creation is not supported.
       # This doesn't happen for Ethernet subinterfaces
       #
-      # @param _name [String] The name of the interface.
+      # @param name [String] The name of the interface.
       #
       # @raise [NotImplementedError] Creation of physical Ethernet interfaces
       #   is not supported. Only subinterfaces are allowed.
@@ -589,7 +589,7 @@ module Rbeapi
           raise NotImplementedError, 'creating Ethernet interfaces is '\
             'not supported'
         else
-          configure("interface #{_name}")
+          configure("interface #{name}")
         end
       end
 
@@ -598,7 +598,7 @@ module Rbeapi
       # raises an exception because Ethernet interface deletion is not
       # supported.
       #
-      # @param _name [String] The name of the interface.
+      # @param name [String] The name of the interface.
       #
       # @raise [NotImplementedError] Deletion of physical Ethernet interfaces
       #   is not supported.
@@ -607,7 +607,7 @@ module Rbeapi
           raise NotImplementedError, 'deleting Ethernet interfaces is '\
             'not supported'
         else
-          configure("no interface #{_name}")
+          configure("no interface #{name}")
         end
       end
 
