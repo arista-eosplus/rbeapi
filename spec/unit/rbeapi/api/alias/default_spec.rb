@@ -61,7 +61,7 @@ describe Rbeapi::Api::Alias do
     let(:test1_entries) do
       { 'Alias1' => { name: 'Alias1', command: 'my command' },
         'Alias2' => { name: 'Alias2', command: 'my command 2' },
-        'Alias3' => { name: 'Alias3', command: 'my command 3' }
+        'Alias3' => { name: 'Alias3', command: '1 conf\n2 int %1\n3 description %2\n4 end\nend' }
       }
     end
 
@@ -94,7 +94,7 @@ describe Rbeapi::Api::Alias do
 
   describe '#create' do
     it 'create a new alias entry' do
-      expect(node).to receive(:config).with('alias Alias1 my command')
+      expect(node).to receive(:config).with(['alias Alias1 my command'])
       expect(subject.create('Alias1', command: 'my command')).to be_truthy
     end
     it 'raises ArgumentError for create without required args ' do
@@ -105,7 +105,7 @@ describe Rbeapi::Api::Alias do
 
   describe '#set_command' do
     it 'set the command' do
-      expect(node).to receive(:config).with('alias Alias4 my command')
+      expect(node).to receive(:config).with(['alias Alias4 my command'])
       expect(subject.create('Alias4', command: 'my command')).to be_truthy
     end
   end

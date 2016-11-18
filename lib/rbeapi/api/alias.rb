@@ -53,7 +53,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the alias resource as a hash
       #   object from the nodes current configuration.
       def get(name)
-        aliases = config.scan(/^alias #{name} (.+)/)
+        aliases = config.scan(/^alias #{name}((?:(?= )(?:.+?)(?=\n)|(?:\n(?:.+?))(?=\n\!)))/m)
         return nil unless aliases[0]
         parse_alias_entry(name,aliases[0])
       end
@@ -79,7 +79,8 @@ module Rbeapi
       #   there are no aliass configured, this method will return an empty
       #   hash.
       def getall
-        entries = config.scan(/^alias (\w+) (.+)/)
+        entries = config.scan(/^alias (\w+)(.+)?/)
+        entries.inspect
         response = {}
         entries.each do |aliases|
           response[aliases[0]] = get aliases[0]
@@ -99,7 +100,8 @@ module Rbeapi
       def parse_alias_entry(name,command)
         hsh = {}
         hsh[:name] = name
-        hsh[:command] = command[0]
+        com = command[0]
+        hsh[:command] = com.strip
         hsh
       end
       private :parse_alias_entry
@@ -122,7 +124,13 @@ module Rbeapi
       # @return [Boolean] Returns true if the command completed successfully.
       def create(name, opts = {})
         if (/.+/).match(opts[:command])
-          cmd = "alias #{name} #{opts[:command]}"
+          command = opts.fetch(:command)
+          cmd = ["alias #{name} "]
+          if command =~ /\\n/
+              command.split("\\n").each { |a| cmd << a }
+          else
+              cmd[0] << command
+          end
           configure(cmd)
         else
           fail ArgumentError, 'a command must be provided'

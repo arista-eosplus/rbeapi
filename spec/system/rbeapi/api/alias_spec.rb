@@ -68,7 +68,8 @@ describe Rbeapi::Api::Alias do
                    'no alias test3.domain',
                    'alias test1 my command',
                    'alias test2 my command 2',
-                   'alias test3 my command 3'])
+                   'alias test3 my command 3',
+                   'alias desc 1 conf\n2 int %1\n3 description %2\n4 end\nend'])
     end
 
     it 'returns the alias collection' do
