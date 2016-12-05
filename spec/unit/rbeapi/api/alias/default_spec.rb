@@ -42,8 +42,7 @@ describe Rbeapi::Api::Alias do
 
   let(:test) do
     { name: 'Alias1',
-      command: 'my command'
-    }
+      command: 'my command' }
   end
   let(:name) { test[:name] }
 
@@ -61,8 +60,9 @@ describe Rbeapi::Api::Alias do
     let(:test1_entries) do
       { 'Alias1' => { name: 'Alias1', command: 'my command' },
         'Alias2' => { name: 'Alias2', command: 'my command 2' },
-        'Alias3' => { name: 'Alias3', command: '1 conf\n2 int %1\n3 description %2\n4 end\nend' }
-      }
+        'Alias3' => { name: 'Alias3',
+                      command: '1 conf\n2 int %1\n3 description %2\n'\
+                               '4 end\nend' } }
     end
 
     it 'returns the alias collection' do
@@ -116,5 +116,4 @@ describe Rbeapi::Api::Alias do
       expect(subject.delete('Alias1')).to be_truthy
     end
   end
-
 end
