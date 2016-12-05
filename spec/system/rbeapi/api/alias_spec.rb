@@ -48,8 +48,12 @@ describe Rbeapi::Api::Alias do
 
   let(:test) do
     { name: 'test1',
-      command: 'my command'
-    }
+      command: 'my command' }
+  end
+
+  let(:test_multi) do
+    { name: 'desc',
+      command: "1 conf\n   2 int %1\n   3 descr %2\n   4 end" }
   end
 
   describe '#getall' do
@@ -58,18 +62,25 @@ describe Rbeapi::Api::Alias do
     let(:test1_entries) do
       { 'test1' => { name: 'test1', command: 'my command' },
         'test2' => { name: 'test2', command: 'my command 2' },
-        'test3' => { name: 'test3', command: 'my command 3' }
-      }
+        'test3' => { name: 'test3', command: 'my command 3' },
+        'desc' => { name: 'desc',
+                    command: "1 conf\n   2 int %1\n   3 descr %2\n   4 end" } }
     end
 
     before do
       node.config(['no alias test1',
                    'no alias test2',
                    'no alias test3.domain',
+                   'no alias desc',
                    'alias test1 my command',
                    'alias test2 my command 2',
                    'alias test3 my command 3',
-                   'alias desc 1 conf\n2 int %1\n3 description %2\n4 end\nend'])
+                   'alias desc',
+                   '1 conf',
+                   '2 int %1',
+                   '3 descr %2',
+                   '4 end',
+                   'end'])
     end
 
     it 'returns the alias collection' do
@@ -79,9 +90,30 @@ describe Rbeapi::Api::Alias do
     it 'returns a hash collection' do
       expect(subject.getall).to be_a_kind_of(Hash)
     end
+  end
 
-    it 'returns the alias resources for given host' do
+  describe '#get' do
+    before do
+      node.config(['no alias test1',
+                   'no alias test2',
+                   'no alias test3.domain',
+                   'no alias desc',
+                   'alias test1 my command',
+                   'alias test2 my command 2',
+                   'alias test3 my command 3',
+                   'alias desc',
+                   '1 conf',
+                   '2 int %1',
+                   '3 descr %2',
+                   '4 end',
+                   'end'])
+    end
+    it 'returns the alias name and body' do
       expect(subject.get('test1')).to eq(test)
+    end
+
+    it 'returns the alias name and body for multiline entry' do
+      expect(subject.get('desc')).to eq(test_multi)
     end
 
     it 'returns a hash' do
@@ -108,7 +140,6 @@ describe Rbeapi::Api::Alias do
       expect { subject.create('test1') }.to \
         raise_error ArgumentError
     end
-
   end
 
   describe '#delete' do
@@ -133,7 +164,5 @@ describe Rbeapi::Api::Alias do
       expect(subject.create('test13', command: 'my command 2')).to be_truthy
       expect(subject.get('test13')[:command]).to eq('my command 2')
     end
-
   end
-
 end
