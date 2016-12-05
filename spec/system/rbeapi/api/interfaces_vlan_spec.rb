@@ -13,7 +13,8 @@ describe Rbeapi::Api::Interfaces do
 
   describe '#get' do
     let(:entity) do
-      { name: 'Vlan1', type: 'vlan', description: '', shutdown: false, autostate: :true, load_interval: '', encapsulation: "" }
+      { name: 'Vlan1', type: 'vlan', description: '', shutdown: false,
+        autostate: :true, load_interval: '', encapsulation: '' }
     end
 
     before { node.config(['no interface Vlan1', 'interface Vlan1']) }
@@ -65,7 +66,6 @@ describe Rbeapi::Api::Interfaces do
   end
 
   describe '#set_autostate' do
-
     it 'sets the autostate value to true' do
       node.config(['interface Vlan1', 'no autostate'])
       expect(subject.get('Vlan1')[:autostate]).to eq(:false)

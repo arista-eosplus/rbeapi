@@ -13,9 +13,10 @@ describe Rbeapi::Api::Interfaces do
 
   describe '#get' do
     let(:entity) do
-      { name: 'Port-Channel1', type: 'portchannel', description: '', encapsulation: '',
-        shutdown: false, load_interval: '', members: [], lacp_mode: 'on', minimum_links: '0',
-        lacp_timeout: '90', lacp_fallback: 'disabled' }
+      { name: 'Port-Channel1', type: 'portchannel', description: '',
+        encapsulation: '', shutdown: false, load_interval: '', members: [],
+        lacp_mode: 'on', minimum_links: '0', lacp_timeout: '90',
+        lacp_fallback: 'disabled' }
     end
 
     before do
@@ -76,7 +77,7 @@ describe Rbeapi::Api::Interfaces do
     before { node.config(['interface Port-Channel1.1']) }
 
     it 'deletes a switchport subinterface resource' do
-##      expect(subject.get('Port-Channel1.1')).not_to be_nil
+      ##      expect(subject.get('Port-Channel1.1')).not_to be_nil
       expect(subject.delete('Port-Channel1.1')).to be_truthy
       expect(subject.get('Port-Channel1.1')).to be_nil
     end

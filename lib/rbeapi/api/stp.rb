@@ -146,7 +146,7 @@ module Rbeapi
     # spanning-tree instances in EOS
     #
     class StpInstances < Entity
-      DEFAULT_STP_PRIORITY = '32768'
+      DEFAULT_STP_PRIORITY = '32768'.freeze
 
       ##
       # get returns the specified stp instance config parsed from the nodes
@@ -263,11 +263,11 @@ module Rbeapi
         when true
           cmd = "default spanning-tree mst #{inst} priority"
         when false
-          if enable
-            cmd = "spanning-tree mst #{inst} priority #{value}"
-          else
-            cmd = "no spanning-tree mst #{inst} priority"
-          end
+          cmd = if enable
+                  "spanning-tree mst #{inst} priority #{value}"
+                else
+                  "no spanning-tree mst #{inst} priority"
+                end
         end
         configure cmd
       end
@@ -360,13 +360,13 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] Resource hash attribute.
       def parse_portfast_type(config)
-        if /spanning-tree portfast network/ =~ config
-          value = 'network'
-        elsif /no spanning-tree portfast/ =~ config
-          value = 'normal'
-        else
-          value = 'edge'
-        end
+        value = if /spanning-tree portfast network/ =~ config
+                  'network'
+                elsif /no spanning-tree portfast/ =~ config
+                  'normal'
+                else
+                  'edge'
+                end
         { portfast_type: value }
       end
       private :parse_portfast_type
@@ -423,7 +423,7 @@ module Rbeapi
       # @return [Boolean] True if the commands succeed otherwise False.
       def set_portfast_type(name, opts = {})
         value = opts[:value]
-        fail ArgumentError, 'value must be set' unless value
+        raise ArgumentError, 'value must be set' unless value
         enable = opts.fetch(:enable, true)
         default = opts[:default] || false
 
@@ -431,11 +431,11 @@ module Rbeapi
         when true
           cmds = "default spanning-tree portfast #{value}"
         when false
-          if enable
-            cmds = "spanning-tree portfast #{value}"
-          else
-            cmds = "no spanning-tree portfast #{value}"
-          end
+          cmds = if enable
+                   "spanning-tree portfast #{value}"
+                 else
+                   "no spanning-tree portfast #{value}"
+                 end
         end
         configure_interface(name, cmds)
       end
@@ -463,11 +463,11 @@ module Rbeapi
         when true
           cmds = 'default spanning-tree bpduguard'
         when false
-          if enable
-            cmds = 'spanning-tree bpduguard enable'
-          else
-            cmds = 'spanning-tree bpduguard disable'
-          end
+          cmds = if enable
+                   'spanning-tree bpduguard enable'
+                 else
+                   'spanning-tree bpduguard disable'
+                 end
         end
         configure_interface(name, cmds)
       end

@@ -41,8 +41,8 @@ module Rbeapi
     # The Ipinterface class provides an instance for managing logical
     # IP interfaces configured using eAPI.
     class Ipinterfaces < Entity
-      DEFAULT_ADDRESS = ''
-      DEFAULT_LOAD_INTERVAL = ''
+      DEFAULT_ADDRESS = ''.freeze
+      DEFAULT_LOAD_INTERVAL = ''.freeze
 
       ##
       # get returns a resource hash that represents the configuration of the IP
@@ -336,7 +336,9 @@ module Rbeapi
         default = opts[:default] || false
 
         if value
-          fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+          unless value.is_a?(Array)
+            raise ArgumentError, 'value must be an Array'
+          end
         end
 
         case default

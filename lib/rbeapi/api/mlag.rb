@@ -41,10 +41,10 @@ module Rbeapi
     # The Mlag class provides a configuration instance for working with
     # the global MLAG configuration of the node.
     class Mlag < Entity
-      DEFAULT_DOMAIN_ID = ''
-      DEFAULT_LOCAL_INTF = ''
-      DEFAULT_PEER_ADDR = ''
-      DEFAULT_PEER_LINK = ''
+      DEFAULT_DOMAIN_ID = ''.freeze
+      DEFAULT_LOCAL_INTF = ''.freeze
+      DEFAULT_PEER_ADDR = ''.freeze
+      DEFAULT_PEER_LINK = ''.freeze
 
       ##
       # get scans the current nodes configuration and returns the values as
@@ -367,10 +367,10 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_shutdown(opts = {})
-        fail 'set_shutdown has the value option set' if opts[:value]
+        raise 'set_shutdown has the value option set' if opts[:value]
         # Shutdown semantics are opposite of enable semantics so invert enable
         value = !opts[:enable]
-        opts.merge!(enable: value)
+        opts[:enable] = value
         cmd = command_builder('shutdown', opts)
         cmds = ['mlag configuration', cmd]
         configure(cmds)

@@ -23,7 +23,8 @@ describe Rbeapi::Api::VlanInterface do
     let(:resource) { subject.get('Vlan1') }
 
     let(:keys) do
-      [:type, :shutdown, :load_interval, :description, :name, :autostate, :encapsulation]
+      [:type, :shutdown, :load_interval, :description, :name, :autostate,
+       :encapsulation]
     end
 
     it 'returns the resource as a hash' do
@@ -67,6 +68,5 @@ describe Rbeapi::Api::VlanInterface do
       expect(node).to receive(:config).with(commands)
       expect(subject.set_autostate('Vlan1', opts)).to be_truthy
     end
-
   end
 end

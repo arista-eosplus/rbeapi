@@ -16,7 +16,8 @@ describe Rbeapi::Api::Managementdefaults do
   end
 
   before :each do
-    allow(subject.node).to receive(:running_config).and_return(managementdefaults)
+    allow(subject.node).to receive(:running_config)
+      .and_return(managementdefaults)
   end
 
   describe '#get' do
@@ -45,12 +46,5 @@ describe Rbeapi::Api::Managementdefaults do
                                              'secret hash '])
       expect(subject.set_secret_hash(default: true)).to be_truthy
     end
-
-#    it 'fails to set any value for secret_hash' do
-#      expect(node).to receive(:config).with(['management defaults',
-#                                             'secret hash any'])
-#      expect(subject.set_secret_hash(value: 'any')).to raise_error ArgumentError
-#    end
   end
-
 end

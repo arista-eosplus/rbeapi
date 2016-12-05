@@ -85,7 +85,7 @@ module Rbeapi
 
         response[:passive_interfaces] =
           config.scan(/(?<=^\s{3}passive-interface\s)(?!default)(.*)$/)
-          .flatten!.to_a
+                .flatten!.to_a
 
         response[:active_interfaces] =
           config.scan(/(?<=^\s{3}no passive-interface\s)(.*)$/).flatten!.to_a
@@ -271,7 +271,9 @@ module Rbeapi
         current = get(pid)[:active_interfaces]
         cmds = ["router ospf #{pid}"]
         current.each do |name|
-          cmds << "passive-interface #{name}" unless Array(values).include?(name)
+          unless Array(values).include?(name)
+            cmds << "passive-interface #{name}"
+          end
         end
         Array(values).each do |name|
           cmds << "no passive-interface #{name}"
@@ -299,7 +301,9 @@ module Rbeapi
         current = get(pid)[:passive_interfaces]
         cmds = ["router ospf #{pid}"]
         current.each do |name|
-          cmds << "no passive-interface #{name}" unless Array(values).include?(name)
+          unless Array(values).include?(name)
+            cmds << "no passive-interface #{name}"
+          end
         end
         Array(values).each do |name|
           cmds << "passive-interface #{name}"
@@ -357,7 +361,7 @@ module Rbeapi
         routemap = opts[:route_map]
         redistribute = "redistribute #{proto}"
         redistribute << " route-map #{routemap}" if routemap
-        cmd = command_builder(redistribute , opts)
+        cmd = command_builder(redistribute, opts)
         cmds = ["router ospf #{pid}", cmd]
         configure cmds
       end
@@ -384,7 +388,9 @@ module Rbeapi
       def get(name)
         config = get_block("interface #{name}")
         return nil unless config
-        return nil unless /no switchport$/ =~ config || /^interface (Lo|Vl)/ =~ config
+        unless /no switchport$/ =~ config || /^interface (Lo|Vl)/ =~ config
+          return nil
+        end
 
         response = {}
         nettype = /ip ospf network point-to-point/ =~ config

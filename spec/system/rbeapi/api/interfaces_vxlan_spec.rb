@@ -13,9 +13,9 @@ describe Rbeapi::Api::Interfaces do
 
   describe '#get' do
     let(:entity) do
-      { name: 'Vxlan1', type: 'vxlan', description: '', encapsulation: '', shutdown: false, load_interval: '',
-        source_interface: '', multicast_group: '', udp_port: 4789,
-        flood_list: [], vlans: {} }
+      { name: 'Vxlan1', type: 'vxlan', description: '', encapsulation: '',
+        shutdown: false, load_interval: '', source_interface: '',
+        multicast_group: '', udp_port: 4789, flood_list: [], vlans: {} }
     end
 
     before { node.config(['no interface Vxlan1', 'interface Vxlan1']) }

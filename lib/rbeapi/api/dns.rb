@@ -213,7 +213,9 @@ module Rbeapi
         default = opts[:default] || false
 
         if value
-          fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+          unless value.is_a?(Array)
+            raise ArgumentError, 'value must be an Array'
+          end
         end
 
         cmds = []

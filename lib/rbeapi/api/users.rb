@@ -149,7 +149,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_user_entry(user)
-        fail ArgumentError, 'user must be an Array' unless user.is_a?(Array)
+        raise ArgumentError, 'user must be an Array' unless user.is_a?(Array)
 
         hsh = {}
         hsh[:name] = user[0]
@@ -219,13 +219,13 @@ module Rbeapi
           # just return the value.
           enc = opts.fetch(:encryption, 'cleartext')
           unless @encryption_map[enc]
-            fail ArgumentError, "invalid encryption value: #{enc}"
+            raise ArgumentError, "invalid encryption value: #{enc}"
           end
           enc = @encryption_map[enc]
 
           unless opts[:secret]
-            fail ArgumentError,
-                 'secret must be specified if nopassword is false'
+            raise ArgumentError,
+                  'secret must be specified if nopassword is false'
           end
           cmd << " secret #{enc} #{opts[:secret]}"
         end

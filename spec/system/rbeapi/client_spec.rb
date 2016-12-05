@@ -171,8 +171,7 @@ describe Rbeapi::Client do
                                            username: 'test2',
                                            password: 'test',
                                            transport: 'http',
-                                           host: 'test2'
-                                          )).to eq(nil)
+                                           host: 'test2')).to eq(nil)
       expect(subject.config.get_connection('test2'))
         .to eq(username: 'test2',
                password: 'test',

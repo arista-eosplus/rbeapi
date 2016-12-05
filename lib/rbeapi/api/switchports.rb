@@ -85,7 +85,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_mode(config)
         mdata = /(?<=\s{3}switchport\smode\s)(.+)$/.match(config)
-        return { mode: [] }  unless defined? mdata[1]
+        return { mode: [] } unless defined? mdata[1]
         { mode: mdata[1] }
       end
       private :parse_mode
@@ -102,7 +102,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_access_vlan(config)
         mdata = /(?<=access\svlan\s)(.+)$/.match(config)
-        return { access_vlan: [] }  unless defined? mdata[1]
+        return { access_vlan: [] } unless defined? mdata[1]
         { access_vlan: mdata[1] }
       end
       private :parse_access_vlan
@@ -119,7 +119,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_trunk_native_vlan(config)
         mdata = /(?<=trunk\snative\svlan\s)(.+)$/.match(config)
-        return { trunk_native_vlan: [] }  unless defined? mdata[1]
+        return { trunk_native_vlan: [] } unless defined? mdata[1]
         { trunk_native_vlan: mdata[1] }
       end
       private :parse_trunk_native_vlan
@@ -158,7 +158,7 @@ module Rbeapi
       def parse_trunk_groups(config)
         mdata = config.scan(/(?<=trunk\sgroup\s)(.+)$/)
         return { trunk_group: [] } unless defined? mdata[1]
-        mdata = mdata.flatten if mdata.length > 0
+        mdata = mdata.flatten unless mdata.empty?
         { trunk_groups: mdata }
       end
       private :parse_trunk_groups
@@ -281,7 +281,9 @@ module Rbeapi
         default = opts[:default] || false
 
         if value
-          fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+          unless value.is_a?(Array)
+            raise ArgumentError, 'value must be an Array'
+          end
           value = value.map(&:inspect).join(',').tr('"', '')
         end
 
@@ -289,11 +291,11 @@ module Rbeapi
         when true
           cmds = 'default switchport trunk allowed vlan'
         when false
-          if !enable
-            cmds = 'no switchport trunk allowed vlan'
-          else
-            cmds = ["switchport trunk allowed vlan #{value}"]
-          end
+          cmds = if !enable
+                   'no switchport trunk allowed vlan'
+                 else
+                   ["switchport trunk allowed vlan #{value}"]
+                 end
         end
         configure_interface(name, cmds)
       end
@@ -374,7 +376,7 @@ module Rbeapi
         end
 
         value = opts.fetch(:value, [])
-        fail ArgumentError, 'value must be an Array' unless value.is_a?(Array)
+        raise ArgumentError, 'value must be an Array' unless value.is_a?(Array)
 
         value = Set.new value
         current_value = Set.new get(name)[:trunk_groups]
@@ -389,7 +391,7 @@ module Rbeapi
         current_value.difference(value).each do |group|
           cmds << "no switchport trunk group #{group}"
         end
-        configure_interface(name, cmds) if cmds.length > 0
+        configure_interface(name, cmds) unless cmds.empty?
       end
     end
   end

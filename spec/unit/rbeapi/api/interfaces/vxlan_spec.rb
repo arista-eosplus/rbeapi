@@ -23,8 +23,8 @@ describe Rbeapi::Api::VxlanInterface do
     let(:resource) { subject.get('Vxlan1') }
 
     let(:keys) do
-      [:type, :shutdown, :load_interval, :description, :encapsulation, :name, :source_interface,
-       :multicast_group, :udp_port, :flood_list, :vlans]
+      [:type, :shutdown, :load_interval, :description, :encapsulation, :name,
+       :source_interface, :multicast_group, :udp_port, :flood_list, :vlans]
     end
 
     it 'returns the resource as a hash' do

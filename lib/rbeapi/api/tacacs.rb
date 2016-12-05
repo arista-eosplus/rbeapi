@@ -166,7 +166,7 @@ module Rbeapi
       def set_global_key(opts = {})
         format = opts[:key_format]
         key = opts[:key]
-        fail ArgumentError, 'key option is required' unless key
+        raise ArgumentError, 'key option is required' unless key
         result = api.config("tacacs-server key #{format} #{key}")
         result == [{}]
       end

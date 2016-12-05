@@ -37,7 +37,7 @@ class Fixtures
   def self.save(key, obj, opts = {})
     dir = opts[:dir] || File.expand_path('../../fixtures', __FILE__)
     file = Pathname.new(File.join(dir, "fixture_#{key}.yaml"))
-    fail ArgumentError, "Error, file #{file} exists" if file.exist?
+    raise ArgumentError, "Error, file #{file} exists" if file.exist?
     File.open(file, 'w+') { |f| f.puts YAML.dump(obj) }
   end
 end
@@ -75,9 +75,9 @@ module FixtureHelpers
     text = Pathname.new(File.join(dir, "fixture_#{key}.text"))
 
     data = if yaml.exist?; then YAML.load(File.read(yaml))
-           elsif json.exist?; then JSON.load(File.read(json))
+           elsif json.exist?; then JSON.parse(File.read(json))
            elsif text.exist?; then File.read(text)
-           else fail "could not load YAML, JSON or TEXT fixture #{key} "\
+           else raise "could not load YAML, JSON or TEXT fixture #{key} "\
              "tried:\n  #{yaml}\n  #{json} #{text}"
            end
 
@@ -88,7 +88,7 @@ module FixtureHelpers
     when :json then JSON.pretty_generate(data)
     when :yaml then YAML.dump(data)
     when :text then data
-    else fail ArgumentError, "unknown format #{opts[:format].inspect}"
+    else raise ArgumentError, "unknown format #{opts[:format].inspect}"
     end
   end
   # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength
