@@ -40,7 +40,6 @@ module Rbeapi
     ##
     # The Alias class manages aliass entries on an EOS node.
     class Alias < Entity
-
       ##
       # get returns the current alias configuration hash extracted from the
       # nodes running configuration.
@@ -53,9 +52,14 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the alias resource as a hash
       #   object from the nodes current configuration.
       def get(name)
-        aliases = config.scan(/^alias #{name}((?:(?= )(?:.+?)(?=\n)|(?:\n(?:.+?))(?=\n\!)))/m)
+        # Complex regex handles the following cases:
+        #  All aliases start with 'alian <name>' followed by
+        #    <space><single-line command>
+        #    <carriage return><multiple lines of commands>
+        pattern = /^alias #{name}((?:(?= )(?:.+?)(?=\n)|\n(?:.+?)(?=\n\!)))/m
+        aliases = config.scan(pattern)
         return nil unless aliases[0]
-        parse_alias_entry(name,aliases[0])
+        parse_alias_entry(name, aliases[0])
       end
 
       ##
@@ -97,7 +101,7 @@ module Rbeapi
       #   expression scan of the aliass configuration.
       #
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
-      def parse_alias_entry(name,command)
+      def parse_alias_entry(name, command)
         hsh = {}
         hsh[:name] = name
         com = command[0]
@@ -123,18 +127,16 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def create(name, opts = {})
-        if (/.+/).match(opts[:command])
-          command = opts.fetch(:command)
-          cmd = ["alias #{name} "]
-          if command =~ /\\n/
-              command.split("\\n").each { |a| cmd << a }
-          else
-              cmd[0] << command
-          end
-          configure(cmd)
+        raise ArgumentError, 'a command must be provided' unless \
+            opts[:command] =~ /.+/
+        command = opts.fetch(:command)
+        cmd = ["alias #{name} "]
+        if command =~ /\\n/
+          command.split('\\n').each { |a| cmd << a }
         else
-          fail ArgumentError, 'a command must be provided'
+          cmd[0] << command
         end
+        configure(cmd)
       end
 
       ##
@@ -153,7 +155,6 @@ module Rbeapi
       def delete(name)
         configure("no alias #{name}")
       end
-
     end
   end
 end
