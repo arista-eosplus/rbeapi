@@ -1,7 +1,28 @@
 # Change Log
 
-## [1.0](https://github.com/arista-eosplus/rbeapi/tree/1.0) (2016-09-22)
-[Full Changelog](https://github.com/arista-eosplus/rbeapi/compare/v0.5.1...1.0)
+## [1.1](https://github.com/arista-eosplus/rbeapi/tree/1.1) (2016-12-06)
+[Full Changelog](https://github.com/arista-eosplus/rbeapi/compare/v1.0...1.1)
+
+**Implemented enhancements:**
+
+- add subinterface functionality [\#161](https://github.com/arista-eosplus/rbeapi/pull/161) ([mmailand](https://github.com/mmailand))
+- add support to set aliases [\#160](https://github.com/arista-eosplus/rbeapi/pull/160) ([mmailand](https://github.com/mmailand))
+- added support for setting the crypto in managementdefaults [\#159](https://github.com/arista-eosplus/rbeapi/pull/159) ([mmailand](https://github.com/mmailand))
+- added support for autostate [\#158](https://github.com/arista-eosplus/rbeapi/pull/158) ([mmailand](https://github.com/mmailand))
+- add support for multi/single-line prefix list output [\#155](https://github.com/arista-eosplus/rbeapi/pull/155) ([mrvinti](https://github.com/mrvinti))
+
+**Fixed bugs:**
+
+- Fix multiline alias support [\#165](https://github.com/arista-eosplus/rbeapi/pull/165) ([jerearista](https://github.com/jerearista))
+- extend and fix ospf features [\#156](https://github.com/arista-eosplus/rbeapi/pull/156) ([rknaus](https://github.com/rknaus))
+
+**Merged pull requests:**
+
+- Style updates for Rubocop 0.45 [\#163](https://github.com/arista-eosplus/rbeapi/pull/163) ([jerearista](https://github.com/jerearista))
+- fix for rspec failure on current develop [\#162](https://github.com/arista-eosplus/rbeapi/pull/162) ([mmailand](https://github.com/mmailand))
+
+## [v1.0](https://github.com/arista-eosplus/rbeapi/tree/v1.0) (2016-09-26)
+[Full Changelog](https://github.com/arista-eosplus/rbeapi/compare/v0.5.1...v1.0)
 
 **Implemented enhancements:**
 
@@ -24,6 +45,8 @@
 
 **Merged pull requests:**
 
+- Release 1.0 [\#153](https://github.com/arista-eosplus/rbeapi/pull/153) ([jerearista](https://github.com/jerearista))
+- Release 1.0 [\#152](https://github.com/arista-eosplus/rbeapi/pull/152) ([jerearista](https://github.com/jerearista))
 - Add json option to get\_config [\#151](https://github.com/arista-eosplus/rbeapi/pull/151) ([jerearista](https://github.com/jerearista))
 - Handle more multiline config commands [\#150](https://github.com/arista-eosplus/rbeapi/pull/150) ([jerearista](https://github.com/jerearista))
 - Ensure get\_config, running\_config, and startup\_config return sane output [\#149](https://github.com/arista-eosplus/rbeapi/pull/149) ([jerearista](https://github.com/jerearista))
