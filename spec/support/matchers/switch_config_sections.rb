@@ -61,12 +61,12 @@ end
 
 RSpec::Matchers.define :section_equal do |expected|
   if expected.class != Rbeapi::SwitchConfig::Section
-    fail 'expected is not a Rbeapi::SwitchConfig::Section class'
+    raise 'expected is not a Rbeapi::SwitchConfig::Section class'
   end
 
   match do |actual|
     if actual.class != Rbeapi::SwitchConfig::Section
-      fail 'actual is not a Rbeapi::SwitchConfig::Section class'
+      raise 'actual is not a Rbeapi::SwitchConfig::Section class'
     end
 
     section_compare(actual, expected)

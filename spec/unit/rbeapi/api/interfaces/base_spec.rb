@@ -23,7 +23,7 @@ describe Rbeapi::Api::BaseInterface do
     let(:resource) { subject.get('Loopback0') }
 
     let(:keys) do
-      [:type, :shutdown, :load_interval, :description, :name]
+      [:type, :shutdown, :load_interval, :description, :encapsulation, :name]
     end
 
     it 'returns an ethernet resource as a hash' do

@@ -124,8 +124,7 @@ describe Rbeapi::Api::Routemaps do
                       continue: 99, description: 'descript',
                       match: ['ip address prefix-list MYLOOPBACK',
                               'interface Loopback0'],
-                      set: ['community internet 5555:5555'])
-            ).to be_truthy
+                      set: ['community internet 5555:5555'])).to be_truthy
       expect(subject.get('test')).to eq(test_entry)
     end
 
@@ -135,7 +134,8 @@ describe Rbeapi::Api::Routemaps do
       expect(subject.get('test1')).to be_truthy
       expect(subject.get('test1').assoc('permit')[0]).to eq('permit')
       expect(
-        subject.get('test1').assoc('permit')[1].assoc(10)[0]).to eq(10)
+        subject.get('test1').assoc('permit')[1].assoc(10)[0]
+      ).to eq(10)
       expect(
         subject.get('test1').assoc('permit')[1].assoc(10)[1][:continue]
       ).to eq(nil)
@@ -213,11 +213,13 @@ describe Rbeapi::Api::Routemaps do
       expect(
         subject.set_match_statements('test', 'permit', 10,
                                      ['ip address prefix-list MYLOOPBACK',
-                                      'interface Loopback0'])).to be_truthy
+                                      'interface Loopback0'])
+      ).to be_truthy
       expect(subject.get('test'))
         .to eq('permit' => { 10 => {
                  match: ['ip address prefix-list MYLOOPBACK',
-                         'interface Loopback0'] } })
+                         'interface Loopback0']
+               } })
     end
 
     it 'adds more match statements' do
@@ -230,12 +232,13 @@ describe Rbeapi::Api::Routemaps do
       expect(subject
         .set_match_statements('test', 'permit', 10,
                               ['interface Vlan100',
-                               'ip address prefix-list MYLOOPBACK'])
-            ).to be_truthy
+                               'ip address prefix-list MYLOOPBACK']))
+        .to be_truthy
       expect(subject.get('test'))
         .to eq('permit' => { 10 => {
                  match: ['ip address prefix-list MYLOOPBACK',
-                         'interface Vlan100'] } })
+                         'interface Vlan100']
+               } })
       expect(subject
         .set_match_statements('test', 'permit', 10,
                               ['interface Vlan100'])).to be_truthy
@@ -261,7 +264,8 @@ describe Rbeapi::Api::Routemaps do
       expect(subject.get('test1'))
         .to eq('permit' => { 10 => {
                  match: ['ip address prefix-list MYLOOPBACK',
-                         'interface Loopback0'] } })
+                         'interface Loopback0']
+               } })
     end
   end
 
@@ -290,7 +294,8 @@ describe Rbeapi::Api::Routemaps do
                              'community internet 4444:4444'])).to be_truthy
       expect(subject.get('test1'))
         .to eq('permit' => { 10 => {
-                 set: ['community internet 4444:4444 5555:5555'] } })
+                 set: ['community internet 4444:4444 5555:5555']
+               } })
     end
   end
 

@@ -227,7 +227,7 @@ module Rbeapi
       def create(bgp_as, opts = {})
         if opts[:maximum_ecmp_paths] && !opts[:maximum_paths]
           message = 'maximum_paths must be set if maximum_ecmp_paths is set'
-          fail ArgumentError, message
+          raise ArgumentError, message
         end
         cmds = ["router bgp #{bgp_as}"]
         if opts.key?(:enable)
@@ -284,7 +284,7 @@ module Rbeapi
       # @return [Boolean] Returns true if the command complete successfully.
       def configure_bgp(cmd)
         config = get_block('^router bgp .*')
-        fail 'BGP router is not configured' unless config
+        raise 'BGP router is not configured' unless config
         bgp_as = Bgp.parse_bgp_as(config)
         cmds = ["router bgp #{bgp_as[:bgp_as]}", cmd]
         configure(cmds)
@@ -341,10 +341,10 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command complete successfully.
       def set_shutdown(opts = {})
-        fail 'set_shutdown has the value option set' if opts[:value]
+        raise 'set_shutdown has the value option set' if opts[:value]
         # Shutdown semantics are opposite of enable semantics so invert enable
         value = !opts[:enable]
-        opts.merge!(enable: value)
+        opts[:enable] = value
         configure_bgp(command_builder('shutdown', opts))
       end
 
@@ -697,7 +697,7 @@ module Rbeapi
       # @return [Boolean] Returns true if the command complete successfully.
       def configure_bgp(cmd)
         config = get_block('^router bgp .*')
-        fail 'BGP router is not configured' unless config
+        raise 'BGP router is not configured' unless config
         bgp_as = Bgp.parse_bgp_as(config)
         cmds = ["router bgp #{bgp_as[:bgp_as]}", cmd]
         configure(cmds)
@@ -831,10 +831,10 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command complete successfully.
       def set_shutdown(name, opts = {})
-        fail 'set_shutdown has value option set' if opts[:value]
+        raise 'set_shutdown has value option set' if opts[:value]
         # Shutdown semantics are opposite of enable semantics so invert enable.
         value = !opts[:enable]
-        opts.merge!(enable: value)
+        opts[:enable] = value
         configure_bgp(neigh_command_builder(name, 'shutdown', opts))
       end
 
@@ -859,7 +859,7 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command complete successfully.
       def set_send_community(name, opts = {})
-        fail 'send_community has the value option set' if opts[:value]
+        raise 'send_community has the value option set' if opts[:value]
         configure_bgp(neigh_command_builder(name, 'send-community', opts))
       end
 
@@ -885,7 +885,7 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command complete successfully.
       def set_next_hop_self(name, opts = {})
-        fail 'set_next_hop_self has the value option set' if opts[:value]
+        raise 'set_next_hop_self has the value option set' if opts[:value]
         configure_bgp(neigh_command_builder(name, 'next-hop-self', opts))
       end
 

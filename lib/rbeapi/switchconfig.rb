@@ -127,7 +127,7 @@ module Rbeapi
       # @return [Section] The Section object contains the portion of self
       #   that is not in section2.
       def compare_r(section2)
-        fail '@line must equal section2.line' if @line != section2.line
+        raise '@line must equal section2.line' if @line != section2.line
 
         # XXX Need to have a list of exceptions of mode commands that
         # support default. If all the commands have been removed from
@@ -180,9 +180,7 @@ module Rbeapi
       #   in section2. The second Section object returned is the portion of
       #   section2 that is not in self.
       def compare(section2)
-        if @line != section2.line
-          fail 'XXX What if @line does not equal section2.line'
-        end
+        raise '@line does not equal section2.line' if @line != section2.line
 
         results = []
         # Compare self with section2
@@ -234,16 +232,17 @@ module Rbeapi
         config.each_line do |line|
           skip = true if @multiline_cmds.any? { |cmd| line =~ /#{cmd}/ }
           if skip
-            if line =~ /^\s*EOF$/
+            if line =~ /^\s*EOF$/ # rubocop:disable Style/GuardClause
               skip = false
             else
               next
             end
           end
           ind = line[/\A */].size
-          if ind % @indent != 0
-            fail ArgumentError, 'SwitchConfig indentation must be multiple of '\
-                                "#{@indent} improper indent #{ind}: #{line}"
+          if (ind % @indent).nonzero? # rubocop:disable Style/Next
+            raise ArgumentError, 'SwitchConfig indentation must be multiple '\
+                                 "of #{@indent} improper indent #{ind}: "\
+                                 "#{line}"
           end
         end
         true
@@ -277,7 +276,7 @@ module Rbeapi
           end
           if combine
             longline << line
-            if line =~ /^\s*EOF$/
+            if line =~ /^\s*EOF$/ # rubocop:disable Style/GuardClause
               line = longline.join
               combine = false
             else
@@ -287,7 +286,7 @@ module Rbeapi
 
           # Ignore comment lines and the end statement if there
           # XXX Fix parsing end
-          next if line.start_with?('!') || line.start_with?('end')
+          next if line.start_with?('!', 'end')
           line.chomp!
           next if line.empty?
           indent_level = line[/\A */].size / @indent

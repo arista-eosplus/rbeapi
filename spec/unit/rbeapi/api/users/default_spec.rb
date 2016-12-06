@@ -57,8 +57,7 @@ describe Rbeapi::Api::Users do
       nopassword: false,
       encryption: 'md5',
       secret: '$1$Ehb5lL0D$N3MgrkfMFxmeh0FSZ5sEZ1',
-      sshkey: sshkey
-    }
+      sshkey: sshkey }
   end
   let(:name) { test[:name] }
 
@@ -84,8 +83,7 @@ describe Rbeapi::Api::Users do
         'rbeapi1' => { name: 'rbeapi1', privilege: 2,
                        role: 'network-minon', nopassword: false,
                        encryption: 'cleartext', secret: 'icanttellyou',
-                       sshkey: nil }
-      }
+                       sshkey: nil } }
     end
 
     it 'returns the username collection' do

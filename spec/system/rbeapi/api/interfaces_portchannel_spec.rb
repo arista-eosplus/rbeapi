@@ -14,9 +14,9 @@ describe Rbeapi::Api::Interfaces do
   describe '#get' do
     let(:entity) do
       { name: 'Port-Channel1', type: 'portchannel', description: '',
-        shutdown: false, load_interval: '', members: [], lacp_mode: 'on',
-        minimum_links: '0',
-        lacp_timeout: '90', lacp_fallback: 'disabled' }
+        encapsulation: '', shutdown: false, load_interval: '', members: [],
+        lacp_mode: 'on', minimum_links: '0', lacp_timeout: '90',
+        lacp_fallback: 'disabled' }
     end
 
     before do
@@ -52,6 +52,17 @@ describe Rbeapi::Api::Interfaces do
     end
   end
 
+  describe '#create' do
+    before { node.config('no interface Port-Channel1.1') }
+
+    it 'creates a new subinterface resource' do
+      expect(subject.get('Port-Channel1.1')).to be_nil
+      expect(subject.create('Port-Channel1.1')).to be_truthy
+      expect(subject.get('Port-Channel1.1')).not_to be_nil
+      node.config(['no interface Port-Channel1.1'])
+    end
+  end
+
   describe '#delete' do
     before { node.config(['interface Port-Channel1']) }
 
@@ -59,6 +70,16 @@ describe Rbeapi::Api::Interfaces do
       expect(subject.get('Port-Channel1')).not_to be_nil
       expect(subject.delete('Port-Channel1')).to be_truthy
       expect(subject.get('Port-Channel1')).to be_nil
+    end
+  end
+
+  describe '#delete' do
+    before { node.config(['interface Port-Channel1.1']) }
+
+    it 'deletes a switchport subinterface resource' do
+      ##      expect(subject.get('Port-Channel1.1')).not_to be_nil
+      expect(subject.delete('Port-Channel1.1')).to be_truthy
+      expect(subject.get('Port-Channel1.1')).to be_nil
     end
   end
 
@@ -79,6 +100,17 @@ describe Rbeapi::Api::Interfaces do
       expect(subject.set_description('Port-Channel1', value: 'foo bar'))
         .to be_truthy
       expect(subject.get('Port-Channel1')[:description]).to eq('foo bar')
+    end
+  end
+
+  describe '#set_encapsulation' do
+    it 'sets the encapsulation value on the interface' do
+      node.config(['interface Port-Channel1.1', 'no encapsulation dot1q vlan'])
+      expect(subject.get('Port-Channel1.1')[:encapsulation]).to be_empty
+      expect(subject.set_encapsulation('Port-Channel1.1', value: '31'))
+        .to be_truthy
+      expect(subject.get('Port-Channel1.1')[:encapsulation]).to eq('31')
+      node.config(['no interface Port-Channel1.1'])
     end
   end
 

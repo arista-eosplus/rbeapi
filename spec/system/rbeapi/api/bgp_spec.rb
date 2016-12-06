@@ -68,8 +68,7 @@ describe Rbeapi::Api::Bgp do
           shutdown: true, description: nil, next_hop_self: true,
           route_map_in: nil, route_map_out: nil
         }
-      }
-    }
+      } }
   end
 
   let(:response) do

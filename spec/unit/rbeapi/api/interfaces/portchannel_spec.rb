@@ -31,8 +31,8 @@ describe Rbeapi::Api::PortchannelInterface do
     let(:resource) { subject.get('Port-Channel1') }
 
     let(:keys) do
-      [:type, :shutdown, :load_interval, :description, :name, :members,
-       :lacp_mode, :minimum_links, :lacp_timeout, :lacp_fallback]
+      [:type, :shutdown, :load_interval, :description, :encapsulation, :name,
+       :members, :lacp_mode, :minimum_links, :lacp_timeout, :lacp_fallback]
     end
 
     it 'returns an ethernet resource as a hash' do
@@ -111,6 +111,40 @@ describe Rbeapi::Api::PortchannelInterface do
     end
   end
 
+  describe '#set_encapsulation' do
+    it 'sets the interface encapsulation' do
+      expect(node).to receive(:config)
+        .with(['interface Port-Channel1.1', 'encapsulation dot1q vlan 10'])
+
+      expect(subject.set_encapsulation('Port-Channel1.1', value: '10'))
+        .to be_truthy
+    end
+
+    it 'negates the interface encapsulation' do
+      expect(node).to receive(:config)
+        .with(['interface Port-Channel1.1', 'no encapsulation dot1q vlan'])
+
+      expect(subject.set_encapsulation('Port-Channel1.1',
+                                       enable: false)).to be_truthy
+    end
+
+    it 'defaults the interface encapsulation' do
+      expect(node).to receive(:config)
+        .with(['interface Port-Channel1.1', 'default encapsulation dot1q vlan'])
+
+      expect(subject.set_encapsulation('Port-Channel1.1', default: true))
+        .to be_truthy
+    end
+
+    it 'default is preferred over enable' do
+      expect(node).to receive(:config)
+        .with(['interface Port-Channel1.1', 'default encapsulation dot1q vlan'])
+
+      opts = { enable: false, default: true }
+      expect(subject.set_encapsulation('Port-Channel1.1', opts)).to be_truthy
+    end
+  end
+
   describe '#set_shutdown' do
     it 'enables the interface' do
       expect(node).to receive(:config)
@@ -144,8 +178,11 @@ describe Rbeapi::Api::PortchannelInterface do
 
   describe '#set_members' do
     it 'raises an ArgumentError if members is not an array' do
-      expect { subject.set_members('Port-Channel1', 'Ethernet3') }.to \
-        raise_error(ArgumentError)
+      expect do
+        subject.set_members('Port-Channel1',
+                            'Ethernet3')
+      end
+        .to raise_error(ArgumentError)
     end
   end
 end

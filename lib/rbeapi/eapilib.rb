@@ -46,8 +46,8 @@ module Rbeapi
     DEFAULT_HTTP_LOCAL_PORT = 8080
     DEFAULT_HTTP_OPEN_TIMEOUT = 10
     DEFAULT_HTTP_READ_TIMEOUT = 10
-    DEFAULT_HTTP_PATH = '/command-api'
-    DEFAULT_UNIX_SOCKET = '/var/run/command-api.sock'
+    DEFAULT_HTTP_PATH = '/command-api'.freeze
+    DEFAULT_UNIX_SOCKET = '/var/run/command-api.sock'.freeze
 
     ##
     # Base error class for generating exceptions.  The EapiError class
@@ -283,7 +283,7 @@ module Rbeapi
           if decoded.include?('error')
             code = decoded['error']['code']
             msg = decoded['error']['message']
-            fail CommandError.new(msg, code)
+            raise CommandError.new(msg, code)
           end
         rescue Timeout::Error
           raise ConnectionError, 'unable to connect to eAPI'

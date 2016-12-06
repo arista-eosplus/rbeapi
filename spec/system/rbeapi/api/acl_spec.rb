@@ -34,14 +34,12 @@ describe Rbeapi::Api::Acl do
       '40' => { seqno: '40', action: 'permit', srcaddr: '5.6.7.0',
                 srcprefixlen: '24', log: nil },
       '50' => { seqno: '50', action: 'permit', srcaddr: '9.10.11.0',
-                srcprefixlen: '255.255.255.0', log: 'log' }
-    }
+                srcprefixlen: '255.255.255.0', log: 'log' } }
   end
 
   let(:test2_entries) do
     { '10' => { seqno: '10', action: 'deny', srcaddr: '16.0.0.0',
-                srcprefixlen: '8', log: nil }
-    }
+                srcprefixlen: '8', log: nil } }
   end
 
   describe '#get' do

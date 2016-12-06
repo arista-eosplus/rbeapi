@@ -104,7 +104,7 @@ module Rbeapi
           resource_hash[:security] = sec_match[1] if sec_match
           ver_match = /^(v\d)/.match(auth) # first 2 characters
           resource_hash[:version] = ver_match[1] if ver_match
-          resource_hash[:type] = /trap/.match(type) ? :traps : :informs
+          resource_hash[:type] = type =~ /trap/ ? :traps : :informs
           resource_hash[:username] = username
           resource_hash
         end
@@ -243,7 +243,7 @@ module Rbeapi
           user_s.scan(/^(\w+).*?: (.*)/).each_with_object({}) do |(h, v), m|
             key = SNMP_USER_PARAM[h.downcase.intern] || h.downcase.intern
             m[key] = case key
-                     when :privacy  then /AES/.match(v) ? :aes128 : :des
+                     when :privacy  then v =~ /AES/ ? :aes128 : :des
                      when :version  then v.sub('v2c', 'v2').intern
                      when :auth     then v.downcase.intern
                      when :roles    then v.sub(/ \(.*?\)/, '')
@@ -262,7 +262,7 @@ module Rbeapi
         authentication: :auth,
         privacy: :privacy,
         group: :roles
-      }
+      }.freeze
 
       ##
       # snmp_user_set creates or updates an SNMP user account on the target
@@ -290,13 +290,15 @@ module Rbeapi
       #   hash which is idempotent.
       def snmp_user_set(opts = {})
         group = [*opts[:roles]].first
-        fail ArgumentError, 'at least one role is required' unless group
+        raise ArgumentError, 'at least one role is required' unless group
         version = opts[:version].to_s.sub('v2', 'v2c')
         cmd = user_cmd = "snmp-server user #{opts[:name]} #{group} #{version}"
         if opts[:password] && version == 'v3'
           privacy = opts[:privacy].to_s.scan(/aes|des/).first
-          fail ArgumentError,
-               'privacy is required when managing passwords' unless privacy
+          unless privacy
+            raise ArgumentError,
+                  'privacy is required when managing passwords'
+          end
           cmd += " auth #{opts[:auth] || 'sha'} #{opts[:password]} "\
             "priv #{privacy} #{opts[:password]}"
         end

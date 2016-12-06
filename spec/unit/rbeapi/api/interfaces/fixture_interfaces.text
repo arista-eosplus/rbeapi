@@ -217,3 +217,71 @@ interface Port-Channel1
    mlag 1
    spanning-tree portfast
 !
+interface Vlan1
+   no description
+   no shutdown
+   default load-interval
+   mtu 1500
+   logging event link-status use-global
+   autostate
+   snmp trap link-status
+   no ip proxy-arp
+   no ip local-proxy-arp
+   no ip address
+   no ip verify unicast
+   default arp timeout 14400
+   default ipv6 nd cache expire 14400
+   bfd interval 300 min_rx 300 multiplier 3
+   no bfd echo
+   default ip dhcp smart-relay
+   no ip helper-address
+   no ipv6 dhcp relay destination
+   ip dhcp relay information option circuit-id Vlan1
+   no ip igmp
+   ip igmp version 3
+   ip igmp last-member-query-count 2
+   ip igmp last-member-query-interval 10
+   ip igmp query-max-response-time 100
+   ip igmp query-interval 125
+   ip igmp startup-query-count 2
+   ip igmp startup-query-interval 310
+   ip igmp router-alert optional connected
+   no ip igmp host-proxy
+   no ipv6 enable
+   no ipv6 address
+   no ipv6 verify unicast
+   no ipv6 nd ra suppress
+   ipv6 nd ra interval msec 200000
+   ipv6 nd ra lifetime 1800
+   no ipv6 nd ra mtu suppress
+   no ipv6 nd managed-config-flag
+   no ipv6 nd other-config-flag
+   ipv6 nd reachable-time 0
+   ipv6 nd router-preference medium
+   ipv6 nd ra dns-servers lifetime 300
+   ipv6 nd ra dns-suffixes lifetime 300
+   ipv6 nd ra hop-limit 64
+   no ip multicast static
+   ip mfib fastdrop
+   default ntp serve
+   default ip ospf bfd
+   ip ospf cost 10
+   ip ospf dead-interval 40
+   ip ospf hello-interval 10
+   ip ospf priority 1
+   ip ospf retransmit-interval 5
+   no ip ospf shutdown
+   ip ospf transmit-delay 1
+   no ip ospf authentication
+   no ip ospf mtu-ignore
+   no ip pim sparse-mode
+   no ip pim bidirectional
+   no ip pim border-router
+   ip pim query-interval 30
+   ip pim query-count 3.5
+   ip pim join-prune-interval 60
+   ip pim dr-priority 1
+   no ip pim neighbor-filter
+   default ip pim bfd-instance
+   no ip pim bsr-border
+!

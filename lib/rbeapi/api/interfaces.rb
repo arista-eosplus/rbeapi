@@ -55,6 +55,7 @@ module Rbeapi
       #     name: <string>,
       #     type: <string>,
       #     description: <string>,
+      #     encapsulation: <integer>,
       #     shutdown: <boolean>
       #   }
       #
@@ -77,6 +78,7 @@ module Rbeapi
       #       name: <string>,
       #       type: <string>,
       #       description: <string>,
+      #       encapsulation: <integer>,
       #       shutdown: <boolean>,
       #       ...
       #     },
@@ -84,6 +86,7 @@ module Rbeapi
       #       name: <string>,
       #       type: <string>,
       #       description: <string>,
+      #       encapsulation: <integer>,
       #       shutdown: <boolean>,
       #       ...
       #     },
@@ -110,16 +113,18 @@ module Rbeapi
       # @return [Object] Returns the interface instance as an Object.
       def get_instance(name)
         name = name[0, 2].upcase
-        case name
-        when 'ET'
-          cls = 'Rbeapi::Api::EthernetInterface'
-        when 'PO'
-          cls = 'Rbeapi::Api::PortchannelInterface'
-        when 'VX'
-          cls = 'Rbeapi::Api::VxlanInterface'
-        else
-          cls = 'Rbeapi::Api::BaseInterface'
-        end
+        cls = case name
+              when 'ET'
+                'Rbeapi::Api::EthernetInterface'
+              when 'PO'
+                'Rbeapi::Api::PortchannelInterface'
+              when 'VX'
+                'Rbeapi::Api::VxlanInterface'
+              when 'VL'
+                'Rbeapi::Api::VlanInterface'
+              else
+                'Rbeapi::Api::BaseInterface'
+              end
 
         return @instances[name] if @instances.include?(cls)
         instance = Rbeapi::Utils.class_from_string(cls).new(@node)
@@ -127,10 +132,12 @@ module Rbeapi
         instance
       end
 
+      # rubocop:disable Style/MethodMissing
       def method_missing(method_name, *args, &block)
         instance = get_instance(args[0])
         instance.send(method_name.to_sym, *args, &block)
       end
+      # rubocop:enable Style/MethodMissing
 
       def respond_to?(method_name, name = nil)
         return super unless name
@@ -143,8 +150,9 @@ module Rbeapi
     # The BaseInterface class extends Entity and provides an implementation
     # that is common to all interfaces configured in EOS.
     class BaseInterface < Entity
-      DEFAULT_INTF_DESCRIPTION = ''
-      DEFAULT_LOAD_INTERVAL = ''
+      DEFAULT_INTF_DESCRIPTION = ''.freeze
+      DEFAULT_INTF_ENCAPSULATION = ''.freeze
+      DEFAULT_LOAD_INTERVAL = ''.freeze
 
       ##
       # get returns the specified interface resource hash that represents the
@@ -157,6 +165,7 @@ module Rbeapi
       #     name: <string>
       #     type: 'generic'
       #     description: <string>
+      #     encapsulation: <integer>
       #     shutdown: [true, false]
       #     load_interval: <string>
       #   }
@@ -173,6 +182,7 @@ module Rbeapi
 
         response = { name: name, type: 'generic' }
         response.merge!(parse_description(config))
+        response.merge!(parse_encapsulation(config))
         response.merge!(parse_shutdown(config))
         response.merge!(parse_load_interval(config))
         response
@@ -196,6 +206,26 @@ module Rbeapi
         { description: mdata.nil? ? DEFAULT_INTF_DESCRIPTION : mdata[1] }
       end
       private :parse_description
+
+      ##
+      # parse_encapsulation scans the provided configuration block and parses
+      # the encapsulation value if it exists in the configuration.  If the
+      # encapsulation value is not configured, then the
+      # DEFALT_INTF_ENCAPSULATION value is returned.  The hash returned by this
+      # method is intended to be merged into the interface resource hash
+      # returned by the get method.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block retrieved from the
+      #   nodes current running configuration.
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_encapsulation(config)
+        mdata = /^\s{3}encapsulation dot1q vlan\s(.+)$/.match(config)
+        { encapsulation: mdata.nil? ? DEFAULT_INTF_ENCAPSULATION : mdata[1] }
+      end
+      private :parse_encapsulation
 
       ##
       # parse_shutdown scans the provided configuration block and parses
@@ -316,6 +346,44 @@ module Rbeapi
       end
 
       ##
+      # set_encapsulation configures the VLAN ID value for the specified
+      # interface name in the nodes running configuration. If the enable
+      # keyword is false then the encapsulation value is negated using the no
+      # keyword. If the default keyword is set to true, then the encapsulation
+      # value is defaulted using the default keyword. The default keyword takes
+      # precedence over the enable keyword if both are provided.
+      #
+      # @since eos_version X.XX.XM
+      #
+      # @param name [String] The interface name to apply the configuration
+      #   to. The name value must be the full interface identifier.
+      #
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts value [String] The value to configure the VLAN ID to be
+      #   used in the encapsulation dot1q vlan setting for a subinterface.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] Configure the interface encapsulation
+      #   using the default keyword.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_encapsulation(name, opts = {})
+        unless name =~ /\./
+          raise ArgumentError, 'Parameter encapsulation can be set only on '\
+            'subinterfaces'
+        end
+        unless name.downcase =~ /et|po/
+          raise ArgumentError, 'Parameter encapsulation can be set only on '\
+            'Ethernet and PostChannel interfaces'
+        end
+        commands = command_builder('encapsulation dot1q vlan', opts)
+        configure_interface(name, commands)
+      end
+
+      ##
       # set_shutdown configures the administrative state of the specified
       # interface in the node. If the enable keyword is false, then the
       # interface is administratively disabled. If the enable keyword is
@@ -340,10 +408,10 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_shutdown(name, opts = {})
-        fail 'set_shutdown has the value option set' if opts[:value]
+        raise 'set_shutdown has the value option set' if opts[:value]
         # Shutdown semantics are opposite of enable semantics so invert enable.
         value = !opts[:enable]
-        opts.merge!(enable: value)
+        opts[:enable] = value
         commands = command_builder('shutdown', opts)
         configure_interface(name, commands)
       end
@@ -374,9 +442,9 @@ module Rbeapi
     # The EthernetInterface class manages all Ethernet interfaces on an
     # EOS node.
     class EthernetInterface < BaseInterface
-      DEFAULT_ETH_FLOWC_TX = 'off'
-      DEFAULT_ETH_FLOWC_RX = 'off'
-      DEFAULT_SPEED = 'default'
+      DEFAULT_ETH_FLOWC_TX = 'off'.freeze
+      DEFAULT_ETH_FLOWC_RX = 'off'.freeze
+      DEFAULT_SPEED = 'default'.freeze
       DEFAULT_LACP_PRIORITY = 32_768
 
       ##
@@ -388,6 +456,7 @@ module Rbeapi
       #     name: <string>,
       #     type: <string>,
       #     description: <string>,
+      #     encapsulation: <integer>,
       #     shutdown: <boolean>,
       #     load_interval: <string>
       #     speed: <string>,
@@ -509,14 +578,19 @@ module Rbeapi
       ##
       # create overrides the create method from the BaseInterface and raises
       # an exception because Ethernet interface creation is not supported.
+      # This doesn't happen for Ethernet subinterfaces
       #
-      # @param _name [String] The name of the interface.
+      # @param name [String] The name of the interface.
       #
       # @raise [NotImplementedError] Creation of physical Ethernet interfaces
-      #   is not supported.
-      def create(_name)
-        fail NotImplementedError, 'creating Ethernet interfaces is '\
-              'not supported'
+      #   is not supported. Only subinterfaces are allowed.
+      def create(name)
+        if name !~ /\./
+          raise NotImplementedError, 'creating Ethernet interfaces is '\
+            'not supported'
+        else
+          configure("interface #{name}")
+        end
       end
 
       ##
@@ -524,13 +598,17 @@ module Rbeapi
       # raises an exception because Ethernet interface deletion is not
       # supported.
       #
-      # @param _name [String] The name of the interface.
+      # @param name [String] The name of the interface.
       #
       # @raise [NotImplementedError] Deletion of physical Ethernet interfaces
       #   is not supported.
-      def delete(_name)
-        fail NotImplementedError, 'deleting Ethernet interfaces is '\
-              'not supported'
+      def delete(name)
+        if name !~ /\./
+          raise NotImplementedError, 'deleting Ethernet interfaces is '\
+            'not supported'
+        else
+          configure("no interface #{name}")
+        end
       end
 
       ##
@@ -720,9 +798,9 @@ module Rbeapi
     # The PortchannelInterface class manages all port channel interfaces on an
     # EOS node.
     class PortchannelInterface < BaseInterface
-      DEFAULT_LACP_FALLBACK = 'disabled'
-      DEFAULT_LACP_MODE = 'on'
-      DEFAULT_MIN_LINKS = '0'
+      DEFAULT_LACP_FALLBACK = 'disabled'.freeze
+      DEFAULT_LACP_MODE = 'on'.freeze
+      DEFAULT_MIN_LINKS = '0'.freeze
 
       ##
       # get returns the specified port-channel interface configuration from
@@ -734,6 +812,7 @@ module Rbeapi
       #   {
       #     type: 'portchannel'
       #     description: <string>
+      #     encapsulation: <integer>
       #     shutdown: [true, false]
       #     load_interval: <string>
       #     members: array[<strings>]
@@ -861,6 +940,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_lacp_timeout(config)
         mdata = /lacp fallback timeout (\d+)$/.match(config)
+        return { lacp_timeout: [] } unless defined? mdata[1]
         { lacp_timeout: mdata[1] }
       end
       private :parse_lacp_timeout
@@ -925,7 +1005,7 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def set_members(name, members, mode = nil)
-        fail ArgumentError, 'members must be an Array' unless
+        raise ArgumentError, 'members must be an Array' unless
         members.is_a?(Array)
 
         current_members = Set.new parse_members(name)[:members]
@@ -1091,8 +1171,8 @@ module Rbeapi
     ##
     # The VxlanInterface class manages all Vxlan interfaces on an EOS node.
     class VxlanInterface < BaseInterface
-      DEFAULT_SRC_INTF = ''
-      DEFAULT_MCAST_GRP = ''
+      DEFAULT_SRC_INTF = ''.freeze
+      DEFAULT_MCAST_GRP = ''.freeze
 
       ##
       # Returns the Vxlan interface configuration as a Ruby hash of key/value
@@ -1105,6 +1185,7 @@ module Rbeapi
       #     name: <string>,
       #     type: <string>,
       #     description: <string>,
+      #     encapsulation: <string>,
       #     shutdown: <boolean>,
       #     load_interval: <string>
       #     source_interface: <string>,
@@ -1372,6 +1453,87 @@ module Rbeapi
       # @return [Boolean] Returns true if the command completed successfully.
       def remove_vlan(name, vlan)
         configure_interface(name, "no vxlan vlan #{vlan} vni")
+      end
+    end
+
+    ##
+    # The VlanInterface class manages all Vlan interfaces on an EOS node.
+    class VlanInterface < BaseInterface
+      ##
+      # Returns the Vlan interface configuration as a Ruby hash of key/value
+      # pairs from the nodes running configuration. This method extends the
+      # BaseInterface get method and adds the Vlan specific attributes to
+      # the hash.
+      #
+      # @example
+      #   {
+      #     name: <string>,
+      #     type: <string>,
+      #     description: <string>,
+      #     shutdown: <boolean>,
+      #     autostate: <boolean>
+      #   }
+      #
+      # @param name [String] The interface name to return from the nodes
+      #   configuration.
+      #
+      # @return [nil, Hash<String, String>] Returns the interface configuration
+      #   as a Ruby hash object. If the provided interface name is not found
+      #   then this method will return nil.
+      def get(name)
+        config = get_block("interface #{name}")
+        return nil unless config
+
+        response = super(name)
+        response[:type] = 'vlan'
+        response.merge!(parse_autostate(config))
+        response
+      end
+
+      ##
+      # parse_autostate scans the interface config block and returns the
+      # value of the vlan autostate. If the autostate is not
+      # configured then it's enabled, as by default. The hash
+      # returned is intended to be merged into the interface resource hash
+      #
+      # @api private
+      #
+      # @param config [String] The interface configuration block to extract
+      #   the vlan autostate value from.
+      #
+      # @return [Hash<Symbol, Object>]
+      def parse_autostate(config)
+        mdata = /^\s{3}no\sautostate$/.match(config)
+        { autostate: mdata.nil? ? :true : :false }
+      end
+      private :parse_autostate
+
+      ##
+      # set_autostate configures the autostate on a vlan interface.
+      # Default value is true, if set to false 'no autostate' is
+      # configured on the interface.
+      #
+      # @since eos_version 4.13.7M
+      #
+      # @param name [String] The interface name to apply the configuration
+      #   values to. The name must be the full interface identifier.
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts value [Boolean] Enables or disables autotate for vlan
+      #   interfaces. Default is true.
+      #
+      # @option opts default [Boolean] Configures the autostate value
+      #   on the interface using the default value (true).
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_autostate(name, opts = {})
+        commands = if opts[:value] == :false
+                     command_builder('no autostate')
+                   else
+                     command_builder('autostate')
+                   end
+        configure_interface(name, commands)
       end
     end
   end

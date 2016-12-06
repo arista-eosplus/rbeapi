@@ -152,8 +152,8 @@ module Rbeapi
       #   address or nil if the value is not set.
       def parse_primary_ip(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} ip (\d+\.\d+\.\d+\.\d+)$/)
-        if match.empty?
-          fail 'Did not get a default value for primary_ip'
+        if match.empty? # rubocop:disable Style/GuardClause
+          raise 'Did not get a default value for primary_ip'
         else
           value = match[0][0]
         end
@@ -175,8 +175,8 @@ module Rbeapi
       #   <1-255> or nil if the value is not set.
       def parse_priority(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} priority (\d+)$/)
-        if match.empty?
-          fail 'Did not get a default value for priority'
+        if match.empty? # rubocop:disable Style/GuardClause
+          raise 'Did not get a default value for priority'
         else
           value = match[0][0].to_i
         end
@@ -198,8 +198,8 @@ module Rbeapi
       #   is between <1-255> or nil if the value is not set.
       def parse_timers_advertise(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} timers advertise (\d+)$/)
-        if match.empty?
-          fail 'Did not get a default value for timers advertise'
+        if match.empty? # rubocop:disable Style/GuardClause
+          raise 'Did not get a default value for timers advertise'
         else
           value = match[0][0].to_i
         end
@@ -221,11 +221,11 @@ module Rbeapi
       #   between <1-255> or nil if the value is not set.
       def parse_preempt(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} preempt$/)
-        if match.empty?
-          value = false
-        else
-          value = true
-        end
+        value = if match.empty?
+                  false
+                else
+                  true
+                end
         { preempt: value }
       end
       private :parse_preempt
@@ -243,11 +243,11 @@ module Rbeapi
       # @return [Hash<'enable', Boolean>]
       def parse_enable(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} shutdown$/)
-        if match.empty?
-          value = true
-        else
-          value = false
-        end
+        value = if match.empty?
+                  true
+                else
+                  false
+                end
         { enable: value }
       end
       private :parse_enable
@@ -289,11 +289,11 @@ module Rbeapi
       #   value is not set.
       def parse_description(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} description\s+(.*)\s*$/)
-        if match.empty?
-          value = nil
-        else
-          value = match[0][0]
-        end
+        value = if match.empty?
+                  nil
+                else
+                  match[0][0]
+                end
         { description: value }
       end
       private :parse_description
@@ -341,8 +341,8 @@ module Rbeapi
       #   value is not set.
       def parse_ip_version(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} ip version (\d+)$/)
-        if match.empty?
-          fail 'Did not get a default value for ip version'
+        if match.empty? # rubocop:disable Style/GuardClause
+          raise 'Did not get a default value for ip version'
         else
           value = match[0][0].to_i
         end
@@ -367,7 +367,7 @@ module Rbeapi
         regex = "vrrp #{vrid} mac-address advertisement-interval"
         match = config.scan(/^\s+#{regex} (\d+)$/)
         if match.empty?
-          fail 'Did not get a default value for mac address ' \
+          raise 'Did not get a default value for mac address ' \
                'advertisement interval'
         else
           value = match[0][0].to_i
@@ -390,8 +390,8 @@ module Rbeapi
       #   value is not set.
       def parse_preempt_delay_min(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} preempt delay minimum (\d+)$/)
-        if match.empty?
-          fail 'Did not get a default value for preempt delay minimum'
+        if match.empty? # rubocop:disable Style/GuardClause
+          raise 'Did not get a default value for preempt delay minimum'
         else
           value = match[0][0].to_i
         end
@@ -413,8 +413,8 @@ module Rbeapi
       #   value is not set.
       def parse_preempt_delay_reload(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} preempt delay reload (\d+)$/)
-        if match.empty?
-          fail 'Did not get a default value for preempt delay reload'
+        if match.empty? # rubocop:disable Style/GuardClause
+          raise 'Did not get a default value for preempt delay reload'
         else
           value = match[0][0].to_i
         end
@@ -436,8 +436,8 @@ module Rbeapi
       #   value is not set.
       def parse_delay_reload(config, vrid)
         match = config.scan(/^\s+vrrp #{vrid} delay reload (\d+)$/)
-        if match.empty?
-          fail 'Did not get a default value for delay reload'
+        if match.empty? # rubocop:disable Style/GuardClause
+          raise 'Did not get a default value for delay reload'
         else
           value = match[0][0].to_i
         end
@@ -513,23 +513,23 @@ module Rbeapi
       # rubocop:disable Metrics/CyclomaticComplexity, Metrics/AbcSize,
       # rubocop:disable Metrics/PerceivedComplexity
       def create(name, vrid, opts = {})
-        fail ArgumentError, 'create has no options set' if opts.empty?
+        raise ArgumentError, 'create has no options set' if opts.empty?
 
         if opts[:secondary_ip] && !opts[:secondary_ip].is_a?(Array)
-          fail ArgumentError, 'opts secondary_ip must be an Array'
+          raise ArgumentError, 'opts secondary_ip must be an Array'
         end
 
         if opts[:track] && !opts[:track].is_a?(Array)
-          fail ArgumentError, 'opts track must be an Array'
+          raise ArgumentError, 'opts track must be an Array'
         end
 
         cmds = []
         if opts.key?(:enable)
-          if opts[:enable]
-            cmds << "no vrrp #{vrid} shutdown"
-          else
-            cmds << "vrrp #{vrid} shutdown"
-          end
+          cmds << if opts[:enable]
+                    "no vrrp #{vrid} shutdown"
+                  else
+                    "vrrp #{vrid} shutdown"
+                  end
         end
         cmds << "vrrp #{vrid} ip #{opts[:primary_ip]}" if opts.key?(:primary_ip)
         if opts.key?(:priority)
@@ -552,11 +552,11 @@ module Rbeapi
           cmds << "vrrp #{vrid} mac-address advertisement-interval #{val}"
         end
         if opts.key?(:preempt)
-          if opts[:preempt]
-            cmds << "vrrp #{vrid} preempt"
-          else
-            cmds << "no vrrp #{vrid} preempt"
-          end
+          cmds << if opts[:preempt]
+                    "vrrp #{vrid} preempt"
+                  else
+                    "no vrrp #{vrid} preempt"
+                  end
         end
         if opts.key?(:preempt_delay_min)
           val = opts[:preempt_delay_min]
@@ -642,10 +642,10 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command complete successfully.
       def set_shutdown(name, vrid, opts = {})
-        fail 'set_shutdown has the value option set' if opts[:value]
+        raise 'set_shutdown has the value option set' if opts[:value]
         # Shutdown semantics are opposite of enable semantics so invert enable.
         enable = opts.fetch(:enable, true)
-        opts.merge!(enable: !enable)
+        opts[:enable] = !enable
         cmd = "vrrp #{vrid} shutdown"
         configure_interface(name, command_builder(cmd, opts))
       end
@@ -757,11 +757,11 @@ module Rbeapi
         vrrp = get(name)
         vrrp = [] if vrrp.nil?
 
-        if vrrp.key?(vrid)
-          current_addrs = Set.new vrrp[vrid][:secondary_ip]
-        else
-          current_addrs = Set.new []
-        end
+        current_addrs = if vrrp.key?(vrid)
+                          Set.new vrrp[vrid][:secondary_ip]
+                        else
+                          Set.new []
+                        end
 
         cmds = []
         # Add commands to delete any secondary IP addresses that are
@@ -921,7 +921,7 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command complete successfully.
       def set_preempt(name, vrid, opts = {})
-        fail 'set_preempt has the value option set' if opts[:value]
+        raise 'set_preempt has the value option set' if opts[:value]
         cmd = "vrrp #{vrid} preempt"
         configure_interface(name, command_builder(cmd, opts))
       end
@@ -1038,22 +1038,22 @@ module Rbeapi
         tracks.each do |track|
           track.keys do |key|
             unless valid_keys.include?(key)
-              fail ArgumentError, 'Key: #{key} invalid in track hash'
+              raise ArgumentError, 'Key: #{key} invalid in track hash'
             end
           end
           unless track.key?(:name) && track.key?(:action)
-            fail ArgumentError, 'Must specify :name and :action in track hash'
+            raise ArgumentError, 'Must specify :name and :action in track hash'
           end
           unless track[:action] == 'decrement' || track[:action] == 'shutdown'
-            fail ArgumentError, "Action must be 'decrement' or 'shutdown'"
+            raise ArgumentError, "Action must be 'decrement' or 'shutdown'"
           end
           if track.key?(:amount) && track[:action] != 'decrement'
-            fail ArgumentError, "Action must be 'decrement' to set amount"
+            raise ArgumentError, "Action must be 'decrement' to set amount"
           end
           if track.key?(:amount)
             track[:amount] = track[:amount].to_i
             if track[:amount] < 0
-              fail ArgumentError, 'Amount must be greater than zero'
+              raise ArgumentError, 'Amount must be greater than zero'
             end
           end
         end
@@ -1066,11 +1066,11 @@ module Rbeapi
         vrrp = get(name)
         vrrp = [] if vrrp.nil?
 
-        if vrrp.key?(vrid)
-          current_tracks = Set.new vrrp[vrid][:track]
-        else
-          current_tracks = Set.new []
-        end
+        current_tracks = if vrrp.key?(vrid)
+                           Set.new vrrp[vrid][:track]
+                         else
+                           Set.new []
+                         end
 
         cmds = []
         # Add commands to delete any tracks that are

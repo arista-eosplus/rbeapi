@@ -49,15 +49,12 @@ describe Rbeapi::Api::Vrrp do
                 timers_advertise: 1,
                 track: [
                   { name: 'Ethernet1', action: 'decrement', amount: 5 }
-                ]
-        },
+                ] },
         40 => { primary_ip: '40.10.5.32', delay_reload: 0, description: nil,
                 enable: true, ip_version: 2, mac_addr_adv_interval: 30,
                 preempt: true, preempt_delay_min: 0, preempt_delay_reload: 0,
                 priority: 200, secondary_ip: [], timers_advertise: 1,
-                track: @tracks
-        }
-      }
+                track: @tracks } }
     end
 
     it 'returns the virtual router resource' do

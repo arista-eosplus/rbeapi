@@ -41,7 +41,7 @@ module Rbeapi
     # The Ntp class provides an instance for working with the nodes
     # NTP configuration.
     class Ntp < Entity
-      DEFAULT_SRC_INTF = ''
+      DEFAULT_SRC_INTF = ''.freeze
 
       ##
       # get returns the nodes current ntp configure as a resource hash.

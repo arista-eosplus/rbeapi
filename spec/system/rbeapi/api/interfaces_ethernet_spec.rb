@@ -14,8 +14,8 @@ describe Rbeapi::Api::Interfaces do
 
   describe '#get' do
     let(:entity) do
-      { name: 'Ethernet1', type: 'ethernet', description: '', shutdown: false,
-        load_interval: '', speed: 'default', sflow: true,
+      { name: 'Ethernet1', type: 'ethernet', description: '', encapsulation: '',
+        shutdown: false, load_interval: '', speed: 'default', sflow: true,
         flowcontrol_send: 'off', flowcontrol_receive: 'off',
         lacp_priority: '32768' }
     end
@@ -45,9 +45,30 @@ describe Rbeapi::Api::Interfaces do
     end
   end
 
+  describe '#create' do
+    before { node.config('no interface Ethernet1.1') }
+
+    it 'creates a new ethernet subinterface' do
+      expect(subject.get('Ethernet1.1')).to be_nil
+      expect(subject.create('Ethernet1.1')).to be_truthy
+      expect(subject.get('Ethernet1.1')).not_to be_nil
+      node.config(['no interface Ethernet1.1'])
+    end
+  end
+
   describe '#delete' do
     it 'raises an error on create' do
       expect { subject.create('Ethernet1') }.to raise_error(NotImplementedError)
+    end
+  end
+
+  describe '#delete' do
+    before { node.config(['interface Ethernet1.1']) }
+
+    it 'deletes an ethernet subinterface resource' do
+      expect(subject.get('Ethernet1.1')).not_to be_nil
+      expect(subject.delete('Ethernet1.1')).to be_truthy
+      expect(subject.get('Ethernet1.1')).to be_nil
     end
   end
 
@@ -71,6 +92,17 @@ describe Rbeapi::Api::Interfaces do
     end
   end
 
+  describe '#set_encapsulation' do
+    it 'sets the encapsulation value on the interface' do
+      node.config(['interface Ethernet1.1', 'no encapsulation dot1q vlan'])
+      expect(subject.get('Ethernet1.1')[:encapsulation]).to be_empty
+      expect(subject.set_encapsulation('Ethernet1.1', value: '10'))
+        .to be_truthy
+      expect(subject.get('Ethernet1.1')[:encapsulation]).to eq('10')
+      node.config(['no interface Ethernet1.1'])
+    end
+  end
+
   describe '#set_shutdown' do
     it 'shutdown the interface' do
       node.config(['interface Ethernet1', 'no shutdown'])
@@ -91,7 +123,8 @@ describe Rbeapi::Api::Interfaces do
     before { node.config(['default interface Ethernet1']) }
 
     it 'sets enable true' do
-      expect(subject.set_speed('Ethernet1', enable: true)).to be_falsy
+      expect(subject.set_speed('Ethernet1', default: false,
+                                            enable: true)).to be_falsy
     end
   end
 
