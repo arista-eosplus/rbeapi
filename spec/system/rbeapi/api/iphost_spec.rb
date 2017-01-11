@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016, Arista Networks, Inc.
+# Copyright (c) 2017, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ describe Rbeapi::Api::Iphosts do
 
   let(:test) do
     { name: 'test1',
-      ipaddress: '192.168.0.1'
+      ipaddress: ['192.168.0.1']
     }
   end
 
@@ -56,9 +56,9 @@ describe Rbeapi::Api::Iphosts do
     let(:resource) { subject.getall }
 
     let(:test1_entries) do
-      { 'test1' => { name: 'test1', ipaddress: '192.168.0.1' },
-        'test2' => { name: 'test2', ipaddress: '10.0.0.1' },
-        'test3.domain' => { name: 'test3.domain', ipaddress: '172.16.0.1' }
+      { 'test1' => { name: 'test1', ipaddress: ['192.168.0.1'] },
+        'test2' => { name: 'test2', ipaddress: ['10.0.0.1', '10.0.1.1'] },
+        'test3.domain' => { name: 'test3.domain', ipaddress: ['172.16.0.1'] }
       }
     end
 
@@ -67,7 +67,7 @@ describe Rbeapi::Api::Iphosts do
                    'no ip host test2',
                    'no ip host test3.domain',
                    'ip host test1 192.168.0.1',
-                   'ip host test2 10.0.0.1',
+                   'ip host test2 10.0.0.1 10.0.1.1',
                    'ip host test3.domain 172.16.0.1'])
     end
 
@@ -99,8 +99,8 @@ describe Rbeapi::Api::Iphosts do
 
     it 'create a new ip host name' do
       expect(subject.get('test1')).to eq(nil)
-      expect(subject.create('test1', ipaddress: '192.168.0.1')).to be_truthy
-      expect(subject.get('test1')[:ipaddress]).to eq('192.168.0.1')
+      expect(subject.create('test1', ipaddress: ['192.168.0.1'])).to be_truthy
+      expect(subject.get('test1')[:ipaddress]).to eq(['192.168.0.1'])
     end
 
     it 'raises ArgumentError for create without required args ' do
@@ -109,7 +109,7 @@ describe Rbeapi::Api::Iphosts do
     end
 
     it 'raises ArgumentError for invalid ipaddress value' do
-      expect { subject.create('test1', ipaddress: 'bogus') }.to \
+      expect { subject.create('test1', ipaddress: ['bogus']) }.to \
         raise_error ArgumentError
     end
   end
@@ -132,9 +132,9 @@ describe Rbeapi::Api::Iphosts do
     end
 
     it 'change the ip address' do
-      expect(subject.create('test13', ipaddress: '192.168.0.1')).to be_truthy
-      expect(subject.create('test13', ipaddress: '172.16.0.13')).to be_truthy
-      expect(subject.get('test13')[:ipaddress]).to eq('172.16.0.13')
+      expect(subject.create('test13', ipaddress: ['192.168.0.1'])).to be_truthy
+      expect(subject.create('test13', ipaddress: ['172.16.0.13'])).to be_truthy
+      expect(subject.get('test13')[:ipaddress]).to eq(['172.16.0.13'])
     end
 
   end

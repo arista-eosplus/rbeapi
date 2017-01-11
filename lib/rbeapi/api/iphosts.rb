@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016, Arista Networks, Inc.
+# Copyright (c) 2017, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the ip host resource as a hash
       #   object from the nodes current configuration.
       def get(name)
-        iphost = config.scan(/^ip host #{name} (\d+\.\d+\.\d+\.\d+)/)
+        iphost = config.scan(/^ip host #{name} ((?:\d+\.\d+\.\d+\.\d+[ ]?)*)/)
         return nil unless iphost && iphost[0]
         parse_host_entry(name,iphost[0])
       end
@@ -99,7 +99,7 @@ module Rbeapi
       def parse_host_entry(host,ipaddress)
         hsh = {}
         hsh[:name] = host
-        hsh[:ipaddress] = ipaddress[0]
+        hsh[:ipaddress] = ipaddress[0].split
         hsh
       end
       private :parse_host_entry
@@ -121,11 +121,17 @@ module Rbeapi
       #
       # @return [Boolean] Returns true if the command completed successfully.
       def create(name, opts = {})
-        if (/(\d+\.\d+\.\d+\.\d+)/).match(opts[:ipaddress])
-          cmd = "ip host #{name} #{opts[:ipaddress]}"
-          configure(cmd)
+        ipaddress = opts.fetch(:ipaddress, NIL)
+        if ipaddress.kind_of?(Array)
+          if ipaddress.all?{ |x| x =~ /(\w+\.\d+\.\d+\.\d+)/ }
+            ips = opts[:ipaddress].join(" ")
+            cmd = "ip host #{name} #{ips}"
+            configure(cmd)
+          else
+            fail ArgumentError, 'option ipaddress must be a valid IP'
+          end
         else
-          fail ArgumentError, 'option ipaddress must be a valid IP'
+          fail ArgumentError, 'no argument given'
         end
       end
 
