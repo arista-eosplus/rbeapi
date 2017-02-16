@@ -63,6 +63,7 @@ module Rbeapi
         response = {}
         response.merge!(parse_hostname(config))
         response.merge!(parse_iprouting(config))
+        response.merge!(parse_timezone(config))
         response.merge!(parse_banners(config))
         response
       end
@@ -96,6 +97,21 @@ module Rbeapi
         { iprouting: mdata.nil? ? true : false }
       end
       private :parse_iprouting
+
+      ##
+      # parse_timezone parses the value of clock timezone.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block returned
+      #   from the node's running configuration.
+      #
+      # @return [Hash<Symbol, Object>] The resource hash attribute.
+      def parse_timezone(config)
+        mdata = /(?<=^clock timezone\s)(.+)$/.match(config)
+        { timezone: mdata.nil? ? '' : mdata[1] }
+      end
+      private :parse_timezone
 
       ##
       # Parses the global config and returns the value for both motd
@@ -155,6 +171,25 @@ module Rbeapi
       # @return [Boolean] Returns true if the command completed successfully.
       def set_iprouting(opts = {})
         cmd = command_builder('ip routing', opts)
+        configure(cmd)
+      end
+
+      ##
+      # Configures the value of clock timezone in the running-config.
+      #
+      # @param opts [Hash] The configuration parameters.
+      #
+      # @option opts value [string] The value to set the clock timezone to.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] If true configure the command using
+      #   the default keyword. Default is false.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_timezone(opts = {})
+        cmd = command_builder('clock timezone', opts)
         configure(cmd)
       end
 

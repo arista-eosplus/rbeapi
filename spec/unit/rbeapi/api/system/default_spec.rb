@@ -43,7 +43,8 @@ describe Rbeapi::Api::System do
   let(:test) do
     { hostname: 'localhost', iprouting: true,
       banner_motd: "MOTD Banner\nSecond Line\nEOF \n*\\v1?",
-      banner_login: "Login Banner\nSecond Line\n123456\n EOF" }
+      banner_login: "Login Banner\nSecond Line\n123456\n EOF",
+      timezone: 'Europe/Berlin' }
   end
 
   def system
@@ -65,12 +66,12 @@ describe Rbeapi::Api::System do
       expect(subject.get).to be_a_kind_of(Hash)
     end
 
-    it 'has four entries' do
-      expect(subject.get.size).to eq(4)
+    it 'has five entries' do
+      expect(subject.get.size).to eq(5)
     end
 
     it 'retrieves only global ip routing' do
-      expect(subject.get.size).to eq(4)
+      expect(subject.get.size).to eq(5)
       expect(subject.get[:iprouting]).to eq(true)
     end
   end
@@ -138,6 +139,14 @@ describe Rbeapi::Api::System do
     it 'defaults the motd banner' do
       expect(node).to receive(:config).with('default banner motd')
       expect(subject.set_banner('motd', default: true)).to be_truthy
+    end
+  end
+
+  describe '#set_timezone' do
+    it 'sets the timezone' do
+      expect(node).to receive(:config).with('clock timezone Europe/Berlin')
+      expect(subject.set_timezone(value: 'Europe/Berlin')).to be_truthy
+      expect(subject.get[:timezone]).to eq('Europe/Berlin')
     end
   end
 end

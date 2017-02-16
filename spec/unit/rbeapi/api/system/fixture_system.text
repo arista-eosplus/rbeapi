@@ -1,5 +1,6 @@
 hostname localhost
 ip routing
+clock timezone Europe/Berlin
 no ip routing vrf foo
 banner login
 Login Banner
