@@ -14,7 +14,7 @@ describe Rbeapi::Api::Ipinterfaces do
   describe '#get' do
     let(:entity) do
       { address: '77.99.99.99/24', mtu: '1500', helper_addresses: [],
-        load_interval: '' }
+        secondary_addresses: [], load_interval: '' }
     end
 
     before do
@@ -156,6 +156,43 @@ describe Rbeapi::Api::Ipinterfaces do
       expect { subject.set_helper_addresses('Ethernet1', value: '123') }
         .to raise_error(ArgumentError)
     end
+  end
+
+  describe '#set_secondary_addresses' do
+    before do
+      node.config(['default interface Ethernet1', 'interface Ethernet1',
+                   'no switchport', 'ip address 77.99.99.99/24'])
+    end
+
+    let(:secondarys) { %w(77.99.99.98/31 77.99.99.97/31) }
+
+    it 'sets the secondary addresses on the interface' do
+      expect(subject.get('Ethernet1')[:secondary_addresses]).to be_empty
+      expect(subject.set_secondary_addresses('Ethernet1', value: secondarys))
+        .to be_truthy
+      expect(subject.get('Ethernet1')[:secondary_addresses].sort)
+        .to eq(secondarys.sort)
+    end
+
+    it 'negates the secondary addresses on the interface' do
+      expect(subject.get('Ethernet1')[:secondary_addresses]).to be_empty
+      expect(subject.set_secondary_addresses('Ethernet1', enable: false))
+        .to be_truthy
+      expect(subject.get('Ethernet1')[:secondary_addresses].sort).to be_empty
+    end
+
+    it 'default the secondary addresses on the interface'  do
+      expect(subject.get('Ethernet1')[:secondary_addresses]).to be_empty
+      expect(subject.set_secondary_addresses('Ethernet1', default: true))
+        .to be_truthy
+      expect(subject.get('Ethernet1')[:secondary_addresses].sort).to be_empty
+    end
+
+    it 'raises an ArgumentError if opts value is not an array' do
+      expect { subject.set_secondary_addresses('Ethernet1', value: '123') }
+        .to raise_error(ArgumentError)
+    end
+
   end
 
   describe '#set_load_interval' do
