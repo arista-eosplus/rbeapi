@@ -283,6 +283,10 @@ module Rbeapi
           if decoded.include?('error')
             code = decoded['error']['code']
             msg = decoded['error']['message']
+            if decoded['error'].key?('data')
+              msg = msg + "\n" +
+                    decoded['error']['data'][-1]['errors'].join(' ')
+            end
             raise CommandError.new(msg, code)
           end
         rescue Timeout::Error

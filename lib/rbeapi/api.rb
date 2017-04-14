@@ -128,8 +128,9 @@ module Rbeapi
       def configure(commands)
         @node.config(commands)
         return true
-      rescue Rbeapi::Eapilib::CommandError, Rbeapi::Eapilib::ConnectionError
-        return false
+      rescue Rbeapi::Eapilib::CommandError,
+             Rbeapi::Eapilib::ConnectionError => e
+        return false, e
       end
 
       ##

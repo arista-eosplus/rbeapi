@@ -124,7 +124,7 @@ describe Rbeapi::Api::Interfaces do
 
     it 'sets enable true' do
       expect(subject.set_speed('Ethernet1', default: false,
-                                            enable: true)).to be_falsy
+                                            enable: true)).to include(false)
     end
   end
 
