@@ -23,6 +23,7 @@ describe Rbeapi::Api::Managementdefaults do
     before { node.config(['management defaults', 'default secret hash']) }
 
     it 'configures the management defaults secret hash value' do
+      expect(subject.set_secret_hash(value: 'md5')).to be_truthy
       expect(subject.get[:secret_hash]).to eq('md5')
       expect(subject.set_secret_hash(value: 'sha512')).to be_truthy
       expect(subject.get[:secret_hash]).to eq('sha512')
