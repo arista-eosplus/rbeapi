@@ -137,7 +137,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] Returns the resource Hash attribute.
       def parse_source_interface
-        mdata = /snmp-server source-interface (.+)$/.match(config)
+        mdata = /snmp-server (?:vrf .+ )?source-interface (.+)$/.match(config)
         { source_interface: mdata.nil? ? '' : mdata[1] }
       end
       private :parse_source_interface
