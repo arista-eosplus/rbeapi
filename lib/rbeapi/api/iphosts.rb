@@ -40,7 +40,6 @@ module Rbeapi
     ##
     # The Iphosts class manages hosts entries on an EOS node.
     class Iphosts < Entity
-
       ##
       # get returns the current ip host configuration hash extracted from the
       # nodes running configuration.
@@ -55,7 +54,7 @@ module Rbeapi
       def get(name)
         iphost = config.scan(/^ip host #{name} ((?:\d+\.\d+\.\d+\.\d+[ ]?)*)/)
         return nil unless iphost && iphost[0]
-        parse_host_entry(name,iphost[0])
+        parse_host_entry(name, iphost[0])
       end
 
       ##
@@ -96,7 +95,7 @@ module Rbeapi
       #   expression scan of the hosts configuration.
       #
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
-      def parse_host_entry(host,ipaddress)
+      def parse_host_entry(host, ipaddress)
         hsh = {}
         hsh[:name] = host
         hsh[:ipaddress] = ipaddress[0].split
@@ -122,9 +121,10 @@ module Rbeapi
       # @return [Boolean] Returns true if the command completed successfully.
       def create(name, opts = {})
         ipaddress = opts.fetch(:ipaddress, NIL)
+        # rubocop:disable Style/GuardClause, Style/ClassCheck
         if ipaddress.kind_of?(Array)
-          if ipaddress.all?{ |x| x =~ /(\w+\.\d+\.\d+\.\d+)/ }
-            ips = opts[:ipaddress].join(" ")
+          if ipaddress.all? { |x| x =~ /(\w+\.\d+\.\d+\.\d+)/ }
+            ips = opts[:ipaddress].join(' ')
             cmd = "ip host #{name} #{ips}"
             configure(cmd)
           else
@@ -133,6 +133,7 @@ module Rbeapi
         else
           fail ArgumentError, 'no argument given'
         end
+        # rubocop:enable Style/GuardClause, Style/ClassCheck
       end
 
       ##
@@ -151,7 +152,6 @@ module Rbeapi
       def delete(name)
         configure("no ip host #{name}")
       end
-
     end
   end
 end
