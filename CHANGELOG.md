@@ -1,10 +1,23 @@
 # Change Log
 
-## [1.1](https://github.com/arista-eosplus/rbeapi/tree/1.1) (2016-12-06)
-[Full Changelog](https://github.com/arista-eosplus/rbeapi/compare/v1.0...1.1)
+## [1.2](https://github.com/arista-eosplus/rbeapi/tree/1.2) (2017-06-02)
+[Full Changelog](https://github.com/arista-eosplus/rbeapi/compare/v1.1...1.2)
 
 **Implemented enhancements:**
 
+- add support for timezone, please review [\#167](https://github.com/arista-eosplus/rbeapi/pull/167) ([mmailand](https://github.com/mmailand))
+- add the ip host function for static dns entries. [\#164](https://github.com/arista-eosplus/rbeapi/pull/164) ([mmailand](https://github.com/mmailand))
+
+**Merged pull requests:**
+
+- \(NETDEV-29\) Enhance netdev NTP api [\#169](https://github.com/arista-eosplus/rbeapi/pull/169) ([shermdog](https://github.com/shermdog))
+
+## [v1.1](https://github.com/arista-eosplus/rbeapi/tree/v1.1) (2016-12-06)
+[Full Changelog](https://github.com/arista-eosplus/rbeapi/compare/v1.0...v1.1)
+
+**Implemented enhancements:**
+
+- Style updates for Rubocop 0.45 [\#163](https://github.com/arista-eosplus/rbeapi/pull/163) ([jerearista](https://github.com/jerearista))
 - add subinterface functionality [\#161](https://github.com/arista-eosplus/rbeapi/pull/161) ([mmailand](https://github.com/mmailand))
 - add support to set aliases [\#160](https://github.com/arista-eosplus/rbeapi/pull/160) ([mmailand](https://github.com/mmailand))
 - added support for setting the crypto in managementdefaults [\#159](https://github.com/arista-eosplus/rbeapi/pull/159) ([mmailand](https://github.com/mmailand))
@@ -14,12 +27,8 @@
 **Fixed bugs:**
 
 - Fix multiline alias support [\#165](https://github.com/arista-eosplus/rbeapi/pull/165) ([jerearista](https://github.com/jerearista))
-- extend and fix ospf features [\#156](https://github.com/arista-eosplus/rbeapi/pull/156) ([rknaus](https://github.com/rknaus))
-
-**Merged pull requests:**
-
-- Style updates for Rubocop 0.45 [\#163](https://github.com/arista-eosplus/rbeapi/pull/163) ([jerearista](https://github.com/jerearista))
 - fix for rspec failure on current develop [\#162](https://github.com/arista-eosplus/rbeapi/pull/162) ([mmailand](https://github.com/mmailand))
+- extend and fix ospf features [\#156](https://github.com/arista-eosplus/rbeapi/pull/156) ([rknaus](https://github.com/rknaus))
 
 ## [v1.0](https://github.com/arista-eosplus/rbeapi/tree/v1.0) (2016-09-26)
 [Full Changelog](https://github.com/arista-eosplus/rbeapi/compare/v0.5.1...v1.0)
@@ -61,7 +70,7 @@
 - Fix rpm uninstall issue \#118 [\#134](https://github.com/arista-eosplus/rbeapi/pull/134) ([jerearista](https://github.com/jerearista))
 - Switchconfig rpms for chef [\#130](https://github.com/arista-eosplus/rbeapi/pull/130) ([jerearista](https://github.com/jerearista))
 - Switchconfig zap empty lines [\#128](https://github.com/arista-eosplus/rbeapi/pull/128) ([jerearista](https://github.com/jerearista))
-- Validate array param options [\#126](https://github.com/arista-eosplus/rbeapi/pull/126) ([websitescenes](https://github.com/websitescenes))
+- Validate array param options [\#126](https://github.com/arista-eosplus/rbeapi/pull/126) ([HuntBurdick](https://github.com/HuntBurdick))
 - Wip load interval v2 [\#122](https://github.com/arista-eosplus/rbeapi/pull/122) ([n1cn0c](https://github.com/n1cn0c))
 - Created vlans set\_trunk\_groups method. [\#119](https://github.com/arista-eosplus/rbeapi/pull/119) ([devrobo](https://github.com/devrobo))
 
@@ -89,9 +98,9 @@
 - Release 0.5.1 [\#115](https://github.com/arista-eosplus/rbeapi/pull/115) ([jerearista](https://github.com/jerearista))
 - Only first trunk group was being returned. [\#114](https://github.com/arista-eosplus/rbeapi/pull/114) ([devrobo](https://github.com/devrobo))
 - Add support for DEFAULT section to eapi config file. [\#111](https://github.com/arista-eosplus/rbeapi/pull/111) ([devrobo](https://github.com/devrobo))
-- Remove getter for timeouts and use attr\_reader instead. [\#107](https://github.com/arista-eosplus/rbeapi/pull/107) ([websitescenes](https://github.com/websitescenes))
+- Remove getter for timeouts and use attr\_reader instead. [\#107](https://github.com/arista-eosplus/rbeapi/pull/107) ([HuntBurdick](https://github.com/HuntBurdick))
 - Added doc for trunk groups to get. [\#106](https://github.com/arista-eosplus/rbeapi/pull/106) ([devrobo](https://github.com/devrobo))
-- Tightening up documentation. [\#105](https://github.com/arista-eosplus/rbeapi/pull/105) ([websitescenes](https://github.com/websitescenes))
+- Tightening up documentation. [\#105](https://github.com/arista-eosplus/rbeapi/pull/105) ([HuntBurdick](https://github.com/HuntBurdick))
 - Added support for setting system banners. [\#104](https://github.com/arista-eosplus/rbeapi/pull/104) ([devrobo](https://github.com/devrobo))
 
 ## [v0.5.0](https://github.com/arista-eosplus/rbeapi/tree/v0.5.0) (2016-01-12)
@@ -105,15 +114,15 @@
 - switchport api should support trunk groups [\#38](https://github.com/arista-eosplus/rbeapi/issues/38)
 - Need units tests for framework [\#30](https://github.com/arista-eosplus/rbeapi/issues/30)
 - Need unit test to verify read and open timeout in eapi conf file override default [\#29](https://github.com/arista-eosplus/rbeapi/issues/29)
-- Unit tests for switchports [\#94](https://github.com/arista-eosplus/rbeapi/pull/94) ([websitescenes](https://github.com/websitescenes))
-- Ensure all parse methods are private. [\#93](https://github.com/arista-eosplus/rbeapi/pull/93) ([websitescenes](https://github.com/websitescenes))
-- test timeout values [\#92](https://github.com/arista-eosplus/rbeapi/pull/92) ([websitescenes](https://github.com/websitescenes))
+- Unit tests for switchports [\#94](https://github.com/arista-eosplus/rbeapi/pull/94) ([HuntBurdick](https://github.com/HuntBurdick))
+- Ensure all parse methods are private. [\#93](https://github.com/arista-eosplus/rbeapi/pull/93) ([HuntBurdick](https://github.com/HuntBurdick))
+- test timeout values [\#92](https://github.com/arista-eosplus/rbeapi/pull/92) ([HuntBurdick](https://github.com/HuntBurdick))
 - Relax check on getall entries [\#91](https://github.com/arista-eosplus/rbeapi/pull/91) ([devrobo](https://github.com/devrobo))
-- Update framework tests [\#90](https://github.com/arista-eosplus/rbeapi/pull/90) ([websitescenes](https://github.com/websitescenes))
+- Update framework tests [\#90](https://github.com/arista-eosplus/rbeapi/pull/90) ([HuntBurdick](https://github.com/HuntBurdick))
 - Add lacp\_mode option when setting port-channel members. [\#89](https://github.com/arista-eosplus/rbeapi/pull/89) ([devrobo](https://github.com/devrobo))
 - Added support for trunk groups. [\#88](https://github.com/arista-eosplus/rbeapi/pull/88) ([devrobo](https://github.com/devrobo))
-- Add basic framework tests. [\#85](https://github.com/arista-eosplus/rbeapi/pull/85) ([websitescenes](https://github.com/websitescenes))
-- Address code coverage gaps [\#84](https://github.com/arista-eosplus/rbeapi/pull/84) ([websitescenes](https://github.com/websitescenes))
+- Add basic framework tests. [\#85](https://github.com/arista-eosplus/rbeapi/pull/85) ([HuntBurdick](https://github.com/HuntBurdick))
+- Address code coverage gaps [\#84](https://github.com/arista-eosplus/rbeapi/pull/84) ([HuntBurdick](https://github.com/HuntBurdick))
 
 **Fixed bugs:**
 
@@ -124,11 +133,11 @@
 - Add terminal to configure command to work around AAA issue found in p… [\#99](https://github.com/arista-eosplus/rbeapi/pull/99) ([devrobo](https://github.com/devrobo))
 - Set enable password for a connection. [\#96](https://github.com/arista-eosplus/rbeapi/pull/96) ([devrobo](https://github.com/devrobo))
 - Catch errors and syslog them when parsing eapi conf file. [\#95](https://github.com/arista-eosplus/rbeapi/pull/95) ([devrobo](https://github.com/devrobo))
-- Ensure that nil is returned when you try to get nonexistent username. [\#83](https://github.com/arista-eosplus/rbeapi/pull/83) ([websitescenes](https://github.com/websitescenes))
+- Ensure that nil is returned when you try to get nonexistent username. [\#83](https://github.com/arista-eosplus/rbeapi/pull/83) ([HuntBurdick](https://github.com/HuntBurdick))
 
 **Merged pull requests:**
 
-- Update documentation [\#97](https://github.com/arista-eosplus/rbeapi/pull/97) ([websitescenes](https://github.com/websitescenes))
+- Update documentation [\#97](https://github.com/arista-eosplus/rbeapi/pull/97) ([HuntBurdick](https://github.com/HuntBurdick))
 
 ## [v0.4.0](https://github.com/arista-eosplus/rbeapi/tree/v0.4.0) (2015-11-21)
 [Full Changelog](https://github.com/arista-eosplus/rbeapi/compare/v0.3.0...v0.4.0)
@@ -155,14 +164,14 @@
 
 - Merge develop to master for Release 0.4.0 [\#81](https://github.com/arista-eosplus/rbeapi/pull/81) ([jerearista](https://github.com/jerearista))
 - Release 0.4.0 [\#80](https://github.com/arista-eosplus/rbeapi/pull/80) ([jerearista](https://github.com/jerearista))
-- Update rubocop version and rectify related test failures. [\#76](https://github.com/arista-eosplus/rbeapi/pull/76) ([websitescenes](https://github.com/websitescenes))
-- Add method to enable ip routing to the system API [\#75](https://github.com/arista-eosplus/rbeapi/pull/75) ([websitescenes](https://github.com/websitescenes))
+- Update rubocop version and rectify related test failures. [\#76](https://github.com/arista-eosplus/rbeapi/pull/76) ([HuntBurdick](https://github.com/HuntBurdick))
+- Add method to enable ip routing to the system API [\#75](https://github.com/arista-eosplus/rbeapi/pull/75) ([HuntBurdick](https://github.com/HuntBurdick))
 - Added vrrp api module and unit tests. [\#64](https://github.com/arista-eosplus/rbeapi/pull/64) ([devrobo](https://github.com/devrobo))
-- Adding feature routemap [\#63](https://github.com/arista-eosplus/rbeapi/pull/63) ([websitescenes](https://github.com/websitescenes))
-- varp and varp interfaces update. [\#60](https://github.com/arista-eosplus/rbeapi/pull/60) ([websitescenes](https://github.com/websitescenes))
+- Adding feature routemap [\#63](https://github.com/arista-eosplus/rbeapi/pull/63) ([HuntBurdick](https://github.com/HuntBurdick))
+- varp and varp interfaces update. [\#60](https://github.com/arista-eosplus/rbeapi/pull/60) ([HuntBurdick](https://github.com/HuntBurdick))
 - Fixed comment for value param for set\_lacp\_timeout method. [\#57](https://github.com/arista-eosplus/rbeapi/pull/57) ([devrobo](https://github.com/devrobo))
-- Feature user updates [\#56](https://github.com/arista-eosplus/rbeapi/pull/56) ([websitescenes](https://github.com/websitescenes))
-- Update max\_paths to maximum\_paths and max\_ecmp\_paths to maximum\_ecmp\_… [\#55](https://github.com/arista-eosplus/rbeapi/pull/55) ([websitescenes](https://github.com/websitescenes))
+- Feature user updates [\#56](https://github.com/arista-eosplus/rbeapi/pull/56) ([HuntBurdick](https://github.com/HuntBurdick))
+- Update max\_paths to maximum\_paths and max\_ecmp\_paths to maximum\_ecmp\_… [\#55](https://github.com/arista-eosplus/rbeapi/pull/55) ([HuntBurdick](https://github.com/HuntBurdick))
 - Fixed issues on the new bgp create call. [\#54](https://github.com/arista-eosplus/rbeapi/pull/54) ([devrobo](https://github.com/devrobo))
 - Added support for getting users information. [\#53](https://github.com/arista-eosplus/rbeapi/pull/53) ([devrobo](https://github.com/devrobo))
 - add dry-run mode [\#42](https://github.com/arista-eosplus/rbeapi/pull/42) ([kakkotetsu](https://github.com/kakkotetsu))
