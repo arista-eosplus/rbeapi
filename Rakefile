@@ -7,10 +7,12 @@ task :build do
   system 'gem build rbeapi.gemspec'
 end
 
+# rubocop:disable Style/FormatStringToken
 RPM_OPTS = '--define "_topdir %(pwd)/rpmbuild" --define "_builddir ' \
   '%{_topdir}" --define "_rpmdir %(pwd)/rpms" --define "_srcrpmdir ' \
   '%{_rpmdir}" --define "_sourcedir  %(pwd)" --define "_specdir %(pwd)" '\
   '-bb'.freeze
+# rubocop:enable Style/FormatStringToken
 desc 'Generate regular and puppet-enterprise rbeapi RPMs for EOS'
 task rpm: :build do
   system "sed -e 's/^Version:.*/Version: #{Rbeapi::VERSION}/g' " \

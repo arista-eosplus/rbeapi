@@ -41,7 +41,8 @@ describe Rbeapi::Api::Iphosts do
   let(:node) { double('node') }
 
   let(:test) do
-    { name: 'test1',
+    {
+      name: 'test1',
       ipaddress: ['192.168.0.1']
     }
   end
@@ -59,7 +60,8 @@ describe Rbeapi::Api::Iphosts do
 
   describe '#getall' do
     let(:test1_entries) do
-      { 'test1' => { name: 'test1', ipaddress: ['192.168.0.1'] },
+      {
+        'test1' => { name: 'test1', ipaddress: ['192.168.0.1'] },
         'test2' => { name: 'test2', ipaddress: ['10.0.0.1', '10.0.1.1'] },
         'test3.domain' => { name: 'test3.domain', ipaddress: ['172.16.0.1'] }
       }
@@ -120,5 +122,4 @@ describe Rbeapi::Api::Iphosts do
       expect(subject.create('test', ipaddress: ['172.16.10.1'])).to be_truthy
     end
   end
-
 end
