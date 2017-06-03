@@ -90,7 +90,7 @@ describe Rbeapi::Api::Users do
                    'username admin privilege 1 role network-admin nopassword',
                    "username rbeapi privilege 1 secret 5 #{md5_secret}",
                    "username rbeapi sshkey #{sshkey}",
-                   'management defaults', 'default secret hash'])
+                   'management defaults', 'secret hash md5'])
     end
 
     it 'returns the username collection' do

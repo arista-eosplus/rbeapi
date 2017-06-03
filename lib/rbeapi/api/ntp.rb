@@ -41,13 +41,35 @@ module Rbeapi
     # The Ntp class provides an instance for working with the nodes
     # NTP configuration.
     class Ntp < Entity
+      DEFAULT_TRST_KEY = ''.freeze
       DEFAULT_SRC_INTF = ''.freeze
 
+      # Regular expression to extract a NTP server's attributes from the
+      # running-configuration text.  The explicit [ ] spaces enable line
+      # wrapping and indentation with the /x flag.
+
+      SERVER_REGEXP = /^(?:ntp[ ]server)
+                      (?:(?:[ ]vrf[ ])([^\s]+))?
+                      [ ]([^\s]+)
+                      ([ ]prefer)?
+                      (?:(?:[ ]minpoll[ ])(\d+))?
+                      (?:(?:[ ]maxpoll[ ])(\d+))?
+                      (?:(?:[ ]source[ ])([^\s]+))?
+                      (?:(?:[ ]key[ ])(\d+))?/x
+      ##
+
+      # Regular expression to extract NTP authentication-keys from the
+      # running-configuration text.  The explicit [ ] spaces enable line
+      # wrapping and indentation with the /x flag.
+
+      AUTH_KEY_REGEXP = /^(?:ntp[ ]authentication-key[ ])
+                        (\d+)[ ](\w+)[ ](\d+)[ ](\w+)/x
       ##
       # get returns the nodes current ntp configure as a resource hash.
       #
       # @example
       #   {
+      #     authenticate: [true, false],
       #     source_interface: <string>,
       #     servers: {
       #       prefer: [true, false]
@@ -58,10 +80,51 @@ module Rbeapi
       #   Hash.
       def get
         response = {}
+        response.merge!(parse_authenticate)
         response.merge!(parse_source_interface)
         response.merge!(parse_servers)
+        response.merge!(parse_trusted_key)
+        response.merge!(parse_auth_keys)
         response
       end
+
+      ##
+      # parse_authenticate checks to see if NTP authencation is enabled in conf
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_authenticate
+        mdata = /^(?:ntp authenticate)/.match(config)
+        { authenticate: mdata.nil? ? false : true }
+      end
+      private :parse_authenticate
+
+      ##
+      # parse_auth_keys scans the nodes configuration and parses the configured
+      # authencation keys. This method will also return
+      # the value of prefer. If no keys are configured, the value will be
+      # set to an empty array. The return hash is intended to be merged into
+      # the resource hash.
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_auth_keys
+        tuples = config.scan(AUTH_KEY_REGEXP)
+        hsh = {}
+        tuples.map do |(key, algorithm, mode, password)|
+          hsh[key] = {
+            algorithm: algorithm,
+            mode: mode,
+            password: password
+          }
+          hsh[key]
+        end
+
+        { auth_keys: hsh }
+      end
+      private :parse_auth_keys
 
       ##
       # parse_source_interface scans the nodes configurations and parses
@@ -89,13 +152,122 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_servers
-        servers = config.scan(/(?:ntp server\s)([^\s]+)\s(prefer)?/)
-        values = servers.each_with_object({}) do |(srv, prefer), hsh|
-          hsh[srv] = { prefer: !prefer.nil? }
+        tuples = config.scan(SERVER_REGEXP)
+        hsh = {}
+        tuples.map do |(vrf, host, prefer, minpoll, maxpoll, sourcei, key)|
+          hsh[host] = {
+            vrf: vrf,
+            prefer: !prefer.nil?,
+            minpoll: minpoll.nil? ? nil : minpoll.to_i,
+            maxpoll: maxpoll.nil? ? nil : maxpoll.to_i,
+            source_interface: sourcei,
+            key: key.nil? ? nil : key.to_i
+          }
+          hsh[host]
         end
-        { servers: values }
+
+        { servers: hsh }
       end
       private :parse_servers
+
+      ##
+      # parse_trusted_key looks for global NTP trusted-key list
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_trusted_key
+        mdata = /^(?:ntp trusted-key (.+))/.match(config)
+        { trusted_key: mdata.nil? ? DEFAULT_TRST_KEY : mdata[1] }
+      end
+      private :parse_trusted_key
+
+      ##
+      # set_authenticate configures ntp authentication in the nodes
+      # running configuration. If the enable keyword is false, then
+      # ntp authentication is configured with the no keyword argument. If the
+      # default keyword argument is provided and set to true, the value is
+      # configured used the default keyword. The default keyword takes
+      # precedence over the enable keyword if both options are specified.
+      #
+      # @since eos_version 4.13.7M
+      #
+      # ===Commands
+      #   ntp authenticate
+      #   no ntp authenticate
+      #   default ntp authenticate
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] Configure the ntp source value using
+      #   the default keyword.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_authenticate(opts = {})
+        cmd = command_builder('ntp authenticate', opts)
+        configure(cmd)
+      end
+
+      ##
+      # set_authentication_key configures the ntp authentication-keys in the
+      # device running configuration. If the enable keyword is false, then
+      # the ntp source is configured with the no keyword argument. If the
+      # default keyword argument is provided and set to true, the value is
+      # configured used the default keyword. The default keyword takes
+      # precedence over the enable keyword if both options are specified.
+      #
+      # @since eos_version 4.13.7M
+      #
+      # ===Commands
+      #   ntp trusted-key <key> <algorithm> <mode> <password>
+      #   no ntp trusted-key <key>
+      #   default ntp trusted-key <key>
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts algorithm [String] Encryption algorithm to use, md5/sha1
+      #
+      # @option opts default [Boolean] Configure the ntp source value using
+      #   the default keyword.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts key [Integer] The authentication-key to configure
+      #
+      # @option opts mode [Integer] Password mode: 0 plain-text, 7 encrypted
+      # default value is 7
+      #
+      # @option opts password [String] Password to use for authentication-key
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_authentication_key(opts = {})
+        cmd = command_builder('ntp authentication-key', opts)
+        configure(cmd)
+
+        algorithm = opts[:algorithm]
+        default = opts[:default] || false
+        enable = opts.fetch(:enable, true)
+        key = opts[:key]
+        mode = opts.fetch(:mode, 7)
+        password = opts[:password]
+
+        case default
+        when true
+          cmds = "default ntp authentication-key #{key}"
+        when false
+          cmds = if enable
+                   "ntp authentication-key #{key} #{algorithm} #{mode} "\
+                   "#{password}"
+                 else
+                   "no ntp authentication-key #{key}"
+                 end
+        end
+        configure cmds
+      end
 
       ##
       # set_source_interface configures the ntp source value in the nodes
@@ -130,6 +302,37 @@ module Rbeapi
       end
 
       ##
+      # set_trusted_key configures the ntp trusted-keys in the device
+      # running configuration. If the enable keyword is false, then
+      # the ntp authentication-key is configured with the no keyword argument.
+      # If the default keyword argument is provided and set to true, the value
+      # is configured using the default keyword. The default keyword takes
+      # precedence over the enable keyword if both options are specified.
+      #
+      # @since eos_version 4.13.7M
+      #
+      # ===Commands
+      #   ntp authentication-key <key> <algorithm> <mode> <password>
+      #   no ntp authentication-key <key>
+      #   default ntp trusted-key <key>
+      #
+      # @param opts [Hash] Optional keyword arguments.
+      #
+      # @option opts value [Integer] authentication-key id
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] Configure the ntp source value using
+      #   the default keyword.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      def set_trusted_key(opts = {})
+        cmd = command_builder('ntp trusted-key', opts)
+        configure(cmd)
+      end
+
+      ##
       # add_server configures a new ntp server destination hostname or ip
       # address to the list of ntp destinations. The optional prefer argument
       # configures the server as a preferred (true) or not (false) ntp
@@ -138,14 +341,33 @@ module Rbeapi
       # @param server [String] The IP address or FQDN of the NTP server to
       #   be removed from the configuration.
       #
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @param opts vrf [String] The VRF instance this server is bound to
+      #
+      # @param opts minpoll [Integer] The minimum poll interval
+      #
+      # @param opts maxpoll [Integer] The maximum poll interval
+      #
+      # @param opts source [String] The source interface used to reach server
+      #
+      # @param opts key [Integer] The authentication key used to communicate
+      #   with server
+      #
       # @param prefer [Boolean] Appends the prefer keyword argument to the
       #   command if this value is true.
       #
       # @return [Boolean] Returns true if the command completed successfully.
-      def add_server(server, prefer = false)
-        cmd = "ntp server #{server}"
-        cmd << ' prefer' if prefer
-        configure cmd
+      def add_server(server, prefer = false, opts = {})
+        cmd = 'ntp server '
+        cmd << "vrf #{opts[:vrf]} " if opts[:vrf]
+        cmd << server.to_s
+        cmd << ' prefer' if prefer || opts[:prefer].to_s == 'true'
+        cmd << " minpoll #{opts[:minpoll]} " if opts[:minpoll]
+        cmd << " maxpoll #{opts[:maxpoll]} " if opts[:maxpoll]
+        cmd << " source #{opts[:source_interface]} " if opts[:source_interface]
+        cmd << " key #{opts[:key]} " if opts[:key]
+        configure(cmd)
       end
 
       ##
@@ -156,9 +378,12 @@ module Rbeapi
       # @param server [String] The IP address or FQDN of the NTP server to
       #   be removed from the configuration.
       #
+      # @param vrf [String] The VRF of the NTP server to be removed from
+      #   the configuration.
+      #
       # @return [Boolean] Returns true if the command completed successfully.
-      def remove_server(server)
-        configure("no ntp server #{server}")
+      def remove_server(server, vrf = nil)
+        configure("no ntp server #{vrf.nil? ? '' : "vrf #{vrf} "}#{server}")
       end
 
       ##

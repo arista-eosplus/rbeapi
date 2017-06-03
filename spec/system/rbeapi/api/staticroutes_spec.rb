@@ -46,7 +46,8 @@ describe Rbeapi::Api::Staticroutes do
     let(:resource) { subject.getall }
 
     before do
-      node.config(['no ip route 1.2.3.4/32',
+      node.config(['no ip route 0.0.0.0/0',
+                   'no ip route 1.2.3.4/32',
                    'no ip route 192.0.2.0/24',
                    'no ip route 192.0.3.0/24',
                    'ip route 1.2.3.4/32 Ethernet7 4 tag 3 name frank',

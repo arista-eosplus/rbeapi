@@ -2,18 +2,20 @@
 
 #### Table of Contents
 
-1. [Overview] (#overview)
-    * [Requirements] (#requirements)
-2. [Getting Started] (#getting-started)
-    * [Example eapi.conf File] (#example-eapiconf-file)
-    * [Using rbeapi] (#using-rbeapi)
-3. [Installation] (#installation)
-4. [Upgrading] (#upgrading)
-5. [Contributing] (#contributing)
-6. [Testing] (#testing)
-7. [License] (#license)
+1. [Overview](#overview)
+    * [Requirements](#requirements)
+2. [Getting Started](#getting-started)
+    * [Example eapi.conf File](#example-eapiconf-file)
+    * [Using rbeapi](#using-rbeapi)
+3. [Installation](#installation)
+4. [Upgrading](#upgrading)
+5. [Contributing](#contributing)
+6. [Testing](#testing)
+7. [License](#license)
 
 ## Build status
+
+Rubygems.org: [![Gem Version](https://badge.fury.io/rb/rbeapi.svg)](https://badge.fury.io/rb/rbeapi)
 
 Style/package build: [![Start Build Status](https://revproxy.arista.com/eosplus/ci/buildStatus/icon?job=rbeapi_start&style=plastic)](https://revproxy.arista.com/eosplus/ci/job/rbeapi_start)
 
@@ -243,37 +245,37 @@ omnibus installation package in /opt/chef/bin/.  For Chef, use the
   $ bundle install --path .bundle/gems/
   $ bundle exec rake all_rpms
   ...
-RPMs are available in rpms/noarch/
-Copy the RPMs to an EOS device then run the 'swix create' command.
-  Examples: 
-    Puppet Open Source: 
-      cd /mnt/flash; \
-      swix create rbeapi-1.0-1.swix \
-      rubygem-rbeapi-1.0-1.eos4.noarch.rpm \
-      rubygem-inifile-3.0.0-3.eos4.noarch.rpm \
-      rubygem-netaddr-1.5.0-2.eos4.noarch.rpm \
-      rubygem-net_http_unix-0.2.1-3.eos4.noarch.rpm
-    Puppet-enterprise agent (3.x): 
-      cd/mnt/flash; \
-      swix create rbeapi-puppet3-1.0-1.swix \
-      rubygem-rbeapi-puppet3-1.0-1.eos4.noarch.rpm \
-      rubygem-inifile-puppet3-3.0.0-3.eos4.noarch.rpm \
-      rubygem-netaddr-puppet3-1.5.0-2.eos4.noarch.rpm
-    Puppet-All-in-one agent (2015.x/4.x): 
-      cd/mnt/flash; \
-      swix create rbeapi-puppet-aio-1.0-1.swix \
-      rubygem-rbeapi-puppet-aio-1.0-1.eos4.noarch.rpm \
-      rubygem-inifile-puppet-aio-3.0.0-3.eos4.noarch.rpm \
-      rubygem-netaddr-puppet-aio-1.5.0-2.eos4.noarch.rpm \
-      rubygem-net_http_unix-puppet-aio-0.2.1-3.eos4.noarch.rpm
+  RPMs are available in rpms/noarch/
+  Copy the RPMs to an EOS device then run the 'swix create' command.
+    Examples: 
+      Puppet Open Source: 
+        cd /mnt/flash; \
+        swix create rbeapi-1.2-1.swix \
+        rubygem-rbeapi-1.2-1.eos4.noarch.rpm \
+        rubygem-inifile-3.0.0-3.eos4.noarch.rpm \
+        rubygem-netaddr-1.5.0-2.eos4.noarch.rpm \
+        rubygem-net_http_unix-0.2.1-3.eos4.noarch.rpm
+      Puppet-enterprise agent (3.x): 
+        cd/mnt/flash; \
+        swix create rbeapi-puppet3-1.2-1.swix \
+        rubygem-rbeapi-puppet3-1.2-1.eos4.noarch.rpm \
+        rubygem-inifile-puppet3-3.0.0-3.eos4.noarch.rpm \
+        rubygem-netaddr-puppet3-1.5.0-2.eos4.noarch.rpm
+      Puppet-All-in-one agent (2015.x/4.x): 
+        cd/mnt/flash; \
+        swix create rbeapi-puppet-aio-1.2-1.swix \
+        rubygem-rbeapi-puppet-aio-1.2-1.eos4.noarch.rpm \
+        rubygem-inifile-puppet-aio-3.0.0-3.eos4.noarch.rpm \
+        rubygem-netaddr-puppet-aio-1.5.0-2.eos4.noarch.rpm \
+        rubygem-net_http_unix-puppet-aio-0.2.1-3.eos4.noarch.rpm
 
-    Chef client:
-      cd /mnt/flash; \
-      swix create rbeapi-chef-1.0-1.swix \
-      rubygem-rbeapi-chef-1.0-1.eos4.noarch.rpm \
-      rubygem-inifile-chef-3.0.0-5.eos4.noarch.rpm \
-      rubygem-netaddr-chef-1.5.1-4.eos4.noarch.rpm \
-      rubygem-net_http_unix-chef-0.2.2-5.eos4.noarch.rpm
+      Chef client:
+        cd /mnt/flash; \
+        swix create rbeapi-chef-1.2-1.swix \
+        rubygem-rbeapi-chef-1.2-1.eos4.noarch.rpm \
+        rubygem-inifile-chef-3.0.0-5.eos4.noarch.rpm \
+        rubygem-netaddr-chef-1.5.1-4.eos4.noarch.rpm \
+        rubygem-net_http_unix-chef-0.2.2-5.eos4.noarch.rpm
   ```
 
   On EOS:
@@ -281,13 +283,13 @@ Copy the RPMs to an EOS device then run the 'swix create' command.
   Arista# copy <URI-to-RPMs> flash:
   Arista# bash
   -bash-4.1# cd /mnt/flash/
-  -bash-4.1# swix create rbeapi-puppet3-1.0-1.swix \
-             rubygem-rbeapi-puppet3-1.0-1.eos4.noarch.rpm \
+  -bash-4.1# swix create rbeapi-puppet3-1.2-1.swix \
+             rubygem-rbeapi-puppet3-1.2-1.eos4.noarch.rpm \
              rubygem-inifile-puppet3-3.0.0-1.eos4.noarch.rpm \
              rubygem-netaddr-puppet3-1.5.0-1.eos4.noarch.rpm
   -bash-4.1# exit
-  Arista# copy flash:rbeapi-puppet3-1.0-1.swix extension:
-  Arista# extension rbeapi-puppet3-1.0-1.swix
+  Arista# copy flash:rbeapi-puppet3-1.2-1.swix extension:
+  Arista# extension rbeapi-puppet3-1.2-1.swix
   Arista# copy installed-extensions boot-extensions
   ```
 
@@ -295,8 +297,8 @@ Copy the RPMs to an EOS device then run the 'swix create' command.
 
   On EOS:
   ```
-  Arista# no extension pe-rbeapi-0.3.0-1.swix
-  Arista# extension rbeapi-puppet3-1.0-1.swix
+  Arista# no extension pe-rbeapi-1.1.0-1.swix
+  Arista# extension rbeapi-puppet3-1.2-1.swix
   Arista# copy installed-extensions boot-extensions
   ```
 

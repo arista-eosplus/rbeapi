@@ -1,6 +1,7 @@
 AllCops:
     Exclude:
         - '**/*.gemspec'
+        - '**/*.spec'
 
 Metrics/CyclomaticComplexity:
   Max: 20
@@ -21,4 +22,17 @@ Metrics/ClassLength:
   Max: 130
 
 Metrics/BlockLength:
+  Enabled: False
+
+# Puppet style
+Style/SignalException:
+  Enabled: False
+
+Layout/IndentHeredoc:
+  Enabled: False
+
+Style/SymbolArray:
+  Enabled: False
+
+Style/PercentLiteralDelimiters:
   Enabled: False

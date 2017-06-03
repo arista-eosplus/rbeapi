@@ -15,7 +15,7 @@ describe Rbeapi::Api::Varp do
     let(:resource) { subject.get }
 
     before do
-      node.config(['no ip virtual-router mac-address',
+      node.config(['no ip virtual-router mac-address aa:bb:cc:dd:ee:ff',
                    'no interface Vlan99', 'no interface Vlan100',
                    'ip virtual-router mac-address aa:bb:cc:dd:ee:ff',
                    'interface Vlan99', 'interface Vlan100'])
@@ -41,36 +41,39 @@ describe Rbeapi::Api::Varp do
   end
 
   describe '#set_mac_address' do
-    before { node.config('no ip virtual-router mac-address') }
+    before do
+      orig_mac = subject.get[:mac_address]
+      node.config("no ip virtual-router mac-address #{orig_mac}")
+    end
 
     it 'set mac-address to aa:bb:cc:dd:ee:ff' do
-      expect(subject.get[:mac_address]).to be_empty
+      expect(subject.get[:mac_address]).to eq('00:00:00:00:00:00')
       expect(subject.set_mac_address(value: 'aa:bb:cc:dd:ee:ff')).to be_truthy
       expect(subject.get[:mac_address]).to eq('aa:bb:cc:dd:ee:ff')
     end
 
     it 'set mac-address to ff-ff-ff-ff-ff-ff' do
-      expect(subject.get[:mac_address]).to be_empty
+      expect(subject.get[:mac_address]).to eq('00:00:00:00:00:00')
       expect(subject.set_mac_address(value: 'ff-ff-ff-ff-ff-ff')).to be_truthy
       expect(subject.get[:mac_address]).to eq('ff:ff:ff:ff:ff:ff')
     end
 
     it 'set mac-address to ffff.ffff.ffff' do
-      expect(subject.get[:mac_address]).to be_empty
+      expect(subject.get[:mac_address]).to eq('00:00:00:00:00:00')
       expect(subject.set_mac_address(value: 'ffff.ffff.ffff')).to be_truthy
       expect(subject.get[:mac_address]).to eq('ff:ff:ff:ff:ff:ff')
     end
 
     it 'set mac-address to ffff:ffff:ffff fails' do
-      expect(subject.get[:mac_address]).to be_empty
+      expect(subject.get[:mac_address]).to eq('00:00:00:00:00:00')
       expect(subject.set_mac_address(value: 'ffff:ffff:ffff')).to be_falsey
-      expect(subject.get[:mac_address]).to eq('')
+      expect(subject.get[:mac_address]).to eq('00:00:00:00:00:00')
     end
 
     it 'set mac-address to ff.ff.ff.ff.ff.ff fails' do
-      expect(subject.get[:mac_address]).to be_empty
+      expect(subject.get[:mac_address]).to eq('00:00:00:00:00:00')
       expect(subject.set_mac_address(value: 'ff.ff.ff.ff.ff.ff')).to be_falsey
-      expect(subject.get[:mac_address]).to eq('')
+      expect(subject.get[:mac_address]).to eq('00:00:00:00:00:00')
     end
   end
 end

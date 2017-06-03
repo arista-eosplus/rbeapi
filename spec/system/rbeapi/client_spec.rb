@@ -209,17 +209,17 @@ describe Rbeapi::Client do
 
   describe '#config' do
     it 'puts switch into config mode' do
-      expect(node.config(['no ip virtual-router mac-address']))
+      expect(node.config(['ip host test 192.0.2.9']))
         .to be_truthy
     end
 
     it 'expects config to return array' do
-      expect(node.config(['no ip virtual-router mac-address']))
+      expect(node.config(['no ip host test 192.0.2.9']))
         .to be_kind_of(Array)
     end
 
     it 'puts switch into config mode with options and returns array' do
-      expect(node.config(['no ip virtual-router mac-address'],
+      expect(node.config(['no ip host test 192.0.2.9'],
                          encoding: 'json',
                          open_timeout: 27.00,
                          read_timeout: 27.00))
@@ -234,13 +234,13 @@ describe Rbeapi::Client do
       end
 
       it 'expects config to do dry run' do
-        expect(node.config(['no ip virtual-router mac-address']))
+        expect(node.config(['no ip host test 192.0.2.1']))
           .to eq(nil)
       end
     end
 
     it 'returns error if invalid command' do
-      expect { node.config(['no ip virtual-router mac-addresses']) }
+      expect { node.config(['no ip hosts']) }
         .to raise_error Rbeapi::Eapilib::CommandError
     end
   end
