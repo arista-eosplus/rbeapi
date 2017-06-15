@@ -59,6 +59,20 @@ module Rbeapi
         response
       end
 
+      def getall
+        # logging host 10.0.2.10 8514 protocol tcp
+        # logging vrf mgmt host 10.0.2.10 8514 protocol tcp
+        loggers = config.scan(/^logging\s(?:vrf\s(\w+)\s)?host\s([^\s]+)\s(\d+)\sprotocol\s(\w+)/)
+        loggers.each_with_object({}) do |params, hsh|
+          resource = {
+            port: params[2],
+            protocol: params[3],
+          }
+          resource[:vrf] = params[0] if params[0]
+          hsh[params[1]] = resource
+        end
+      end
+
       ##
       # parse_enable scans the nodes current running configuration and extracts
       # the current enabled state of the logging facility. The logging enable
@@ -85,7 +99,15 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_hosts
-        hosts = config.scan(/(?<=^logging\shost\s)[^\s]+/)
+        # logging host 10.0.2.10 8514 protocol tcp
+        # logging vrf mgmt host 10.0.2.10 8514 protocol tcp
+        loggers = config.scan(/^logging\s(?:vrf\s(\w+)\s)?host\s([^\s]+)\s(\d+)\sprotocol\s(\w+)/)
+        hosts = {}
+        loggers.each do |params|
+          hosts[params[1]] = { port: params[2],
+                               protocol: params[3],
+                               vrf: params[0] }
+        end
         { hosts: hosts }
       end
       private :parse_hosts
@@ -133,8 +155,12 @@ module Rbeapi
       #   node to send logging information to.
       #
       # @return [Boolean] Returns true if the command completed successfully.
-      def add_host(name)
-        configure "logging host #{name}"
+      def add_host(name, opts = {})
+        vrf = opts[:vrf] ? "vrf #{opts[:vrf]} " : ''
+        cmd = "logging #{vrf}host #{name}"
+        cmd += " #{opts[:port]}" if opts[:port]
+        cmd += " protocol #{opts[:protocol]}" if opts[:protocol]
+        configure cmd
       end
 
       ##
@@ -151,8 +177,10 @@ module Rbeapi
       #   host to remove from the nodes current configuration.
       #
       # @return [Boolean] Returns true if the commands completed successfully.
-      def remove_host(name)
-        configure "no logging host #{name}"
+      def remove_host(name, opts = {})
+        vrf = opts[:vrf] ? "vrf #{opts[:vrf]} " : ''
+        cmd = "no logging #{vrf}host #{name}"
+        configure cmd
       end
     end
   end
