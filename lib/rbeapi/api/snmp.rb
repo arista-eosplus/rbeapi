@@ -52,6 +52,12 @@ module Rbeapi
                      .freeze
       STATE_TO_CFG = { 'default' => 'default', 'on' => nil, 'off' => 'no' }
                      .freeze
+      ENSURE_TO_CFG = { :present => nil, :absent => 'no ' }
+                     .freeze
+      CFG_TO_VER = { 'v1' => 'v1', '1' => 'v1', '2c' => 'v2', 'v2c' => 'v2',
+                     '3' => 'v3', 'v3' => 'v3' }.freeze
+      VER_TO_CFG = { 'v1' => '1', 'v2' => '2c', 'v3' => '3' }
+                     .freeze
 
       ##
       # get returns the snmp resource Hash that represents the nodes snmp
@@ -74,6 +80,8 @@ module Rbeapi
         response.merge!(parse_source_interface)
         response.merge!(parse_communities)
         response.merge!(parse_notifications)
+        response.merge!(parse_notifications_receivers)
+        response.merge!(parse_users)
         response
       end
 
@@ -180,6 +188,30 @@ module Rbeapi
       end
       private :parse_notifications
 
+      def parse_notifications_receivers
+        # snmp-server host 10.0.0.1 vrf jere traps version 2c public udp-port 162
+        # snmp-server host 9.9.9.9 vrf default traps version 1 public udp-port 1234
+        recvrs = config.scan(/snmp-server\shost\s([^\s]+)\svrf\s([^\s]+)\s(\w+)\sversion\s([^\s]+)\s([^\s]+)\sudp-port\s(\d+)/)
+
+        receivers = recvrs.map do |recvr|
+          name, vrf, type, version, username, port = recvr
+          { name: name, vrf: vrf, type: type, version: CFG_TO_VER[version],
+            username: username, port: port }
+        end
+        { receivers: receivers }
+      end
+      private :parse_notifications_receivers
+
+      def parse_users
+        users = config.scan(/snmp-server user\s([^\s]+)\s([^\s]+)\s([^\s]+)/)
+        userlist = users.map do |user|
+          name, group, version = user
+          { name: name, group: group, version: CFG_TO_VER[version] }
+        end
+        { users: userlist }
+      end
+      private :parse_users
+
       ##
       # set_notification configures the snmp trap notification for the
       # specified trap. The name option accepts the snmp trap name to
@@ -208,6 +240,31 @@ module Rbeapi
         state = opts[:state] || 'default'
         state = STATE_TO_CFG[state]
         configure "#{state} snmp-server enable traps #{name}"
+      end
+
+      def set_notification_receiver(opts = {})
+        name = opts[:name]
+        port = opts[:port] || '162'
+        type = opts[:type]
+        username = opts[:username]
+        vrf = opts[:vrf] || 'default'
+        version = opts[:version]
+        version = VER_TO_CFG[version.to_s]
+        state = opts[:ensure]
+        state = ENSURE_TO_CFG[state]
+        cmd = "#{state}snmp-server host #{name} vrf #{vrf} #{type} version #{version} #{username} udp-port #{port}"
+        configure cmd
+      end
+
+      def set_user(opts = {})
+        name = opts[:name]
+        group = opts[:roles].join(' ')
+        state = opts[:ensure]
+        state = ENSURE_TO_CFG[state]
+        version = opts[:version]
+        version = VER_TO_CFG[version.to_s]
+        cmd = "#{state}snmp-server user #{name} #{group} v#{version}"
+        configure cmd
       end
 
       ##
