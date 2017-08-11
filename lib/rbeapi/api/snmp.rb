@@ -203,10 +203,24 @@ module Rbeapi
       private :parse_notifications_receivers
 
       def parse_users
-        users = config.scan(/snmp-server user\s([^\s]+)\s([^\s]+)\s([^\s]+)/)
+        users = config.scan(/snmp-server user\s([^\s]+)\s([^\s]+)\s([^\s]+)(.*)/)
         userlist = users.map do |user|
-          name, group, version = user
-          { name: name, group: group, version: CFG_TO_VER[version] }
+          name, group, version, other = user
+          user_hsh = { name: name, group: group, version: CFG_TO_VER[version] }
+          if version == 'v3'
+            options = other.scan(/\slocalized\s([^\s]+)\sauth\s([^\s]+)\s([^\s]+)(.*)/)
+            engine_id, auth_mode, auth_pass, priv = options[0]
+            if priv
+              priv_options = priv.scan(/\spriv\s([^\s]+)\s([^\s]+)/)
+              priv_mode, priv_pass = priv_options[0]
+              user_hsh[:priv_mode] = priv_mode
+              user_hsh[:priv_pass] = priv_pass
+            end
+            user_hsh[:engine_id] = engine_id
+            user_hsh[:auth_mode] = auth_mode
+            user_hsh[:auth_pass] = auth_pass
+          end
+          user_hsh
         end
         { users: userlist }
       end
@@ -257,6 +271,7 @@ module Rbeapi
       end
 
       def set_user(opts = {})
+        priv_hash = { :aes128 => 'aes', :des => 'des' }.freeze
         name = opts[:name]
         group = opts[:roles].join(' ')
         state = opts[:ensure]
@@ -264,6 +279,14 @@ module Rbeapi
         version = opts[:version]
         version = VER_TO_CFG[version.to_s]
         cmd = "#{state}snmp-server user #{name} #{group} v#{version}"
+        if version == '3'
+          if opts[:auth] && opts[:password]
+            cmd += " auth #{opts[:auth]} #{opts[:password]}"
+          end
+          if opts[:privacy] && opts[:private_key]
+            cmd += " priv #{priv_hash[opts[:privacy]]} #{opts[:private_key]}"
+          end
+        end
         configure cmd
       end
 
