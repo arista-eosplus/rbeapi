@@ -154,7 +154,6 @@ node = Rbeapi::Client.connect_to('veos01')
 
 # send one or more commands to the node
 node.enable('show hostname')
-node.enable('show hostname')
 => [{:command=>"show hostname", :result=>{"fqdn"=>"veos01.arista.com", "hostname"=>"veos01"}, :encoding=>"json"}]
 
 # use the config method to send configuration commands
