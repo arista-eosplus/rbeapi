@@ -23,6 +23,7 @@ group :development, :test do
   gem 'pry-stack_explorer', require: false
   gem 'rake', '~> 10.1.0'
   gem 'rbeapi', Rbeapi::VERSION, path: '.'
+  gem 'rb-readline'
   gem 'redcarpet', '~> 3.1.2'
   gem 'rspec', '~> 3.0.0'
   gem 'rspec-mocks', '~> 3.0.0'
