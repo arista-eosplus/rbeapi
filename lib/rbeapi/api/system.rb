@@ -65,6 +65,7 @@ module Rbeapi
         response.merge!(parse_iprouting(config))
         response.merge!(parse_timezone(config))
         response.merge!(parse_banners(config))
+        response.merge!(parse_vrf_routing(config))
         response
       end
 
@@ -97,6 +98,25 @@ module Rbeapi
         { iprouting: mdata.nil? ? true : false }
       end
       private :parse_iprouting
+
+      ##
+      # parse_vrf_routing parses ip routing from the provided config.
+      #
+      # @api private
+      #
+      # @param config [String] The configuration block returned
+      #   from the node's running configuration.
+      #
+      # @return [Hash<Symbol, Object>] Hash keyed on VRF name. values: true | false
+      def parse_vrf_routing(config)
+        mdata = config.scan(/^(no)?\s?ip\srouting\svrf\s(\w+)/)
+        vrfs = {}
+        mdata.each do |match,vrf|
+          vrfs[vrf] = match.nil? ? true : false
+        end
+        { vrf_routing: vrfs }
+      end
+      private :parse_vrf_routing
 
       ##
       # parse_timezone parses the value of clock timezone.
@@ -173,6 +193,31 @@ module Rbeapi
         cmd = command_builder('ip routing', opts)
         configure(cmd)
       end
+
+      ##
+      # Configures the state of vrf ip routing.
+      #
+      # @param vrf [String] The VRF name
+      # @param opts [Hash] The configuration parameters.
+      #
+      # @option opts enable [Boolean] True if ip routing should be enabled
+      #  or False if ip routing should be disabled. Default is true.
+      #
+      # @option opts default [Boolean] If true configure the command using
+      #   the default keyword. Default is false.
+      #
+      # @return [Boolean] Returns true if the command completed successfully.
+      #
+      # @example
+      #     system.set_vrf_routing('red', enable: true)
+      #     system.set_vrf_routing('blue', enable: false)
+      #     system.set_vrf_routing('green', enable: true)
+      #
+      def set_vrf_routing(vrf, opts = {})
+        cmd = command_builder("ip routing vrf #{vrf}", opts)
+        configure(cmd)
+      end
+
 
       ##
       # Configures the value of clock timezone in the running-config.

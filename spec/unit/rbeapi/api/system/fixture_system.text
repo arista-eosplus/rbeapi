@@ -2,6 +2,16 @@ hostname localhost
 ip routing
 clock timezone Europe/Berlin
 no ip routing vrf foo
+no ip icmp source-interface vrf foo
+no ip routing vrf red
+no ip icmp source-interface vrf red
+ip routing vrf blue
+no ip icmp source-interface vrf blue
+
+!
+no ipv6 unicast-routing vrf red
+no ipv6 unicast-routing vrf blue
+!
 banner login
 Login Banner
 Second Line

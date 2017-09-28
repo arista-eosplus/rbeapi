@@ -44,6 +44,7 @@ describe Rbeapi::Api::System do
     { hostname: 'localhost', iprouting: true,
       banner_motd: "MOTD Banner\nSecond Line\nEOF \n*\\v1?",
       banner_login: "Login Banner\nSecond Line\n123456\n EOF",
+      vrf_routing: {"foo"=>false, "red"=>false, "blue"=>true},
       timezone: 'Europe/Berlin' }
   end
 
@@ -66,13 +67,19 @@ describe Rbeapi::Api::System do
       expect(subject.get).to be_a_kind_of(Hash)
     end
 
-    it 'has five entries' do
-      expect(subject.get.size).to eq(5)
+    it 'has six entries' do
+      expect(subject.get.size).to eq(6)
     end
 
-    it 'retrieves only global ip routing' do
-      expect(subject.get.size).to eq(5)
+    it 'retrieves global ip routing' do
+      expect(subject.get.size).to eq(6)
       expect(subject.get[:iprouting]).to eq(true)
+    end
+
+    it 'retrieves VRF ip routing' do
+      expect(subject.get[:vrf_routing].size).to eq(3)
+      expect(subject.get[:vrf_routing]['red']).to eq(false)
+      expect(subject.get[:vrf_routing]['blue']).to eq(true)
     end
   end
 
