@@ -76,6 +76,7 @@ module Rbeapi
         global.merge!(parse_global_timeout)
         global.merge!(parse_global_retransmit)
         global.merge!(parse_global_key)
+        global.merge!(parse_global_source)
         resource = { global: global, servers: parse_servers }
         resource
       end
@@ -125,6 +126,29 @@ module Rbeapi
         rsrc_hsh
       end
       private :parse_global_key
+
+      ##
+      # parse_global_source takes a running configuration as a string
+      # and parses out the radius global source-interface per VRF if it exists
+      # in the configuration. An empty Hash is returned if there is no global
+      # setting configured. The Hash needs to be converted to ordered lists
+      # for vrf and source_interface before being merged into a property hash.
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
+      def parse_global_source
+        src = config.scan(/ip radius(?:\svrf\s(\w+))?\ssource-interface\s(\w+)/)
+        sources = {}
+        src.each do |vrf, intf|
+          vrf = vrf.nil? ? 'default' : vrf
+          sources[vrf] = intf
+        end
+        { source_interface: sources }
+      end
+      private :parse_global_source
+
+      ##
 
       ##
       # parse_servers returns an Array of radius server resource hashes. Each
@@ -334,6 +358,32 @@ module Rbeapi
         cmd << " auth-port #{opts[:auth_port]}" if opts[:auth_port]
         cmd << " acct-port #{opts[:acct_port]}" if opts[:acct_port]
         configure cmd
+      end
+
+      ##
+      # set_source_interface takes a dictionary mapping the VRF to the desired
+      # source interface. Any radius source-interface lines in the
+      # running-config that are not defined in the hash will be removed, then
+      # lines generated from the hash will be applied.  This is NOT idempotent,
+      # however, it is explicit.
+      #
+      # @api public
+      #
+      # @param sources [Hash] A hash mapping the vrf name to the source
+      #                       interface.
+      #
+      # @return [Boolean] Returns true if there are no errors.
+      def set_source_interface(sources)
+        existing = config.scan(/ip radius.* source-interface.*/)
+        desired = []
+        sources.each do |vrf, intf|
+          vrf_str = vrf == 'default' ? '' : " vrf #{vrf}"
+          desired << "ip radius#{vrf_str} source-interface #{intf}"
+        end
+        remove = existing - desired
+        cmds = remove.map { |line| "no #{line}" }
+        cmds.concat(desired)
+        configure cmds
       end
     end
   end
