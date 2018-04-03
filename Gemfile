@@ -17,6 +17,7 @@ end
 
 group :development, :test do
   gem 'ci_reporter_rspec', require: false
+  gem 'github_changelog_generator', :git => 'https://github.com/skywinder/github-changelog-generator.git'
   gem 'listen', '<=3.0.3'
   gem 'pry',                     require: false
   gem 'pry-doc',                 require: false
