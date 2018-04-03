@@ -77,6 +77,7 @@ module Rbeapi
         global = {}
         global.merge!(parse_global_timeout)
         global.merge!(parse_global_key)
+        global.merge!(parse_global_source)
         resource = { global: global, servers: servers }
         resource
       end
@@ -115,6 +116,27 @@ module Rbeapi
         { timeout: timeout.first.to_i }
       end
       private :parse_global_timeout
+
+      ##
+      # parse_global_source takes a running configuration as a string
+      # and parses out the tacacs global source-interface per VRF if it exists
+      # in the configuration. An empty Hash is returned if there is no global
+      # setting configured. The Hash needs to be converted to ordered lists
+      # for vrf and source_interface before being merged into a property hash.
+      #
+      # @api private
+      #
+      # @return [Hash<Symbol,Object>] Returns the resource hash attributes.
+      def parse_global_source
+        src = config.scan(/ip tacacs(?:\svrf\s(\w+))?\ssource-interface\s(\w+)/)
+        sources = {}
+        src.each do |vrf, intf|
+          vrf = vrf.nil? ? 'default' : vrf
+          sources[vrf] = intf
+        end
+        { source_interface: sources }
+      end
+      private :parse_global_source
 
       ##
       # servers returns an Array of tacacs server resource hashes.  Each hash
@@ -242,6 +264,32 @@ module Rbeapi
         cmd = "no tacacs-server host #{opts[:hostname]}"
         cmd << " port #{opts[:port]}" if opts[:port]
         configure cmd
+      end
+
+      ##
+      # set_source_interface takes a dictionary mapping the VRF to the desired
+      # source interface. Any tacacs source-interface lines in the
+      # running-config that are not defined in the hash will be removed, then
+      # lines generated from the hash will be applied.  This is NOT idempotent,
+      # however, it is explicit.
+      #
+      # @api public
+      #
+      # @param sources [Hash] A hash mapping the vrf name to the source
+      #                       interface.
+      #
+      # @return [Boolean] Returns true if there are no errors.
+      def set_source_interface(sources)
+        existing = config.scan(/ip tacacs.* source-interface.*/)
+        desired = []
+        sources.each do |vrf, intf|
+          vrf_str = vrf == 'default' ? '' : " vrf #{vrf}"
+          desired << "ip tacacs#{vrf_str} source-interface #{intf}"
+        end
+        remove = existing - desired
+        cmds = remove.map { |line| "no #{line}" }
+        cmds.concat(desired)
+        configure cmds
       end
     end
   end
