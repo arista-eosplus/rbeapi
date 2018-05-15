@@ -45,7 +45,7 @@ Github iusses.
 * Arista EOS 4.12 or later
 * Arista eAPI enabled for at least one transport (see official EOS Config Guide
   at arista.com for details)
-* Ruby 1.9.3 or later
+* Ruby 2.1.6 or later
 
 # Getting Started
 In order to use rbeapi, the EOS command API must be enabled using ``management
