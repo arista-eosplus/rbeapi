@@ -81,7 +81,7 @@ module Rbeapi
       #
       # @return [Hash<Symbol, Object>] Resource hash attribute.
       def parse_mode
-        mdata = /(?<=spanning-tree\smode\s)(\w+)$/.match(config)
+        mdata = /(?<=spanning-tree\smode\s)([-\w]+)$/.match(config)
         { mode: mdata[1] }
       end
 
