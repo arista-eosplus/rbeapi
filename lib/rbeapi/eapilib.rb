@@ -207,8 +207,9 @@ module Rbeapi
       def request(commands, opts = {})
         id = opts.fetch(:reqid, object_id)
         format = opts.fetch(:format, 'json')
+        version = opts.fetch(:version, 1)
         cmds = [*commands]
-        params = { 'version' => 1, 'cmds' => cmds, 'format' => format }
+        params = { 'version' => version, 'cmds' => cmds, 'format' => format }
         { 'jsonrpc' => '2.0', 'method' => 'runCmds',
           'params' => params, 'id' => id }
       end
