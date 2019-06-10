@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.summary       = 'This Gem library provides a Ruby interface '\
                        'to the Arista EOS command API'
   spec.homepage      = 'https://github.com/arista-eosplus/rbeapi'
-  spec.license       = 'New BSD'
+  spec.license       = 'BSD-3-Clause'
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(/^bin\//) { |f| File.basename(f) }
