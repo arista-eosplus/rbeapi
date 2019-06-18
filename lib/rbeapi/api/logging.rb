@@ -117,7 +117,7 @@ module Rbeapi
       # @return [Hash<Symbol, Object>] Returns the resource hash attribute.
       def parse_monitor_level
         level = config.scan(/^logging monitor ([^\s]+)/).first
-        { monitor: SEV_NUM[level[0]] }
+        level.nil? ? {} : { monitor: SEV_NUM[level[0]] }
       end
       private :parse_monitor_level
 
