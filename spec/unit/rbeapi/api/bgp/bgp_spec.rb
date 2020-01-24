@@ -55,17 +55,17 @@ describe Rbeapi::Api::Bgp do
         'eBGP_GROUP' => {
           peer_group: nil, remote_as: nil, send_community: false,
           shutdown: false, description: nil, next_hop_self: false,
-          route_map_in: nil, route_map_out: nil
+          route_map_in: nil, route_map_out: nil, maximum_routes: '12000'
         },
         '192.168.255.1' => {
           peer_group: 'eBGP_GROUP', remote_as: '65000', send_community: true,
           shutdown: true, description: nil, next_hop_self: true,
-          route_map_in: nil, route_map_out: nil
+          route_map_in: nil, route_map_out: nil, maximum_routes: nil
         },
         '192.168.255.3' => {
           peer_group: 'eBGP_GROUP', remote_as: '65001', send_community: true,
           shutdown: true, description: nil, next_hop_self: true,
-          route_map_in: nil, route_map_out: nil
+          route_map_in: nil, route_map_out: nil, maximum_routes: nil
         }
       } }
   end
