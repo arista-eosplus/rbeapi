@@ -22,7 +22,7 @@ group :development, :test do
   gem 'pry',                     require: false
   gem 'pry-doc',                 require: false
   gem 'pry-stack_explorer', require: false
-  gem 'rake', '~> 10.1.0'
+  gem 'rake', '~> 12.3.3'
   gem 'rbeapi', Rbeapi::VERSION, path: '.'
   gem 'redcarpet', '~> 3.1.2'
   gem 'rspec', '~> 3.0.0'
