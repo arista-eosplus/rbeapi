@@ -55,17 +55,17 @@ describe Rbeapi::Api::BgpNeighbors do
         'eBGP_GROUP' => {
           peer_group: nil, remote_as: nil, send_community: false,
           shutdown: false, description: nil, next_hop_self: false,
-          route_map_in: nil, route_map_out: nil
+          route_map_in: nil, route_map_out: nil, maximum_routes: '12000'
         },
         '192.168.255.1' => {
           peer_group: 'eBGP_GROUP', remote_as: '65000', send_community: true,
           shutdown: true, description: nil, next_hop_self: true,
-          route_map_in: nil, route_map_out: nil
+          route_map_in: nil, route_map_out: nil, maximum_routes: nil
         },
         '192.168.255.3' => {
           peer_group: 'eBGP_GROUP', remote_as: '65001', send_community: true,
           shutdown: true, description: nil, next_hop_self: true,
-          route_map_in: nil, route_map_out: nil
+          route_map_in: nil, route_map_out: nil, maximum_routes: nil
         }
       } }
   end
@@ -285,6 +285,20 @@ describe Rbeapi::Api::BgpNeighbors do
       expect(node).to receive(:config)
         .with(['router bgp 64600', 'default neighbor eng description'])
       expect(subject.set_description('eng', default: true)).to be_truthy
+    end
+  end
+
+  describe '#set_maximum_routes' do
+    it 'set the maximum routes value' do
+      expect(node).to receive(:config).with(['router bgp 64600',
+                                             'neighbor eng maximum-routes 0'])
+      expect(subject.set_maximum_routes('eng', value: 0)).to be_truthy
+    end
+
+    it 'defaults the maximum routes value' do
+      expect(node).to receive(:config)
+        .with(['router bgp 64600', 'default neighbor eng maximum-routes'])
+      expect(subject.set_maximum_routes('eng', default: true)).to be_truthy
     end
   end
 end

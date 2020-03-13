@@ -51,7 +51,8 @@ describe Rbeapi::Api::BgpNeighbors do
         description: nil,
         next_hop_self: false,
         route_map_in: nil,
-        route_map_out: nil }
+        route_map_out: nil,
+        maximum_routes: nil }
     end
 
     before do
@@ -70,17 +71,17 @@ describe Rbeapi::Api::BgpNeighbors do
         'eBGP_GROUP' => {
           peer_group: nil, remote_as: nil, send_community: false,
           shutdown: false, description: nil, next_hop_self: false,
-          route_map_in: nil, route_map_out: nil
+          route_map_in: nil, route_map_out: nil, maximum_routes: '12000'
         },
         '192.168.255.1' => {
           peer_group: 'eBGP_GROUP', remote_as: '65000', send_community: true,
           shutdown: true, description: nil, next_hop_self: true,
-          route_map_in: nil, route_map_out: nil
+          route_map_in: nil, route_map_out: nil, maximum_routes: nil
         },
         '192.168.255.3' => {
           peer_group: 'eBGP_GROUP', remote_as: '65001', send_community: true,
           shutdown: true, description: nil, next_hop_self: true,
-          route_map_in: nil, route_map_out: nil
+          route_map_in: nil, route_map_out: nil, maximum_routes: nil
         }
       }
     end
@@ -115,7 +116,8 @@ describe Rbeapi::Api::BgpNeighbors do
         description: nil,
         next_hop_self: true,
         route_map_in: nil,
-        route_map_out: nil }
+        route_map_out: nil,
+        maximum_routes: nil }
     end
 
     let(:after) do
@@ -126,7 +128,8 @@ describe Rbeapi::Api::BgpNeighbors do
         description: nil,
         next_hop_self: false,
         route_map_in: nil,
-        route_map_out: nil }
+        route_map_out: nil,
+        maximum_routes: nil }
     end
 
     before { node.config(['no router bgp 64600', 'router bgp 64600']) }
@@ -148,7 +151,8 @@ describe Rbeapi::Api::BgpNeighbors do
         description: nil,
         next_hop_self: false,
         route_map_in: nil,
-        route_map_out: nil }
+        route_map_out: nil,
+        maximum_routes: nil }
     end
 
     let(:after) do
@@ -159,7 +163,8 @@ describe Rbeapi::Api::BgpNeighbors do
         description: nil,
         next_hop_self: true,
         route_map_in: nil,
-        route_map_out: nil }
+        route_map_out: nil,
+        maximum_routes: nil }
     end
 
     it 'delete a BGP resource' do
@@ -349,6 +354,21 @@ describe Rbeapi::Api::BgpNeighbors do
       expect(subject.get('eng')[:description]).to eq('text')
       expect(subject.set_description('eng', default: true)).to be_truthy
       expect(subject.get('eng')[:description]).to eq(nil)
+    end
+  end
+
+  describe '#set_maximum_routes' do
+    it 'set the maximum routes value' do
+      expect(subject.get('eng')[:maximum_routes]).to eq('12000')
+      expect(subject.set_maximum_routes('eng', value: '10')).to be_truthy
+      expect(subject.get('eng')[:maximum_routes]).to eq('0')
+    end
+
+    it 'defaults the maximum routes value' do
+      expect(subject.set_maximum_routes('eng', value: '0')).to be_truthy
+      expect(subject.set_maximum_routes('eng', default: true))
+        .to be_truthy
+      expect(subject.get('eng')[:maximum_routes]).to eq('12000')
     end
   end
 end

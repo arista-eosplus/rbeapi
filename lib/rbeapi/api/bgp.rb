@@ -449,10 +449,11 @@ module Rbeapi
       #     remote_as: <string>,
       #     send_community: <string>,
       #     shutdown: <boolean>,
-      #     description: <integer>
-      #     next_hop_self: <boolean>
-      #     route_map_in: <string>
-      #     route_map_out: <string>
+      #     description: <integer>,
+      #     next_hop_self: <boolean>,
+      #     route_map_in: <string>,
+      #     route_map_out: <string>,
+      #     maximum_routes: <integer>
       #   }
       #
       # @param name [String] The name of the BGP neighbor to manage.
@@ -473,6 +474,7 @@ module Rbeapi
         response.merge!(parse_next_hop_self(config, name))
         response.merge!(parse_route_map_in(config, name))
         response.merge!(parse_route_map_out(config, name))
+        response.merge!(parse_maximum_routes(config, name))
         response
       end
 
@@ -487,20 +489,22 @@ module Rbeapi
       #       remote_as: <string>,
       #       send_community: <string>,
       #       shutdown: <boolean>,
-      #       description: <integer>
-      #       next_hop_self: <boolean>
-      #       route_map_in: <string>
-      #       route_map_out: <string>
+      #       description: <integer>,
+      #       next_hop_self: <boolean>,
+      #       route_map_in: <string>,
+      #       route_map_out: <string>,
+      #       maximum_routes: <integer>
       #     },
       #     <name>: {
       #       peer_group: <string>,
       #       remote_as: <string>,
       #       send_community: <string>,
       #       shutdown: <boolean>,
-      #       description: <integer>
-      #       next_hop_self: <boolean>
-      #       route_map_in: <string>
-      #       route_map_out: <string>
+      #       description: <integer>,
+      #       next_hop_self: <boolean>,
+      #       route_map_in: <string>,
+      #       route_map_out: <string>,
+      #       maximum_routes: <integer>
       #     },
       #     ...
       #   }
@@ -684,6 +688,26 @@ module Rbeapi
         { route_map_out: route_map_out }
       end
       private :parse_route_map_out
+
+      ##
+      # parse_maximum_routes scans the BGP neighbor entries for the
+      # maximum routes.
+      #
+      # @api private
+      #
+      # @param config [String] The switch config.
+      #
+      # @param name [String] The name of the BGP neighbor to manage.
+      #   This value can be either an IPv4 address or string (in the
+      #   case of managing a peer group).
+      #
+      # @return [Hash<Symbol, Object>] Returns the resource hash attribute
+      def parse_maximum_routes(config, name)
+        value = config.scan(/neighbor #{name} maximum-routes (\d+)/)
+        maximum_routes = value[0] ? value[0][0] : nil
+        { maximum_routes: maximum_routes }
+      end
+      private :parse_maximum_routes
 
       ##
       # configure_bgp adds the command to go to BGP config mode.
@@ -964,6 +988,31 @@ module Rbeapi
       # @return [Boolean] Returns true if the command complete successfully.
       def set_description(name, opts = {})
         configure_bgp(neigh_command_builder(name, 'description', opts))
+      end
+
+      ##
+      # set_maximum_routes configures the maximum routes number for a neighbor
+      # (peer).
+      #
+      # ===Commands
+      #   router bgp <bgp_as>
+      #     {no | default} neighbor <name> maximum-routes <integer>
+      #
+      # @param name [String] The IP address or name of the peer group.
+      #
+      # @param opts [hash] Optional keyword arguments.
+      #
+      # @option opts value [Integer] The maximum routes to receive from the neighbor.
+      #
+      # @option opts enable [Boolean] If false then the command is
+      #   negated. Default is true.
+      #
+      # @option opts default [Boolean] Configure the peer group using
+      #   the default keyword.
+      #
+      # @return [Boolean] Returns true if the command complete successfully.
+      def set_maximum_routes(name, opts = {})
+        configure_bgp(neigh_command_builder(name, 'maximum-routes', opts))
       end
     end
   end
