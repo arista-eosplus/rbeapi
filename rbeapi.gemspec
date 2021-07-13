@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'net_http_unix'
   spec.add_runtime_dependency 'netaddr'
 
-  spec.add_development_dependency 'bundler', '~> 1.3'
+  spec.add_development_dependency 'bundler', '~> 2.2.10'
   spec.add_development_dependency 'yard'
   spec.add_development_dependency 'redcarpet'
   spec.add_development_dependency 'rake', '~> 12.3.3'
