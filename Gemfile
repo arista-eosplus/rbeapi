@@ -24,7 +24,7 @@ group :development, :test do
   gem 'pry-stack_explorer', require: false
   gem 'rake', '~> 12.3.3'
   gem 'rbeapi', Rbeapi::VERSION, path: '.'
-  gem 'redcarpet', '~> 3.1.2'
+  gem 'redcarpet', '~> 3.5.1'
   gem 'rspec', '~> 3.0.0'
   gem 'rspec-mocks', '~> 3.0.0'
   gem 'simplecov'
@@ -33,19 +33,11 @@ group :development, :test do
   gem 'yard'
 end
 
-# Rubocop > 0.37 requires a gem that only works with ruby 2.x
-if RUBY_VERSION.to_f < 2.0
-  gem 'json', '<2.0'
-  group :development, :test do
-    gem 'rubocop', '>=0.49.0'
-  end
-else
-  # Rubocop thinks these are duplicates.
-  # rubocop:disable Bundler/DuplicatedGem
-  gem 'json'
-  group :development, :test do
-    gem 'rubocop', '>=0.49.0'
-  end
+# Rubocop thinks these are duplicates.
+# rubocop:disable Bundler/DuplicatedGem
+gem 'json'
+group :development, :test do
+  gem 'rubocop', '>=0.49.0'
 end
 
 # vim:ft=ruby
